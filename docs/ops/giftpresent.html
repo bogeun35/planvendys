@@ -1005,9 +1005,8 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape') ggClo
 
 /* ══════ Init ══════ */
 (function ggInit() {
-    // Default: 2026-01-01 ~ 2026-02-28
     document.getElementById('ggSD').value = '2026-01-01';
     document.getElementById('ggED').value = '2026-02-28';
-    ggFetch();
+    ggHideLoading();
 })();
 </script>
