@@ -192,8 +192,8 @@ const ALLOWED_DOMAIN = "vendys.co.kr";
 let SECTIONS = [];
 let currentTab = 0, currentPageId = null;
 const expandedNodes = new Set();
-const pageCache = {};  // 로드한 HTML 캐시
-const searchIndex = []; // 검색 인덱스
+const pageCache = {};
+const searchIndex = [];
 
 // ═══ AUTH ═══
 function signIn() {
@@ -221,7 +221,7 @@ auth.onAuthStateChanged(user => {
     document.getElementById("mainLayout").classList.add("active");
     document.getElementById("gnbUsername").textContent = user.displayName || user.email.split("@")[0];
     document.getElementById("userEmail").textContent = user.email;
-    if (user.photoURL) document.getElementById("gnbAvatar").innerHTML = `<img src="${user.photoURL}">`;
+    if (user.photoURL) document.getElementById("gnbAvatar").innerHTML = '<img src="' + user.photoURL + '">';
     loadSitemap();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
@@ -238,14 +238,37 @@ async function loadSitemap() {
     SECTIONS = data.sections;
     buildSearchIndex(SECTIONS);
     renderGnbTabs();
-    switchTab(0);
+
+    // hash에서 복원
+    var hash = window.location.hash.replace('#', '');
+    if (hash) {
+      var parts = hash.split('/');
+      var tabIdx = parseInt(parts[0]) || 0;
+      var pageId = parts[1] || null;
+      if (tabIdx >= 0 && tabIdx < SECTIONS.length) {
+        currentTab = tabIdx;
+        renderGnbTabs();
+        document.getElementById("lnbTitle").textContent = SECTIONS[tabIdx].tab;
+        renderTree();
+        if (pageId && findInAll(pageId)) {
+          navigateTo(pageId);
+        } else {
+          var first = SECTIONS[tabIdx].pages[0];
+          if (first) navigateTo(first.id);
+        }
+      } else {
+        switchTab(0);
+      }
+    } else {
+      switchTab(0);
+    }
   } catch (e) {
     document.getElementById("contentArea").innerHTML =
-      `<div class="content-loading">sitemap.json을 불러올 수 없습니다.</div>`;
+      '<div class="content-loading">sitemap.json을 불러올 수 없습니다.</div>';
   }
 }
 
-// ═══ PAGE LOADER (개별 HTML 파일 fetch) ═══
+// ═══ PAGE LOADER ═══
 async function loadPageContent(page) {
   if (!page.file) return page.body || "";
   if (pageCache[page.id]) return pageCache[page.id];
@@ -255,7 +278,6 @@ async function loadPageContent(page) {
     if (!res.ok) throw new Error(res.status);
     let html = await res.text();
 
-    // HTML 주석에서 메타 추출: <!-- title: ... meta: ... -->
     const metaMatch = html.match(/<!--\s*([\s\S]*?)-->/);
     if (metaMatch) {
       const metaBlock = metaMatch[1];
@@ -267,7 +289,22 @@ async function loadPageContent(page) {
     pageCache[page.id] = html;
     return html;
   } catch (e) {
-    return `<p style="color:var(--danger)">문서를 불러올 수 없습니다: ${page.file}</p>`;
+    return '<p style="color:var(--danger)">문서를 불러올 수 없습니다: ' + page.file + '</p>';
+  }
+}
+
+// ═══ SCRIPT EXECUTOR (innerHTML로 삽입된 script 실행) ═══
+function executeScripts(container) {
+  var scripts = container.querySelectorAll('script');
+  for (var i = 0; i < scripts.length; i++) {
+    var oldScript = scripts[i];
+    var newScript = document.createElement('script');
+    if (oldScript.src) {
+      newScript.src = oldScript.src;
+    } else {
+      newScript.textContent = oldScript.textContent;
+    }
+    oldScript.parentNode.replaceChild(newScript, oldScript);
   }
 }
 
@@ -293,13 +330,13 @@ function indexPages(pages, trail) {
 // ═══ GNB ═══
 function renderGnbTabs() {
   document.getElementById("gnbTabs").innerHTML = SECTIONS.map((s, i) =>
-    `<div class="gnb-tab${i===currentTab?' active':''}" onclick="switchTab(${i})">${s.tab}</div>`
+    '<div class="gnb-tab' + (i===currentTab?' active':'') + '" onclick="switchTab(' + i + ')">' + s.tab + '</div>'
   ).join("");
 }
 
 function switchTab(idx) {
   currentTab = idx;
-  document.querySelectorAll(".gnb-tab").forEach((el, i) => el.classList.toggle("active", i===idx));
+  renderGnbTabs();
   document.getElementById("lnbTitle").textContent = SECTIONS[idx].tab;
   renderTree();
   const first = SECTIONS[idx].pages[0];
@@ -318,26 +355,26 @@ function renderTree() {
   document.getElementById("lnbTree").innerHTML = SECTIONS[currentTab].pages.map(p => treeNode(p)).join("");
 }
 function treeNode(page) {
-  const has = page.children?.length > 0;
+  const has = page.children && page.children.length > 0;
   const exp = expandedNodes.has(page.id);
   const act = currentPageId === page.id;
-  return `<div>
-    <div class="tree-row${act?' active':''}" onclick="navigateTo('${page.id}')">
-      <span class="tree-toggle ${has?(exp?'expanded':''):'hidden'}" onclick="event.stopPropagation();toggleNode('${page.id}')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l10 7-10 7z"/></svg>
-      </span>
-      <span class="tree-icon">${ICONS[page.icon]||ICONS.doc}</span>
-      <span class="tree-label">${page.title}</span>
-    </div>
-    ${has?`<div class="tree-children${exp?' open':''}">${page.children.map(c=>treeNode(c)).join("")}</div>`:''}
-  </div>`;
+  return '<div>' +
+    '<div class="tree-row' + (act?' active':'') + '" onclick="navigateTo(\'' + page.id + '\')">' +
+      '<span class="tree-toggle ' + (has?(exp?'expanded':''):'hidden') + '" onclick="event.stopPropagation();toggleNode(\'' + page.id + '\')">' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l10 7-10 7z"/></svg>' +
+      '</span>' +
+      '<span class="tree-icon">' + (ICONS[page.icon]||ICONS.doc) + '</span>' +
+      '<span class="tree-label">' + page.title + '</span>' +
+    '</div>' +
+    (has ? '<div class="tree-children' + (exp?' open':'') + '">' + page.children.map(c => treeNode(c)).join("") + '</div>' : '') +
+  '</div>';
 }
 function toggleNode(id){expandedNodes.has(id)?expandedNodes.delete(id):expandedNodes.add(id);renderTree()}
 
 // ═══ FIND / PATH ═══
 function findPage(id,pages){for(const p of pages){if(p.id===id)return p;if(p.children){const f=findPage(id,p.children);if(f)return f}}return null}
 function findInAll(id){for(const s of SECTIONS){const f=findPage(id,s.pages);if(f)return f}return null}
-function getPath(id,pages,trail=[]){for(const p of pages){if(p.id===id)return[...trail,p];if(p.children){const r=getPath(id,p.children,[...trail,p]);if(r)return r}}return null}
+function getPath(id,pages,trail){trail=trail||[];for(const p of pages){if(p.id===id)return trail.concat([p]);if(p.children){const r=getPath(id,p.children,trail.concat([p]));if(r)return r}}return null}
 function getFullPath(id){for(const s of SECTIONS){const p=getPath(id,s.pages);if(p)return p}return[]}
 
 // ═══ NAVIGATE ═══
@@ -349,34 +386,40 @@ async function navigateTo(id) {
   path.forEach(p => expandedNodes.add(p.id));
   renderTree();
 
+  // URL hash에 현재 상태 저장
+  window.location.hash = currentTab + '/' + id;
+
   const el = document.getElementById("contentArea");
-  el.innerHTML = `<div class="content-loading"><div class="spinner"></div> 로딩 중...</div>`;
+  el.innerHTML = '<div class="content-loading"><div class="spinner"></div> 로딩 중...</div>';
 
   const body = await loadPageContent(page);
   const meta = page._meta || page.meta || "";
 
   const bc = path.map((p,i) => i===path.length-1
-    ? `<span class="breadcrumb-item current">${p.title}</span>`
-    : `<span class="breadcrumb-item" onclick="navigateTo('${p.id}')">${p.title}</span><span class="breadcrumb-sep">/</span>`
+    ? '<span class="breadcrumb-item current">' + p.title + '</span>'
+    : '<span class="breadcrumb-item" onclick="navigateTo(\'' + p.id + '\')">' + p.title + '</span><span class="breadcrumb-sep">/</span>'
   ).join("");
 
   let childHtml = "";
-  if (page.children?.length) {
-    childHtml = `<div class="child-pages">${page.children.map(c =>
-      `<div class="child-page-card" onclick="navigateTo('${c.id}')">
-        <div class="child-page-card-title">${c.title}</div>
-        ${c.desc?`<div class="child-page-card-desc">${c.desc}</div>`:""}
-      </div>`
-    ).join("")}</div>`;
+  if (page.children && page.children.length) {
+    childHtml = '<div class="child-pages">' + page.children.map(c =>
+      '<div class="child-page-card" onclick="navigateTo(\'' + c.id + '\')">' +
+        '<div class="child-page-card-title">' + c.title + '</div>' +
+        (c.desc ? '<div class="child-page-card-desc">' + c.desc + '</div>' : "") +
+      '</div>'
+    ).join("") + '</div>';
   }
 
-  el.innerHTML = `<div class="breadcrumb">${bc}</div>
-    <div class="doc-title">${page.title}</div>
-    <div class="doc-meta">${meta}</div>
-    <div class="doc-body">${body}${childHtml}</div>`;
+  el.innerHTML = '<div class="breadcrumb">' + bc + '</div>' +
+    '<div class="doc-title">' + page.title + '</div>' +
+    '<div class="doc-meta">' + meta + '</div>' +
+    '<div class="doc-body">' + body + childHtml + '</div>';
   el.scrollTop = 0;
 
-  // 검색 인덱스에 본문 추가 (최초 로드 시)
+  // innerHTML로 삽입된 script 태그 실행
+  executeScripts(el);
+
+  // 검색 인덱스에 본문 추가
   const idx = searchIndex.find(x => x.id === id);
   if (idx && !idx.text) idx.text = body.replace(/<[^>]*>/g, " ");
 }
@@ -395,7 +438,7 @@ searchInput.addEventListener("input", () => {
   ).slice(0, 8);
 
   if (!matches.length) {
-    searchResults.innerHTML = `<div class="search-empty">검색 결과가 없습니다</div>`;
+    searchResults.innerHTML = '<div class="search-empty">검색 결과가 없습니다</div>';
   } else {
     searchResults.innerHTML = matches.map(m => {
       let snippet = "";
@@ -403,13 +446,13 @@ searchInput.addEventListener("input", () => {
       const idx = text.toLowerCase().indexOf(q);
       if (idx >= 0) {
         const raw = text.slice(Math.max(0,idx-20), idx+q.length+40).trim();
-        snippet = raw.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi'), '<mark>$1</mark>');
+        snippet = raw.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')','gi'), '<mark>$1</mark>');
       }
-      return `<div class="search-result-item" onclick="searchGo('${m.id}')">
-        <div class="search-result-title">${m.title}</div>
-        <div class="search-result-path">${m.path}</div>
-        ${snippet?`<div class="search-result-snippet">${snippet}</div>`:""}
-      </div>`;
+      return '<div class="search-result-item" onclick="searchGo(\'' + m.id + '\')">' +
+        '<div class="search-result-title">' + m.title + '</div>' +
+        '<div class="search-result-path">' + m.path + '</div>' +
+        (snippet ? '<div class="search-result-snippet">' + snippet + '</div>' : "") +
+      '</div>';
     }).join("");
   }
   searchResults.classList.add("open");
@@ -417,7 +460,7 @@ searchInput.addEventListener("input", () => {
 
 function searchGo(id) {
   searchInput.value = ""; searchResults.classList.remove("open");
-  for (let i=0;i<SECTIONS.length;i++){if(findPage(id,SECTIONS[i].pages)){switchTab(i);break}}
+  for (let i=0;i<SECTIONS.length;i++){if(findPage(id,SECTIONS[i].pages)){currentTab=i;renderGnbTabs();document.getElementById("lnbTitle").textContent=SECTIONS[i].tab;renderTree();break}}
   navigateTo(id);
 }
 
