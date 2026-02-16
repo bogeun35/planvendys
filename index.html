@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendys Internal Docs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #111111;
+      --bg-tertiary: #1a1a1a;
+      --bg-hover: #222222;
+      --border: #2a2a2a;
+      --border-active: #3a3a3a;
+      --text-primary: #e8e8e8;
+      --text-secondary: #888888;
+      --text-muted: #555555;
+      --accent: #4a9eff;
+      --accent-dim: rgba(74, 158, 255, 0.08);
+      --danger: #ff4a4a;
+      --sidebar-w: 280px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ─── LOGIN SCREEN ─── */
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: var(--bg-primary);
+    }
+
+    .login-card {
+      text-align: center;
+      padding: 48px;
+      max-width: 380px;
+      width: 100%;
+    }
+
+    .login-logo {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .login-title {
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--text-primary);
+      margin-bottom: 40px;
+      letter-spacing: -0.3px;
+    }
+
+    .login-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 28px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .login-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-active);
+    }
+
+    .login-btn svg { width: 18px; height: 18px; }
+
+    .login-notice {
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .login-error {
+      margin-top: 16px;
+      padding: 10px 16px;
+      background: rgba(255, 74, 74, 0.08);
+      border: 1px solid rgba(255, 74, 74, 0.2);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--danger);
+      display: none;
+    }
+
+    /* ─── APP LAYOUT ─── */
+    .app {
+      display: none;
+      height: 100vh;
+    }
+
+    .app.active {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+    }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-brand {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .sidebar-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 10px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar { width: 3px; }
+    .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .nav-section {
+      margin-bottom: 8px;
+    }
+
+    .nav-section-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 8px 10px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 5px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.1s ease;
+      line-height: 1.4;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .nav-item .icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      opacity: 0.5;
+    }
+
+    .nav-item.active .icon { opacity: 1; }
+
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-name {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .logout-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .logout-btn:hover { color: var(--danger); }
+
+    /* ─── CONTENT ─── */
+    .content {
+      height: 100vh;
+      overflow-y: auto;
+      padding: 40px 56px;
+    }
+
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .doc-header {
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .doc-title {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .doc-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .doc-body h2 {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 28px 0 12px;
+      color: var(--text-primary);
+    }
+
+    .doc-body p {
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+    }
+
+    .doc-body code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: var(--accent);
+    }
+
+    .doc-body pre {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .doc-body ul {
+      padding-left: 20px;
+      margin-bottom: 14px;
+    }
+
+    .doc-body li {
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .doc-body .callout {
+      padding: 14px 18px;
+      background: var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      margin: 16px 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ─── LOADING ─── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: var(--bg-primary);
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- LOADING -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen" style="display:none">
+    <div class="login-card">
+      <div class="login-logo">Vendys</div>
+      <div class="login-title">Internal Documentation</div>
+      <button class="login-btn" onclick="signIn()">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Google로 로그인
+      </button>
+      <div class="login-notice">@vendys.co.kr 계정만 접근 가능합니다</div>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">Vendys Docs</div>
+        <div class="sidebar-subtitle">Internal Documentation</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Getting Started</div>
+          <div class="nav-item active" data-doc="welcome">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+            시작하기
+          </div>
+          <div class="nav-item" data-doc="setup">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            환경 설정
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Services</div>
+          <div class="nav-item" data-doc="sikgwon">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+            식권대장
+          </div>
+          <div class="nav-item" data-doc="bokji">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+            복지대장
+          </div>
+          <div class="nav-item" data-doc="quick">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            퀵대장
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Development</div>
+          <div class="nav-item" data-doc="api">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            API 가이드
+          </div>
+          <div class="nav-item" data-doc="db">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            DB 스키마
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar"></div>
+          <span class="user-name" id="userName"></span>
+        </div>
+        <button class="logout-btn" onclick="signOut()" title="로그아웃">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <main class="content" id="content"></main>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════════
+    //  Firebase 설정 (본인의 Firebase 프로젝트 값으로 교체)
+    // ══════════════════════════════════════════════
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const ALLOWED_DOMAIN = "vendys.co.kr";
+
+    // ══════════════════════════════════════════════
+    //  문서 데이터 (Markdown 대신 간단한 HTML 데이터)
+    // ══════════════════════════════════════════════
+    const docs = {
+      welcome: {
+        title: "시작하기",
+        meta: "최종 수정: 2025.02.16",
+        body: `
+          <p>Vendys 내부 문서에 오신 것을 환영합니다. 이 사이트는 서비스 기획, 개발, 운영에 필요한 핵심 문서를 관리합니다.</p>
+          <div class="callout">이 문서는 @vendys.co.kr 계정으로 인증된 사용자만 열람할 수 있습니다.</div>
+          <h2>문서 구조</h2>
+          <p>좌측 사이드바에서 카테고리별로 문서를 탐색할 수 있습니다. Getting Started에서 기본 환경 설정을, Services에서 각 서비스별 상세 문서를, Development에서 기술 문서를 확인하세요.</p>
+          <h2>문서 편집</h2>
+          <p>모든 문서는 GitHub 저장소에서 관리됩니다. 수정이 필요한 경우 해당 파일을 직접 편집하거나 PR을 생성해주세요.</p>
+          <pre>git clone https://github.com/vendys/internal-docs.git
+cd internal-docs
+# 문서 수정 후
+git add . && git commit -m "docs: update"
+git push origin main</pre>
+        `
+      },
+      setup: {
+        title: "환경 설정",
+        meta: "최종 수정: 2025.02.10",
+        body: `
+          <p>개발 및 운영 환경 설정에 필요한 가이드입니다.</p>
+          <h2>필수 도구</h2>
+          <ul>
+            <li>Git 2.40+</li>
+            <li>Node.js 20 LTS</li>
+            <li>Docker Desktop</li>
+          </ul>
+          <h2>VPN 접속</h2>
+          <p>내부 서버 접근을 위해 VPN 설정이 필요합니다. IT팀에 VPN 계정을 요청한 후 아래 설정을 적용하세요.</p>
+          <pre>Server: vpn.vendys.co.kr
+Protocol: WireGuard
+Config: IT팀에서 발급받은 .conf 파일 사용</pre>
+        `
+      },
+      sikgwon: {
+        title: "식권대장",
+        meta: "최종 수정: 2025.02.14",
+        body: `
+          <p>식권대장 서비스의 기획/운영 문서입니다.</p>
+          <h2>서비스 개요</h2>
+          <p>기업 고객에게 모바일 식권 발급, 사용, 정산까지 원스톱으로 제공하는 B2B 서비스입니다.</p>
+          <h2>주요 기능</h2>
+          <ul>
+            <li>모바일 식권 발급 및 QR 결제</li>
+            <li>식당 가맹점 관리</li>
+            <li>기업 관리자 대시보드</li>
+            <li>정산 및 리포트</li>
+          </ul>
+          <div class="callout">상세 API 문서는 Development > API 가이드를 참고하세요.</div>
+        `
+      },
+      bokji: {
+        title: "복지대장",
+        meta: "최종 수정: 2025.02.12",
+        body: `
+          <p>복지대장은 기업 복지 포인트 관리 서비스입니다.</p>
+          <h2>서비스 구조</h2>
+          <p>기업이 임직원에게 복지 포인트를 부여하면, 임직원은 제휴 가맹점에서 자유롭게 사용할 수 있습니다. 카테고리별 한도 설정, 사용 내역 조회, 잔여 포인트 관리 등의 기능을 제공합니다.</p>
+        `
+      },
+      quick: {
+        title: "퀵대장",
+        meta: "최종 수정: 2025.02.08",
+        body: `
+          <p>퀵대장은 기업 간 퀵 배송 서비스입니다.</p>
+          <h2>배송 프로세스</h2>
+          <p>주문 접수부터 배차, 픽업, 배송 완료까지의 전체 프로세스를 관리합니다. 실시간 위치 추적과 배송 상태 알림을 제공합니다.</p>
+        `
+      },
+      api: {
+        title: "API 가이드",
+        meta: "최종 수정: 2025.02.15",
+        body: `
+          <p>내부 API 사용 가이드입니다.</p>
+          <h2>Base URL</h2>
+          <pre>Production: https://api.vendys.co.kr/v1
+Staging:    https://api-staging.vendys.co.kr/v1</pre>
+          <h2>인증</h2>
+          <p>모든 API 요청에 <code>Authorization: Bearer {token}</code> 헤더가 필요합니다.</p>
+          <h2>공통 응답 형식</h2>
+          <pre>{
+  "code": 200,
+  "message": "success",
+  "data": { ... }
+}</pre>
+        `
+      },
+      db: {
+        title: "DB 스키마",
+        meta: "최종 수정: 2025.02.13",
+        body: `
+          <p>주요 데이터베이스 스키마 문서입니다.</p>
+          <h2>데이터베이스 구성</h2>
+          <ul>
+            <li><code>vendys_main</code> - 메인 서비스 DB</li>
+            <li><code>vendys_auth</code> - 인증/권한 DB</li>
+            <li><code>vendys_log</code> - 로그/분석 DB</li>
+          </ul>
+          <div class="callout">스키마 변경 시 반드시 DBA 팀 리뷰를 거쳐주세요. 마이그레이션 스크립트는 /migrations 디렉토리에서 관리합니다.</div>
+        `
+      }
+    };
+
+    // ══════════════════════════════════════════════
+    //  인증 로직
+    // ══════════════════════════════════════════════
+    function signIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ hd: ALLOWED_DOMAIN });
+      auth.signInWithPopup(provider).catch(err => {
+        showError("로그인에 실패했습니다: " + err.message);
+      });
+    }
+
+    function signOut() {
+      auth.signOut();
+    }
+
+    function showError(msg) {
+      const el = document.getElementById("loginError");
+      el.textContent = msg;
+      el.style.display = "block";
+    }
+
+    auth.onAuthStateChanged(user => {
+      document.getElementById("loading").style.display = "none";
+
+      if (user) {
+        const domain = user.email.split("@")[1];
+        if (domain !== ALLOWED_DOMAIN) {
+          auth.signOut();
+          document.getElementById("loginScreen").style.display = "flex";
+          showError("@vendys.co.kr 계정만 접근 가능합니다.");
+          return;
+        }
+
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("app").classList.add("active");
+
+        // 사용자 정보 표시
+        document.getElementById("userName").textContent = user.email;
+        const avatar = document.getElementById("userAvatar");
+        if (user.photoURL) {
+          avatar.innerHTML = `<img src="${user.photoURL}" alt="">`;
+        }
+
+        renderDoc("welcome");
+      } else {
+        document.getElementById("loginScreen").style.display = "flex";
+        document.getElementById("app").classList.remove("active");
+      }
+    });
+
+    // ══════════════════════════════════════════════
+    //  문서 렌더링 & 네비게이션
+    // ══════════════════════════════════════════════
+    function renderDoc(key) {
+      const doc = docs[key];
+      if (!doc) return;
+
+      document.getElementById("content").innerHTML = `
+        <div class="doc-header">
+          <div class="doc-title">${doc.title}</div>
+          <div class="doc-meta">${doc.meta}</div>
+        </div>
+        <div class="doc-body">${doc.body}</div>
+      `;
+
+      document.querySelectorAll(".nav-item").forEach(item => {
+        item.classList.toggle("active", item.dataset.doc === key);
+      });
+    }
+
+    document.querySelectorAll(".nav-item").forEach(item => {
+      item.addEventListener("click", () => renderDoc(item.dataset.doc));
+    });
+  </script>
+</body>
+</html>
