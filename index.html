@@ -9,24 +9,27 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <style>
     :root {
-      --bg-primary: #09090b;
-      --bg-secondary: #0f0f11;
-      --bg-tertiary: #18181b;
-      --bg-hover: #1f1f23;
-      --bg-active: #27272a;
-      --border: #27272a;
-      --border-subtle: #1e1e21;
-      --text-primary: #e4e4e7;
-      --text-secondary: #a1a1aa;
-      --text-muted: #52525b;
-      --accent: #60a5fa;
-      --accent-dim: rgba(96, 165, 250, 0.07);
-      --accent-border: rgba(96, 165, 250, 0.15);
-      --danger: #f87171;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafd;
+      --bg-tertiary: #f0f4f9;
+      --bg-hover: #e8eef6;
+      --bg-active: #dce6f2;
+      --border: #e2e8f0;
+      --border-subtle: #edf1f7;
+      --text-primary: #1a2332;
+      --text-secondary: #4a5568;
+      --text-muted: #94a3b8;
+      --accent: #4a90d9;
+      --accent-light: #6ba5e7;
+      --accent-dim: rgba(74, 144, 217, 0.06);
+      --accent-border: rgba(74, 144, 217, 0.2);
+      --accent-bg: #eef4fb;
+      --danger: #e85d5d;
+      --warn: #d49a2a;
       --gnb-h: 48px;
       --lnb-w: 260px;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Noto Sans KR', -apple-system, sans-serif;
       background: var(--bg-primary); color: var(--text-primary);
@@ -34,39 +37,40 @@
     }
 
     /* ═══ LOGIN ═══ */
-    .login-screen { display:flex; align-items:center; justify-content:center; height:100vh; }
+    .login-screen { display:flex; align-items:center; justify-content:center; height:100vh; background:var(--bg-secondary); }
     .login-card { text-align:center; padding:48px; max-width:360px; }
-    .login-logo { font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+    .login-logo { font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
     .login-title { font-size:20px; font-weight:300; color:var(--text-primary); margin-bottom:36px; }
     .login-btn {
       display:inline-flex; align-items:center; gap:10px; padding:11px 24px;
-      background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px;
-      color:var(--text-primary); font-size:13px; font-family:inherit; cursor:pointer; transition:all 0.15s;
+      background:var(--bg-primary); border:1px solid var(--border); border-radius:6px;
+      color:var(--text-primary); font-size:13px; font-family:inherit; cursor:pointer;
+      transition:all 0.15s; box-shadow:0 1px 3px rgba(0,0,0,0.04);
     }
-    .login-btn:hover { background:var(--bg-hover); }
+    .login-btn:hover { background:var(--bg-tertiary); border-color:var(--accent-border); box-shadow:0 2px 6px rgba(74,144,217,0.08); }
     .login-btn svg { width:16px; height:16px; }
     .login-notice { margin-top:20px; font-size:11px; color:var(--text-muted); }
-    .login-error { margin-top:14px; padding:9px 14px; background:rgba(248,113,113,0.06); border:1px solid rgba(248,113,113,0.15); border-radius:5px; font-size:12px; color:var(--danger); display:none; }
+    .login-error { margin-top:14px; padding:9px 14px; background:rgba(232,93,93,0.06); border:1px solid rgba(232,93,93,0.15); border-radius:5px; font-size:12px; color:var(--danger); display:none; }
 
-    .loading { display:flex; align-items:center; justify-content:center; height:100vh; }
+    .loading { display:flex; align-items:center; justify-content:center; height:100vh; background:var(--bg-secondary); }
     .spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .5s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
     /* ═══ GNB ═══ */
     .gnb {
-      display:none; height:var(--gnb-h); background:var(--bg-secondary);
+      display:none; height:var(--gnb-h); background:var(--bg-primary);
       border-bottom:1px solid var(--border); padding:0 20px;
       align-items:center; justify-content:space-between;
       position:fixed; top:0; left:0; right:0; z-index:100;
     }
     .gnb.active { display:flex; }
     .gnb-left { display:flex; align-items:center; gap:16px; }
-    .gnb-brand { font-size:12px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--text-secondary); }
+    .gnb-brand { font-size:12px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--accent); }
     .gnb-sep { width:1px; height:16px; background:var(--border); }
     .gnb-tabs { display:flex; gap:2px; }
-    .gnb-tab { padding:6px 12px; border-radius:4px; font-size:12px; color:var(--text-muted); cursor:pointer; transition:all .1s; }
-    .gnb-tab:hover { color:var(--text-secondary); background:var(--bg-hover); }
-    .gnb-tab.active { color:var(--text-primary); background:var(--bg-tertiary); }
+    .gnb-tab { padding:6px 12px; border-radius:4px; font-size:12px; color:var(--text-muted); cursor:pointer; transition:all .1s; font-weight:400; }
+    .gnb-tab:hover { color:var(--text-secondary); background:var(--bg-tertiary); }
+    .gnb-tab.active { color:var(--accent); background:var(--accent-dim); font-weight:500; }
     .gnb-right { display:flex; align-items:center; gap:12px; }
 
     /* ═══ SEARCH ═══ */
@@ -74,34 +78,34 @@
     .search-input {
       width:100%; padding:6px 10px 6px 30px; background:var(--bg-tertiary);
       border:1px solid var(--border); border-radius:5px; color:var(--text-primary);
-      font-size:12px; font-family:inherit; outline:none; transition:border-color .15s;
+      font-size:12px; font-family:inherit; outline:none; transition:all .15s;
     }
     .search-input::placeholder { color:var(--text-muted); }
-    .search-input:focus { border-color:var(--accent-border); }
+    .search-input:focus { border-color:var(--accent); background:var(--bg-primary); box-shadow:0 0 0 3px var(--accent-dim); }
     .search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-muted); pointer-events:none; }
-    .search-kbd { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--text-muted); background:var(--bg-hover); padding:1px 5px; border-radius:3px; border:1px solid var(--border); }
-    .search-results { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px; max-height:280px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:200; }
+    .search-kbd { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--text-muted); background:var(--bg-primary); padding:1px 5px; border-radius:3px; border:1px solid var(--border); }
+    .search-results { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--bg-primary); border:1px solid var(--border); border-radius:6px; max-height:280px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,0.08); z-index:200; }
     .search-results.open { display:block; }
     .search-result-item { padding:8px 12px; cursor:pointer; transition:background .1s; border-bottom:1px solid var(--border-subtle); }
     .search-result-item:last-child { border-bottom:none; }
-    .search-result-item:hover { background:var(--bg-hover); }
+    .search-result-item:hover { background:var(--bg-tertiary); }
     .search-result-title { font-size:12px; color:var(--text-primary); font-weight:500; }
     .search-result-path { font-size:10px; color:var(--text-muted); margin-top:2px; }
     .search-result-snippet { font-size:11px; color:var(--text-muted); margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .search-result-snippet mark { background:rgba(96,165,250,.2); color:var(--accent); border-radius:1px; padding:0 1px; }
+    .search-result-snippet mark { background:var(--accent-bg); color:var(--accent); border-radius:1px; padding:0 1px; }
     .search-empty { padding:16px 12px; text-align:center; font-size:12px; color:var(--text-muted); }
 
     .gnb-user { display:flex; align-items:center; gap:8px; padding:4px 8px; border-radius:4px; cursor:pointer; transition:background .1s; position:relative; }
-    .gnb-user:hover { background:var(--bg-hover); }
-    .gnb-avatar { width:24px; height:24px; border-radius:50%; background:var(--bg-active); overflow:hidden; }
+    .gnb-user:hover { background:var(--bg-tertiary); }
+    .gnb-avatar { width:24px; height:24px; border-radius:50%; background:var(--bg-active); overflow:hidden; border:1px solid var(--border); }
     .gnb-avatar img { width:100%; height:100%; object-fit:cover; }
     .gnb-username { font-size:12px; color:var(--text-secondary); }
-    .user-menu { display:none; position:absolute; top:calc(100% + 6px); right:0; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px; min-width:140px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:200; }
+    .user-menu { display:none; position:absolute; top:calc(100% + 6px); right:0; background:var(--bg-primary); border:1px solid var(--border); border-radius:6px; min-width:140px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.08); z-index:200; }
     .user-menu.open { display:block; }
     .user-menu-item { padding:8px 14px; font-size:12px; color:var(--text-secondary); cursor:pointer; transition:all .1s; }
-    .user-menu-item:hover { background:var(--bg-hover); color:var(--text-primary); }
+    .user-menu-item:hover { background:var(--bg-tertiary); color:var(--text-primary); }
     .user-menu-item.danger { color:var(--danger); }
-    .user-menu-item.danger:hover { background:rgba(248,113,113,.06); }
+    .user-menu-item.danger:hover { background:rgba(232,93,93,0.04); }
 
     /* ═══ MAIN LAYOUT ═══ */
     .main-layout { display:none; margin-top:var(--gnb-h); height:calc(100vh - var(--gnb-h)); }
@@ -118,45 +122,45 @@
     .tree-item { border-radius:4px; }
     .tree-row { display:flex; align-items:center; gap:4px; padding:5px 8px; border-radius:4px; cursor:pointer; transition:all .08s; font-size:13px; color:var(--text-secondary); }
     .tree-row:hover { background:var(--bg-hover); color:var(--text-primary); }
-    .tree-row.active { background:var(--accent-dim); color:var(--accent); }
+    .tree-row.active { background:var(--accent-bg); color:var(--accent); }
     .tree-toggle { width:16px; height:16px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--text-muted); transition:transform .15s; }
     .tree-toggle.expanded { transform:rotate(90deg); }
     .tree-toggle.hidden { visibility:hidden; }
-    .tree-icon { width:14px; height:14px; flex-shrink:0; color:var(--text-muted); opacity:.6; }
+    .tree-icon { width:14px; height:14px; flex-shrink:0; color:var(--text-muted); opacity:.5; }
     .tree-row.active .tree-icon { color:var(--accent); opacity:1; }
     .tree-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .tree-children { display:none; padding-left:16px; }
     .tree-children.open { display:block; }
 
     /* ═══ CONTENT ═══ */
-    .content-area { height:calc(100vh - var(--gnb-h)); overflow-y:auto; padding:36px 52px 60px; }
+    .content-area { height:calc(100vh - var(--gnb-h)); overflow-y:auto; padding:36px 52px 60px; background:var(--bg-primary); }
     .content-area::-webkit-scrollbar { width:4px; }
     .content-area::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
 
     .breadcrumb { display:flex; align-items:center; gap:6px; margin-bottom:20px; font-size:12px; }
     .breadcrumb-item { color:var(--text-muted); cursor:pointer; transition:color .1s; }
-    .breadcrumb-item:hover { color:var(--text-secondary); }
+    .breadcrumb-item:hover { color:var(--accent); }
     .breadcrumb-item.current { color:var(--text-secondary); cursor:default; }
     .breadcrumb-sep { color:var(--text-muted); font-size:10px; }
 
-    .doc-title { font-size:24px; font-weight:600; letter-spacing:-.5px; margin-bottom:6px; }
+    .doc-title { font-size:24px; font-weight:600; letter-spacing:-.5px; margin-bottom:6px; color:var(--text-primary); }
     .doc-meta { font-size:11px; color:var(--text-muted); margin-bottom:28px; padding-bottom:16px; border-bottom:1px solid var(--border-subtle); }
     .doc-body h2 { font-size:16px; font-weight:600; margin:28px 0 10px; color:var(--text-primary); }
     .doc-body h3 { font-size:14px; font-weight:600; margin:20px 0 8px; color:var(--text-primary); }
     .doc-body p { font-size:13.5px; line-height:1.8; color:var(--text-secondary); margin-bottom:12px; }
-    .doc-body code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--bg-tertiary); border:1px solid var(--border); padding:1px 5px; border-radius:3px; color:var(--accent); }
-    .doc-body pre { background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin:14px 0; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.65; color:var(--text-secondary); }
+    .doc-body code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--accent-bg); border:1px solid var(--accent-border); padding:1px 5px; border-radius:3px; color:var(--accent); }
+    .doc-body pre { background:var(--bg-secondary); border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin:14px 0; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.65; color:var(--text-secondary); }
     .doc-body ul,.doc-body ol { padding-left:20px; margin-bottom:12px; }
     .doc-body li { font-size:13.5px; line-height:1.8; color:var(--text-secondary); margin-bottom:3px; }
-    .doc-body .callout { padding:12px 16px; background:var(--accent-dim); border-left:3px solid var(--accent); border-radius:0 5px 5px 0; margin:14px 0; font-size:13px; color:var(--text-secondary); line-height:1.65; }
-    .doc-body .callout-warn { padding:12px 16px; background:rgba(250,204,21,.05); border-left:3px solid #facc15; border-radius:0 5px 5px 0; margin:14px 0; font-size:13px; color:var(--text-secondary); line-height:1.65; }
+    .doc-body .callout { padding:12px 16px; background:var(--accent-bg); border-left:3px solid var(--accent); border-radius:0 5px 5px 0; margin:14px 0; font-size:13px; color:var(--text-secondary); line-height:1.65; }
+    .doc-body .callout-warn { padding:12px 16px; background:rgba(212,154,42,0.06); border-left:3px solid var(--warn); border-radius:0 5px 5px 0; margin:14px 0; font-size:13px; color:var(--text-secondary); line-height:1.65; }
     .doc-body table { width:100%; border-collapse:collapse; margin:14px 0; font-size:13px; }
     .doc-body th { text-align:left; padding:8px 12px; background:var(--bg-tertiary); border:1px solid var(--border); color:var(--text-primary); font-weight:500; }
     .doc-body td { padding:8px 12px; border:1px solid var(--border); color:var(--text-secondary); }
 
     .child-pages { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-top:20px; }
-    .child-page-card { padding:14px 16px; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px; cursor:pointer; transition:all .12s; }
-    .child-page-card:hover { border-color:var(--accent-border); background:var(--bg-hover); }
+    .child-page-card { padding:14px 16px; background:var(--bg-primary); border:1px solid var(--border); border-radius:6px; cursor:pointer; transition:all .12s; }
+    .child-page-card:hover { border-color:var(--accent-border); background:var(--accent-bg); box-shadow:0 2px 8px rgba(74,144,217,0.06); }
     .child-page-card-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:4px; }
     .child-page-card-desc { font-size:11px; color:var(--text-muted); line-height:1.4; }
   </style>
@@ -210,9 +214,6 @@
   </div>
 
 <script>
-// ═══════════════════════════════════════════════
-//  FIREBASE (본인 프로젝트 값으로 교체)
-// ═══════════════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyAQE9oQRDUmeX6ZPO2KOcfd1ctBqt6v34w",
   authDomain: "vendys-b1fea.firebaseapp.com",
@@ -222,12 +223,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const ALLOWED_DOMAIN = "vendys.co.kr";
 
-// ═══════════════════════════════════════════════
-//  PAGE DATA - 여기에 페이지를 추가하면 자동 반영
-//
-//  children 배열 안에 또 children을 넣으면
-//  무한 depth로 트리가 생성됩니다.
-// ═══════════════════════════════════════════════
 const SECTIONS = [
   {
     tab: "서비스",
@@ -350,15 +345,9 @@ const SECTIONS = [
   }
 ];
 
-// ═══════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════
 let currentTab = 0, currentPageId = null;
 const expandedNodes = new Set();
 
-// ═══════════════════════════════════════════════
-//  AUTH
-// ═══════════════════════════════════════════════
 function signIn() {
   const p = new firebase.auth.GoogleAuthProvider();
   p.setCustomParameters({ hd: ALLOWED_DOMAIN });
@@ -393,9 +382,6 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// ═══════════════════════════════════════════════
-//  APP
-// ═══════════════════════════════════════════════
 function initApp() { renderGnbTabs(); switchTab(0); }
 
 function renderGnbTabs() {
@@ -413,7 +399,6 @@ function switchTab(idx) {
   if (first) navigateTo(first.id);
 }
 
-// ─── Icons ───
 const ICONS = {
   folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>',
   doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
@@ -421,11 +406,9 @@ const ICONS = {
   db: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
 };
 
-// ─── Tree ───
 function renderTree() {
   document.getElementById("lnbTree").innerHTML = SECTIONS[currentTab].pages.map(p => treeNode(p)).join("");
 }
-
 function treeNode(page) {
   const has = page.children?.length > 0;
   const exp = expandedNodes.has(page.id);
@@ -441,11 +424,9 @@ function treeNode(page) {
     ${has?`<div class="tree-children${exp?' open':''}">${page.children.map(c=>treeNode(c)).join("")}</div>`:''}
   </div>`;
 }
-
 function toggleNode(id) { expandedNodes.has(id)?expandedNodes.delete(id):expandedNodes.add(id); renderTree(); }
 function onTreeClick(id) { navigateTo(id); }
 
-// ─── Find / Path ───
 function findPage(id, pages) {
   for (const p of pages) { if (p.id===id) return p; if (p.children) { const f=findPage(id,p.children); if(f) return f; } } return null;
 }
@@ -455,7 +436,6 @@ function getPath(id, pages, trail=[]) {
 }
 function getFullPath(id) { for (const s of SECTIONS) { const p=getPath(id,s.pages); if(p) return p; } return []; }
 
-// ─── Navigate ───
 function navigateTo(id) {
   currentPageId = id;
   const page = findInAll(id); if(!page) return;
@@ -486,9 +466,6 @@ function navigateTo(id) {
   el.scrollTop = 0;
 }
 
-// ═══════════════════════════════════════════════
-//  SEARCH
-// ═══════════════════════════════════════════════
 function flatPages(pages, result=[]) {
   for (const p of pages) {
     const path = getFullPath(p.id)?.map(x=>x.title).join(" > ") || p.title;
