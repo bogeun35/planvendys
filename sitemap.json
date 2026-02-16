@@ -59,7 +59,16 @@
           "title": "재무기획",
           "icon": "folder",
           "desc": "재무기획 관련 도구",
-          "children": []
+          "children": [
+ {
+              "id": "billing-match.html",
+              "title": "지급내역 매핑",
+              "icon": "doc",
+              "desc": "지급내역 매핑",
+              "file": "docs/ops/billing-match.html"
+            }
+            
+          ]
         },
         {
           "id": "statistics",
