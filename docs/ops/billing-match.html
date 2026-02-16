@@ -177,6 +177,7 @@ meta: 최종 수정: 2026.02.16
         <th onclick="bmSortDep('regExDescription')">DB정규식</th>
         <th onclick="bmSortDep('_normalized')">JS정규식</th>
         <th onclick="bmSortDep('depositAmount')" style="text-align:right">입금액(원)</th>
+        <th onclick="bmSortDep('transactionDate')">입금일</th>
         <th onclick="bmSortDep('matchedAmount')" style="text-align:right">연결액(원)</th>
         <th>청구서</th>
         <th>상태</th>
@@ -249,7 +250,7 @@ async function bmFetch(){
                 _normalized:bmNormalize(dbReg||orig),depositAmount:Number(r.depositAmount)||0,
                 matchedAmount:Number(r.matchedAmount)||0,billIdx:r.billIdx?Number(r.billIdx):null,
                 accountBizNumber:String(r.accountBizNumber||''),codeName:String(r.codeName||''),
-                transactionDate:String(r.transactionDate||'').substring(0,10),
+                transactionDate:String(r.transactionDate||'').replace(/T.*/,'').substring(0,10),
                 _matchStatus:r.billIdx?'linked':'unmatched',_matchedBillIdx:r.billIdx?Number(r.billIdx):null,_diff:0};
         });
 
@@ -389,27 +390,123 @@ function bmRenderDeps(){
         var tag='';if(d._matchStatus==='linked')tag='<span class="bm-tag bm-tag--linked">연결</span>';
         else if(d._matchStatus==='matched'){tag='<span class="bm-tag bm-tag--matched">매칭</span>';if(d._diff!==0)tag+=' <span class="bm-tag bm-tag--diff">'+(d._diff>0?'+':'')+d._diff+'</span>';}
         else tag='<span class="bm-tag bm-tag--unmatched">미매칭</span>';
-        html+='<tr class="'+cls+'" onclick="bmSelectDep('+d.bankStatementIdx+')"><td>'+d.bankStatementIdx+'</td><td title="'+d.description+'">'+(d.description.length>15?d.description.substring(0,15)+'..':d.description)+'</td><td class="bm-dim">'+(d.regExDescription||'-')+'</td><td class="bm-js">'+d._normalized+'</td><td class="bm-num">'+bmN(d.depositAmount)+'</td><td class="bm-num">'+(d.matchedAmount?bmN(d.matchedAmount):'-')+'</td><td>'+(d._matchedBillIdx||'-')+'</td><td>'+tag+'</td></tr>';});
+        html+='<tr class="'+cls+'" onclick="bmSelectDep('+d.bankStatementIdx+')"><td>'+d.bankStatementIdx+'</td><td title="'+d.description+'">'+(d.description.length>15?d.description.substring(0,15)+'..':d.description)+'</td><td class="bm-dim">'+(d.regExDescription||'-')+'</td><td class="bm-js">'+d._normalized+'</td><td class="bm-num">'+bmN(d.depositAmount)+'</td><td>'+d.transactionDate+'</td><td class="bm-num">'+(d.matchedAmount?bmN(d.matchedAmount):'-')+'</td><td>'+(d._matchedBillIdx||'-')+'</td><td>'+tag+'</td></tr>';});
     document.getElementById('bmDepBody').innerHTML=html;document.getElementById('bmDepCount').textContent=filtered.length+'건';
 }
 
 /* ===== Selection ===== */
-function bmSelectBill(idx){BM.selectedBillIdx=idx;var b=BM.bills.find(function(b){return b.billIdx===idx;});BM.selectedDepIdx=(b&&b._matchedDepIdx)?b._matchedDepIdx:null;bmRenderBills();bmRenderDeps();bmShowMatchDetail(b);}
-function bmSelectDep(idx){BM.selectedDepIdx=idx;var d=BM.deps.find(function(d){return d.bankStatementIdx===idx;});BM.selectedBillIdx=(d&&d._matchedBillIdx)?d._matchedBillIdx:null;bmRenderBills();bmRenderDeps();if(d&&d._matchedBillIdx)bmShowMatchDetail(BM.bills.find(function(b){return b.billIdx===d._matchedBillIdx;}));else bmShowMatchDetail(null);}
+function bmSelectBill(idx){
+    BM.selectedBillIdx=idx;
+    var b=BM.bills.find(function(b){return b.billIdx===idx;});
+    BM.selectedDepIdx=(b&&b._matchedDepIdx)?b._matchedDepIdx:null;
+    bmRenderBills();bmRenderDeps();
+    bmShowDetail('bill',b);
+}
+function bmSelectDep(idx){
+    BM.selectedDepIdx=idx;
+    var d=BM.deps.find(function(d){return d.bankStatementIdx===idx;});
+    BM.selectedBillIdx=(d&&d._matchedBillIdx)?d._matchedBillIdx:null;
+    bmRenderBills();bmRenderDeps();
+    bmShowDetail('dep',d);
+}
 
-function bmShowMatchDetail(bill){
+function bmShowDetail(type,item){
     var panel=document.getElementById('bmMatchResult'),detail=document.getElementById('bmMatchDetail');
-    if(!bill){panel.classList.add('bm-hidden');return;}
-    var dep=bill._matchedDepIdx?BM.deps.find(function(d){return d.bankStatementIdx===bill._matchedDepIdx;}):null;
-    var h='<table class="bm-detail-tbl"><thead><tr><th style="width:90px">단계</th><th>청구서 (예금주)</th><th>입금내역 (적요)</th><th style="width:80px">비교</th></tr></thead><tbody>';
-    h+='<tr><td>원본</td><td>'+bill.depositAccountHolder+'</td><td>'+(dep?dep.description:'-')+'</td><td></td></tr>';
-    var dbB=bill.regExDepositAccountHolder||'-',dbD=dep?(dep.regExDescription||'-'):'-';
-    h+='<tr><td>DB 정규식</td><td class="bm-dim">'+dbB+'</td><td class="bm-dim">'+dbD+'</td><td>'+(dbB==='-'||dbD==='-'?'<span class="bm-dim">-</span>':dbB===dbD?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--unmatched">불일치</span>')+'</td></tr>';
-    var jsB=bill._normalized,jsD=dep?dep._normalized:'-';
-    h+='<tr><td><strong>JS 정규식</strong></td><td class="bm-js">'+jsB+'</td><td class="bm-js">'+jsD+'</td><td>'+(jsD==='-'?'<span class="bm-dim">-</span>':jsB===jsD?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--unmatched">불일치</span>')+'</td></tr>';
-    h+='<tr><td>금액</td><td class="bm-num">'+bmN(bill.totalAmount)+'</td><td class="bm-num">'+(dep?bmN(dep.depositAmount):'-')+'</td>';
-    if(dep){var diff=bill.totalAmount-dep.depositAmount;h+='<td>'+(Math.abs(diff)<=Number(document.getElementById('bmTolerance').value||2)?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--diff">'+(diff>0?'+':'')+bmN(diff)+'</span>')+'</td>';}else h+='<td>-</td>';
-    h+='</tr></tbody></table>';detail.innerHTML=h;panel.classList.remove('bm-hidden');
+    if(!item){panel.classList.add('bm-hidden');return;}
+
+    var tolerance=Number(document.getElementById('bmTolerance').value)||0;
+    var h='';
+
+    if(type==='bill'){
+        var bill=item;
+        var dep=bill._matchedDepIdx?BM.deps.find(function(d){return d.bankStatementIdx===bill._matchedDepIdx;}):null;
+
+        // 매칭 상세 비교
+        h+='<table class="bm-detail-tbl"><thead><tr><th style="width:90px">단계</th><th>청구서 (예금주)</th><th>입금내역 (적요)</th><th style="width:80px">비교</th></tr></thead><tbody>';
+        h+='<tr><td>원본</td><td>'+bill.depositAccountHolder+'</td><td>'+(dep?dep.description:'-')+'</td><td></td></tr>';
+        var dbB=bill.regExDepositAccountHolder||'-',dbD=dep?(dep.regExDescription||'-'):'-';
+        h+='<tr><td>DB 정규식</td><td class="bm-dim">'+dbB+'</td><td class="bm-dim">'+dbD+'</td><td>'+(dbB==='-'||dbD==='-'?'-':dbB===dbD?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--unmatched">불일치</span>')+'</td></tr>';
+        var jsB=bill._normalized,jsD=dep?dep._normalized:'-';
+        h+='<tr><td><strong>JS 정규식</strong></td><td class="bm-js">'+jsB+'</td><td class="bm-js">'+jsD+'</td><td>'+(jsD==='-'?'-':jsB===jsD?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--unmatched">불일치</span>')+'</td></tr>';
+        h+='<tr><td>금액</td><td class="bm-num">'+bmN(bill.totalAmount)+'</td><td class="bm-num">'+(dep?bmN(dep.depositAmount):'-')+'</td>';
+        if(dep){var diff=bill.totalAmount-dep.depositAmount;h+='<td>'+(Math.abs(diff)<=tolerance?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--diff">'+(diff>0?'+':'')+bmN(diff)+'</span>')+'</td>';}else h+='<td>-</td>';
+        h+='</tr></tbody></table>';
+
+        // 후보 리스트 (정규식 or 금액 매칭 가능한 입금내역)
+        var candidates=[];
+        BM.deps.forEach(function(d){
+            var descOk=bill._normalized&&d._normalized&&bill._normalized===d._normalized;
+            var amtDiff=Math.abs(bill.totalAmount-d.depositAmount);
+            var amtOk=amtDiff<=tolerance;
+            if(descOk||amtOk){
+                candidates.push({dep:d,descOk:descOk,amtOk:amtOk,amtDiff:amtDiff});
+            }
+        });
+        if(candidates.length>0){
+            candidates.sort(function(a,b){if(a.descOk&&a.amtOk&&!(b.descOk&&b.amtOk))return -1;if(b.descOk&&b.amtOk&&!(a.descOk&&a.amtOk))return 1;return a.amtDiff-b.amtDiff;});
+            h+='<div style="margin-top:6px"><strong style="font-size:11px">매칭 후보 ('+candidates.length+'건)</strong>';
+            h+='<table class="bm-detail-tbl" style="margin-top:4px"><thead><tr><th>#</th><th>적요</th><th>JS정규식</th><th>입금액</th><th>입금일</th><th>정규식</th><th>금액</th><th>차이</th></tr></thead><tbody>';
+            candidates.slice(0,20).forEach(function(c){
+                var isCurrent=dep&&c.dep.bankStatementIdx===dep.bankStatementIdx;
+                var trStyle=isCurrent?' style="background:#eef4fb;font-weight:600"':'';
+                h+='<tr'+trStyle+'><td>'+c.dep.bankStatementIdx+'</td>';
+                h+='<td title="'+c.dep.description+'">'+(c.dep.description.length>20?c.dep.description.substring(0,20)+'..':c.dep.description)+'</td>';
+                h+='<td class="bm-js">'+c.dep._normalized+'</td>';
+                h+='<td class="bm-num">'+bmN(c.dep.depositAmount)+'</td>';
+                h+='<td>'+c.dep.transactionDate+'</td>';
+                h+='<td>'+(c.descOk?'<span class="bm-tag bm-tag--matched">O</span>':'<span class="bm-tag bm-tag--unmatched">X</span>')+'</td>';
+                h+='<td>'+(c.amtOk?'<span class="bm-tag bm-tag--matched">O</span>':'<span class="bm-tag bm-tag--unmatched">X</span>')+'</td>';
+                h+='<td class="bm-num">'+(c.amtDiff===0?'-':(c.dep.depositAmount>bill.totalAmount?'+':'-')+bmN(c.amtDiff))+'</td></tr>';
+            });
+            h+='</tbody></table>';
+            if(candidates.length>20)h+='<span class="bm-dim">...외 '+(candidates.length-20)+'건</span>';
+            h+='</div>';
+        }
+    } else {
+        // dep 선택 시: 매칭된 bill 상세 + 후보 bill 리스트
+        var dep2=item;
+        var bill2=dep2._matchedBillIdx?BM.bills.find(function(b){return b.billIdx===dep2._matchedBillIdx;}):null;
+
+        h+='<table class="bm-detail-tbl"><thead><tr><th style="width:90px">항목</th><th>입금내역</th><th>청구서</th><th style="width:80px">비교</th></tr></thead><tbody>';
+        h+='<tr><td>원본</td><td>'+dep2.description+'</td><td>'+(bill2?bill2.depositAccountHolder:'-')+'</td><td></td></tr>';
+        h+='<tr><td><strong>JS 정규식</strong></td><td class="bm-js">'+dep2._normalized+'</td><td class="bm-js">'+(bill2?bill2._normalized:'-')+'</td>';
+        if(bill2)h+='<td>'+(dep2._normalized===bill2._normalized?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--unmatched">불일치</span>')+'</td>';else h+='<td>-</td>';
+        h+='</tr>';
+        h+='<tr><td>금액</td><td class="bm-num">'+bmN(dep2.depositAmount)+'</td><td class="bm-num">'+(bill2?bmN(bill2.totalAmount):'-')+'</td>';
+        if(bill2){var diff2=bill2.totalAmount-dep2.depositAmount;h+='<td>'+(Math.abs(diff2)<=tolerance?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--diff">'+(diff2>0?'+':'')+bmN(diff2)+'</span>')+'</td>';}else h+='<td>-</td>';
+        h+='</tr></tbody></table>';
+
+        // 후보 bill 리스트
+        var cands2=[];
+        BM.bills.forEach(function(b){
+            var descOk=dep2._normalized&&b._normalized&&dep2._normalized===b._normalized;
+            var amtDiff=Math.abs(b.totalAmount-dep2.depositAmount);
+            var amtOk=amtDiff<=tolerance;
+            if(descOk||amtOk){cands2.push({bill:b,descOk:descOk,amtOk:amtOk,amtDiff:amtDiff});}
+        });
+        if(cands2.length>0){
+            cands2.sort(function(a,b){if(a.descOk&&a.amtOk&&!(b.descOk&&b.amtOk))return -1;if(b.descOk&&b.amtOk&&!(a.descOk&&a.amtOk))return 1;return a.amtDiff-b.amtDiff;});
+            h+='<div style="margin-top:6px"><strong style="font-size:11px">매칭 후보 청구서 ('+cands2.length+'건)</strong>';
+            h+='<table class="bm-detail-tbl" style="margin-top:4px"><thead><tr><th>#</th><th>청구서명</th><th>JS정규식</th><th>청구액</th><th>약정일</th><th>정규식</th><th>금액</th><th>차이</th></tr></thead><tbody>';
+            cands2.slice(0,20).forEach(function(c){
+                var isCurrent=bill2&&c.bill.billIdx===bill2.billIdx;
+                var trStyle=isCurrent?' style="background:#eef4fb;font-weight:600"':'';
+                h+='<tr'+trStyle+'><td>'+c.bill.billIdx+'</td>';
+                h+='<td title="'+c.bill.billName+'">'+(c.bill.billName.length>20?c.bill.billName.substring(0,20)+'..':c.bill.billName)+'</td>';
+                h+='<td class="bm-js">'+c.bill._normalized+'</td>';
+                h+='<td class="bm-num">'+bmN(c.bill.totalAmount)+'</td>';
+                h+='<td>'+c.bill.payDate+'</td>';
+                h+='<td>'+(c.descOk?'<span class="bm-tag bm-tag--matched">O</span>':'<span class="bm-tag bm-tag--unmatched">X</span>')+'</td>';
+                h+='<td>'+(c.amtOk?'<span class="bm-tag bm-tag--matched">O</span>':'<span class="bm-tag bm-tag--unmatched">X</span>')+'</td>';
+                h+='<td class="bm-num">'+(c.amtDiff===0?'-':(c.bill.totalAmount>dep2.depositAmount?'+':'-')+bmN(c.amtDiff))+'</td></tr>';
+            });
+            h+='</tbody></table>';
+            if(cands2.length>20)h+='<span class="bm-dim">...외 '+(cands2.length-20)+'건</span>';
+            h+='</div>';
+        }
+    }
+
+    detail.innerHTML=h;panel.classList.remove('bm-hidden');
 }
 
 /* ===== Filters & Sort ===== */
