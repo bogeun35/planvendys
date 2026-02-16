@@ -1,14 +1,78 @@
 <!--
-title: NGR
-meta: 사내 서비스
+title: 서비스 링크
+meta: 최종 수정: 2026.02.16
 -->
 
 <style>
-.ngr-frame{
-    width:100%;
-    height:calc(100vh - 80px);
-    border:none;
+.sl-root { font-family: 'Noto Sans KR', sans-serif; color: #1a2332; font-size: 12px; line-height: 1.6; }
+.sl-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+.sl-sec { margin-bottom: 4px; }
+.sl-sec-title {
+    font-size: 11px; font-weight: 700; color: #4a90d9;
+    letter-spacing: 0.5px; margin: 0 0 6px 0;
+    padding-bottom: 4px; border-bottom: 1px solid #e2e8f0;
 }
+.sl-row { display: flex; align-items: baseline; gap: 6px; padding: 2px 0; }
+.sl-name { font-size: 12px; font-weight: 500; color: #1a2332; white-space: nowrap; }
+.sl-dash { color: #cbd5e1; font-size: 11px; }
+.sl-links { display: flex; gap: 6px; align-items: baseline; }
+.sl-links a {
+    font-size: 11px; font-family: 'JetBrains Mono', monospace;
+    text-decoration: none; padding: 0 4px; border-radius: 2px;
+    transition: background 0.12s;
+}
+.sl-links a:hover { text-decoration: underline; }
+.sl-dev { color: #d97706; }
+.sl-dev:hover { background: #fef3c7; }
+.sl-prod { color: #16a34a; }
+.sl-prod:hover { background: #dcfce7; }
+.sl-link { color: #4a90d9; }
+.sl-link:hover { background: #eef4fb; }
+.sl-na { color: #94a3b8; font-size: 11px; }
 </style>
 
-<iframe class="ngr-frame" src="https://vone.sikdae.com/" allow="clipboard-read; clipboard-write"></iframe>
+<div class="sl-root">
+    <div class="sl-cols">
+        <div class="sl-sec">
+            <div class="sl-sec-title">ADMIN</div>
+            <div class="sl-row"><span class="sl-name">Vone 통합관리</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="https://dev-vone.mealc.co.kr/" target="_blank">dev</a><a class="sl-prod" href="https://vone.sikdae.com/" target="_blank">prod</a></span></div>
+            <div class="sl-row"><span class="sl-name">NGR 관리자</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="https://dev-ngr.mealc.co.kr/" target="_blank">dev</a><a class="sl-prod" href="https://ngr.sikdae.com/" target="_blank">prod</a></span></div>
+            <div class="sl-row"><span class="sl-name">정산 시스템</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="https://dev-settlement-web.mealc.co.kr/" target="_blank">dev</a><a class="sl-prod" href="https://js.sikdae.com/" target="_blank">prod</a></span></div>
+        </div>
+
+        <div class="sl-sec">
+            <div class="sl-sec-title">STORE</div>
+            <div class="sl-row"><span class="sl-name">사장님 웹</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="https://dev-store.mealc.co.kr/" target="_blank">dev</a><a class="sl-prod" href="https://store.sikdae.com/" target="_blank">prod</a></span></div>
+            <div class="sl-row"><span class="sl-name">사장님 앱</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="https://dev-mstore.mealc.co.kr/" target="_blank">dev</a><a class="sl-prod" href="https://mstore.sikdae.com/" target="_blank">prod</a></span></div>
+            <div class="sl-row"><span class="sl-name">구내식당 바코드</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="https://dev-cafeteria.mealc.co.kr/" target="_blank">dev</a><a class="sl-prod" href="https://store-cafeteria.sikdae.com/" target="_blank">prod</a></span></div>
+        </div>
+
+        <div class="sl-sec">
+            <div class="sl-sec-title">COMPANY</div>
+            <div class="sl-row"><span class="sl-name">고객사 관리자</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="https://dev-corp.mealc.co.kr/" target="_blank">dev</a><a class="sl-prod" href="https://corp.sikdae.com/" target="_blank">prod</a></span></div>
+            <div class="sl-row"><span class="sl-name">APP 웹뷰 (홈)</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="http://dev-sm.mealc.co.kr" target="_blank">dev</a></span></div>
+            <div class="sl-row"><span class="sl-name">APP 웹뷰 (식품관)</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="http://dev-sm.mealc.co.kr/welfare" target="_blank">dev</a></span></div>
+            <div class="sl-row"><span class="sl-name">복지대장몰 랜딩</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="http://dev-sm.mealc.co.kr/ezwelWelfareMall" target="_blank">dev</a></span></div>
+            <div class="sl-row"><span class="sl-name">홍보 웹사이트</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="https://homepage.mealc.co.kr/" target="_blank">dev</a><a class="sl-prod" href="https://sikdae.com/" target="_blank">prod</a></span></div>
+        </div>
+
+        <div class="sl-sec">
+            <div class="sl-sec-title">ETC</div>
+            <div class="sl-row"><span class="sl-name">고객 매뉴얼 (Notion)</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-link" href="https://sikdae.notion.site/4d43de4b353049a0a9714066e4dc56f1" target="_blank">열기</a></span></div>
+            <div class="sl-row"><span class="sl-name">고객 매뉴얼 (Oopy)</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-link" href="https://vendyss.oopy.io/" target="_blank">열기</a></span></div>
+            <div class="sl-row"><span class="sl-name">GR 관리자</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-dev" href="https://dev-gr.mealc.co.kr/mealcoupon/admin/" target="_blank">dev</a><a class="sl-prod" href="https://gr.sikdae.com/mealcoupon/admin/" target="_blank">prod</a></span></div>
+        </div>
+    </div>
+
+    <div class="sl-sec" style="margin-top:12px;">
+        <div class="sl-sec-title">WORK</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0 24px;">
+            <div class="sl-row"><span class="sl-name">Datadog</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-link" href="https://app.datadoghq.com/logs" target="_blank">열기</a></span></div>
+            <div class="sl-row"><span class="sl-name">Google Analytics</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-link" href="https://analytics.google.com/" target="_blank">열기</a></span></div>
+            <div class="sl-row"><span class="sl-name">Redash</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-link" href="https://redash.sikdae.com/" target="_blank">열기</a></span></div>
+            <div class="sl-row"><span class="sl-name">Swagger API</span><span class="sl-dash">-</span><span class="sl-links"><a class="sl-link" href="https://api-docs.mealc.co.kr/" target="_blank">열기</a></span></div>
+            <div class="sl-row"><span class="sl-name">Confluence</span><span class="sl-dash">-</span><span class="sl-na">링크 미등록</span></div>
+            <div class="sl-row"><span class="sl-name">JIRA</span><span class="sl-dash">-</span><span class="sl-na">링크 미등록</span></div>
+        </div>
+    </div>
+</div>
