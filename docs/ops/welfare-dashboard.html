@@ -121,8 +121,8 @@ var _wf = {
     PROXY_URL: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
     rawData: [], filteredData: [], sortCol: 'totalAmount', sortDir: 'desc', selectedCompany: null
 };
-function wfProxyGet(u){return fetch(_wf.PROXY_URL+'?url='+encodeURIComponent(u)).then(function(r){return r.json()})}
-function wfProxyPost(u,b){return fetch(_wf.PROXY_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({url:u,body:b})}).then(function(r){return r.json()})}
+function wfProxyGet(u){return fetch(_wf.PROXY_URL+'?url='+encodeURIComponent(u),{redirect:'follow'}).then(function(r){return r.json()})}
+function wfProxyPost(u,b){return fetch(_wf.PROXY_URL+'?url='+encodeURIComponent(u)+'&body='+encodeURIComponent(JSON.stringify(b))+'&method=post',{redirect:'follow'}).then(function(r){return r.json()})}
 function wfFmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function wfLastDay(y,m){return new Date(y,m,0).getDate()}
 function wfSetRange(key,el){var now=new Date(),y=now.getFullYear(),m=now.getMonth(),s,e;switch(key){case'today':s=e=wfFmtDate(now);break;case'thisMonth':s=y+'-'+String(m+1).padStart(2,'0')+'-01';e=y+'-'+String(m+1).padStart(2,'0')+'-'+String(wfLastDay(y,m+1)).padStart(2,'0');break;case'lastMonth':var lm=m===0?11:m-1,ly=m===0?y-1:y;s=ly+'-'+String(lm+1).padStart(2,'0')+'-01';e=ly+'-'+String(lm+1).padStart(2,'0')+'-'+String(wfLastDay(ly,lm+1)).padStart(2,'0');break;case'twoMonthsAgo':var tm=m-2,ty=y;if(tm<0){tm+=12;ty--}s=ty+'-'+String(tm+1).padStart(2,'0')+'-01';e=ty+'-'+String(tm+1).padStart(2,'0')+'-'+String(wfLastDay(ty,tm+1)).padStart(2,'0');break;case'thisYear':s=y+'-01-01';e=y+'-12-31';break;case'lastYear':s=(y-1)+'-01-01';e=(y-1)+'-12-31';break}document.getElementById('wfStartDate').value=s;document.getElementById('wfEndDate').value=e;var bs=document.querySelectorAll('.wf-dash__hot');for(var i=0;i<bs.length;i++)bs[i].classList.remove('active');if(el)el.classList.add('active')}
