@@ -41,7 +41,7 @@ meta: 최종 수정: 2026.02.16
 .sk-plog { margin-top: 6px; font-size: 11px; color: #4a5568; max-height: 60px; overflow-y: auto; line-height: 1.6; }
 
 /* 서머리 카드 */
-.sk-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 12px 0; }
+.sk-cards { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 12px 0; }
 .sk-card {
     background: #f8fafd; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px 12px;
 }
@@ -133,10 +133,12 @@ meta: 최종 수정: 2026.02.16
     <!-- 서머리 카드 -->
     <div class="sk-cards" id="skCards" style="display:none;">
         <div class="sk-card"><div class="sk-card__label">총 건수</div><div class="sk-card__value" id="skC1">-</div></div>
+        <div class="sk-card"><div class="sk-card__label">사용자 수</div><div class="sk-card__value" id="skC4">-</div></div>
+        <div class="sk-card"><div class="sk-card__label">부서1</div><div class="sk-card__value" id="skC6">-</div></div>
+        <div class="sk-card"><div class="sk-card__label">부서2</div><div class="sk-card__value" id="skC5">-</div></div>
+        <div class="sk-card"><div class="sk-card__label">선택 정책 사용식대</div><div class="sk-card__value" id="skC7">-</div></div>
         <div class="sk-card"><div class="sk-card__label">총 결제총액</div><div class="sk-card__value" id="skC2">-</div></div>
         <div class="sk-card"><div class="sk-card__label">총 정산금액</div><div class="sk-card__value" id="skC3">-</div></div>
-        <div class="sk-card"><div class="sk-card__label">사용자 수</div><div class="sk-card__value" id="skC4">-</div></div>
-        <div class="sk-card"><div class="sk-card__label">부서2 수</div><div class="sk-card__value" id="skC5">-</div></div>
     </div>
 
     <!-- 2단 레이아웃 -->
@@ -232,24 +234,23 @@ function skApi(params) {
     var qs = Object.keys(params).map(function(k) {
         return k + '=' + encodeURIComponent(params[k]);
     }).join('&');
-    return fetch(SK.PROXY + '?' + qs, { redirect: 'follow' }).then(function(r) { return r.json(); });
+    var url = SK.PROXY + '?' + qs;
+    console.log('[skApi] URL:', url);
+    return fetch(url, { redirect: 'follow' }).then(function(r) { return r.json(); });
 }
 
-/* ── 단일 날짜 조회 + 폴링 ── */
-async function skFetchDay(dateStr, comid) {
+/* ── 구간 조회 (startdate~enddate) + 폴링 ── */
+async function skFetchChunk(sd, ed, comid) {
     var d = await skApi({
         action: 'post', queryId: SK.QID,
-        startdate: dateStr, enddate: dateStr, comid: comid
+        startdate: sd, enddate: ed, comid: comid
     });
-    console.log('[skFetchDay] ' + dateStr, JSON.stringify(d).substring(0, 300));
-    // 즉시 결과
+    console.log('[skFetchChunk] ' + sd + '~' + ed, JSON.stringify(d).substring(0, 300));
     if (d.query_result && d.query_result.data) return d.query_result.data.rows || [];
-    // job 비동기
     var jobId = d.job && (d.job.id || d.job.job_id);
     if (!jobId && d.job_id) jobId = d.job_id;
     if (jobId && jobId !== 'undefined') return await skPollJob(jobId);
-    // 응답 구조 알 수 없음
-    console.warn('[skFetchDay] 알 수 없는 응답:', JSON.stringify(d));
+    console.warn('[skFetchChunk] 알 수 없는 응답:', JSON.stringify(d));
     throw new Error('알 수 없는 응답 구조');
 }
 
@@ -308,6 +309,7 @@ async function skFetch() {
     var ed = document.getElementById('skEnd').value;
     var comid = document.getElementById('skComid').value.trim();
     if (!sd || !ed || !comid) { alert('comid, 시작일, 종료일을 입력하세요.'); SK.fetching = false; return; }
+    if (skDaysBetween(sd, ed) > 185) { alert('최대 조회 기간은 185일입니다.'); SK.fetching = false; return; }
 
     var fetchBtn = document.getElementById('skFetchBtn');
     var stopBtn = document.getElementById('skStopBtn');
@@ -327,40 +329,46 @@ async function skFetch() {
     ptext.textContent = '0%';
     plog.innerHTML = '';
 
-    var totalDays = skDaysBetween(sd, ed);
-    var statusEl = document.getElementById('skStatus');
+    // 7일 청크 생성
+    var chunks = [];
     var cur = sd;
-    var dayIdx = 0;
+    while (cur <= ed) {
+        var chunkEnd = skAddDays(cur, 6); // 7일간
+        if (chunkEnd > ed) chunkEnd = ed;
+        chunks.push({ s: cur, e: chunkEnd });
+        cur = skAddDays(chunkEnd, 1);
+    }
+
+    var statusEl = document.getElementById('skStatus');
     var errors = [];
 
-    while (cur <= ed) {
+    for (var ci = 0; ci < chunks.length; ci++) {
         if (SK.aborted) {
             plog.innerHTML += '<span style="color:#d49a2a">사용자 중단</span><br>';
             break;
         }
-        dayIdx++;
-        var pct = Math.round((dayIdx / totalDays) * 100);
+        var chunk = chunks[ci];
+        var pct = Math.round(((ci + 1) / chunks.length) * 100);
         pbar.style.width = pct + '%';
-        ptext.textContent = cur + ' (' + pct + '%)';
-        statusEl.textContent = cur + ' 조회 중... (' + SK.raw.length.toLocaleString() + '건)';
+        ptext.textContent = chunk.s + ' ~ ' + chunk.e + ' (' + pct + '%)';
+        statusEl.textContent = chunk.s + '~' + chunk.e + ' 조회 중... (' + SK.raw.length.toLocaleString() + '건)';
 
         try {
-            var rows = await skFetchDay(cur, comid);
+            var rows = await skFetchChunk(chunk.s, chunk.e, comid);
             if (rows.length > 0) {
                 SK.raw = SK.raw.concat(rows);
-                plog.innerHTML += cur + ': ' + rows.length.toLocaleString() + '건<br>';
+                plog.innerHTML += chunk.s + '~' + chunk.e + ': ' + rows.length.toLocaleString() + '건<br>';
             }
         } catch(err) {
-            errors.push(cur);
-            plog.innerHTML += '<span style="color:#e85d5d">' + cur + ': 실패 (' + err.message + ')</span><br>';
+            errors.push(chunk.s + '~' + chunk.e);
+            plog.innerHTML += '<span style="color:#e85d5d">' + chunk.s + '~' + chunk.e + ': 실패 (' + err.message + ')</span><br>';
         }
         plog.scrollTop = plog.scrollHeight;
-        cur = skAddDays(cur, 1);
     }
 
     pbar.style.width = '100%';
     ptext.textContent = '완료 - ' + SK.raw.length.toLocaleString() + '건' + (SK.aborted ? ' (중단됨)' : '');
-    statusEl.textContent = SK.raw.length.toLocaleString() + '건 조회 완료' + (errors.length ? ' (실패 ' + errors.length + '일)' : '') + (SK.aborted ? ' [중단]' : '');
+    statusEl.textContent = SK.raw.length.toLocaleString() + '건 조회 완료' + (errors.length ? ' (실패 ' + errors.length + '구간)' : '') + (SK.aborted ? ' [중단]' : '');
 
     if (SK.raw.length > 0) skProcess();
     fetchBtn.disabled = false;
@@ -373,26 +381,38 @@ async function skFetch() {
 function skProcess() {
     if (SK.raw.length === 0) return;
 
-    // 부서2별 그룹핑
+    // 날짜 T 제거 (2026-02-02T06:39:35 → 2026-02-02)
+    SK.raw.forEach(function(r) {
+        if (r['날짜'] && String(r['날짜']).indexOf('T') >= 0) {
+            r['날짜'] = String(r['날짜']).split('T')[0];
+        }
+    });
+
+    // 그룹핑 + 집계
     SK.deptMap = {};
-    var userSet = new Set();
-    var totalPrice = 0, totalSettle = 0;
+    var userSet = new Set(), dept1Set = new Set(), dept2Set = new Set();
+    var totalPrice = 0, totalSettle = 0, totalCompoint = 0;
     SK.raw.forEach(function(r) {
         var dept2 = String(r['부서2'] || '(미지정)');
         if (!SK.deptMap[dept2]) SK.deptMap[dept2] = [];
         SK.deptMap[dept2].push(r);
         userSet.add(String(r['ID'] || r['사원번호'] || ''));
+        if (r['부서1']) dept1Set.add(String(r['부서1']));
+        if (r['부서2']) dept2Set.add(String(r['부서2']));
         totalPrice += Number(r['총 결제총액']) || 0;
         totalSettle += Number(r['정산금액']) || 0;
+        totalCompoint += Number(r['선택 정책 사용식대']) || 0;
     });
     SK.deptList = Object.keys(SK.deptMap).sort();
 
     // 서머리
     document.getElementById('skC1').textContent = SK.raw.length.toLocaleString() + '건';
+    document.getElementById('skC4').textContent = userSet.size.toLocaleString() + '명';
+    document.getElementById('skC6').textContent = dept1Set.size + '개';
+    document.getElementById('skC5').textContent = dept2Set.size + '개';
+    document.getElementById('skC7').textContent = skS(totalCompoint);
     document.getElementById('skC2').textContent = skS(totalPrice);
     document.getElementById('skC3').textContent = skS(totalSettle);
-    document.getElementById('skC4').textContent = userSet.size.toLocaleString() + '명';
-    document.getElementById('skC5').textContent = SK.deptList.length + '개';
     document.getElementById('skCards').style.display = 'grid';
 
     // 부서 리스트 렌더
