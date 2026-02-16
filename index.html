@@ -9,642 +9,541 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <style>
     :root {
-      --bg-primary: #0a0a0a;
-      --bg-secondary: #111111;
-      --bg-tertiary: #1a1a1a;
-      --bg-hover: #222222;
-      --border: #2a2a2a;
-      --border-active: #3a3a3a;
-      --text-primary: #e8e8e8;
-      --text-secondary: #888888;
-      --text-muted: #555555;
-      --accent: #4a9eff;
-      --accent-dim: rgba(74, 158, 255, 0.08);
-      --danger: #ff4a4a;
-      --sidebar-w: 280px;
+      --bg-primary: #09090b;
+      --bg-secondary: #0f0f11;
+      --bg-tertiary: #18181b;
+      --bg-hover: #1f1f23;
+      --bg-active: #27272a;
+      --border: #27272a;
+      --border-subtle: #1e1e21;
+      --text-primary: #e4e4e7;
+      --text-secondary: #a1a1aa;
+      --text-muted: #52525b;
+      --accent: #60a5fa;
+      --accent-dim: rgba(96, 165, 250, 0.07);
+      --accent-border: rgba(96, 165, 250, 0.15);
+      --danger: #f87171;
+      --gnb-h: 48px;
+      --lnb-w: 260px;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      height: 100vh;
-      overflow: hidden;
+      font-family: 'Noto Sans KR', -apple-system, sans-serif;
+      background: var(--bg-primary); color: var(--text-primary);
+      height: 100vh; overflow: hidden; font-size: 13px;
     }
 
-    /* ─── LOGIN SCREEN ─── */
-    .login-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: var(--bg-primary);
-    }
-
-    .login-card {
-      text-align: center;
-      padding: 48px;
-      max-width: 380px;
-      width: 100%;
-    }
-
-    .login-logo {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-
-    .login-title {
-      font-size: 22px;
-      font-weight: 300;
-      color: var(--text-primary);
-      margin-bottom: 40px;
-      letter-spacing: -0.3px;
-    }
-
+    /* ═══ LOGIN ═══ */
+    .login-screen { display:flex; align-items:center; justify-content:center; height:100vh; }
+    .login-card { text-align:center; padding:48px; max-width:360px; }
+    .login-logo { font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+    .login-title { font-size:20px; font-weight:300; color:var(--text-primary); margin-bottom:36px; }
     .login-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 28px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-primary);
-      font-size: 14px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      display:inline-flex; align-items:center; gap:10px; padding:11px 24px;
+      background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px;
+      color:var(--text-primary); font-size:13px; font-family:inherit; cursor:pointer; transition:all 0.15s;
     }
+    .login-btn:hover { background:var(--bg-hover); }
+    .login-btn svg { width:16px; height:16px; }
+    .login-notice { margin-top:20px; font-size:11px; color:var(--text-muted); }
+    .login-error { margin-top:14px; padding:9px 14px; background:rgba(248,113,113,0.06); border:1px solid rgba(248,113,113,0.15); border-radius:5px; font-size:12px; color:var(--danger); display:none; }
 
-    .login-btn:hover {
-      background: var(--bg-hover);
-      border-color: var(--border-active);
+    .loading { display:flex; align-items:center; justify-content:center; height:100vh; }
+    .spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .5s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ═══ GNB ═══ */
+    .gnb {
+      display:none; height:var(--gnb-h); background:var(--bg-secondary);
+      border-bottom:1px solid var(--border); padding:0 20px;
+      align-items:center; justify-content:space-between;
+      position:fixed; top:0; left:0; right:0; z-index:100;
     }
+    .gnb.active { display:flex; }
+    .gnb-left { display:flex; align-items:center; gap:16px; }
+    .gnb-brand { font-size:12px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--text-secondary); }
+    .gnb-sep { width:1px; height:16px; background:var(--border); }
+    .gnb-tabs { display:flex; gap:2px; }
+    .gnb-tab { padding:6px 12px; border-radius:4px; font-size:12px; color:var(--text-muted); cursor:pointer; transition:all .1s; }
+    .gnb-tab:hover { color:var(--text-secondary); background:var(--bg-hover); }
+    .gnb-tab.active { color:var(--text-primary); background:var(--bg-tertiary); }
+    .gnb-right { display:flex; align-items:center; gap:12px; }
 
-    .login-btn svg { width: 18px; height: 18px; }
-
-    .login-notice {
-      margin-top: 24px;
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.6;
+    /* ═══ SEARCH ═══ */
+    .search-box { position:relative; width:220px; }
+    .search-input {
+      width:100%; padding:6px 10px 6px 30px; background:var(--bg-tertiary);
+      border:1px solid var(--border); border-radius:5px; color:var(--text-primary);
+      font-size:12px; font-family:inherit; outline:none; transition:border-color .15s;
     }
+    .search-input::placeholder { color:var(--text-muted); }
+    .search-input:focus { border-color:var(--accent-border); }
+    .search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-muted); pointer-events:none; }
+    .search-kbd { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--text-muted); background:var(--bg-hover); padding:1px 5px; border-radius:3px; border:1px solid var(--border); }
+    .search-results { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px; max-height:280px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:200; }
+    .search-results.open { display:block; }
+    .search-result-item { padding:8px 12px; cursor:pointer; transition:background .1s; border-bottom:1px solid var(--border-subtle); }
+    .search-result-item:last-child { border-bottom:none; }
+    .search-result-item:hover { background:var(--bg-hover); }
+    .search-result-title { font-size:12px; color:var(--text-primary); font-weight:500; }
+    .search-result-path { font-size:10px; color:var(--text-muted); margin-top:2px; }
+    .search-result-snippet { font-size:11px; color:var(--text-muted); margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .search-result-snippet mark { background:rgba(96,165,250,.2); color:var(--accent); border-radius:1px; padding:0 1px; }
+    .search-empty { padding:16px 12px; text-align:center; font-size:12px; color:var(--text-muted); }
 
-    .login-error {
-      margin-top: 16px;
-      padding: 10px 16px;
-      background: rgba(255, 74, 74, 0.08);
-      border: 1px solid rgba(255, 74, 74, 0.2);
-      border-radius: 6px;
-      font-size: 13px;
-      color: var(--danger);
-      display: none;
-    }
+    .gnb-user { display:flex; align-items:center; gap:8px; padding:4px 8px; border-radius:4px; cursor:pointer; transition:background .1s; position:relative; }
+    .gnb-user:hover { background:var(--bg-hover); }
+    .gnb-avatar { width:24px; height:24px; border-radius:50%; background:var(--bg-active); overflow:hidden; }
+    .gnb-avatar img { width:100%; height:100%; object-fit:cover; }
+    .gnb-username { font-size:12px; color:var(--text-secondary); }
+    .user-menu { display:none; position:absolute; top:calc(100% + 6px); right:0; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px; min-width:140px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:200; }
+    .user-menu.open { display:block; }
+    .user-menu-item { padding:8px 14px; font-size:12px; color:var(--text-secondary); cursor:pointer; transition:all .1s; }
+    .user-menu-item:hover { background:var(--bg-hover); color:var(--text-primary); }
+    .user-menu-item.danger { color:var(--danger); }
+    .user-menu-item.danger:hover { background:rgba(248,113,113,.06); }
 
-    /* ─── APP LAYOUT ─── */
-    .app {
-      display: none;
-      height: 100vh;
-    }
+    /* ═══ MAIN LAYOUT ═══ */
+    .main-layout { display:none; margin-top:var(--gnb-h); height:calc(100vh - var(--gnb-h)); }
+    .main-layout.active { display:grid; grid-template-columns:var(--lnb-w) 1fr; }
 
-    .app.active {
-      display: grid;
-      grid-template-columns: var(--sidebar-w) 1fr;
-    }
+    /* ═══ LNB ═══ */
+    .lnb { background:var(--bg-secondary); border-right:1px solid var(--border); display:flex; flex-direction:column; height:calc(100vh - var(--gnb-h)); overflow:hidden; }
+    .lnb-header { padding:14px 14px 10px; border-bottom:1px solid var(--border-subtle); flex-shrink:0; }
+    .lnb-section-title { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
+    .lnb-tree { flex:1; overflow-y:auto; padding:6px 8px; }
+    .lnb-tree::-webkit-scrollbar { width:3px; }
+    .lnb-tree::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-    /* ─── SIDEBAR ─── */
-    .sidebar {
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
+    .tree-item { border-radius:4px; }
+    .tree-row { display:flex; align-items:center; gap:4px; padding:5px 8px; border-radius:4px; cursor:pointer; transition:all .08s; font-size:13px; color:var(--text-secondary); }
+    .tree-row:hover { background:var(--bg-hover); color:var(--text-primary); }
+    .tree-row.active { background:var(--accent-dim); color:var(--accent); }
+    .tree-toggle { width:16px; height:16px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--text-muted); transition:transform .15s; }
+    .tree-toggle.expanded { transform:rotate(90deg); }
+    .tree-toggle.hidden { visibility:hidden; }
+    .tree-icon { width:14px; height:14px; flex-shrink:0; color:var(--text-muted); opacity:.6; }
+    .tree-row.active .tree-icon { color:var(--accent); opacity:1; }
+    .tree-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .tree-children { display:none; padding-left:16px; }
+    .tree-children.open { display:block; }
 
-    .sidebar-header {
-      padding: 20px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
+    /* ═══ CONTENT ═══ */
+    .content-area { height:calc(100vh - var(--gnb-h)); overflow-y:auto; padding:36px 52px 60px; }
+    .content-area::-webkit-scrollbar { width:4px; }
+    .content-area::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
 
-    .sidebar-brand {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 2px;
-    }
+    .breadcrumb { display:flex; align-items:center; gap:6px; margin-bottom:20px; font-size:12px; }
+    .breadcrumb-item { color:var(--text-muted); cursor:pointer; transition:color .1s; }
+    .breadcrumb-item:hover { color:var(--text-secondary); }
+    .breadcrumb-item.current { color:var(--text-secondary); cursor:default; }
+    .breadcrumb-sep { color:var(--text-muted); font-size:10px; }
 
-    .sidebar-subtitle {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
+    .doc-title { font-size:24px; font-weight:600; letter-spacing:-.5px; margin-bottom:6px; }
+    .doc-meta { font-size:11px; color:var(--text-muted); margin-bottom:28px; padding-bottom:16px; border-bottom:1px solid var(--border-subtle); }
+    .doc-body h2 { font-size:16px; font-weight:600; margin:28px 0 10px; color:var(--text-primary); }
+    .doc-body h3 { font-size:14px; font-weight:600; margin:20px 0 8px; color:var(--text-primary); }
+    .doc-body p { font-size:13.5px; line-height:1.8; color:var(--text-secondary); margin-bottom:12px; }
+    .doc-body code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--bg-tertiary); border:1px solid var(--border); padding:1px 5px; border-radius:3px; color:var(--accent); }
+    .doc-body pre { background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin:14px 0; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.65; color:var(--text-secondary); }
+    .doc-body ul,.doc-body ol { padding-left:20px; margin-bottom:12px; }
+    .doc-body li { font-size:13.5px; line-height:1.8; color:var(--text-secondary); margin-bottom:3px; }
+    .doc-body .callout { padding:12px 16px; background:var(--accent-dim); border-left:3px solid var(--accent); border-radius:0 5px 5px 0; margin:14px 0; font-size:13px; color:var(--text-secondary); line-height:1.65; }
+    .doc-body .callout-warn { padding:12px 16px; background:rgba(250,204,21,.05); border-left:3px solid #facc15; border-radius:0 5px 5px 0; margin:14px 0; font-size:13px; color:var(--text-secondary); line-height:1.65; }
+    .doc-body table { width:100%; border-collapse:collapse; margin:14px 0; font-size:13px; }
+    .doc-body th { text-align:left; padding:8px 12px; background:var(--bg-tertiary); border:1px solid var(--border); color:var(--text-primary); font-weight:500; }
+    .doc-body td { padding:8px 12px; border:1px solid var(--border); color:var(--text-secondary); }
 
-    .sidebar-nav {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px 10px;
-    }
-
-    .sidebar-nav::-webkit-scrollbar { width: 3px; }
-    .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
-    .sidebar-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    .nav-section {
-      margin-bottom: 8px;
-    }
-
-    .nav-section-title {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      padding: 8px 10px 6px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 5px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.1s ease;
-      line-height: 1.4;
-    }
-
-    .nav-item:hover {
-      background: var(--bg-hover);
-      color: var(--text-primary);
-    }
-
-    .nav-item.active {
-      background: var(--accent-dim);
-      color: var(--accent);
-    }
-
-    .nav-item .icon {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      opacity: 0.5;
-    }
-
-    .nav-item.active .icon { opacity: 1; }
-
-    .sidebar-footer {
-      padding: 14px 16px;
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .user-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border);
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-
-    .user-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .user-name {
-      font-size: 12px;
-      color: var(--text-secondary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .logout-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 4px;
-      transition: color 0.15s;
-      flex-shrink: 0;
-    }
-
-    .logout-btn:hover { color: var(--danger); }
-
-    /* ─── CONTENT ─── */
-    .content {
-      height: 100vh;
-      overflow-y: auto;
-      padding: 40px 56px;
-    }
-
-    .content::-webkit-scrollbar { width: 4px; }
-    .content::-webkit-scrollbar-track { background: transparent; }
-    .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-    .doc-header {
-      margin-bottom: 32px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .doc-title {
-      font-size: 26px;
-      font-weight: 600;
-      letter-spacing: -0.5px;
-      margin-bottom: 6px;
-    }
-
-    .doc-meta {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .doc-body h2 {
-      font-size: 17px;
-      font-weight: 600;
-      margin: 28px 0 12px;
-      color: var(--text-primary);
-    }
-
-    .doc-body p {
-      font-size: 14px;
-      line-height: 1.75;
-      color: var(--text-secondary);
-      margin-bottom: 14px;
-    }
-
-    .doc-body code {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12.5px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border);
-      padding: 2px 6px;
-      border-radius: 3px;
-      color: var(--accent);
-    }
-
-    .doc-body pre {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 16px 20px;
-      margin: 16px 0;
-      overflow-x: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12.5px;
-      line-height: 1.6;
-      color: var(--text-secondary);
-    }
-
-    .doc-body ul {
-      padding-left: 20px;
-      margin-bottom: 14px;
-    }
-
-    .doc-body li {
-      font-size: 14px;
-      line-height: 1.75;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-    }
-
-    .doc-body .callout {
-      padding: 14px 18px;
-      background: var(--accent-dim);
-      border-left: 3px solid var(--accent);
-      border-radius: 0 6px 6px 0;
-      margin: 16px 0;
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-
-    /* ─── LOADING ─── */
-    .loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: var(--bg-primary);
-    }
-
-    .spinner {
-      width: 24px;
-      height: 24px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .child-pages { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-top:20px; }
+    .child-page-card { padding:14px 16px; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:6px; cursor:pointer; transition:all .12s; }
+    .child-page-card:hover { border-color:var(--accent-border); background:var(--bg-hover); }
+    .child-page-card-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:4px; }
+    .child-page-card-desc { font-size:11px; color:var(--text-muted); line-height:1.4; }
   </style>
 </head>
 <body>
+  <div class="loading" id="loading"><div class="spinner"></div></div>
 
-  <!-- LOADING -->
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-  </div>
-
-  <!-- LOGIN -->
   <div class="login-screen" id="loginScreen" style="display:none">
     <div class="login-card">
       <div class="login-logo">Vendys</div>
       <div class="login-title">Internal Documentation</div>
       <button class="login-btn" onclick="signIn()">
         <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Google로 로그인
+        Google 계정으로 로그인
       </button>
       <div class="login-notice">@vendys.co.kr 계정만 접근 가능합니다</div>
       <div class="login-error" id="loginError"></div>
     </div>
   </div>
 
-  <!-- APP -->
-  <div class="app" id="app">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-brand">Vendys Docs</div>
-        <div class="sidebar-subtitle">Internal Documentation</div>
+  <header class="gnb" id="gnb">
+    <div class="gnb-left">
+      <div class="gnb-brand">Vendys Docs</div>
+      <div class="gnb-sep"></div>
+      <div class="gnb-tabs" id="gnbTabs"></div>
+    </div>
+    <div class="gnb-right">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="searchInput" type="text" placeholder="검색..." autocomplete="off">
+        <span class="search-kbd">/</span>
+        <div class="search-results" id="searchResults"></div>
       </div>
-
-      <nav class="sidebar-nav">
-        <div class="nav-section">
-          <div class="nav-section-title">Getting Started</div>
-          <div class="nav-item active" data-doc="welcome">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-            시작하기
-          </div>
-          <div class="nav-item" data-doc="setup">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-            환경 설정
-          </div>
+      <div class="gnb-user" id="gnbUser" onclick="toggleUserMenu()">
+        <div class="gnb-avatar" id="gnbAvatar"></div>
+        <span class="gnb-username" id="gnbUsername"></span>
+        <div class="user-menu" id="userMenu">
+          <div class="user-menu-item" id="userEmail" style="pointer-events:none;color:var(--text-muted);font-size:11px;"></div>
+          <div class="user-menu-item danger" onclick="signOut()">로그아웃</div>
         </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Services</div>
-          <div class="nav-item" data-doc="sikgwon">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
-            식권대장
-          </div>
-          <div class="nav-item" data-doc="bokji">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
-            복지대장
-          </div>
-          <div class="nav-item" data-doc="quick">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            퀵대장
-          </div>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Development</div>
-          <div class="nav-item" data-doc="api">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            API 가이드
-          </div>
-          <div class="nav-item" data-doc="db">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-            DB 스키마
-          </div>
-        </div>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar" id="userAvatar"></div>
-          <span class="user-name" id="userName"></span>
-        </div>
-        <button class="logout-btn" onclick="signOut()" title="로그아웃">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        </button>
       </div>
+    </div>
+  </header>
+
+  <div class="main-layout" id="mainLayout">
+    <aside class="lnb">
+      <div class="lnb-header"><div class="lnb-section-title" id="lnbTitle">문서</div></div>
+      <div class="lnb-tree" id="lnbTree"></div>
     </aside>
-
-    <main class="content" id="content"></main>
+    <main class="content-area" id="contentArea"></main>
   </div>
 
-  <script>
-    // ══════════════════════════════════════════════
-    //  Firebase 설정 (본인의 Firebase 프로젝트 값으로 교체)
-    // ══════════════════════════════════════════════
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-    };
+<script>
+// ═══════════════════════════════════════════════
+//  FIREBASE (본인 프로젝트 값으로 교체)
+// ═══════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyAQE9oQRDUmeX6ZPO2KOcfd1ctBqt6v34w",
+  authDomain: "vendys-b1fea.firebaseapp.com",
+  projectId: "vendys-b1fea",
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const ALLOWED_DOMAIN = "vendys.co.kr";
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const ALLOWED_DOMAIN = "vendys.co.kr";
-
-    // ══════════════════════════════════════════════
-    //  문서 데이터 (Markdown 대신 간단한 HTML 데이터)
-    // ══════════════════════════════════════════════
-    const docs = {
-      welcome: {
-        title: "시작하기",
-        meta: "최종 수정: 2025.02.16",
-        body: `
-          <p>Vendys 내부 문서에 오신 것을 환영합니다. 이 사이트는 서비스 기획, 개발, 운영에 필요한 핵심 문서를 관리합니다.</p>
-          <div class="callout">이 문서는 @vendys.co.kr 계정으로 인증된 사용자만 열람할 수 있습니다.</div>
-          <h2>문서 구조</h2>
-          <p>좌측 사이드바에서 카테고리별로 문서를 탐색할 수 있습니다. Getting Started에서 기본 환경 설정을, Services에서 각 서비스별 상세 문서를, Development에서 기술 문서를 확인하세요.</p>
-          <h2>문서 편집</h2>
-          <p>모든 문서는 GitHub 저장소에서 관리됩니다. 수정이 필요한 경우 해당 파일을 직접 편집하거나 PR을 생성해주세요.</p>
-          <pre>git clone https://github.com/vendys/internal-docs.git
-cd internal-docs
-# 문서 수정 후
-git add . && git commit -m "docs: update"
-git push origin main</pre>
-        `
-      },
-      setup: {
-        title: "환경 설정",
-        meta: "최종 수정: 2025.02.10",
-        body: `
-          <p>개발 및 운영 환경 설정에 필요한 가이드입니다.</p>
-          <h2>필수 도구</h2>
-          <ul>
-            <li>Git 2.40+</li>
-            <li>Node.js 20 LTS</li>
-            <li>Docker Desktop</li>
-          </ul>
-          <h2>VPN 접속</h2>
-          <p>내부 서버 접근을 위해 VPN 설정이 필요합니다. IT팀에 VPN 계정을 요청한 후 아래 설정을 적용하세요.</p>
-          <pre>Server: vpn.vendys.co.kr
-Protocol: WireGuard
-Config: IT팀에서 발급받은 .conf 파일 사용</pre>
-        `
-      },
-      sikgwon: {
-        title: "식권대장",
-        meta: "최종 수정: 2025.02.14",
-        body: `
-          <p>식권대장 서비스의 기획/운영 문서입니다.</p>
+// ═══════════════════════════════════════════════
+//  PAGE DATA - 여기에 페이지를 추가하면 자동 반영
+//
+//  children 배열 안에 또 children을 넣으면
+//  무한 depth로 트리가 생성됩니다.
+// ═══════════════════════════════════════════════
+const SECTIONS = [
+  {
+    tab: "서비스",
+    pages: [
+      {
+        id: "sikgwon", title: "식권대장", icon: "folder",
+        desc: "모바일 식권 서비스", meta: "최종 수정: 2025.02.16",
+        body: `<p>식권대장 서비스의 기획/운영 종합 문서입니다.</p>
           <h2>서비스 개요</h2>
-          <p>기업 고객에게 모바일 식권 발급, 사용, 정산까지 원스톱으로 제공하는 B2B 서비스입니다.</p>
-          <h2>주요 기능</h2>
-          <ul>
-            <li>모바일 식권 발급 및 QR 결제</li>
-            <li>식당 가맹점 관리</li>
-            <li>기업 관리자 대시보드</li>
-            <li>정산 및 리포트</li>
-          </ul>
-          <div class="callout">상세 API 문서는 Development > API 가이드를 참고하세요.</div>
-        `
+          <p>기업 고객에게 모바일 식권 발급, 사용, 정산까지 원스톱으로 제공하는 B2B 서비스입니다.</p>`,
+        children: [
+          {
+            id: "sikgwon-admin", title: "관리자 기능", icon: "doc",
+            desc: "기업 관리자 대시보드", meta: "최종 수정: 2025.02.15",
+            body: `<h2>관리자 대시보드</h2><p>기업 관리자가 식권 발급, 사용현황, 정산을 관리하는 화면입니다.</p>
+              <ul><li>임직원 등록/해지</li><li>식권 발급 및 한도 설정</li><li>월별 사용 리포트</li><li>정산 내역 조회</li></ul>`,
+            children: [
+              {
+                id: "sikgwon-admin-report", title: "리포트", icon: "doc",
+                desc: "정산/사용 리포트", meta: "최종 수정: 2025.02.14",
+                body: `<h2>리포트 기능</h2><p>월별, 부서별, 가맹점별 사용 현황을 다양한 포맷으로 제공합니다.</p>
+                  <table><tr><th>리포트</th><th>주기</th><th>포맷</th></tr>
+                  <tr><td>사용현황</td><td>일/주/월</td><td>Excel, PDF</td></tr>
+                  <tr><td>정산서</td><td>월</td><td>PDF</td></tr></table>`
+              }
+            ]
+          },
+          {
+            id: "sikgwon-app", title: "사용자 앱", icon: "doc",
+            desc: "임직원용 모바일 앱", meta: "최종 수정: 2025.02.13",
+            body: `<h2>사용자 앱</h2><p>임직원이 식권을 조회하고 QR 결제하는 모바일 앱입니다.</p>
+              <ul><li>홈 - 잔여 식권</li><li>QR 결제</li><li>사용 내역</li><li>주변 가맹점</li></ul>`
+          },
+          {
+            id: "sikgwon-store", title: "가맹점 관리", icon: "doc",
+            desc: "가맹점 등록/운영", meta: "최종 수정: 2025.02.10",
+            body: `<h2>가맹점 관리</h2><p>가맹점 등록, 상태 관리, 정산 프로세스를 다룹니다.</p>
+              <div class="callout">신규 가맹점 등록은 영업팀 승인 후 운영팀에서 처리합니다.</div>`
+          }
+        ]
       },
-      bokji: {
-        title: "복지대장",
-        meta: "최종 수정: 2025.02.12",
-        body: `
-          <p>복지대장은 기업 복지 포인트 관리 서비스입니다.</p>
-          <h2>서비스 구조</h2>
-          <p>기업이 임직원에게 복지 포인트를 부여하면, 임직원은 제휴 가맹점에서 자유롭게 사용할 수 있습니다. 카테고리별 한도 설정, 사용 내역 조회, 잔여 포인트 관리 등의 기능을 제공합니다.</p>
-        `
+      {
+        id: "bokji", title: "복지대장", icon: "folder",
+        desc: "기업 복지 포인트 서비스", meta: "최종 수정: 2025.02.12",
+        body: `<p>복지대장은 기업 복지 포인트 관리 서비스입니다.</p>`,
+        children: [
+          { id: "bokji-category", title: "카테고리 관리", icon: "doc", desc: "복지 카테고리 설정", meta: "최종 수정: 2025.02.11",
+            body: `<h2>카테고리 관리</h2><p>식비, 자기계발, 건강, 문화 등 카테고리별 한도를 설정합니다.</p>` }
+        ]
       },
-      quick: {
-        title: "퀵대장",
-        meta: "최종 수정: 2025.02.08",
-        body: `
-          <p>퀵대장은 기업 간 퀵 배송 서비스입니다.</p>
-          <h2>배송 프로세스</h2>
-          <p>주문 접수부터 배차, 픽업, 배송 완료까지의 전체 프로세스를 관리합니다. 실시간 위치 추적과 배송 상태 알림을 제공합니다.</p>
-        `
+      {
+        id: "quick", title: "퀵대장", icon: "folder",
+        desc: "기업 간 퀵 배송", meta: "최종 수정: 2025.02.08",
+        body: `<p>퀵대장은 기업 간 퀵 배송 서비스입니다.</p><h2>배송 프로세스</h2><p>주문 접수 > 배차 > 픽업 > 배송 완료</p>`
       },
-      api: {
-        title: "API 가이드",
-        meta: "최종 수정: 2025.02.15",
-        body: `
-          <p>내부 API 사용 가이드입니다.</p>
-          <h2>Base URL</h2>
-          <pre>Production: https://api.vendys.co.kr/v1
-Staging:    https://api-staging.vendys.co.kr/v1</pre>
-          <h2>인증</h2>
-          <p>모든 API 요청에 <code>Authorization: Bearer {token}</code> 헤더가 필요합니다.</p>
-          <h2>공통 응답 형식</h2>
-          <pre>{
-  "code": 200,
-  "message": "success",
-  "data": { ... }
-}</pre>
-        `
-      },
-      db: {
-        title: "DB 스키마",
-        meta: "최종 수정: 2025.02.13",
-        body: `
-          <p>주요 데이터베이스 스키마 문서입니다.</p>
-          <h2>데이터베이스 구성</h2>
-          <ul>
-            <li><code>vendys_main</code> - 메인 서비스 DB</li>
-            <li><code>vendys_auth</code> - 인증/권한 DB</li>
-            <li><code>vendys_log</code> - 로그/분석 DB</li>
-          </ul>
-          <div class="callout">스키마 변경 시 반드시 DBA 팀 리뷰를 거쳐주세요. 마이그레이션 스크립트는 /migrations 디렉토리에서 관리합니다.</div>
-        `
+      {
+        id: "gift", title: "단체선물대장", icon: "folder",
+        desc: "기업 단체 선물 서비스", meta: "최종 수정: 2025.02.06",
+        body: `<p>기업 고객이 임직원, 거래처에 단체 선물을 발송하는 서비스입니다.</p>`
       }
-    };
+    ]
+  },
+  {
+    tab: "개발",
+    pages: [
+      {
+        id: "api-guide", title: "API 가이드", icon: "api",
+        desc: "내부 API 사용 가이드", meta: "최종 수정: 2025.02.15",
+        body: `<h2>Base URL</h2>
+          <pre>Production: https://api.vendys.co.kr/v1\nStaging:    https://api-stg.vendys.co.kr/v1</pre>
+          <h2>인증</h2><p>모든 요청에 <code>Authorization: Bearer {token}</code> 헤더가 필요합니다.</p>`,
+        children: [
+          { id: "api-sikgwon", title: "식권대장 API", icon: "api", desc: "식권 관련 엔드포인트", meta: "최종 수정: 2025.02.14",
+            body: `<h2>식권 발급</h2><pre>POST /vouchers/issue\n{\n  "company_id": "C001",\n  "amount": 8000\n}</pre>` },
+          { id: "api-auth", title: "인증 API", icon: "api", desc: "OAuth, 토큰 관리", meta: "최종 수정: 2025.02.13",
+            body: `<h2>토큰 발급</h2><pre>POST /auth/token\n{\n  "grant_type": "client_credentials"\n}</pre>
+              <div class="callout-warn">client_secret은 프론트엔드에 노출하지 마세요.</div>` }
+        ]
+      },
+      {
+        id: "db-schema", title: "DB 스키마", icon: "db",
+        desc: "데이터베이스 구조", meta: "최종 수정: 2025.02.13",
+        body: `<h2>DB 구성</h2>
+          <table><tr><th>DB명</th><th>용도</th><th>엔진</th></tr>
+          <tr><td><code>vendys_main</code></td><td>메인 서비스</td><td>MySQL 8.0</td></tr>
+          <tr><td><code>vendys_log</code></td><td>로그/분석</td><td>ClickHouse</td></tr></table>`
+      },
+      {
+        id: "dev-env", title: "개발 환경", icon: "doc",
+        desc: "로컬 환경 세팅", meta: "최종 수정: 2025.02.10",
+        body: `<h2>필수 도구</h2><ul><li>Git 2.40+</li><li>Node.js 20 LTS</li><li>Docker Desktop</li></ul>
+          <pre>git clone https://github.com/vendys/platform.git\ndocker-compose up -d\nnpm run dev</pre>`
+      }
+    ]
+  },
+  {
+    tab: "운영",
+    pages: [
+      {
+        id: "ops-guide", title: "운영 가이드", icon: "folder",
+        desc: "서비스 운영 매뉴얼", meta: "최종 수정: 2025.02.14",
+        body: `<p>서비스 운영에 필요한 매뉴얼과 프로세스입니다.</p>`,
+        children: [
+          { id: "ops-cs", title: "CS 대응 매뉴얼", icon: "doc", desc: "고객 문의 처리 가이드", meta: "최종 수정: 2025.02.13",
+            body: `<h2>CS 프로세스</h2><ol><li>인입 채널 확인</li><li>문의 유형 분류</li><li>1차 응대</li><li>2차 에스컬레이션</li><li>완료 피드백</li></ol>` },
+          { id: "ops-deploy", title: "배포 프로세스", icon: "doc", desc: "서비스 배포 절차", meta: "최종 수정: 2025.02.12",
+            body: `<h2>배포 절차</h2><pre>main 머지 → CI → Staging → QA → Prod 승인 → 배포</pre>
+              <div class="callout-warn">Production 배포는 팀장 승인 필수</div>` }
+        ]
+      },
+      {
+        id: "ops-monitoring", title: "모니터링", icon: "doc",
+        desc: "대시보드 및 알림", meta: "최종 수정: 2025.02.11",
+        body: `<table><tr><th>도구</th><th>용도</th></tr>
+          <tr><td>Grafana</td><td>서버 메트릭</td></tr>
+          <tr><td>Sentry</td><td>에러 트래킹</td></tr>
+          <tr><td>Redash</td><td>데이터 분석</td></tr></table>`
+      }
+    ]
+  }
+];
 
-    // ══════════════════════════════════════════════
-    //  인증 로직
-    // ══════════════════════════════════════════════
-    function signIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ hd: ALLOWED_DOMAIN });
-      auth.signInWithPopup(provider).catch(err => {
-        showError("로그인에 실패했습니다: " + err.message);
-      });
-    }
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let currentTab = 0, currentPageId = null;
+const expandedNodes = new Set();
 
-    function signOut() {
+// ═══════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════
+function signIn() {
+  const p = new firebase.auth.GoogleAuthProvider();
+  p.setCustomParameters({ hd: ALLOWED_DOMAIN });
+  auth.signInWithPopup(p).catch(e => {
+    const el = document.getElementById("loginError");
+    el.textContent = "로그인 실패: " + e.message; el.style.display = "block";
+  });
+}
+function signOut() { auth.signOut(); }
+
+auth.onAuthStateChanged(user => {
+  document.getElementById("loading").style.display = "none";
+  if (user) {
+    if (user.email.split("@")[1] !== ALLOWED_DOMAIN) {
       auth.signOut();
-    }
-
-    function showError(msg) {
+      document.getElementById("loginScreen").style.display = "flex";
       const el = document.getElementById("loginError");
-      el.textContent = msg;
-      el.style.display = "block";
+      el.textContent = "@vendys.co.kr 계정만 접근 가능합니다."; el.style.display = "block";
+      return;
     }
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("gnb").classList.add("active");
+    document.getElementById("mainLayout").classList.add("active");
+    document.getElementById("gnbUsername").textContent = user.displayName || user.email.split("@")[0];
+    document.getElementById("userEmail").textContent = user.email;
+    if (user.photoURL) document.getElementById("gnbAvatar").innerHTML = `<img src="${user.photoURL}">`;
+    initApp();
+  } else {
+    document.getElementById("loginScreen").style.display = "flex";
+    document.getElementById("gnb").classList.remove("active");
+    document.getElementById("mainLayout").classList.remove("active");
+  }
+});
 
-    auth.onAuthStateChanged(user => {
-      document.getElementById("loading").style.display = "none";
+// ═══════════════════════════════════════════════
+//  APP
+// ═══════════════════════════════════════════════
+function initApp() { renderGnbTabs(); switchTab(0); }
 
-      if (user) {
-        const domain = user.email.split("@")[1];
-        if (domain !== ALLOWED_DOMAIN) {
-          auth.signOut();
-          document.getElementById("loginScreen").style.display = "flex";
-          showError("@vendys.co.kr 계정만 접근 가능합니다.");
-          return;
-        }
+function renderGnbTabs() {
+  document.getElementById("gnbTabs").innerHTML = SECTIONS.map((s, i) =>
+    `<div class="gnb-tab${i===currentTab?' active':''}" onclick="switchTab(${i})">${s.tab}</div>`
+  ).join("");
+}
 
-        document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("app").classList.add("active");
+function switchTab(idx) {
+  currentTab = idx;
+  document.querySelectorAll(".gnb-tab").forEach((el, i) => el.classList.toggle("active", i===idx));
+  document.getElementById("lnbTitle").textContent = SECTIONS[idx].tab;
+  renderTree();
+  const first = SECTIONS[idx].pages[0];
+  if (first) navigateTo(first.id);
+}
 
-        // 사용자 정보 표시
-        document.getElementById("userName").textContent = user.email;
-        const avatar = document.getElementById("userAvatar");
-        if (user.photoURL) {
-          avatar.innerHTML = `<img src="${user.photoURL}" alt="">`;
-        }
+// ─── Icons ───
+const ICONS = {
+  folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>',
+  doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  api: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+  db: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
+};
 
-        renderDoc("welcome");
-      } else {
-        document.getElementById("loginScreen").style.display = "flex";
-        document.getElementById("app").classList.remove("active");
+// ─── Tree ───
+function renderTree() {
+  document.getElementById("lnbTree").innerHTML = SECTIONS[currentTab].pages.map(p => treeNode(p)).join("");
+}
+
+function treeNode(page) {
+  const has = page.children?.length > 0;
+  const exp = expandedNodes.has(page.id);
+  const act = currentPageId === page.id;
+  return `<div class="tree-item">
+    <div class="tree-row${act?' active':''}" onclick="onTreeClick('${page.id}')">
+      <span class="tree-toggle ${has?(exp?'expanded':''):'hidden'}" onclick="event.stopPropagation();toggleNode('${page.id}')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l10 7-10 7z"/></svg>
+      </span>
+      <span class="tree-icon">${ICONS[page.icon]||ICONS.doc}</span>
+      <span class="tree-label">${page.title}</span>
+    </div>
+    ${has?`<div class="tree-children${exp?' open':''}">${page.children.map(c=>treeNode(c)).join("")}</div>`:''}
+  </div>`;
+}
+
+function toggleNode(id) { expandedNodes.has(id)?expandedNodes.delete(id):expandedNodes.add(id); renderTree(); }
+function onTreeClick(id) { navigateTo(id); }
+
+// ─── Find / Path ───
+function findPage(id, pages) {
+  for (const p of pages) { if (p.id===id) return p; if (p.children) { const f=findPage(id,p.children); if(f) return f; } } return null;
+}
+function findInAll(id) { for (const s of SECTIONS) { const f=findPage(id,s.pages); if(f) return f; } return null; }
+function getPath(id, pages, trail=[]) {
+  for (const p of pages) { if(p.id===id) return [...trail,p]; if(p.children) { const r=getPath(id,p.children,[...trail,p]); if(r) return r; } } return null;
+}
+function getFullPath(id) { for (const s of SECTIONS) { const p=getPath(id,s.pages); if(p) return p; } return []; }
+
+// ─── Navigate ───
+function navigateTo(id) {
+  currentPageId = id;
+  const page = findInAll(id); if(!page) return;
+  const path = getFullPath(id);
+  path.forEach(p => expandedNodes.add(p.id));
+  renderTree();
+
+  const bc = path.map((p,i) => i===path.length-1
+    ? `<span class="breadcrumb-item current">${p.title}</span>`
+    : `<span class="breadcrumb-item" onclick="navigateTo('${p.id}')">${p.title}</span><span class="breadcrumb-sep">/</span>`
+  ).join("");
+
+  let childHtml = "";
+  if (page.children?.length) {
+    childHtml = `<div class="child-pages">${page.children.map(c =>
+      `<div class="child-page-card" onclick="navigateTo('${c.id}')">
+        <div class="child-page-card-title">${c.title}</div>
+        ${c.desc?`<div class="child-page-card-desc">${c.desc}</div>`:""}
+      </div>`
+    ).join("")}</div>`;
+  }
+
+  const el = document.getElementById("contentArea");
+  el.innerHTML = `<div class="breadcrumb">${bc}</div>
+    <div class="doc-title">${page.title}</div>
+    <div class="doc-meta">${page.meta||""}</div>
+    <div class="doc-body">${page.body||""}${childHtml}</div>`;
+  el.scrollTop = 0;
+}
+
+// ═══════════════════════════════════════════════
+//  SEARCH
+// ═══════════════════════════════════════════════
+function flatPages(pages, result=[]) {
+  for (const p of pages) {
+    const path = getFullPath(p.id)?.map(x=>x.title).join(" > ") || p.title;
+    result.push({ id:p.id, title:p.title, path, text:(p.body||"").replace(/<[^>]*>/g," "), desc:p.desc||"" });
+    if (p.children) flatPages(p.children, result);
+  }
+  return result;
+}
+function allPages() { let r=[]; SECTIONS.forEach(s=>flatPages(s.pages,r)); return r; }
+
+const searchInput = document.getElementById("searchInput");
+const searchResults = document.getElementById("searchResults");
+
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) { searchResults.classList.remove("open"); return; }
+  const matches = allPages().filter(p =>
+    p.title.toLowerCase().includes(q) || p.text.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  if (!matches.length) {
+    searchResults.innerHTML = `<div class="search-empty">검색 결과가 없습니다</div>`;
+  } else {
+    searchResults.innerHTML = matches.map(m => {
+      let snippet = "";
+      const idx = m.text.toLowerCase().indexOf(q);
+      if (idx >= 0) {
+        const raw = m.text.slice(Math.max(0,idx-20), idx+q.length+40).trim();
+        snippet = raw.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi'), '<mark>$1</mark>');
       }
-    });
+      return `<div class="search-result-item" onclick="searchGo('${m.id}')">
+        <div class="search-result-title">${m.title}</div>
+        <div class="search-result-path">${m.path}</div>
+        ${snippet?`<div class="search-result-snippet">${snippet}</div>`:""}
+      </div>`;
+    }).join("");
+  }
+  searchResults.classList.add("open");
+});
 
-    // ══════════════════════════════════════════════
-    //  문서 렌더링 & 네비게이션
-    // ══════════════════════════════════════════════
-    function renderDoc(key) {
-      const doc = docs[key];
-      if (!doc) return;
+function searchGo(id) {
+  searchInput.value = ""; searchResults.classList.remove("open");
+  for (let i=0;i<SECTIONS.length;i++) { if(findPage(id,SECTIONS[i].pages)){switchTab(i);break;} }
+  navigateTo(id);
+}
 
-      document.getElementById("content").innerHTML = `
-        <div class="doc-header">
-          <div class="doc-title">${doc.title}</div>
-          <div class="doc-meta">${doc.meta}</div>
-        </div>
-        <div class="doc-body">${doc.body}</div>
-      `;
-
-      document.querySelectorAll(".nav-item").forEach(item => {
-        item.classList.toggle("active", item.dataset.doc === key);
-      });
-    }
-
-    document.querySelectorAll(".nav-item").forEach(item => {
-      item.addEventListener("click", () => renderDoc(item.dataset.doc));
-    });
-  </script>
+document.addEventListener("click", e => {
+  if(!e.target.closest(".search-box")) searchResults.classList.remove("open");
+  if(!e.target.closest(".gnb-user")) document.getElementById("userMenu").classList.remove("open");
+});
+document.addEventListener("keydown", e => {
+  if(e.key==="/"&&document.activeElement!==searchInput){e.preventDefault();searchInput.focus();}
+  if(e.key==="Escape"){searchInput.blur();searchResults.classList.remove("open");}
+});
+function toggleUserMenu(){document.getElementById("userMenu").classList.toggle("open");}
+</script>
 </body>
 </html>
