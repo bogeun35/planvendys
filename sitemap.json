@@ -62,9 +62,9 @@
           "children": [
  {
               "id": "billing-match.html",
-              "title": "지급내역 매핑",
+              "title": "입금내역 매핑",
               "icon": "doc",
-              "desc": "지급내역 매핑",
+              "desc": "입금내역 매핑",
               "file": "docs/ops/billing-match.html"
             }
             
