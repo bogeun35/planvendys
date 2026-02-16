@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수기 계약서 데이터 추출기</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f8fafd;--surface:#fff;--surface-alt:#f0f4f9;
+  --border:#e2e8f0;--border-light:#eef2f7;
+  --text:#1a2332;--text-sub:#4a5568;--text-muted:#94a3b8;
+  --accent:#4a90d9;--accent-bg:#eef4fb;--accent-hover:#3a7bc8;
+  --success:#22c55e;--success-bg:#f0fdf4;
+  --danger:#e85d5d;--danger-bg:#fef2f2;
+  --warning:#d49a2a;--warning-bg:#fefce8;
+  --mono:'JetBrains Mono',monospace;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+
+/* ── Header ── */
+.ce-header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 24px;height:44px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.ce-header__left{display:flex;align-items:center;gap:10px}
+.ce-header__icon{
+  width:26px;height:26px;background:var(--accent);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+}
+.ce-header__icon svg{width:14px;height:14px;fill:#fff}
+.ce-header__title{font-size:14px;font-weight:600}
+.ce-header__sub{font-size:11px;color:var(--text-muted);margin-left:8px;font-weight:400}
+.ce-header__actions{display:flex;gap:6px}
+
+/* ── Buttons ── */
+.ce-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border:1px solid var(--border);border-radius:3px;
+  background:var(--surface);color:var(--text-sub);font-family:inherit;
+  font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.ce-btn:hover{background:var(--surface-alt);border-color:#ccd5e0}
+.ce-btn svg{width:13px;height:13px;flex-shrink:0}
+.ce-btn--primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.ce-btn--primary:hover{background:var(--accent-hover)}
+.ce-btn--primary:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.ce-btn--success{background:var(--success);border-color:var(--success);color:#fff;font-weight:600}
+.ce-btn--success:hover{background:#1db954}
+.ce-btn--success:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
+/* ── Main Layout ── */
+.ce-main{max-width:1440px;margin:0 auto;padding:16px 24px;display:flex;flex-direction:column;gap:12px}
+
+/* ── Drop Zone ── */
+.ce-drop{
+  border:1.5px dashed var(--border);border-radius:4px;
+  padding:32px 20px;text-align:center;background:var(--surface);
+  cursor:pointer;position:relative;transition:all .2s;
+}
+.ce-drop:hover,.ce-drop.drag-over{border-color:var(--accent);background:var(--accent-bg)}
+.ce-drop__icon{margin-bottom:6px}
+.ce-drop__icon svg{width:28px;height:28px;fill:var(--text-muted)}
+.ce-drop.drag-over .ce-drop__icon svg{fill:var(--accent)}
+.ce-drop__text{font-size:13px;font-weight:500;color:var(--text-sub)}
+.ce-drop__hint{font-size:11px;color:var(--text-muted);margin-top:2px}
+.ce-drop input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* ── Stats Bar ── */
+.ce-stats{display:flex;gap:10px}
+.ce-stat{
+  background:var(--surface);border:1px solid var(--border);border-radius:3px;
+  padding:10px 16px;flex:1;display:flex;align-items:center;gap:10px;
+}
+.ce-stat__icon{width:28px;height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center}
+.ce-stat__icon--total{background:var(--accent-bg)}
+.ce-stat__icon--total svg{fill:var(--accent)}
+.ce-stat__icon--success{background:var(--success-bg)}
+.ce-stat__icon--success svg{fill:var(--success)}
+.ce-stat__icon--fail{background:var(--danger-bg)}
+.ce-stat__icon--fail svg{fill:var(--danger)}
+.ce-stat__icon svg{width:14px;height:14px}
+.ce-stat__label{font-size:11px;color:var(--text-muted);font-weight:500}
+.ce-stat__value{font-family:var(--mono);font-size:18px;font-weight:600}
+.ce-stat__value--success{color:var(--success)}
+.ce-stat__value--fail{color:var(--danger)}
+
+/* ── Section Panel ── */
+.ce-panel{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.ce-panel__head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;border-bottom:1px solid var(--border);background:var(--surface-alt);
+}
+.ce-panel__title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+.ce-panel__badge{
+  background:var(--accent-bg);color:var(--accent);font-family:var(--mono);
+  font-size:10px;font-weight:600;padding:1px 7px;border-radius:8px;
+}
+.ce-panel__actions{display:flex;gap:6px}
+
+/* ── File List ── */
+.ce-files{max-height:180px;overflow-y:auto}
+.ce-file{
+  display:flex;align-items:center;padding:6px 14px;
+  border-bottom:1px solid var(--border-light);gap:10px;transition:background .1s;
+}
+.ce-file:last-child{border-bottom:none}
+.ce-file:hover{background:var(--surface-alt)}
+.ce-file__num{font-family:var(--mono);font-size:10px;color:var(--text-muted);min-width:20px;text-align:center}
+.ce-file__name{flex:1;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ce-file__size{font-family:var(--mono);font-size:10px;color:var(--text-muted)}
+.ce-file__status{font-size:10px;padding:1px 8px;border-radius:8px;font-weight:500}
+.ce-file__status--pending{background:#f0f1f5;color:var(--text-muted)}
+.ce-file__status--processing{background:var(--warning-bg);color:var(--warning)}
+.ce-file__status--done{background:var(--success-bg);color:var(--success)}
+.ce-file__status--error{background:var(--danger-bg);color:var(--danger)}
+.ce-file__remove{
+  background:none;border:none;color:var(--text-muted);cursor:pointer;
+  font-size:13px;padding:1px 5px;border-radius:3px;line-height:1;
+}
+.ce-file__remove:hover{background:var(--danger-bg);color:var(--danger)}
+
+/* ── Progress Bar ── */
+.ce-progress{height:2px;background:var(--border-light);display:none}
+.ce-progress.active{display:block}
+.ce-progress__fill{height:100%;background:var(--accent);border-radius:1px;transition:width .3s;width:0%}
+
+/* ── Two-column result layout ── */
+.ce-result-layout{display:flex;gap:12px;min-height:0}
+.ce-result-layout .ce-panel{flex:1;min-width:0;display:flex;flex-direction:column}
+.ce-result-layout .ce-panel--actions{flex:0 0 220px;display:flex;flex-direction:column}
+
+/* ── Table ── */
+.ce-table-wrap{overflow:auto;flex:1;max-height:380px}
+.ce-table-wrap table{width:100%;border-collapse:collapse;font-size:12px;min-width:1000px}
+.ce-table-wrap thead{position:sticky;top:0;z-index:2}
+.ce-table-wrap th{
+  background:var(--surface-alt);color:var(--text-sub);font-weight:600;font-size:11px;
+  padding:6px 10px;text-align:left;white-space:nowrap;border-bottom:2px solid var(--border);
+}
+.ce-table-wrap td{
+  padding:5px 10px;border-bottom:1px solid var(--border-light);white-space:nowrap;
+  max-width:180px;overflow:hidden;text-overflow:ellipsis;font-size:12px;
+}
+.ce-table-wrap tr:hover td{background:var(--surface-alt)}
+.ce-table-wrap td.addr{max-width:260px}
+.ce-table-wrap .rn{color:var(--text-muted);font-family:var(--mono);font-size:10px;text-align:center}
+
+/* ── Action Buttons Panel ── */
+.ce-actions-body{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.ce-action-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border:1px solid var(--border);border-radius:4px;
+  background:var(--surface);cursor:pointer;transition:all .15s;
+  text-align:left;font-family:inherit;width:100%;
+}
+.ce-action-btn:hover{background:var(--accent-bg);border-color:var(--accent)}
+.ce-action-btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+.ce-action-btn__icon{
+  width:32px;height:32px;border-radius:3px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.ce-action-btn__icon svg{width:16px;height:16px;fill:#fff}
+.ce-action-btn__icon--store{background:#5b8def}
+.ce-action-btn__icon--settle{background:#f59e0b}
+.ce-action-btn__icon--vendor{background:#10b981}
+.ce-action-btn__icon--contract{background:#8b5cf6}
+.ce-action-btn__label{font-size:12px;font-weight:600;color:var(--text)}
+.ce-action-btn__desc{font-size:10px;color:var(--text-muted);margin-top:1px}
+
+/* ── Empty State ── */
+.ce-empty{padding:36px 16px;text-align:center;color:var(--text-muted);font-size:12px}
+.ce-empty svg{width:24px;height:24px;fill:var(--text-muted);opacity:.4;margin-bottom:6px}
+
+/* ── Log ── */
+.ce-log{
+  font-family:var(--mono);font-size:11px;padding:8px 14px;
+  max-height:120px;overflow-y:auto;line-height:1.6;color:var(--text-sub);
+  background:var(--surface-alt);
+}
+.ce-log__line--success{color:var(--success)}
+.ce-log__line--error{color:var(--danger)}
+.ce-log__line--info{color:var(--accent)}
+.ce-log__time{color:var(--text-muted);margin-right:6px}
+
+.ce-debug{
+  display:none;padding:8px 14px;max-height:200px;overflow-y:auto;
+  font-family:var(--mono);font-size:10px;line-height:1.5;color:var(--text-sub);
+  white-space:pre-wrap;word-break:break-all;background:#f5f6fa;
+  border-bottom:1px solid var(--border);
+}
+.ce-debug.visible{display:block}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d4d7e0;border-radius:2px}
+
+/* ── Copy feedback ── */
+.ce-btn--copied{background:var(--success)!important;border-color:var(--success)!important;color:#fff!important}
+</style>
+</head>
+<body>
+
+<div class="ce-header">
+  <div class="ce-header__left">
+    <div class="ce-header__icon">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h5v7h7v9H6z"/></svg>
+    </div>
+    <div class="ce-header__title">수기 계약서 추출기<span class="ce-header__sub">식권대장 PDF → Excel 변환</span></div>
+  </div>
+  <div class="ce-header__actions">
+    <button class="ce-btn" onclick="ceClearAll()">
+      <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/></svg>
+      초기화
+    </button>
+    <button class="ce-btn ce-btn--primary" id="ceBtnExtract" onclick="ceExtractAll()" disabled>
+      <svg viewBox="0 0 24 24"><path d="M13 3L4 14h7l-2 7 9-11h-7l2-7z" fill="currentColor"/></svg>
+      전체 추출
+    </button>
+    <button class="ce-btn ce-btn--success" id="ceBtnDownload" onclick="ceDownloadExcel()" disabled>
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="currentColor"/></svg>
+      엑셀 다운로드
+    </button>
+  </div>
+</div>
+
+<div class="ce-main">
+  <!-- Drop Zone -->
+  <div class="ce-drop" id="ceDropZone">
+    <div class="ce-drop__icon">
+      <svg viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0012 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 000 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+    </div>
+    <div class="ce-drop__text">PDF 파일을 드래그하거나 클릭하여 선택</div>
+    <div class="ce-drop__hint">여러 파일 동시 선택 가능 · 제휴점 서비스공급 계약서 PDF</div>
+    <input type="file" id="ceFileInput" accept=".pdf" multiple>
+  </div>
+
+  <!-- Stats -->
+  <div class="ce-stats">
+    <div class="ce-stat">
+      <div class="ce-stat__icon ce-stat__icon--total">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+      </div>
+      <div><div class="ce-stat__label">등록 파일</div><div class="ce-stat__value" id="ceStatTotal">0</div></div>
+    </div>
+    <div class="ce-stat">
+      <div class="ce-stat__icon ce-stat__icon--success">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+      </div>
+      <div><div class="ce-stat__label">추출 성공</div><div class="ce-stat__value ce-stat__value--success" id="ceStatSuccess">0</div></div>
+    </div>
+    <div class="ce-stat">
+      <div class="ce-stat__icon ce-stat__icon--fail">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      </div>
+      <div><div class="ce-stat__label">실패</div><div class="ce-stat__value ce-stat__value--fail" id="ceStatFail">0</div></div>
+    </div>
+  </div>
+
+  <!-- File List -->
+  <div class="ce-panel">
+    <div class="ce-panel__head">
+      <div class="ce-panel__title">
+        파일 목록 <span class="ce-panel__badge" id="ceFileBadge">0</span>
+      </div>
+    </div>
+    <div class="ce-progress" id="ceProgressBar"><div class="ce-progress__fill" id="ceProgressFill"></div></div>
+    <div class="ce-files" id="ceFileList">
+      <div class="ce-empty">
+        <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+        <div>PDF 파일을 추가하면 여기에 표시됩니다</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result: Two-column (Table + Actions) -->
+  <div class="ce-result-layout">
+    <div class="ce-panel" style="flex:1">
+      <div class="ce-panel__head">
+        <div class="ce-panel__title">
+          추출 결과 <span class="ce-panel__badge" id="ceResultBadge">0</span>
+        </div>
+        <div class="ce-panel__actions">
+          <button class="ce-btn" onclick="ceCopyToClipboard()" id="ceBtnCopy" style="display:none;font-size:11px;padding:3px 10px">
+            <svg viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>
+            클립보드 복사
+          </button>
+        </div>
+      </div>
+      <div class="ce-table-wrap" id="ceTableWrap">
+        <div class="ce-empty">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-2-2H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          <div>추출 결과가 여기에 표시됩니다</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons Panel -->
+    <div class="ce-panel ce-panel--actions">
+      <div class="ce-panel__head">
+        <div class="ce-panel__title">바로가기</div>
+      </div>
+      <div class="ce-actions-body">
+        <button class="ce-action-btn" id="ceBtnStore" disabled onclick="ceOpenAction('store')">
+          <div class="ce-action-btn__icon ce-action-btn__icon--store">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>
+          </div>
+          <div>
+            <div class="ce-action-btn__label">제휴점 만들기</div>
+            <div class="ce-action-btn__desc">추출 데이터로 제휴점 등록</div>
+          </div>
+        </button>
+        <button class="ce-action-btn" id="ceBtnSettle" disabled onclick="ceOpenAction('settle')">
+          <div class="ce-action-btn__icon ce-action-btn__icon--settle">
+            <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+          </div>
+          <div>
+            <div class="ce-action-btn__label">구정산정보 만들기</div>
+            <div class="ce-action-btn__desc">정산 정보 등록</div>
+          </div>
+        </button>
+        <button class="ce-action-btn" id="ceBtnVendor" disabled onclick="ceOpenAction('vendor')">
+          <div class="ce-action-btn__icon ce-action-btn__icon--vendor">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          </div>
+          <div>
+            <div class="ce-action-btn__label">거래처 만들기</div>
+            <div class="ce-action-btn__desc">거래처 정보 등록</div>
+          </div>
+        </button>
+        <button class="ce-action-btn" id="ceBtnContract" disabled onclick="ceOpenAction('contract')">
+          <div class="ce-action-btn__icon ce-action-btn__icon--contract">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6zm2-6h8v2H8v-2zm0-3h8v2H8v-2z"/></svg>
+          </div>
+          <div>
+            <div class="ce-action-btn__label">계약서 만들기</div>
+            <div class="ce-action-btn__desc">계약서 생성</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="ce-panel">
+    <div class="ce-panel__head">
+      <div class="ce-panel__title">로그</div>
+      <div class="ce-panel__actions">
+        <button class="ce-btn" onclick="ceToggleDebug()" style="font-size:10px;padding:2px 8px">Raw 텍스트</button>
+        <button class="ce-btn" onclick="ceClearLog()" style="font-size:10px;padding:2px 8px">지우기</button>
+      </div>
+    </div>
+    <div class="ce-debug" id="ceDebugArea"></div>
+    <div class="ce-log" id="ceLogArea"></div>
+  </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ── Global State ── */
+var CE = {
+  files: [],
+  data: [],
+  lastRaw: '',
+  actionUrls: {
+    store: '',
+    settle: '',
+    vendor: '',
+    contract: ''
+  }
+};
+
+/* ── File Management ── */
+var ceDropZone = document.getElementById('ceDropZone');
+var ceFileInput = document.getElementById('ceFileInput');
+ceFileInput.addEventListener('change', function(e) { ceAddFiles(e.target.files); ceFileInput.value = ''; });
+ceDropZone.addEventListener('dragover', function(e) { e.preventDefault(); ceDropZone.classList.add('drag-over'); });
+ceDropZone.addEventListener('dragleave', function() { ceDropZone.classList.remove('drag-over'); });
+ceDropZone.addEventListener('drop', function(e) {
+  e.preventDefault(); ceDropZone.classList.remove('drag-over');
+  ceAddFiles([].filter.call(e.dataTransfer.files, function(f) { return f.name.toLowerCase().endsWith('.pdf'); }));
+});
+
+function ceAddFiles(files) {
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    var dup = CE.files.some(function(f) { return f.name === file.name && f.size === file.size; });
+    if (dup) continue;
+    CE.files.push({ file: file, name: file.name, size: file.size, status: 'pending' });
+  }
+  ceRenderFileList(); ceUpdateStats();
+  document.getElementById('ceBtnExtract').disabled = CE.files.length === 0;
+  ceLog(files.length + '개 파일 추가 (총 ' + CE.files.length + '개)', 'info');
+}
+
+function ceRemoveFile(i) {
+  CE.files.splice(i, 1); ceRenderFileList(); ceUpdateStats();
+  document.getElementById('ceBtnExtract').disabled = !CE.files.length;
+}
+
+function ceFormatSize(b) {
+  return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+}
+
+function ceRenderFileList() {
+  var el = document.getElementById('ceFileList');
+  document.getElementById('ceFileBadge').textContent = CE.files.length;
+  if (!CE.files.length) {
+    el.innerHTML = '<div class="ce-empty"><svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg><div>PDF 파일을 추가하면 여기에 표시됩니다</div></div>';
+    return;
+  }
+  var statusMap = { pending: '대기', processing: '처리중...', done: '완료', error: '실패' };
+  el.innerHTML = CE.files.map(function(f, i) {
+    return '<div class="ce-file">' +
+      '<span class="ce-file__num">' + (i + 1) + '</span>' +
+      '<span class="ce-file__name" title="' + f.name + '">' + f.name + '</span>' +
+      '<span class="ce-file__size">' + ceFormatSize(f.size) + '</span>' +
+      '<span class="ce-file__status ce-file__status--' + f.status + '">' + statusMap[f.status] + '</span>' +
+      '<button class="ce-file__remove" onclick="ceRemoveFile(' + i + ')">&#x2715;</button>' +
+      '</div>';
+  }).join('');
+}
+
+function ceUpdateStats() {
+  document.getElementById('ceStatTotal').textContent = CE.files.length;
+  document.getElementById('ceStatSuccess').textContent = CE.data.length;
+  document.getElementById('ceStatFail').textContent = CE.files.filter(function(f) { return f.status === 'error'; }).length;
+}
+
+/* ── PDF Extraction ── */
+async function ceExtractDataFromPDF(file) {
+  var buf = await file.arrayBuffer();
+  var pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+
+  var targetPage = null;
+  for (var p = pdf.numPages; p >= 1; p--) {
+    var pg = await pdf.getPage(p);
+    var ct = await pg.getTextContent();
+    var raw = ct.items.map(function(i) { return i.str; }).join('');
+    if (raw.includes('계약체결일') && raw.includes('은행명')) { targetPage = pg; break; }
+  }
+  if (!targetPage) targetPage = await pdf.getPage(pdf.numPages);
+
+  var content = await targetPage.getTextContent();
+  var items = content.items.filter(function(i) { return i.str.trim(); });
+
+  var all = items.map(function(i) {
+    return { x: Math.round(i.transform[4]), y: Math.round(i.transform[5]), w: i.width || 0, text: i.str };
+  });
+
+  all.sort(function(a, b) { return b.y - a.y || a.x - b.x; });
+
+  var lines = [];
+  if (all.length === 0) return null;
+
+  var curLine = [all[0]], curY = all[0].y;
+  for (var i = 1; i < all.length; i++) {
+    if (Math.abs(all[i].y - curY) <= 3) {
+      curLine.push(all[i]);
+    } else {
+      lines.push(curLine);
+      curLine = [all[i]];
+      curY = all[i].y;
+    }
+  }
+  lines.push(curLine);
+
+  var mergedLines = lines.map(function(line) {
+    line.sort(function(a, b) { return a.x - b.x; });
+    var text = '';
+    for (var i = 0; i < line.length; i++) {
+      if (i === 0) { text = line[i].text; continue; }
+      var prev = line[i - 1];
+      var gap = line[i].x - (prev.x + prev.w);
+      if (gap > 30) text += '\t' + line[i].text;
+      else if (gap > 5) text += ' ' + line[i].text;
+      else text += line[i].text;
+    }
+    return { y: line[0].y, text: text.trim() };
+  });
+
+  CE.lastRaw = mergedLines.map(function(l) { return 'y=' + l.y + ' | ' + l.text; }).join('\n');
+
+  var dateLineIdx = -1;
+  for (var i = 0; i < mergedLines.length; i++) {
+    if (mergedLines[i].text.includes('계약체결일')) { dateLineIdx = i; break; }
+  }
+  if (dateLineIdx < 0) return null;
+  var baseY = mergedLines[dateLineIdx].y;
+
+  function findLineByOffset(offsetMin, offsetMax) {
+    for (var i = 0; i < mergedLines.length; i++) {
+      var off = baseY - mergedLines[i].y;
+      if (off >= offsetMin && off <= offsetMax) return mergedLines[i];
+    }
+    return null;
+  }
+
+  var data = {};
+
+  // 계약체결일
+  var dateLine = mergedLines[dateLineIdx];
+  var dm = dateLine.text.match(/(\d{4})\s*년?\s*(\d{1,2})\s*월?\s*(\d{1,2})\s*일?/);
+  data.contractDate = dm ? dm[1] + '-' + dm[2].padStart(2, '0') + '-' + dm[3].padStart(2, '0') : '';
+
+  // 상호 / 대표자
+  var storeLine = findLineByOffset(14, 25);
+  if (storeLine) {
+    var st = storeLine.text;
+    var repMatch = st.match(/대표자[\s\t]+(.+)/);
+    var storeMatch = st.match(/상\s*호[\s\t]+(.+?)[\s\t]+대표자/);
+    if (storeMatch) data.storeName = storeMatch[1].trim();
+    else {
+      var parts = st.replace(/상\s*호/, '').split(/대표자/);
+      if (parts[0]) data.storeName = parts[0].replace(/[\t]/g, ' ').trim();
+    }
+    if (repMatch) data.representative = repMatch[1].trim();
+  }
+
+  // 매장전화 / 휴대전화
+  var phoneLine = findLineByOffset(33, 42);
+  if (phoneLine) {
+    var pt = phoneLine.text;
+    var storePhoneMatch = pt.match(/매장전화번호[\s\t]+([\d\-]+)/);
+    var mobileMatch = pt.match(/휴대전화번호[\s\t]+([\d\-]+)/);
+    data.storePhone = storePhoneMatch ? storePhoneMatch[1] : '';
+    data.mobilePhone = mobileMatch ? mobileMatch[1] : '';
+  }
+
+  // 주소
+  var addrLine = findLineByOffset(50, 62);
+  if (addrLine) {
+    var addr = addrLine.text.replace(/제휴점/, '').replace(/주\s*소/, '').replace(/[\t]/g, ' ').trim();
+    addr = addr.replace(/\(인\)/, '').trim();
+    if (addr.includes('강남구') || addr.includes('봉은사로')) addr = '';
+    data.address = addr;
+  }
+
+  // 이메일
+  var emailLine = findLineByOffset(68, 80);
+  if (emailLine) {
+    var em = emailLine.text.replace(/이메일주소?/, '').replace(/[\t]/g, ' ').trim();
+    var emailMatch = em.match(/([\w.\-]+@[\w.\-]+\.\w+)/);
+    data.email = emailMatch ? emailMatch[1] : em;
+  }
+
+  // 운영시간
+  var timeLine = findLineByOffset(86, 100);
+  if (timeLine) {
+    data.operatingHours = timeLine.text.replace(/운영시간/, '').replace(/[\t]/g, ' ').trim();
+  }
+
+  // 은행명
+  var bankLine = findLineByOffset(170, 190);
+  if (bankLine) {
+    data.bankName = bankLine.text.replace(/은행명/, '').replace(/[\t]/g, ' ').trim();
+  }
+
+  // 계좌번호
+  var acctLine = findLineByOffset(190, 210);
+  if (acctLine) {
+    data.accountNumber = acctLine.text.replace(/계좌번호/, '').replace(/[\t]/g, ' ').trim();
+  }
+
+  // 명의주
+  var holderLine = findLineByOffset(205, 225);
+  if (holderLine) {
+    data.accountHolder = holderLine.text.replace(/계좌\s*명의주/, '').replace(/[\t]/g, ' ').trim();
+  }
+
+  // 사업자번호
+  var bizLine = findLineByOffset(220, 245);
+  if (bizLine) {
+    var biz = bizLine.text.replace(/사업자\s*등록번호/, '').replace(/[\t]/g, ' ').trim();
+    data.businessNumber = biz.replace(/-/g, '');
+  }
+
+  // Fallback: 텍스트 기반
+  if (!data.storeName || !data.bankName) {
+    var allText = mergedLines.map(function(l) { return l.text; }).join('\n');
+    if (!data.storeName) {
+      var m = allText.match(/상\s*호[\s\t]+(.+?)[\s\t]*대표자/);
+      if (m) data.storeName = m[1].trim();
+    }
+    if (!data.representative) {
+      for (var i = 0; i < mergedLines.length; i++) {
+        var m = mergedLines[i].text.match(/대표자[\s\t]+(\S+)/);
+        if (m && m[1] !== '조정호') { data.representative = m[1]; break; }
+      }
+    }
+    if (!data.storePhone) {
+      var m = allText.match(/매장전화번호[\s\t]+([\d\-]+)/);
+      if (m) data.storePhone = m[1];
+    }
+    if (!data.mobilePhone) {
+      var m = allText.match(/휴대전화번호[\s\t]+([\d\-]+)/);
+      if (m) data.mobilePhone = m[1];
+    }
+    if (!data.address) {
+      for (var i = 0; i < mergedLines.length; i++) {
+        var m = mergedLines[i].text.match(/주\s*소[\s\t]+(.+)/);
+        if (m && !m[1].includes('강남구') && !m[1].includes('봉은사로') && m[1].trim().length > 5) {
+          data.address = m[1].replace(/제휴점/, '').replace(/\(인\)/, '').trim();
+          break;
+        }
+      }
+    }
+    if (!data.email) {
+      var m = allText.match(/([\w.\-]+@[\w.\-]+\.\w+)/);
+      if (m) data.email = m[1];
+    }
+    if (!data.operatingHours) {
+      var m = allText.match(/운영시간[\s\t]+(\S+)/);
+      if (m) data.operatingHours = m[1];
+    }
+    if (!data.bankName) {
+      var m = allText.match(/은행명[\s\t]+(\S+)/);
+      if (m) data.bankName = m[1];
+    }
+    if (!data.accountNumber) {
+      var m = allText.match(/계좌번호[\s\t]+([\d\-]+)/);
+      if (m) data.accountNumber = m[1];
+    }
+    if (!data.accountHolder) {
+      var m = allText.match(/(?:계좌\s*)?명의주[\s\t]+(.+?)(?:\n|$)/);
+      if (m) data.accountHolder = m[1].trim();
+    }
+    if (!data.businessNumber) {
+      var m = allText.match(/사업자\s*등록번호[\s\t]+([\d\-]+)/);
+      if (m) data.businessNumber = m[1].replace(/-/g, '');
+    }
+  }
+
+  var fields = ['contractDate', 'storeName', 'representative', 'storePhone', 'mobilePhone', 'address', 'email', 'operatingHours', 'bankName', 'accountNumber', 'accountHolder', 'businessNumber'];
+  var missing = fields.filter(function(f) { return !data[f]; });
+  if (missing.length > 0) ceLog('  ! 누락: ' + missing.join(', '), 'error');
+
+  return data;
+}
+
+/* ── Extract All ── */
+async function ceExtractAll() {
+  if (!CE.files.length) return;
+  var btn = document.getElementById('ceBtnExtract');
+  btn.disabled = true; btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="currentColor"/></svg> 처리 중...';
+  var pBar = document.getElementById('ceProgressBar'), pFill = document.getElementById('ceProgressFill');
+  pBar.classList.add('active');
+  CE.data = [];
+  var total = CE.files.length;
+  ceLog('추출 시작 - ' + total + '개 파일', 'info');
+
+  for (var i = 0; i < total; i++) {
+    var pf = CE.files[i];
+    pf.status = 'processing'; ceRenderFileList();
+    pFill.style.width = (i / total * 100) + '%';
+    try {
+      ceLog('[' + (i + 1) + '/' + total + '] ' + pf.name);
+      var data = await ceExtractDataFromPDF(pf.file);
+      document.getElementById('ceDebugArea').textContent = '=== ' + pf.name + ' ===\n' + CE.lastRaw;
+      if (data && (data.storeName || data.businessNumber || data.storePhone)) {
+        data._fileName = pf.name; CE.data.push(data);
+        pf.status = 'done'; ceLog('  > ' + (data.storeName || '(상호없음)'), 'success');
+      } else { pf.status = 'error'; ceLog('  > 데이터 없음', 'error'); }
+    } catch (err) { pf.status = 'error'; ceLog('  > ' + err.message, 'error'); }
+    ceRenderFileList(); pFill.style.width = ((i + 1) / total * 100) + '%';
+  }
+  ceRenderResultTable(); ceUpdateStats(); ceUpdateActionButtons();
+  ceLog('완료 - 성공: ' + CE.data.length + '/' + total, CE.data.length ? 'success' : 'error');
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M13 3L4 14h7l-2 7 9-11h-7l2-7z" fill="currentColor"/></svg> 전체 추출';
+  document.getElementById('ceBtnDownload').disabled = !CE.data.length;
+  setTimeout(function() { pBar.classList.remove('active'); }, 1000);
+}
+
+/* ── Action Buttons ── */
+function ceUpdateActionButtons() {
+  var hasData = CE.data.length > 0;
+  document.getElementById('ceBtnStore').disabled = !hasData;
+  document.getElementById('ceBtnSettle').disabled = !hasData;
+  document.getElementById('ceBtnVendor').disabled = !hasData;
+  document.getElementById('ceBtnContract').disabled = !hasData;
+}
+
+function ceOpenAction(type) {
+  var url = CE.actionUrls[type];
+  if (url) {
+    window.open(url, '_blank');
+  } else {
+    ceLog(type + ' URL이 아직 설정되지 않았습니다', 'info');
+  }
+}
+
+/* ── Table / Excel / Clipboard ── */
+function ceRenderResultTable() {
+  var wrap = document.getElementById('ceTableWrap');
+  document.getElementById('ceResultBadge').textContent = CE.data.length;
+  var btnCopy = document.getElementById('ceBtnCopy');
+  if (!CE.data.length) {
+    wrap.innerHTML = '<div class="ce-empty"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-2-2H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><div>추출 결과가 여기에 표시됩니다</div></div>';
+    btnCopy.style.display = 'none'; return;
+  }
+  btnCopy.style.display = '';
+  var H = ['#', '체결일', '상호', '대표자', '매장전화', '휴대전화', '주소', '이메일', '운영시간', '은행명', '계좌번호', '명의주', '사업자번호'];
+  var K = ['contractDate', 'storeName', 'representative', 'storePhone', 'mobilePhone', 'address', 'email', 'operatingHours', 'bankName', 'accountNumber', 'accountHolder', 'businessNumber'];
+  var html = '<table><thead><tr>' + H.map(function(h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>';
+  CE.data.forEach(function(d, i) {
+    html += '<tr><td class="rn">' + (i + 1) + '</td>' + K.map(function(k) {
+      return '<td' + (k === 'address' ? ' class="addr"' : '') + ' title="' + (d[k] || '').replace(/"/g, '&quot;') + '">' + (d[k] || '-') + '</td>';
+    }).join('') + '</tr>';
+  });
+  wrap.innerHTML = html + '</tbody></table>';
+}
+
+function ceDownloadExcel() {
+  if (!CE.data.length) return;
+  var H = ['체결일', '상호', '대표자', '매장전화번호', '휴대전화번호', '주소', '이메일', '운영시간', '은행명', '계좌번호', '명의주', '사업자번호'];
+  var K = ['contractDate', 'storeName', 'representative', 'storePhone', 'mobilePhone', 'address', 'email', 'operatingHours', 'bankName', 'accountNumber', 'accountHolder', 'businessNumber'];
+  var ws = XLSX.utils.aoa_to_sheet([H].concat(CE.data.map(function(d) { return K.map(function(k) { return d[k] || ''; }); })));
+  ws['!cols'] = [{ wch: 12 }, { wch: 15 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 35 }, { wch: 25 }, { wch: 14 }, { wch: 12 }, { wch: 18 }, { wch: 15 }, { wch: 14 }];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '제휴점 계약 데이터');
+  var d = new Date();
+  XLSX.writeFile(wb, '제휴점_계약추출_' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '.xlsx');
+  ceLog('엑셀 다운로드 완료', 'success');
+}
+
+function ceCopyToClipboard() {
+  if (!CE.data.length) return;
+  var H = ['체결일', '상호', '대표자', '매장전화번호', '휴대전화번호', '주소', '이메일', '운영시간', '은행명', '계좌번호', '명의주', '사업자번호'];
+  var K = ['contractDate', 'storeName', 'representative', 'storePhone', 'mobilePhone', 'address', 'email', 'operatingHours', 'bankName', 'accountNumber', 'accountHolder', 'businessNumber'];
+  var tsv = H.join('\t') + '\n';
+  CE.data.forEach(function(d) { tsv += K.map(function(k) { return d[k] || ''; }).join('\t') + '\n'; });
+  navigator.clipboard.writeText(tsv).then(function() {
+    ceLog('클립보드 복사 완료', 'success');
+    var b = document.getElementById('ceBtnCopy'), o = b.innerHTML;
+    b.classList.add('ce-btn--copied');
+    b.innerHTML = '<svg viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/></svg> 복사됨';
+    setTimeout(function() { b.innerHTML = o; b.classList.remove('ce-btn--copied'); }, 1500);
+  });
+}
+
+/* ── Utilities ── */
+function ceClearAll() {
+  CE.files = []; CE.data = [];
+  ceRenderFileList(); ceRenderResultTable(); ceUpdateStats(); ceUpdateActionButtons();
+  document.getElementById('ceBtnExtract').disabled = true;
+  document.getElementById('ceBtnDownload').disabled = true;
+  document.getElementById('ceDebugArea').textContent = '';
+  ceLog('초기화', 'info');
+}
+
+function ceLog(msg, type) {
+  type = type || '';
+  var a = document.getElementById('ceLogArea'), now = new Date();
+  var t = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+  var l = document.createElement('div');
+  l.className = 'ce-log__line' + (type ? ' ce-log__line--' + type : '');
+  l.innerHTML = '<span class="ce-log__time">[' + t + ']</span>' + msg;
+  a.insertBefore(l, a.firstChild);
+  while (a.children.length > 100) a.removeChild(a.lastChild);
+}
+
+function ceClearLog() { document.getElementById('ceLogArea').innerHTML = ''; }
+function ceToggleDebug() { document.getElementById('ceDebugArea').classList.toggle('visible'); }
+
+ceLog('준비 완료', 'info');
+</script>
+</body>
+</html>
