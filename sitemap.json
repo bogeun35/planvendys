@@ -155,6 +155,13 @@
               "desc": "단체선물대장 대시보드를 보여줍니다.",
               "file": "docs/ops/giftpresent.html"
             }
+           {
+              "id": "ngr",
+              "title": "ngr",
+              "icon": "doc",
+              "desc": "ngr입니다",
+              "file": "docs/ops/ngr.html"
+            },
           ]
         },
         {
