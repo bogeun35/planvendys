@@ -1,14 +1,14 @@
 {
   "sections": [
     {
-      "tab": "기획",
+      "tab": "업무",
       "pages": [
         {
-          "id": "sikgwon",
-          "title": "식권대장",
+          "id": "sitemap",
+          "title": "사이트맵",
           "icon": "folder",
-          "desc": "모바일 식권 서비스",
-          "file": "docs/services/sikgwon/index.html",
+          "desc": "업무용 사이트맵",
+          "file": "docs/sitemap/vone.html",
           "children": [
             {
               "id": "sikgwon-admin",
