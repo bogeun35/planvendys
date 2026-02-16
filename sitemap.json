@@ -149,11 +149,11 @@
               "file": "docs/ops/sds-report.html"
             },
             {
-              "id": "ops-deploy",
-              "title": "배포 프로세스",
+              "id": "단체선물대장",
+              "title": "단체선물대장",
               "icon": "doc",
-              "desc": "서비스 배포 절차",
-              "file": "docs/ops/deploy.html"
+              "desc": "단체선물대장 대시보드를 보여줍니다.",
+              "file": "docs/ops/단체선물대장.html"
             }
           ]
         },
