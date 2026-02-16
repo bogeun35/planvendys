@@ -515,7 +515,8 @@ function ceRenderResultTable() {
   var btnCopy = document.getElementById('ceBtnCopy');
   if (!CE.data.length) { wrap.innerHTML = '<div class="ce-empty">추출 결과가 여기에 표시됩니다</div>'; btnCopy.style.display = 'none'; return; }
   btnCopy.style.display = '';
-  var H = ['#','상호','주소','사업자번호','Place'];
+  var H = ['#','체결일','상호','대표자','매장전화','휴대전화','주소','이메일','운영시간','은행명','계좌번호','명의주','사업자번호','Place'];
+  var K = ['contractDate','storeName','representative','storePhone','mobilePhone','address','email','operatingHours','bankName','accountNumber','accountHolder','businessNumber'];
   var html = '<table><thead><tr>' + H.map(function(h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>';
   CE.data.forEach(function(d, i) {
     var placeCell = '-';
@@ -526,9 +527,7 @@ function ceRenderResultTable() {
     }
     html += '<tr onclick="ceSelectRow(' + i + ')"' + (CE.selectedIdx === i ? ' class="ce-row--selected"' : '') + '>' +
       '<td class="rn">' + (i + 1) + '</td>' +
-      '<td title="' + ((d.storeName || '').replace(/"/g, '&quot;')) + '">' + (d.storeName || '-') + '</td>' +
-      '<td class="addr" title="' + ((d.address || '').replace(/"/g, '&quot;')) + '">' + (d.address || '-') + '</td>' +
-      '<td>' + (d.businessNumber || '-') + '</td>' +
+      K.map(function(k) { return '<td' + (k === 'address' ? ' class="addr"' : '') + ' title="' + ((d[k] || '').replace(/"/g, '&quot;')) + '">' + (d[k] || '-') + '</td>'; }).join('') +
       '<td style="text-align:center">' + placeCell + '</td>' +
       '</tr>';
   });
