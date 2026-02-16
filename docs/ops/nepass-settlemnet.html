@@ -1,0 +1,649 @@
+<!--
+title: 네패스 수기정산
+meta: 최종 수정: 2026.02.16
+-->
+
+<style>
+.np{font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;position:relative}
+.np *{box-sizing:border-box}
+.np-ctrl{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e2e8f0;flex-wrap:wrap}
+.np-ctrl input[type=date]{font-family:'JetBrains Mono',monospace;font-size:12px;padding:4px 8px;border:1px solid #d1d5db;border-radius:3px;color:#1a2332}
+.np-ctrl-btn{padding:4px 12px;border:1px solid #d1d5db;border-radius:3px;background:#fff;font-size:11px;cursor:pointer;color:#4a5568;font-family:'Noto Sans KR',sans-serif}
+.np-ctrl-btn:hover{border-color:#4a90d9;color:#4a90d9}
+.np-ctrl-btn--primary{background:#4a90d9;color:#fff;border-color:#4a90d9;font-weight:600}
+.np-ctrl-btn--primary:hover{background:#3a7bc8}
+.np-ctrl-btn--active{background:#eef4fb;color:#4a90d9;border-color:#4a90d9}
+.np-ctrl-sep{width:1px;height:20px;background:#e2e8f0}
+.np-ctrl-status{margin-left:auto;font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace}
+
+.np-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 0}
+.np-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:3px;padding:8px 10px}
+.np-card__label{font-size:11px;color:#94a3b8;margin-bottom:2px}
+.np-card__value{font-size:16px;font-weight:700;color:#1a2332;font-family:'JetBrains Mono',monospace}
+
+.np-body{display:grid;grid-template-columns:340px 1fr;gap:0;border:1px solid #e2e8f0;border-radius:3px;margin-top:8px;height:calc(100vh - 260px);min-height:400px}
+
+.np-left{border-right:1px solid #e2e8f0;display:flex;flex-direction:column;overflow:hidden}
+.np-tabs{display:flex;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.np-tab{flex:1;padding:6px 4px;text-align:center;font-size:11px;cursor:pointer;color:#4a5568;border-bottom:2px solid transparent;background:#f8fafd}
+.np-tab:hover{color:#4a90d9}
+.np-tab--active{color:#4a90d9;border-bottom-color:#4a90d9;background:#fff;font-weight:600}
+.np-left-toolbar{display:flex;align-items:center;gap:4px;padding:4px 6px;border-bottom:1px solid #e2e8f0;flex-shrink:0;background:#f8fafd}
+.np-left-toolbar input{flex:1;padding:3px 6px;border:1px solid #d1d5db;border-radius:3px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
+.np-left-scroll{overflow-y:auto;flex:1}
+
+.np-gtbl{width:100%;border-collapse:collapse}
+.np-gtbl th{position:sticky;top:0;background:#f0f4f9;padding:4px 8px;text-align:left;font-size:11px;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;z-index:1}
+.np-gtbl th:hover{color:#4a90d9}
+.np-gtbl th.np-sort-asc::after{content:' \25B2';font-size:8px}
+.np-gtbl th.np-sort-desc::after{content:' \25BC';font-size:8px}
+.np-gtbl td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;white-space:nowrap}
+.np-gtbl tr:hover{background:#eef4fb}
+.np-gtbl tr.np-row--sel{background:#dbeafe}
+.np-gtbl .np-num{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px}
+
+.np-right{display:flex;flex-direction:column;overflow:hidden}
+.np-right-toolbar{display:flex;align-items:center;gap:4px;padding:4px 6px;border-bottom:1px solid #e2e8f0;flex-shrink:0;background:#f8fafd}
+.np-right-toolbar input{flex:1;padding:3px 6px;border:1px solid #d1d5db;border-radius:3px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
+.np-right-toolbar select{padding:3px 6px;border:1px solid #d1d5db;border-radius:3px;font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#4a5568}
+.np-right-info{font-size:11px;color:#94a3b8;white-space:nowrap}
+.np-copy-btn{padding:3px 8px;border:1px solid #d1d5db;border-radius:3px;background:#fff;font-size:10px;cursor:pointer;color:#4a5568;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+.np-copy-btn:hover{border-color:#4a90d9;color:#4a90d9}
+.np-copy-btn--ok{background:#22c55e;color:#fff;border-color:#22c55e}
+.np-xl-btn{padding:3px 8px;border:1px solid #d1d5db;border-radius:3px;background:#fff;font-size:10px;cursor:pointer;color:#4a5568;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+.np-xl-btn:hover{border-color:#22c55e;color:#22c55e}
+
+.np-right-scroll{overflow:auto;flex:1;position:relative}
+.np-rtbl{width:100%;border-collapse:collapse}
+.np-rtbl th{position:sticky;top:0;background:#f0f4f9;padding:4px 6px;text-align:left;font-size:10px;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;z-index:1}
+.np-rtbl th:hover{color:#4a90d9}
+.np-rtbl th.np-sort-asc::after{content:' \25B2';font-size:8px}
+.np-rtbl th.np-sort-desc::after{content:' \25BC';font-size:8px}
+.np-rtbl td{padding:3px 6px;border-bottom:1px solid #f0f4f9;font-size:10px;white-space:nowrap}
+.np-rtbl tr:hover{background:#eef4fb}
+.np-rtbl .np-num{text-align:right;font-family:'JetBrains Mono',monospace}
+
+.np-loading{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
+.np-loading-bar{width:200px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;margin-top:8px}
+.np-loading-fill{height:100%;background:#4a90d9;border-radius:2px;transition:width .3s}
+.np-loading-text{font-size:11px;color:#4a5568;margin-top:6px}
+.np-empty{display:none;align-items:center;justify-content:center;height:200px;color:#94a3b8;font-size:13px}
+
+.np-cell-sel{background:#dbeafe !important}
+.np-cell-rng{background:#bfdbfe !important}
+
+.np-filter-row{display:flex;align-items:center;gap:4px;padding:4px 6px;border-bottom:1px solid #e2e8f0;flex-shrink:0;background:#fff}
+.np-filter-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;background:#eef4fb;color:#4a90d9;border:1px solid #b8d4f0}
+.np-filter-chip button{background:none;border:none;cursor:pointer;font-size:10px;color:#4a90d9;padding:0;line-height:1}
+.np-filter-chip button:hover{color:#e85d5d}
+</style>
+
+<div class="np" id="npRoot">
+  <div class="np-ctrl">
+    <input type="date" id="npSD">
+    <span style="color:#94a3b8">~</span>
+    <input type="date" id="npED">
+    <button class="np-ctrl-btn np-ctrl-btn--primary" onclick="npFetch()">조회</button>
+    <div class="np-ctrl-sep"></div>
+    <button class="np-ctrl-btn" onclick="npHot('today',this)">오늘</button>
+    <button class="np-ctrl-btn" onclick="npHot('thisMonth',this)">이번달</button>
+    <button class="np-ctrl-btn" onclick="npHot('lastMonth',this)">지난달</button>
+    <button class="np-ctrl-btn" onclick="npHot('twoMonthsAgo',this)">지지난달</button>
+    <button class="np-ctrl-btn" onclick="npHot('thisYear',this)">올해</button>
+    <button class="np-ctrl-btn" onclick="npHot('lastYear',this)">작년</button>
+    <span class="np-ctrl-status" id="npStatus"></span>
+  </div>
+
+  <div class="np-cards" id="npCards" style="display:none">
+    <div class="np-card"><div class="np-card__label">총 주문건수</div><div class="np-card__value" id="npC1">-</div></div>
+    <div class="np-card"><div class="np-card__label">총 주문금액</div><div class="np-card__value" id="npC2">-</div></div>
+    <div class="np-card"><div class="np-card__label">총 취소금액</div><div class="np-card__value" id="npC3">-</div></div>
+    <div class="np-card"><div class="np-card__label">최종결제금액</div><div class="np-card__value" id="npC4">-</div></div>
+    <div class="np-card"><div class="np-card__label">사용자수</div><div class="np-card__value" id="npC5">-</div></div>
+    <div class="np-card"><div class="np-card__label">제휴점수</div><div class="np-card__value" id="npC6">-</div></div>
+  </div>
+
+  <div class="np-empty" id="npEmpty">조회 버튼을 눌러 데이터를 불러오세요</div>
+
+  <div class="np-body" id="npBody" style="display:none">
+    <!-- LEFT: Group Summary -->
+    <div class="np-left">
+      <div class="np-tabs">
+        <div class="np-tab np-tab--active" onclick="npSetTab('company',this)">고객사별</div>
+        <div class="np-tab" onclick="npSetTab('store',this)">제휴점별</div>
+        <div class="np-tab" onclick="npSetTab('policy',this)">정책별</div>
+        <div class="np-tab" onclick="npSetTab('cause',this)">지급사유별</div>
+      </div>
+      <div class="np-left-toolbar">
+        <input type="text" id="npGSearch" placeholder="검색..." oninput="npRenderGroup()">
+        <button class="np-copy-btn" onclick="npCopyGroup(this)">복사</button>
+      </div>
+      <div class="np-left-scroll">
+        <table class="np-gtbl" id="npGTable">
+          <thead id="npGHead"></thead>
+          <tbody id="npGBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: Raw Data -->
+    <div class="np-right">
+      <div class="np-right-toolbar">
+        <input type="text" id="npRSearch" placeholder="전체 검색..." oninput="npFilterRaw()">
+        <select id="npCompanyFilter" onchange="npFilterRaw()">
+          <option value="">회사 전체</option>
+        </select>
+        <span class="np-right-info" id="npRInfo">0건</span>
+        <button class="np-copy-btn" onclick="npCopyRaw(this)">복사</button>
+        <button class="np-xl-btn" onclick="npExcelRaw()">Excel</button>
+      </div>
+      <div id="npFilterRow" class="np-filter-row" style="display:none"></div>
+      <div class="np-right-scroll" id="npRScroll">
+        <table class="np-rtbl" id="npRTable">
+          <thead id="npRHead"></thead>
+          <tbody id="npRBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="np-loading" id="npLoading" style="display:none">
+    <div style="font-size:13px;color:#4a5568;font-weight:600">데이터 조회 중</div>
+    <div class="np-loading-bar"><div class="np-loading-fill" id="npLoadFill" style="width:0%"></div></div>
+    <div class="np-loading-text" id="npLoadText">쿼리 실행 중...</div>
+  </div>
+</div>
+
+<script>
+/* ============ GLOBAL STATE ============ */
+var NP = {
+    PROXY: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
+    QID: 1259,
+    raw: [],
+    filtered: [],
+    grouped: [],
+    tab: 'company',
+    gSortCol: '',
+    gSortDir: 'desc',
+    rSortCol: '',
+    rSortDir: 'desc',
+    activeFilters: {},
+    selGroupIdx: -1,
+    RAW_COLS: [
+        {key:'회사명',label:'회사명',type:'s'},
+        {key:'제휴점명',label:'제휴점명',type:'s'},
+        {key:'사용자명',label:'사용자명',type:'s'},
+        {key:'사용자ID',label:'사용자ID',type:'s'},
+        {key:'정책명',label:'정책명',type:'s'},
+        {key:'지급사유',label:'지급사유',type:'s'},
+        {key:'주문금액',label:'주문금액(원)',type:'n'},
+        {key:'취소금액',label:'취소금액(원)',type:'n'},
+        {key:'최종결제금액',label:'최종결제(원)',type:'n'},
+        {key:'최초지급금액',label:'최초지급(원)',type:'n'},
+        {key:'포인트사용금액',label:'포인트사용(원)',type:'n'},
+        {key:'주문시간',label:'주문시간',type:'s'},
+        {key:'취소시간',label:'취소시간',type:'s'},
+        {key:'주문ID',label:'주문ID',type:'s'},
+        {key:'포인트지급ID',label:'포인트지급ID',type:'s'},
+        {key:'포인트사용 원본 주문ID',label:'원본주문ID',type:'s'}
+    ]
+};
+
+/* ============ UTILITIES ============ */
+function npN(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
+function npS(v){var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+(a/1e4).toFixed(0)+'만';return p+a.toLocaleString()}
+
+/* ============ DATE HOTKEYS ============ */
+function npHot(key, el) {
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth();
+    var s, e;
+    switch(key) {
+        case 'today':
+            s = e = new Date(y, m, now.getDate()); break;
+        case 'thisMonth':
+            s = new Date(y, m, 1); e = new Date(y, m + 1, 0); break;
+        case 'lastMonth':
+            s = new Date(y, m - 1, 1); e = new Date(y, m, 0); break;
+        case 'twoMonthsAgo':
+            s = new Date(y, m - 2, 1); e = new Date(y, m - 1, 0); break;
+        case 'thisYear':
+            s = new Date(y, 0, 1); e = new Date(y, 11, 31); break;
+        case 'lastYear':
+            s = new Date(y - 1, 0, 1); e = new Date(y - 1, 11, 31); break;
+    }
+    function fmt(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+    document.getElementById('npSD').value = fmt(s);
+    document.getElementById('npED').value = fmt(e);
+    document.querySelectorAll('.np-ctrl-btn:not(.np-ctrl-btn--primary)').forEach(function(b){b.classList.remove('np-ctrl-btn--active')});
+    if(el)el.classList.add('np-ctrl-btn--active');
+}
+
+/* ============ API ============ */
+function npApi(p) {
+    var qs = Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k])}).join('&');
+    return fetch(NP.PROXY + '?' + qs, {redirect:'follow'}).then(function(r){return r.json()});
+}
+
+/* ============ LOADING ============ */
+function npShowLoad(text,pct){
+    document.getElementById('npLoading').style.display='flex';
+    document.getElementById('npLoadText').textContent=text;
+    document.getElementById('npLoadFill').style.width=pct+'%';
+}
+function npHideLoad(){document.getElementById('npLoading').style.display='none'}
+
+/* ============ FETCH ============ */
+async function npFetch() {
+    var sd = document.getElementById('npSD').value;
+    var ed = document.getElementById('npED').value;
+    if (!sd || !ed) { npSetStatus('날짜를 선택하세요'); return; }
+
+    npShowLoad('쿼리 실행 중...', 10);
+    NP.activeFilters = {};
+    try {
+        var d = await npApi({action:'post', queryId:NP.QID, startdate:sd, enddate:ed, companyname:'전체'});
+        if (d.query_result) {
+            npShowLoad('데이터 처리 중...', 80);
+            npProcess(d.query_result.data.rows, sd, ed);
+        } else if (d.job) {
+            await npPoll(d.job.id, sd, ed);
+        } else {
+            throw new Error('응답 형식 오류');
+        }
+    } catch(err) {
+        npHideLoad();
+        npSetStatus('오류: ' + err.message);
+    }
+}
+
+async function npPoll(jid, sd, ed) {
+    for (var i = 0; i < 60; i++) {
+        npShowLoad('쿼리 실행 중... (' + (i+1) + '초)', Math.min(10 + i, 70));
+        await new Promise(function(r){setTimeout(r, 1000)});
+        var d = await npApi({action:'job', jobId:jid});
+        if (d.job && d.job.status === 3) {
+            npShowLoad('결과 로딩 중...', 75);
+            var res = await npApi({action:'result', resultId:d.job.query_result_id});
+            npShowLoad('데이터 처리 중...', 85);
+            npProcess(res.query_result.data.rows, sd, ed);
+            return;
+        }
+        if (d.job && d.job.status === 4) throw new Error('쿼리 실행 실패');
+    }
+    throw new Error('시간 초과');
+}
+
+/* ============ PROCESS ============ */
+function npProcess(rows, sd, ed) {
+    NP.raw = rows.map(function(r) {
+        return {
+            '주문ID': String(r['주문ID']||''),
+            '사용자명': String(r['사용자명']||''),
+            '사용자ID': String(r['사용자ID']||''),
+            '회사명': String(r['회사명']||''),
+            '제휴점명': String(r['제휴점명']||''),
+            '주문금액': Number(r['주문금액'])||0,
+            '취소금액': Number(r['취소금액'])||0,
+            '정책ID': String(r['정책ID']||''),
+            '정책명': String(r['정책명']||''),
+            '최종결제금액': Number(r['최종결제금액'])||0,
+            '주문시간': String(r['주문시간']||''),
+            '취소시간': String(r['취소시간']||''),
+            '지급사유': String(r['지급사유']||''),
+            '최초지급금액': Number(r['최초지급금액'])||0,
+            '포인트지급ID': String(r['포인트지급ID']||''),
+            '포인트사용금액': Number(r['포인트사용금액'])||0,
+            '포인트사용 원본 주문ID': String(r['포인트사용 원본 주문ID']||'')
+        };
+    });
+    NP.filtered = NP.raw.slice();
+    npBuildCompanyFilter();
+    npRenderCards();
+    npRenderGroup();
+    npFilterRaw();
+    npShowLoad('완료', 100);
+    setTimeout(npHideLoad, 300);
+    document.getElementById('npCards').style.display='grid';
+    document.getElementById('npBody').style.display='grid';
+    document.getElementById('npEmpty').style.display='none';
+    npSetStatus(sd + ' ~ ' + ed + ' / ' + NP.raw.length + '건');
+}
+
+/* ============ SUMMARY CARDS ============ */
+function npRenderCards() {
+    var d = NP.filtered;
+    var totalAmt = 0, cancelAmt = 0, finalAmt = 0, users = new Set(), stores = new Set();
+    d.forEach(function(r){
+        totalAmt += r['주문금액'];
+        cancelAmt += r['취소금액'];
+        finalAmt += r['최종결제금액'];
+        users.add(r['사용자ID']);
+        stores.add(r['제휴점명']);
+    });
+    document.getElementById('npC1').textContent = d.length.toLocaleString() + '건';
+    document.getElementById('npC2').textContent = npS(totalAmt);
+    document.getElementById('npC3').textContent = npS(cancelAmt);
+    document.getElementById('npC4').textContent = npS(finalAmt);
+    document.getElementById('npC5').textContent = users.size.toLocaleString() + '명';
+    document.getElementById('npC6').textContent = stores.size.toLocaleString() + '곳';
+}
+
+/* ============ COMPANY FILTER DROPDOWN ============ */
+function npBuildCompanyFilter() {
+    var sel = document.getElementById('npCompanyFilter');
+    var companies = {};
+    NP.raw.forEach(function(r){ companies[r['회사명']] = true; });
+    var names = Object.keys(companies).sort();
+    sel.innerHTML = '<option value="">회사 전체</option>';
+    names.forEach(function(n){
+        sel.innerHTML += '<option value="'+n+'">'+n+'</option>';
+    });
+}
+
+/* ============ ACTIVE FILTERS ============ */
+function npAddFilter(key, value) {
+    NP.activeFilters[key] = value;
+    npFilterRaw();
+}
+function npRemoveFilter(key) {
+    delete NP.activeFilters[key];
+    npFilterRaw();
+}
+function npRenderFilterChips() {
+    var row = document.getElementById('npFilterRow');
+    var keys = Object.keys(NP.activeFilters);
+    if (keys.length === 0) { row.style.display = 'none'; return; }
+    row.style.display = 'flex';
+    row.innerHTML = keys.map(function(k){
+        return '<span class="np-filter-chip">' + k + ': ' + NP.activeFilters[k] +
+               ' <button onclick="npRemoveFilter(\''+k+'\')">&times;</button></span>';
+    }).join('');
+}
+
+/* ============ LEFT: GROUP TABLE ============ */
+function npSetTab(tab, el) {
+    NP.tab = tab;
+    NP.gSortCol = '';
+    NP.gSortDir = 'desc';
+    NP.selGroupIdx = -1;
+    document.querySelectorAll('.np-tab').forEach(function(t){t.classList.remove('np-tab--active')});
+    if(el)el.classList.add('np-tab--active');
+    npRenderGroup();
+}
+
+function npGroupData() {
+    var keyField, labelField;
+    switch(NP.tab) {
+        case 'company': keyField = '회사명'; labelField = '회사명'; break;
+        case 'store':   keyField = '제휴점명'; labelField = '제휴점명'; break;
+        case 'policy':  keyField = '정책명'; labelField = '정책명'; break;
+        case 'cause':   keyField = '지급사유'; labelField = '지급사유'; break;
+    }
+    var map = {};
+    NP.filtered.forEach(function(r) {
+        var k = r[keyField] || '(없음)';
+        if (!map[k]) map[k] = {label:k, key:keyField, count:0, orderAmt:0, cancelAmt:0, finalAmt:0, users:new Set()};
+        var g = map[k];
+        g.count++;
+        g.orderAmt += r['주문금액'];
+        g.cancelAmt += r['취소금액'];
+        g.finalAmt += r['최종결제금액'];
+        g.users.add(r['사용자ID']);
+    });
+    return Object.values(map).map(function(g){
+        g.userCount = g.users.size;
+        return g;
+    });
+}
+
+function npSortGroup(col, el) {
+    if (NP.gSortCol === col) {
+        NP.gSortDir = NP.gSortDir === 'desc' ? 'asc' : 'desc';
+    } else {
+        NP.gSortCol = col;
+        NP.gSortDir = 'desc';
+    }
+    npRenderGroup();
+}
+
+function npRenderGroup() {
+    var search = (document.getElementById('npGSearch').value||'').toLowerCase();
+    var groups = npGroupData();
+    if (search) groups = groups.filter(function(g){ return g.label.toLowerCase().indexOf(search) >= 0; });
+
+    if (NP.gSortCol) {
+        var dir = NP.gSortDir === 'asc' ? 1 : -1;
+        groups.sort(function(a,b){
+            var va = a[NP.gSortCol], vb = b[NP.gSortCol];
+            if (typeof va === 'string') return va.localeCompare(vb) * dir;
+            return (va - vb) * dir;
+        });
+    } else {
+        groups.sort(function(a,b){ return b.finalAmt - a.finalAmt; });
+    }
+    NP.grouped = groups;
+
+    var tabLabel = NP.tab === 'company' ? '고객사' : NP.tab === 'store' ? '제휴점' : NP.tab === 'policy' ? '정책' : '지급사유';
+    var cols = [
+        {key:'label',label:tabLabel,type:'s'},
+        {key:'count',label:'건수',type:'n'},
+        {key:'orderAmt',label:'주문액(원)',type:'n'},
+        {key:'cancelAmt',label:'취소액(원)',type:'n'},
+        {key:'finalAmt',label:'최종결제(원)',type:'n'},
+        {key:'userCount',label:'사용자(명)',type:'n'}
+    ];
+
+    var head = document.getElementById('npGHead');
+    head.innerHTML = '<tr>' + cols.map(function(c){
+        var cls = NP.gSortCol===c.key ? (NP.gSortDir==='asc'?'np-sort-asc':'np-sort-desc') : '';
+        return '<th class="'+cls+'" onclick="npSortGroup(\''+c.key+'\',this)">'+c.label+'</th>';
+    }).join('') + '</tr>';
+
+    var body = document.getElementById('npGBody');
+    if (groups.length === 0) {
+        body.innerHTML = '<tr><td colspan="'+cols.length+'" style="text-align:center;color:#94a3b8;padding:20px">데이터 없음</td></tr>';
+        return;
+    }
+    body.innerHTML = groups.map(function(g, i){
+        var sel = i === NP.selGroupIdx ? ' np-row--sel' : '';
+        return '<tr class="'+sel+'" onclick="npSelectGroup('+i+')" ondblclick="npDrillGroup('+i+')">' +
+            '<td title="더블클릭: 필터 적용">'+g.label+'</td>' +
+            '<td class="np-num">'+npN(g.count)+'</td>' +
+            '<td class="np-num">'+npN(g.orderAmt)+'</td>' +
+            '<td class="np-num">'+npN(g.cancelAmt)+'</td>' +
+            '<td class="np-num">'+npN(g.finalAmt)+'</td>' +
+            '<td class="np-num">'+npN(g.userCount)+'</td></tr>';
+    }).join('');
+}
+
+function npSelectGroup(i) {
+    NP.selGroupIdx = i;
+    npRenderGroup();
+}
+
+function npDrillGroup(i) {
+    var g = NP.grouped[i];
+    if (!g) return;
+    npAddFilter(g.key, g.label);
+}
+
+/* ============ RIGHT: RAW TABLE ============ */
+function npFilterRaw() {
+    var search = (document.getElementById('npRSearch').value||'').toLowerCase();
+    var compFilter = document.getElementById('npCompanyFilter').value;
+
+    NP.filtered = NP.raw.filter(function(r) {
+        if (compFilter && r['회사명'] !== compFilter) return false;
+        var keys = Object.keys(NP.activeFilters);
+        for (var k = 0; k < keys.length; k++) {
+            if (r[keys[k]] !== NP.activeFilters[keys[k]]) return false;
+        }
+        if (search) {
+            var hay = Object.values(r).join(' ').toLowerCase();
+            if (hay.indexOf(search) < 0) return false;
+        }
+        return true;
+    });
+    npRenderFilterChips();
+    npRenderCards();
+    npRenderGroup();
+    npRenderRaw();
+}
+
+function npSortRaw(col) {
+    if (NP.rSortCol === col) {
+        NP.rSortDir = NP.rSortDir === 'desc' ? 'asc' : 'desc';
+    } else {
+        NP.rSortCol = col;
+        NP.rSortDir = 'desc';
+    }
+    npRenderRaw();
+}
+
+function npRenderRaw() {
+    var data = NP.filtered.slice();
+    if (NP.rSortCol) {
+        var dir = NP.rSortDir === 'asc' ? 1 : -1;
+        var colDef = NP.RAW_COLS.find(function(c){return c.key===NP.rSortCol});
+        data.sort(function(a,b){
+            var va = a[NP.rSortCol], vb = b[NP.rSortCol];
+            if (colDef && colDef.type === 'n') return ((Number(va)||0) - (Number(vb)||0)) * dir;
+            return String(va||'').localeCompare(String(vb||'')) * dir;
+        });
+    }
+
+    document.getElementById('npRInfo').textContent = data.length.toLocaleString() + '건';
+
+    var head = document.getElementById('npRHead');
+    head.innerHTML = '<tr>' + NP.RAW_COLS.map(function(c){
+        var cls = NP.rSortCol===c.key ? (NP.rSortDir==='asc'?'np-sort-asc':'np-sort-desc') : '';
+        return '<th class="'+cls+'" onclick="npSortRaw(\''+c.key+'\')">'+c.label+'</th>';
+    }).join('') + '</tr>';
+
+    var body = document.getElementById('npRBody');
+    if (data.length === 0) {
+        body.innerHTML = '<tr><td colspan="'+NP.RAW_COLS.length+'" style="text-align:center;color:#94a3b8;padding:20px">데이터 없음</td></tr>';
+        return;
+    }
+
+    var maxRows = 5000;
+    var showing = data.slice(0, maxRows);
+    body.innerHTML = showing.map(function(r){
+        return '<tr>' + NP.RAW_COLS.map(function(c){
+            var v = r[c.key];
+            if (c.type === 'n') return '<td class="np-num">' + npN(Number(v)||0) + '</td>';
+            return '<td>' + (v||'-') + '</td>';
+        }).join('') + '</tr>';
+    }).join('');
+
+    if (data.length > maxRows) {
+        body.innerHTML += '<tr><td colspan="'+NP.RAW_COLS.length+'" style="text-align:center;color:#94a3b8;padding:8px">상위 '+maxRows+'건만 표시 (전체 '+data.length+'건)</td></tr>';
+    }
+}
+
+/* ============ CLIPBOARD: GROUP ============ */
+function npCopyGroup(btn) {
+    var groups = NP.grouped;
+    if (!groups.length) return;
+    var tabLabel = NP.tab === 'company' ? '고객사' : NP.tab === 'store' ? '제휴점' : NP.tab === 'policy' ? '정책' : '지급사유';
+    var lines = [tabLabel+'\t건수\t주문액\t취소액\t최종결제액\t사용자수'];
+    groups.forEach(function(g){
+        lines.push(g.label+'\t'+g.count+'\t'+g.orderAmt+'\t'+g.cancelAmt+'\t'+g.finalAmt+'\t'+g.userCount);
+    });
+    npClip(lines.join('\n'), btn);
+}
+
+/* ============ CLIPBOARD: RAW ============ */
+function npCopyRaw(btn) {
+    var data = NP.filtered;
+    if (!data.length) return;
+    var headers = NP.RAW_COLS.map(function(c){return c.label});
+    var lines = [headers.join('\t')];
+    data.forEach(function(r){
+        lines.push(NP.RAW_COLS.map(function(c){
+            var v = r[c.key];
+            return c.type === 'n' ? (Number(v)||0) : (v||'');
+        }).join('\t'));
+    });
+    npClip(lines.join('\n'), btn);
+}
+
+function npClip(text, btn) {
+    navigator.clipboard.writeText(text).then(function(){
+        if(btn){
+            btn.classList.add('np-copy-btn--ok');
+            btn.textContent='복사 완료';
+            setTimeout(function(){btn.classList.remove('np-copy-btn--ok');btn.textContent='복사'},1500);
+        }
+    });
+}
+
+/* ============ EXCEL EXPORT ============ */
+function npExcelRaw() {
+    var data = NP.filtered;
+    if (!data.length) return;
+
+    var headers = NP.RAW_COLS.map(function(c){return c.label});
+    var xmlRows = data.map(function(r){
+        return '<Row>' + NP.RAW_COLS.map(function(c){
+            var v = r[c.key];
+            if (c.type === 'n') return '<Cell><Data ss:Type="Number">'+(Number(v)||0)+'</Data></Cell>';
+            return '<Cell><Data ss:Type="String">'+ String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') +'</Data></Cell>';
+        }).join('') + '</Row>';
+    });
+
+    var xml = '<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n' +
+        '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n' +
+        '<Worksheet ss:Name="수기정산"><Table>\n' +
+        '<Row>' + headers.map(function(h){return '<Cell><Data ss:Type="String">'+h+'</Data></Cell>'}).join('') + '</Row>\n' +
+        xmlRows.join('\n') + '\n</Table></Worksheet></Workbook>';
+
+    var blob = new Blob([xml], {type:'application/vnd.ms-excel'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var sd = document.getElementById('npSD').value;
+    var ed = document.getElementById('npED').value;
+    a.download = '네패스_수기정산_' + sd + '_' + ed + '.xls';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+/* ============ STATUS ============ */
+function npSetStatus(t){document.getElementById('npStatus').textContent=t}
+
+/* ============ CELL DRAG SELECT (RAW TABLE) ============ */
+(function(){
+    var drag=false, startR=-1, startC=-1, endR=-1, endC=-1, tbl=null;
+    function cells(){if(!tbl)return;var rows=tbl.querySelectorAll('tbody tr');rows.forEach(function(tr){tr.querySelectorAll('td').forEach(function(td){td.classList.remove('np-cell-sel','np-cell-rng')})})}
+    function mark(){if(!tbl)return;var rows=tbl.querySelectorAll('tbody tr');var r1=Math.min(startR,endR),r2=Math.max(startR,endR),c1=Math.min(startC,endC),c2=Math.max(startC,endC);
+        for(var r=r1;r<=r2;r++){var tr=rows[r];if(!tr)continue;var tds=tr.querySelectorAll('td');for(var c=c1;c<=c2;c++){if(tds[c])tds[c].classList.add('np-cell-rng')}}}
+    document.addEventListener('mousedown',function(e){
+        var td=e.target.closest('.np-rtbl td');if(!td)return;
+        tbl=td.closest('.np-rtbl');var tr=td.parentElement;
+        startR=endR=Array.from(tr.parentElement.children).indexOf(tr);
+        startC=endC=Array.from(tr.children).indexOf(td);
+        drag=true;cells();mark();
+    });
+    document.addEventListener('mousemove',function(e){
+        if(!drag)return;var td=e.target.closest('.np-rtbl td');if(!td)return;
+        var tr=td.parentElement;endR=Array.from(tr.parentElement.children).indexOf(tr);endC=Array.from(tr.children).indexOf(td);
+        cells();mark();
+    });
+    document.addEventListener('mouseup',function(){drag=false});
+    document.addEventListener('keydown',function(e){
+        if((e.ctrlKey||e.metaKey)&&e.key==='c'){
+            if(!tbl)return;var rows=tbl.querySelectorAll('tbody tr');var sel=[];
+            rows.forEach(function(tr){var line=[];tr.querySelectorAll('td').forEach(function(td){
+                if(td.classList.contains('np-cell-rng'))line.push(td.textContent.replace(/,/g,''))});
+                if(line.length)sel.push(line.join('\t'))});
+            if(sel.length){e.preventDefault();navigator.clipboard.writeText(sel.join('\n'))}
+        }
+    });
+})();
+
+/* ============ INIT ============ */
+(function npInit(){
+    npHot('thisMonth', document.querySelectorAll('.np-ctrl-btn:not(.np-ctrl-btn--primary)')[1]);
+    document.getElementById('npEmpty').style.display='flex';
+})();
+</script>
