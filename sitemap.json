@@ -83,6 +83,13 @@
           "icon": "folder",
           "desc": "통계 대시보드",
           "children": [
+                        {
+              "id": "service-dashboard",
+              "title": "서비스 대시보드",
+              "icon": "doc",
+              "desc": "서비스에 대한 전체 대시보드",
+              "file": "docs/ops/service-dashboard.html"
+            },
             {
               "id": "welfare-dashboard",
               "title": "복지대장 지급현황",
