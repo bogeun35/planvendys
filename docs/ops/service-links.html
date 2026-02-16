@@ -1,0 +1,230 @@
+<!--
+title: 서비스 링크
+meta: 최종 수정: 2026.02.16
+-->
+
+<style>
+.sl { font-family: 'Noto Sans KR', sans-serif; color: #1a2332; font-size: 12px; line-height: 1.5; }
+.sl-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+.sl-col { }
+
+/* Section */
+.sl-sec { margin-bottom: 14px; }
+.sl-sec-h {
+    font-size: 11px; font-weight: 700; color: #4a90d9;
+    letter-spacing: 0.5px; margin: 0 0 6px 0;
+    padding-bottom: 4px; border-bottom: 1px solid #e2e8f0;
+}
+
+/* Row */
+.sl-item { display: flex; align-items: center; justify-content: space-between; padding: 3px 0; }
+.sl-info { min-width: 0; }
+.sl-name { font-size: 12px; font-weight: 600; color: #1a2332; }
+.sl-sub { font-size: 11px; color: #94a3b8; margin-top: -1px; }
+
+/* Buttons */
+.sl-btns { display: flex; gap: 4px; flex-shrink: 0; margin-left: 10px; }
+.sl-btn {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 8px; border-radius: 3px; text-decoration: none;
+    letter-spacing: 0.3px; transition: filter 0.12s, transform 0.1s;
+    line-height: 1.6;
+}
+.sl-btn:hover { filter: brightness(0.92); transform: translateY(-1px); }
+.sl-btn--dev { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.sl-btn--prod { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.sl-btn--link { background: #eef4fb; color: #2563eb; border: 1px solid #dbeafe; }
+.sl-btn--na {
+    background: #f8fafc; color: #cbd5e1; border: 1px solid #e2e8f0;
+    pointer-events: none; cursor: default;
+}
+
+/* Work 3-col */
+.sl-work-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 24px; }
+</style>
+
+<div class="sl">
+    <div class="sl-split">
+        <!-- LEFT -->
+        <div class="sl-col">
+            <div class="sl-sec">
+                <div class="sl-sec-h">ADMIN</div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">Vone</div>
+                        <div class="sl-sub">통합 관리 시스템</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="https://dev-vone.mealc.co.kr/" target="_blank">DEV</a>
+                        <a class="sl-btn sl-btn--prod" href="https://vone.sikdae.com/" target="_blank">PROD</a>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">NGR</div>
+                        <div class="sl-sub">식권대장 서비스 컨트롤</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="https://dev-ngr.mealc.co.kr/" target="_blank">DEV</a>
+                        <a class="sl-btn sl-btn--prod" href="https://ngr.sikdae.com/" target="_blank">PROD</a>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">정산 시스템</div>
+                        <div class="sl-sub">정산 내역 관리</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="https://dev-settlement-web.mealc.co.kr/" target="_blank">DEV</a>
+                        <a class="sl-btn sl-btn--prod" href="https://js.sikdae.com/" target="_blank">PROD</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sl-sec">
+                <div class="sl-sec-h">STORE</div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">사장님 웹</div>
+                        <div class="sl-sub">입점 사장님 서비스 현황</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="https://dev-store.mealc.co.kr/" target="_blank">DEV</a>
+                        <a class="sl-btn sl-btn--prod" href="https://store.sikdae.com/" target="_blank">PROD</a>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">사장님 앱</div>
+                        <div class="sl-sub">사장님 간편 확인 APP</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="https://dev-mstore.mealc.co.kr/" target="_blank">DEV</a>
+                        <a class="sl-btn sl-btn--prod" href="https://mstore.sikdae.com/" target="_blank">PROD</a>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">구내식당 바코드</div>
+                        <div class="sl-sub">구내식당 바코드 서비스</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="https://dev-cafeteria.mealc.co.kr/" target="_blank">DEV</a>
+                        <a class="sl-btn sl-btn--prod" href="https://store-cafeteria.sikdae.com/" target="_blank">PROD</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="sl-col">
+            <div class="sl-sec">
+                <div class="sl-sec-h">COMPANY</div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">대장마켓플레이스</div>
+                        <div class="sl-sub">고객사 관리자 페이지</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="https://dev-corp.mealc.co.kr/" target="_blank">DEV</a>
+                        <a class="sl-btn sl-btn--prod" href="https://corp.sikdae.com/" target="_blank">PROD</a>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">식권대장 APP</div>
+                        <div class="sl-sub">웹뷰 (홈)</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="http://dev-sm.mealc.co.kr" target="_blank">DEV</a>
+                        <span class="sl-btn sl-btn--na">PROD</span>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">식권대장 APP</div>
+                        <div class="sl-sub">웹뷰 (식품관)</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="http://dev-sm.mealc.co.kr/welfare" target="_blank">DEV</a>
+                        <span class="sl-btn sl-btn--na">PROD</span>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">복지대장몰</div>
+                        <div class="sl-sub">랜딩페이지</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="http://dev-sm.mealc.co.kr/ezwelWelfareMall" target="_blank">DEV</a>
+                        <span class="sl-btn sl-btn--na">PROD</span>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">홍보 웹사이트</div>
+                        <div class="sl-sub">식권대장 홍보용</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--dev" href="https://homepage.mealc.co.kr/" target="_blank">DEV</a>
+                        <a class="sl-btn sl-btn--prod" href="https://sikdae.com/" target="_blank">PROD</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sl-sec">
+                <div class="sl-sec-h">ETC</div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">고객 매뉴얼</div>
+                        <div class="sl-sub">Notion 기반</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--link" href="https://sikdae.notion.site/4d43de4b353049a0a9714066e4dc56f1" target="_blank">OPEN</a>
+                    </div>
+                </div>
+                <div class="sl-item">
+                    <div class="sl-info">
+                        <div class="sl-name">고객 매뉴얼</div>
+                        <div class="sl-sub">Oopy 기반</div>
+                    </div>
+                    <div class="sl-btns">
+                        <a class="sl-btn sl-btn--link" href="https://vendyss.oopy.io/" target="_blank">OPEN</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WORK - full width -->
+    <div class="sl-sec" style="margin-top: 2px;">
+        <div class="sl-sec-h">WORK</div>
+        <div class="sl-work-grid">
+            <div class="sl-item">
+                <div class="sl-info"><div class="sl-name">Datadog</div><div class="sl-sub">서비스 로그 모니터링</div></div>
+                <div class="sl-btns"><a class="sl-btn sl-btn--link" href="https://app.datadoghq.com/logs" target="_blank">OPEN</a></div>
+            </div>
+            <div class="sl-item">
+                <div class="sl-info"><div class="sl-name">Google Analytics</div><div class="sl-sub">사용자 데이터 분석</div></div>
+                <div class="sl-btns"><a class="sl-btn sl-btn--link" href="https://analytics.google.com/" target="_blank">OPEN</a></div>
+            </div>
+            <div class="sl-item">
+                <div class="sl-info"><div class="sl-name">Redash</div><div class="sl-sub">데이터 추출/분석</div></div>
+                <div class="sl-btns"><a class="sl-btn sl-btn--link" href="https://redash.sikdae.com/" target="_blank">OPEN</a></div>
+            </div>
+            <div class="sl-item">
+                <div class="sl-info"><div class="sl-name">Swagger</div><div class="sl-sub">API 문서</div></div>
+                <div class="sl-btns"><a class="sl-btn sl-btn--link" href="https://api-docs.mealc.co.kr/" target="_blank">OPEN</a></div>
+            </div>
+            <div class="sl-item">
+                <div class="sl-info"><div class="sl-name">Confluence</div><div class="sl-sub">업무 문서</div></div>
+                <div class="sl-btns"><span class="sl-btn sl-btn--na">OPEN</span></div>
+            </div>
+            <div class="sl-item">
+                <div class="sl-info"><div class="sl-name">JIRA</div><div class="sl-sub">이슈 트래커</div></div>
+                <div class="sl-btns"><span class="sl-btn sl-btn--na">OPEN</span></div>
+            </div>
+        </div>
+    </div>
+</div>
