@@ -9,38 +9,6 @@
           "icon": "folder",
           "desc": "업무용 사이트맵",
           "file": "docs/sitemap/vone.html",
-          "children": [
-            {
-              "id": "sikgwon-admin",
-              "title": "관리자 기능",
-              "icon": "doc",
-              "desc": "기업 관리자 대시보드",
-              "file": "docs/services/sikgwon/admin.html",
-              "children": [
-                {
-                  "id": "sikgwon-admin-report",
-                  "title": "리포트",
-                  "icon": "doc",
-                  "desc": "정산/사용 리포트",
-                  "file": "docs/services/sikgwon/admin-report.html"
-                }
-              ]
-            },
-            {
-              "id": "sikgwon-app",
-              "title": "사용자 앱",
-              "icon": "doc",
-              "desc": "임직원용 모바일 앱",
-              "file": "docs/services/sikgwon/app.html"
-            },
-            {
-              "id": "sikgwon-store",
-              "title": "가맹점 관리",
-              "icon": "doc",
-              "desc": "가맹점 등록/운영",
-              "file": "docs/services/sikgwon/store.html"
-            }
-          ]
         },
         {
           "id": "bokji",
