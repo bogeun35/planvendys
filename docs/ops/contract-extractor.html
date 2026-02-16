@@ -1,101 +1,77 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>수기 계약서 데이터 추출기</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+title: 수기 계약서 추출기
+meta: 식권대장 PDF → Excel 변환
+-->
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#f8fafd;--surface:#fff;--surface-alt:#f0f4f9;
-  --border:#e2e8f0;--border-light:#eef2f7;
-  --text:#1a2332;--text-sub:#4a5568;--text-muted:#94a3b8;
-  --accent:#4a90d9;--accent-bg:#eef4fb;--accent-hover:#3a7bc8;
-  --success:#22c55e;--success-bg:#f0fdf4;
-  --danger:#e85d5d;--danger-bg:#fef2f2;
-  --warning:#d49a2a;--warning-bg:#fefce8;
-  --mono:'JetBrains Mono',monospace;
-}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
-.ce-header{
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:0 24px;height:42px;display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;
-}
-.ce-header__title{font-size:14px;font-weight:600}
-.ce-header__sub{font-size:11px;color:var(--text-muted);margin-left:8px;font-weight:400}
-.ce-header__actions{display:flex;gap:6px}
+.ce *{margin:0;padding:0;box-sizing:border-box}
+.ce{font-family:'Noto Sans KR',sans-serif;color:#1a2332;font-size:13px;line-height:1.5;display:flex;flex-direction:column;gap:10px}
+.ce-ctrl{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:2px 0}
 .ce-btn{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:5px 12px;border:1px solid var(--border);border-radius:3px;
-  background:var(--surface);color:var(--text-sub);font-family:inherit;
+  display:inline-flex;align-items:center;
+  padding:5px 12px;border:1px solid #e2e8f0;border-radius:3px;
+  background:#fff;color:#4a5568;font-family:inherit;
   font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;
 }
-.ce-btn:hover{background:var(--surface-alt);border-color:#ccd5e0}
-.ce-btn--primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.ce-btn--primary:hover{background:var(--accent-hover)}
+.ce-btn:hover{background:#f0f4f9;border-color:#ccd5e0}
+.ce-btn--primary{background:#4a90d9;border-color:#4a90d9;color:#fff}
+.ce-btn--primary:hover{background:#3a7bc8}
 .ce-btn--primary:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
-.ce-btn--success{background:var(--success);border-color:var(--success);color:#fff;font-weight:600}
+.ce-btn--success{background:#22c55e;border-color:#22c55e;color:#fff;font-weight:600}
 .ce-btn--success:hover{background:#1db954}
 .ce-btn--success:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
-.ce-btn--copied{background:var(--success)!important;border-color:var(--success)!important;color:#fff!important}
-.ce-main{max-width:1440px;margin:0 auto;padding:14px 24px;display:flex;flex-direction:column;gap:10px}
+.ce-btn--copied{background:#22c55e!important;border-color:#22c55e!important;color:#fff!important}
 .ce-drop{
-  border:1.5px dashed var(--border);border-radius:3px;
-  padding:28px 20px;text-align:center;background:var(--surface);
-  cursor:pointer;position:relative;transition:all .2s;
+  border:1.5px dashed #e2e8f0;border-radius:3px;
+  padding:28px 20px;text-align:center;background:#fff;
+  cursor:pointer;transition:all .2s;user-select:none;
 }
-.ce-drop:hover,.ce-drop.drag-over{border-color:var(--accent);background:var(--accent-bg)}
-.ce-drop__text{font-size:13px;font-weight:500;color:var(--text-sub)}
-.ce-drop__hint{font-size:11px;color:var(--text-muted);margin-top:2px}
-.ce-drop input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.ce-drop:hover,.ce-drop.drag-over{border-color:#4a90d9;background:#eef4fb}
+.ce-drop__text{font-size:13px;font-weight:500;color:#4a5568}
+.ce-drop__hint{font-size:11px;color:#94a3b8;margin-top:2px}
 .ce-stats{display:flex;gap:8px}
 .ce-stat{
-  background:var(--surface);border:1px solid var(--border);border-radius:3px;
+  background:#fff;border:1px solid #e2e8f0;border-radius:3px;
   padding:8px 14px;flex:1;display:flex;align-items:baseline;gap:8px;
 }
-.ce-stat__label{font-size:11px;color:var(--text-muted);font-weight:500}
-.ce-stat__value{font-family:var(--mono);font-size:16px;font-weight:600}
-.ce-stat__value--success{color:var(--success)}
-.ce-stat__value--fail{color:var(--danger)}
-.ce-panel{background:var(--surface);border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.ce-stat__label{font-size:11px;color:#94a3b8;font-weight:500}
+.ce-stat__value{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600}
+.ce-stat__value--success{color:#22c55e}
+.ce-stat__value--fail{color:#e85d5d}
+.ce-panel{background:#fff;border:1px solid #e2e8f0;border-radius:3px;overflow:hidden}
 .ce-panel__head{
   display:flex;align-items:center;justify-content:space-between;
-  padding:7px 14px;border-bottom:1px solid var(--border);background:var(--surface-alt);
+  padding:7px 14px;border-bottom:1px solid #e2e8f0;background:#f0f4f9;
 }
 .ce-panel__title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
 .ce-panel__badge{
-  background:var(--accent-bg);color:var(--accent);font-family:var(--mono);
+  background:#eef4fb;color:#4a90d9;font-family:'JetBrains Mono',monospace;
   font-size:10px;font-weight:600;padding:1px 7px;border-radius:8px;
 }
 .ce-panel__actions{display:flex;gap:6px}
 .ce-files{max-height:160px;overflow-y:auto}
 .ce-file{
   display:flex;align-items:center;padding:5px 14px;
-  border-bottom:1px solid var(--border-light);gap:10px;transition:background .1s;
+  border-bottom:1px solid #eef2f7;gap:10px;transition:background .1s;
 }
 .ce-file:last-child{border-bottom:none}
-.ce-file:hover{background:var(--surface-alt)}
-.ce-file__num{font-family:var(--mono);font-size:10px;color:var(--text-muted);min-width:18px;text-align:center}
+.ce-file:hover{background:#f0f4f9}
+.ce-file__num{font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8;min-width:18px;text-align:center}
 .ce-file__name{flex:1;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ce-file__size{font-family:var(--mono);font-size:10px;color:var(--text-muted)}
+.ce-file__size{font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8}
 .ce-file__status{font-size:10px;padding:1px 8px;border-radius:8px;font-weight:500}
-.ce-file__status--pending{background:#f0f1f5;color:var(--text-muted)}
-.ce-file__status--processing{background:var(--warning-bg);color:var(--warning)}
-.ce-file__status--done{background:var(--success-bg);color:var(--success)}
-.ce-file__status--error{background:var(--danger-bg);color:var(--danger)}
+.ce-file__status--pending{background:#f0f1f5;color:#94a3b8}
+.ce-file__status--processing{background:#fefce8;color:#d49a2a}
+.ce-file__status--done{background:#f0fdf4;color:#22c55e}
+.ce-file__status--error{background:#fef2f2;color:#e85d5d}
 .ce-file__remove{
-  background:none;border:none;color:var(--text-muted);cursor:pointer;
+  background:none;border:none;color:#94a3b8;cursor:pointer;
   font-size:12px;padding:1px 4px;border-radius:3px;line-height:1;
 }
-.ce-file__remove:hover{background:var(--danger-bg);color:var(--danger)}
-.ce-progress{height:2px;background:var(--border-light);display:none}
+.ce-file__remove:hover{background:#fef2f2;color:#e85d5d}
+.ce-progress{height:2px;background:#eef2f7;display:none}
 .ce-progress.active{display:block}
-.ce-progress__fill{height:100%;background:var(--accent);transition:width .3s;width:0%}
+.ce-progress__fill{height:100%;background:#4a90d9;transition:width .3s;width:0%}
 .ce-result-row{display:flex;gap:10px;min-height:0}
 .ce-result-row>.ce-panel:first-child{flex:1;min-width:0;display:flex;flex-direction:column}
 .ce-result-row>.ce-panel:last-child{flex:0 0 260px;display:flex;flex-direction:column}
@@ -103,78 +79,70 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .ce-table-wrap table{width:100%;border-collapse:collapse;font-size:12px;min-width:1000px}
 .ce-table-wrap thead{position:sticky;top:0;z-index:2}
 .ce-table-wrap th{
-  background:var(--surface-alt);color:var(--text-sub);font-weight:600;font-size:11px;
-  padding:5px 10px;text-align:left;white-space:nowrap;border-bottom:2px solid var(--border);
+  background:#f0f4f9;color:#4a5568;font-weight:600;font-size:11px;
+  padding:5px 10px;text-align:left;white-space:nowrap;border-bottom:2px solid #e2e8f0;
 }
 .ce-table-wrap td{
-  padding:4px 10px;border-bottom:1px solid var(--border-light);white-space:nowrap;
+  padding:4px 10px;border-bottom:1px solid #eef2f7;white-space:nowrap;
   max-width:180px;overflow:hidden;text-overflow:ellipsis;font-size:12px;
 }
-.ce-table-wrap tr{cursor:pointer;transition:background .1s}
-.ce-table-wrap tr:hover td{background:var(--surface-alt)}
-.ce-table-wrap tr.ce-row--selected td{background:var(--accent-bg);border-bottom-color:#d0e0f2}
+.ce-table-wrap tbody tr{cursor:pointer;transition:background .1s}
+.ce-table-wrap tbody tr:hover td{background:#f0f4f9}
+.ce-table-wrap tbody tr.ce-row--selected td{background:#eef4fb;border-bottom-color:#d0e0f2}
 .ce-table-wrap td.addr{max-width:260px}
-.ce-table-wrap .rn{color:var(--text-muted);font-family:var(--mono);font-size:10px;text-align:center}
+.ce-table-wrap .rn{color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:10px;text-align:center}
 .ce-detail{flex:1;overflow-y:auto}
-.ce-detail__empty{padding:40px 16px;text-align:center;color:var(--text-muted);font-size:11px}
+.ce-detail__empty{padding:40px 16px;text-align:center;color:#94a3b8;font-size:11px}
 .ce-detail__body{padding:10px 14px}
-.ce-detail__name{font-size:14px;font-weight:600;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border-light)}
+.ce-detail__name{font-size:14px;font-weight:600;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #eef2f7}
 .ce-detail__grid{display:grid;grid-template-columns:72px 1fr;gap:3px 8px;font-size:11px;margin-bottom:12px}
-.ce-detail__label{color:var(--text-muted);font-weight:500}
-.ce-detail__value{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ce-detail__divider{height:1px;background:var(--border-light);margin:8px 0;grid-column:1/-1}
+.ce-detail__label{color:#94a3b8;font-weight:500}
+.ce-detail__value{color:#1a2332;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ce-detail__divider{height:1px;background:#eef2f7;margin:8px 0;grid-column:1/-1}
 .ce-detail__actions{display:flex;flex-direction:column;gap:6px;padding:0 14px 12px}
 .ce-action-btn{
-  padding:8px 12px;border:1px solid var(--border);border-radius:3px;
-  background:var(--surface);cursor:pointer;transition:all .15s;
-  text-align:left;font-family:inherit;font-size:12px;font-weight:500;color:var(--text);
+  padding:8px 12px;border:1px solid #e2e8f0;border-radius:3px;
+  background:#fff;cursor:pointer;transition:all .15s;
+  text-align:left;font-family:inherit;font-size:12px;font-weight:500;color:#1a2332;
 }
-.ce-action-btn:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-.ce-empty{padding:32px 16px;text-align:center;color:var(--text-muted);font-size:12px}
+.ce-action-btn:hover{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
+.ce-empty{padding:32px 16px;text-align:center;color:#94a3b8;font-size:12px}
 .ce-log{
-  font-family:var(--mono);font-size:11px;padding:6px 14px;
-  max-height:100px;overflow-y:auto;line-height:1.6;color:var(--text-sub);
-  background:var(--surface-alt);
+  font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 14px;
+  max-height:100px;overflow-y:auto;line-height:1.6;color:#4a5568;background:#f0f4f9;
 }
-.ce-log__line--success{color:var(--success)}
-.ce-log__line--error{color:var(--danger)}
-.ce-log__line--info{color:var(--accent)}
-.ce-log__time{color:var(--text-muted);margin-right:6px}
+.ce-log__line--success{color:#22c55e}
+.ce-log__line--error{color:#e85d5d}
+.ce-log__line--info{color:#4a90d9}
+.ce-log__time{color:#94a3b8;margin-right:6px}
 .ce-debug{
   display:none;padding:6px 14px;max-height:180px;overflow-y:auto;
-  font-family:var(--mono);font-size:10px;line-height:1.5;color:var(--text-sub);
-  white-space:pre-wrap;word-break:break-all;background:#f5f6fa;
-  border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;color:#4a5568;
+  white-space:pre-wrap;word-break:break-all;background:#f5f6fa;border-bottom:1px solid #e2e8f0;
 }
 .ce-debug.visible{display:block}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#d4d7e0;border-radius:2px}
 </style>
-</head>
-<body>
-<div class="ce-header">
-  <div>
-    <span class="ce-header__title">수기 계약서 추출기</span>
-    <span class="ce-header__sub">식권대장 PDF → Excel 변환</span>
-  </div>
-  <div class="ce-header__actions">
+
+<div class="ce" id="ceRoot">
+  <input type="file" id="ceFileInput" accept=".pdf" multiple style="display:none">
+
+  <div class="ce-ctrl">
     <button class="ce-btn" onclick="ceClearAll()">초기화</button>
     <button class="ce-btn ce-btn--primary" id="ceBtnExtract" onclick="ceExtractAll()" disabled>전체 추출</button>
     <button class="ce-btn ce-btn--success" id="ceBtnDownload" onclick="ceDownloadExcel()" disabled>엑셀 다운로드</button>
   </div>
-</div>
-<div class="ce-main">
+
   <div class="ce-drop" id="ceDropZone">
     <div class="ce-drop__text">PDF 파일을 드래그하거나 클릭하여 선택</div>
     <div class="ce-drop__hint">여러 파일 동시 선택 가능 · 제휴점 서비스공급 계약서 PDF</div>
-    <input type="file" id="ceFileInput" accept=".pdf" multiple>
   </div>
+
   <div class="ce-stats">
     <div class="ce-stat"><span class="ce-stat__label">등록 파일</span><span class="ce-stat__value" id="ceStatTotal">0</span></div>
     <div class="ce-stat"><span class="ce-stat__label">추출 성공</span><span class="ce-stat__value ce-stat__value--success" id="ceStatSuccess">0</span></div>
     <div class="ce-stat"><span class="ce-stat__label">실패</span><span class="ce-stat__value ce-stat__value--fail" id="ceStatFail">0</span></div>
   </div>
+
   <div class="ce-panel">
     <div class="ce-panel__head">
       <div class="ce-panel__title">파일 목록 <span class="ce-panel__badge" id="ceFileBadge">0</span></div>
@@ -182,6 +150,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     <div class="ce-progress" id="ceProgressBar"><div class="ce-progress__fill" id="ceProgressFill"></div></div>
     <div class="ce-files" id="ceFileList"><div class="ce-empty">PDF 파일을 추가하면 여기에 표시됩니다</div></div>
   </div>
+
   <div class="ce-result-row">
     <div class="ce-panel">
       <div class="ce-panel__head">
@@ -197,6 +166,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
       <div class="ce-detail" id="ceDetail"><div class="ce-detail__empty">좌측 테이블에서 행을 선택하세요</div></div>
     </div>
   </div>
+
   <div class="ce-panel">
     <div class="ce-panel__head">
       <div class="ce-panel__title">로그</div>
@@ -211,175 +181,359 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-var CE={files:[],data:[],lastRaw:'',selectedIdx:-1,actionUrls:{store:'',settle:'',vendor:'',contract:''}};
-var ceDropZone=document.getElementById('ceDropZone'),ceFileInput=document.getElementById('ceFileInput');
-ceFileInput.addEventListener('change',function(e){ceAddFiles(e.target.files);ceFileInput.value='';});
-ceDropZone.addEventListener('dragover',function(e){e.preventDefault();ceDropZone.classList.add('drag-over');});
-ceDropZone.addEventListener('dragleave',function(){ceDropZone.classList.remove('drag-over');});
-ceDropZone.addEventListener('drop',function(e){e.preventDefault();ceDropZone.classList.remove('drag-over');ceAddFiles([].filter.call(e.dataTransfer.files,function(f){return f.name.toLowerCase().endsWith('.pdf');}));});
-
-function ceAddFiles(files){
-  for(var i=0;i<files.length;i++){var file=files[i];if(CE.files.some(function(f){return f.name===file.name&&f.size===file.size;}))continue;CE.files.push({file:file,name:file.name,size:file.size,status:'pending'});}
-  ceRenderFileList();ceUpdateStats();document.getElementById('ceBtnExtract').disabled=CE.files.length===0;ceLog(files.length+'개 파일 추가 (총 '+CE.files.length+'개)','info');
-}
-function ceRemoveFile(i){CE.files.splice(i,1);ceRenderFileList();ceUpdateStats();document.getElementById('ceBtnExtract').disabled=!CE.files.length;}
-function ceFormatSize(b){return b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB';}
-function ceRenderFileList(){
-  var el=document.getElementById('ceFileList');document.getElementById('ceFileBadge').textContent=CE.files.length;
-  if(!CE.files.length){el.innerHTML='<div class="ce-empty">PDF 파일을 추가하면 여기에 표시됩니다</div>';return;}
-  var sm={pending:'대기',processing:'처리중...',done:'완료',error:'실패'};
-  el.innerHTML=CE.files.map(function(f,i){return'<div class="ce-file"><span class="ce-file__num">'+(i+1)+'</span><span class="ce-file__name" title="'+f.name+'">'+f.name+'</span><span class="ce-file__size">'+ceFormatSize(f.size)+'</span><span class="ce-file__status ce-file__status--'+f.status+'">'+sm[f.status]+'</span><button class="ce-file__remove" onclick="ceRemoveFile('+i+')">&#x2715;</button></div>';}).join('');
-}
-function ceUpdateStats(){
-  document.getElementById('ceStatTotal').textContent=CE.files.length;
-  document.getElementById('ceStatSuccess').textContent=CE.data.length;
-  document.getElementById('ceStatFail').textContent=CE.files.filter(function(f){return f.status==='error';}).length;
-}
-
-async function ceExtractDataFromPDF(file){
-  var buf=await file.arrayBuffer();var pdf=await pdfjsLib.getDocument({data:buf}).promise;var targetPage=null;
-  for(var p=pdf.numPages;p>=1;p--){var pg=await pdf.getPage(p);var ct=await pg.getTextContent();var raw=ct.items.map(function(i){return i.str;}).join('');if(raw.includes('계약체결일')&&raw.includes('은행명')){targetPage=pg;break;}}
-  if(!targetPage)targetPage=await pdf.getPage(pdf.numPages);
-  var content=await targetPage.getTextContent();var items=content.items.filter(function(i){return i.str.trim();});
-  var all=items.map(function(i){return{x:Math.round(i.transform[4]),y:Math.round(i.transform[5]),w:i.width||0,text:i.str};});
-  all.sort(function(a,b){return b.y-a.y||a.x-b.x;});
-  var lines=[];if(all.length===0)return null;
-  var curLine=[all[0]],curY=all[0].y;
-  for(var i=1;i<all.length;i++){if(Math.abs(all[i].y-curY)<=3){curLine.push(all[i]);}else{lines.push(curLine);curLine=[all[i]];curY=all[i].y;}}
-  lines.push(curLine);
-  var mergedLines=lines.map(function(line){line.sort(function(a,b){return a.x-b.x;});var text='';for(var i=0;i<line.length;i++){if(i===0){text=line[i].text;continue;}var prev=line[i-1],gap=line[i].x-(prev.x+prev.w);if(gap>30)text+='\t'+line[i].text;else if(gap>5)text+=' '+line[i].text;else text+=line[i].text;}return{y:line[0].y,text:text.trim()};});
-  CE.lastRaw=mergedLines.map(function(l){return'y='+l.y+' | '+l.text;}).join('\n');
-  var dateLineIdx=-1;for(var i=0;i<mergedLines.length;i++){if(mergedLines[i].text.includes('계약체결일')){dateLineIdx=i;break;}}
-  if(dateLineIdx<0)return null;var baseY=mergedLines[dateLineIdx].y;
-  function findLine(oMin,oMax){for(var i=0;i<mergedLines.length;i++){var off=baseY-mergedLines[i].y;if(off>=oMin&&off<=oMax)return mergedLines[i];}return null;}
-  var data={};
-  var dateLine=mergedLines[dateLineIdx];var dm=dateLine.text.match(/(\d{4})\s*년?\s*(\d{1,2})\s*월?\s*(\d{1,2})\s*일?/);
-  data.contractDate=dm?dm[1]+'-'+dm[2].padStart(2,'0')+'-'+dm[3].padStart(2,'0'):'';
-  var storeLine=findLine(14,25);
-  if(storeLine){var st=storeLine.text;var repMatch=st.match(/대표자[\s\t]+(.+)/);var storeMatch=st.match(/상\s*호[\s\t]+(.+?)[\s\t]+대표자/);if(storeMatch)data.storeName=storeMatch[1].trim();else{var parts=st.replace(/상\s*호/,'').split(/대표자/);if(parts[0])data.storeName=parts[0].replace(/[\t]/g,' ').trim();}if(repMatch)data.representative=repMatch[1].trim();}
-  var phoneLine=findLine(33,42);
-  if(phoneLine){var pt=phoneLine.text;var spm=pt.match(/매장전화번호[\s\t]+([\d\-]+)/);var mpm=pt.match(/휴대전화번호[\s\t]+([\d\-]+)/);data.storePhone=spm?spm[1]:'';data.mobilePhone=mpm?mpm[1]:'';}
-  var addrLine=findLine(50,62);
-  if(addrLine){var addr=addrLine.text.replace(/제휴점/,'').replace(/주\s*소/,'').replace(/[\t]/g,' ').trim().replace(/\(인\)/,'').trim();if(addr.includes('강남구')||addr.includes('봉은사로'))addr='';data.address=addr;}
-  var emailLine=findLine(68,80);
-  if(emailLine){var em=emailLine.text.replace(/이메일주소?/,'').replace(/[\t]/g,' ').trim();var emm=em.match(/([\w.\-]+@[\w.\-]+\.\w+)/);data.email=emm?emm[1]:em;}
-  var timeLine=findLine(86,100);if(timeLine)data.operatingHours=timeLine.text.replace(/운영시간/,'').replace(/[\t]/g,' ').trim();
-  var bankLine=findLine(170,190);if(bankLine)data.bankName=bankLine.text.replace(/은행명/,'').replace(/[\t]/g,' ').trim();
-  var acctLine=findLine(190,210);if(acctLine)data.accountNumber=acctLine.text.replace(/계좌번호/,'').replace(/[\t]/g,' ').trim();
-  var holderLine=findLine(205,225);if(holderLine)data.accountHolder=holderLine.text.replace(/계좌\s*명의주/,'').replace(/[\t]/g,' ').trim();
-  var bizLine=findLine(220,245);if(bizLine)data.businessNumber=bizLine.text.replace(/사업자\s*등록번호/,'').replace(/[\t]/g,' ').trim().replace(/-/g,'');
-  if(!data.storeName||!data.bankName){
-    var allText=mergedLines.map(function(l){return l.text;}).join('\n');
-    if(!data.storeName){var m=allText.match(/상\s*호[\s\t]+(.+?)[\s\t]*대표자/);if(m)data.storeName=m[1].trim();}
-    if(!data.representative){for(var i=0;i<mergedLines.length;i++){var m=mergedLines[i].text.match(/대표자[\s\t]+(\S+)/);if(m&&m[1]!=='조정호'){data.representative=m[1];break;}}}
-    if(!data.storePhone){var m=allText.match(/매장전화번호[\s\t]+([\d\-]+)/);if(m)data.storePhone=m[1];}
-    if(!data.mobilePhone){var m=allText.match(/휴대전화번호[\s\t]+([\d\-]+)/);if(m)data.mobilePhone=m[1];}
-    if(!data.address){for(var i=0;i<mergedLines.length;i++){var m=mergedLines[i].text.match(/주\s*소[\s\t]+(.+)/);if(m&&!m[1].includes('강남구')&&!m[1].includes('봉은사로')&&m[1].trim().length>5){data.address=m[1].replace(/제휴점/,'').replace(/\(인\)/,'').trim();break;}}}
-    if(!data.email){var m=allText.match(/([\w.\-]+@[\w.\-]+\.\w+)/);if(m)data.email=m[1];}
-    if(!data.operatingHours){var m=allText.match(/운영시간[\s\t]+(\S+)/);if(m)data.operatingHours=m[1];}
-    if(!data.bankName){var m=allText.match(/은행명[\s\t]+(\S+)/);if(m)data.bankName=m[1];}
-    if(!data.accountNumber){var m=allText.match(/계좌번호[\s\t]+([\d\-]+)/);if(m)data.accountNumber=m[1];}
-    if(!data.accountHolder){var m=allText.match(/(?:계좌\s*)?명의주[\s\t]+(.+?)(?:\n|$)/);if(m)data.accountHolder=m[1].trim();}
-    if(!data.businessNumber){var m=allText.match(/사업자\s*등록번호[\s\t]+([\d\-]+)/);if(m)data.businessNumber=m[1].replace(/-/g,'');}
+/* ── External libs check ── */
+(function ceLoadLibs() {
+  function loadScript(src, cb) {
+    if (document.querySelector('script[src="' + src + '"]')) { if (cb) cb(); return; }
+    var s = document.createElement('script'); s.src = src; s.onload = cb; document.head.appendChild(s);
   }
-  var fields=['contractDate','storeName','representative','storePhone','mobilePhone','address','email','operatingHours','bankName','accountNumber','accountHolder','businessNumber'];
-  var missing=fields.filter(function(f){return!data[f];});
-  if(missing.length>0)ceLog('  ! 누락: '+missing.join(', '),'error');
+  if (typeof pdfjsLib === 'undefined') {
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', function() {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    });
+  } else {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  if (typeof XLSX === 'undefined') {
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+  }
+})();
+
+/* ── Global State ── */
+var CE = { files: [], data: [], lastRaw: '', selectedIdx: -1, actionUrls: { store: '', settle: '', vendor: '', contract: '' } };
+
+/* ── File Input & Drop Zone (explicit click, no overlay input) ── */
+var ceFileInput = document.getElementById('ceFileInput');
+var ceDropZone = document.getElementById('ceDropZone');
+
+ceDropZone.addEventListener('click', function() {
+  ceFileInput.click();
+});
+
+ceFileInput.addEventListener('change', function() {
+  ceAddFiles(ceFileInput.files);
+  ceFileInput.value = '';
+});
+
+ceDropZone.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  ceDropZone.classList.add('drag-over');
+});
+
+ceDropZone.addEventListener('dragleave', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  ceDropZone.classList.remove('drag-over');
+});
+
+ceDropZone.addEventListener('drop', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  ceDropZone.classList.remove('drag-over');
+  var files = [];
+  for (var i = 0; i < e.dataTransfer.files.length; i++) {
+    if (e.dataTransfer.files[i].name.toLowerCase().endsWith('.pdf')) files.push(e.dataTransfer.files[i]);
+  }
+  if (files.length) ceAddFiles(files);
+});
+
+/* ── File Management ── */
+function ceAddFiles(files) {
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    var dup = false;
+    for (var j = 0; j < CE.files.length; j++) {
+      if (CE.files[j].name === file.name && CE.files[j].size === file.size) { dup = true; break; }
+    }
+    if (dup) continue;
+    CE.files.push({ file: file, name: file.name, size: file.size, status: 'pending' });
+  }
+  ceRenderFileList(); ceUpdateStats();
+  document.getElementById('ceBtnExtract').disabled = CE.files.length === 0;
+  ceLog(files.length + '개 파일 추가 (총 ' + CE.files.length + '개)', 'info');
+}
+
+function ceRemoveFile(i) {
+  CE.files.splice(i, 1); ceRenderFileList(); ceUpdateStats();
+  document.getElementById('ceBtnExtract').disabled = !CE.files.length;
+}
+
+function ceFormatSize(b) {
+  return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+}
+
+function ceRenderFileList() {
+  var el = document.getElementById('ceFileList');
+  document.getElementById('ceFileBadge').textContent = CE.files.length;
+  if (!CE.files.length) { el.innerHTML = '<div class="ce-empty">PDF 파일을 추가하면 여기에 표시됩니다</div>'; return; }
+  var sm = { pending: '대기', processing: '처리중...', done: '완료', error: '실패' };
+  el.innerHTML = CE.files.map(function(f, i) {
+    return '<div class="ce-file">' +
+      '<span class="ce-file__num">' + (i + 1) + '</span>' +
+      '<span class="ce-file__name" title="' + f.name + '">' + f.name + '</span>' +
+      '<span class="ce-file__size">' + ceFormatSize(f.size) + '</span>' +
+      '<span class="ce-file__status ce-file__status--' + f.status + '">' + sm[f.status] + '</span>' +
+      '<button class="ce-file__remove" onclick="ceRemoveFile(' + i + ')">&#x2715;</button></div>';
+  }).join('');
+}
+
+function ceUpdateStats() {
+  document.getElementById('ceStatTotal').textContent = CE.files.length;
+  document.getElementById('ceStatSuccess').textContent = CE.data.length;
+  document.getElementById('ceStatFail').textContent = CE.files.filter(function(f) { return f.status === 'error'; }).length;
+}
+
+/* ── PDF Extraction ── */
+async function ceExtractDataFromPDF(file) {
+  var buf = await file.arrayBuffer();
+  var pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  var targetPage = null;
+  for (var p = pdf.numPages; p >= 1; p--) {
+    var pg = await pdf.getPage(p);
+    var ct = await pg.getTextContent();
+    var raw = ct.items.map(function(it) { return it.str; }).join('');
+    if (raw.includes('계약체결일') && raw.includes('은행명')) { targetPage = pg; break; }
+  }
+  if (!targetPage) targetPage = await pdf.getPage(pdf.numPages);
+  var content = await targetPage.getTextContent();
+  var items = content.items.filter(function(it) { return it.str.trim(); });
+  var all = items.map(function(it) {
+    return { x: Math.round(it.transform[4]), y: Math.round(it.transform[5]), w: it.width || 0, text: it.str };
+  });
+  all.sort(function(a, b) { return b.y - a.y || a.x - b.x; });
+  if (all.length === 0) return null;
+  var lines = [], curLine = [all[0]], curY = all[0].y;
+  for (var i = 1; i < all.length; i++) {
+    if (Math.abs(all[i].y - curY) <= 3) curLine.push(all[i]);
+    else { lines.push(curLine); curLine = [all[i]]; curY = all[i].y; }
+  }
+  lines.push(curLine);
+  var mergedLines = lines.map(function(line) {
+    line.sort(function(a, b) { return a.x - b.x; });
+    var text = '';
+    for (var i = 0; i < line.length; i++) {
+      if (i === 0) { text = line[i].text; continue; }
+      var prev = line[i - 1], gap = line[i].x - (prev.x + prev.w);
+      if (gap > 30) text += '\t' + line[i].text;
+      else if (gap > 5) text += ' ' + line[i].text;
+      else text += line[i].text;
+    }
+    return { y: line[0].y, text: text.trim() };
+  });
+  CE.lastRaw = mergedLines.map(function(l) { return 'y=' + l.y + ' | ' + l.text; }).join('\n');
+  var dateLineIdx = -1;
+  for (var i = 0; i < mergedLines.length; i++) { if (mergedLines[i].text.includes('계약체결일')) { dateLineIdx = i; break; } }
+  if (dateLineIdx < 0) return null;
+  var baseY = mergedLines[dateLineIdx].y;
+  function findLine(oMin, oMax) {
+    for (var i = 0; i < mergedLines.length; i++) { var off = baseY - mergedLines[i].y; if (off >= oMin && off <= oMax) return mergedLines[i]; }
+    return null;
+  }
+  var data = {};
+  var dateLine = mergedLines[dateLineIdx];
+  var dm = dateLine.text.match(/(\d{4})\s*년?\s*(\d{1,2})\s*월?\s*(\d{1,2})\s*일?/);
+  data.contractDate = dm ? dm[1] + '-' + dm[2].padStart(2, '0') + '-' + dm[3].padStart(2, '0') : '';
+  var storeLine = findLine(14, 25);
+  if (storeLine) {
+    var st = storeLine.text;
+    var repMatch = st.match(/대표자[\s\t]+(.+)/);
+    var storeMatch = st.match(/상\s*호[\s\t]+(.+?)[\s\t]+대표자/);
+    if (storeMatch) data.storeName = storeMatch[1].trim();
+    else { var parts = st.replace(/상\s*호/, '').split(/대표자/); if (parts[0]) data.storeName = parts[0].replace(/[\t]/g, ' ').trim(); }
+    if (repMatch) data.representative = repMatch[1].trim();
+  }
+  var phoneLine = findLine(33, 42);
+  if (phoneLine) {
+    var pt = phoneLine.text;
+    var spm = pt.match(/매장전화번호[\s\t]+([\d\-]+)/); var mpm = pt.match(/휴대전화번호[\s\t]+([\d\-]+)/);
+    data.storePhone = spm ? spm[1] : ''; data.mobilePhone = mpm ? mpm[1] : '';
+  }
+  var addrLine = findLine(50, 62);
+  if (addrLine) {
+    var addr = addrLine.text.replace(/제휴점/, '').replace(/주\s*소/, '').replace(/[\t]/g, ' ').trim().replace(/\(인\)/, '').trim();
+    if (addr.includes('강남구') || addr.includes('봉은사로')) addr = '';
+    data.address = addr;
+  }
+  var emailLine = findLine(68, 80);
+  if (emailLine) { var em = emailLine.text.replace(/이메일주소?/, '').replace(/[\t]/g, ' ').trim(); var emm = em.match(/([\w.\-]+@[\w.\-]+\.\w+)/); data.email = emm ? emm[1] : em; }
+  var timeLine = findLine(86, 100);
+  if (timeLine) data.operatingHours = timeLine.text.replace(/운영시간/, '').replace(/[\t]/g, ' ').trim();
+  var bankLine = findLine(170, 190);
+  if (bankLine) data.bankName = bankLine.text.replace(/은행명/, '').replace(/[\t]/g, ' ').trim();
+  var acctLine = findLine(190, 210);
+  if (acctLine) data.accountNumber = acctLine.text.replace(/계좌번호/, '').replace(/[\t]/g, ' ').trim();
+  var holderLine = findLine(205, 225);
+  if (holderLine) data.accountHolder = holderLine.text.replace(/계좌\s*명의주/, '').replace(/[\t]/g, ' ').trim();
+  var bizLine = findLine(220, 245);
+  if (bizLine) data.businessNumber = bizLine.text.replace(/사업자\s*등록번호/, '').replace(/[\t]/g, ' ').trim().replace(/-/g, '');
+  /* fallback */
+  if (!data.storeName || !data.bankName) {
+    var allText = mergedLines.map(function(l) { return l.text; }).join('\n');
+    if (!data.storeName) { var m = allText.match(/상\s*호[\s\t]+(.+?)[\s\t]*대표자/); if (m) data.storeName = m[1].trim(); }
+    if (!data.representative) { for (var i = 0; i < mergedLines.length; i++) { var m = mergedLines[i].text.match(/대표자[\s\t]+(\S+)/); if (m && m[1] !== '조정호') { data.representative = m[1]; break; } } }
+    if (!data.storePhone) { var m = allText.match(/매장전화번호[\s\t]+([\d\-]+)/); if (m) data.storePhone = m[1]; }
+    if (!data.mobilePhone) { var m = allText.match(/휴대전화번호[\s\t]+([\d\-]+)/); if (m) data.mobilePhone = m[1]; }
+    if (!data.address) { for (var i = 0; i < mergedLines.length; i++) { var m = mergedLines[i].text.match(/주\s*소[\s\t]+(.+)/); if (m && !m[1].includes('강남구') && !m[1].includes('봉은사로') && m[1].trim().length > 5) { data.address = m[1].replace(/제휴점/, '').replace(/\(인\)/, '').trim(); break; } } }
+    if (!data.email) { var m = allText.match(/([\w.\-]+@[\w.\-]+\.\w+)/); if (m) data.email = m[1]; }
+    if (!data.operatingHours) { var m = allText.match(/운영시간[\s\t]+(\S+)/); if (m) data.operatingHours = m[1]; }
+    if (!data.bankName) { var m = allText.match(/은행명[\s\t]+(\S+)/); if (m) data.bankName = m[1]; }
+    if (!data.accountNumber) { var m = allText.match(/계좌번호[\s\t]+([\d\-]+)/); if (m) data.accountNumber = m[1]; }
+    if (!data.accountHolder) { var m = allText.match(/(?:계좌\s*)?명의주[\s\t]+(.+?)(?:\n|$)/); if (m) data.accountHolder = m[1].trim(); }
+    if (!data.businessNumber) { var m = allText.match(/사업자\s*등록번호[\s\t]+([\d\-]+)/); if (m) data.businessNumber = m[1].replace(/-/g, ''); }
+  }
+  var fields = ['contractDate','storeName','representative','storePhone','mobilePhone','address','email','operatingHours','bankName','accountNumber','accountHolder','businessNumber'];
+  var missing = fields.filter(function(f) { return !data[f]; });
+  if (missing.length > 0) ceLog('  ! 누락: ' + missing.join(', '), 'error');
   return data;
 }
 
-async function ceExtractAll(){
-  if(!CE.files.length)return;
-  var btn=document.getElementById('ceBtnExtract');btn.disabled=true;btn.textContent='처리 중...';
-  var pBar=document.getElementById('ceProgressBar'),pFill=document.getElementById('ceProgressFill');pBar.classList.add('active');
-  CE.data=[];CE.selectedIdx=-1;var total=CE.files.length;ceLog('추출 시작 - '+total+'개 파일','info');
-  for(var i=0;i<total;i++){
-    var pf=CE.files[i];pf.status='processing';ceRenderFileList();pFill.style.width=(i/total*100)+'%';
-    try{ceLog('['+(i+1)+'/'+total+'] '+pf.name);var data=await ceExtractDataFromPDF(pf.file);document.getElementById('ceDebugArea').textContent='=== '+pf.name+' ===\n'+CE.lastRaw;
-      if(data&&(data.storeName||data.businessNumber||data.storePhone)){data._fileName=pf.name;CE.data.push(data);pf.status='done';ceLog('  > '+(data.storeName||'(상호없음)'),'success');}
-      else{pf.status='error';ceLog('  > 데이터 없음','error');}
-    }catch(err){pf.status='error';ceLog('  > '+err.message,'error');}
-    ceRenderFileList();pFill.style.width=((i+1)/total*100)+'%';
+/* ── Extract All ── */
+async function ceExtractAll() {
+  if (!CE.files.length) return;
+  var btn = document.getElementById('ceBtnExtract');
+  btn.disabled = true; btn.textContent = '처리 중...';
+  var pBar = document.getElementById('ceProgressBar'), pFill = document.getElementById('ceProgressFill');
+  pBar.classList.add('active');
+  CE.data = []; CE.selectedIdx = -1;
+  var total = CE.files.length;
+  ceLog('추출 시작 - ' + total + '개 파일', 'info');
+  for (var i = 0; i < total; i++) {
+    var pf = CE.files[i]; pf.status = 'processing'; ceRenderFileList();
+    pFill.style.width = (i / total * 100) + '%';
+    try {
+      ceLog('[' + (i + 1) + '/' + total + '] ' + pf.name);
+      var data = await ceExtractDataFromPDF(pf.file);
+      document.getElementById('ceDebugArea').textContent = '=== ' + pf.name + ' ===\n' + CE.lastRaw;
+      if (data && (data.storeName || data.businessNumber || data.storePhone)) {
+        data._fileName = pf.name; CE.data.push(data);
+        pf.status = 'done'; ceLog('  > ' + (data.storeName || '(상호없음)'), 'success');
+      } else { pf.status = 'error'; ceLog('  > 데이터 없음', 'error'); }
+    } catch (err) { pf.status = 'error'; ceLog('  > ' + err.message, 'error'); }
+    ceRenderFileList(); pFill.style.width = ((i + 1) / total * 100) + '%';
   }
-  ceRenderResultTable();ceUpdateStats();ceRenderDetail();
-  ceLog('완료 - 성공: '+CE.data.length+'/'+total,CE.data.length?'success':'error');
-  btn.disabled=false;btn.textContent='전체 추출';
-  document.getElementById('ceBtnDownload').disabled=!CE.data.length;
-  setTimeout(function(){pBar.classList.remove('active');},1000);
+  ceRenderResultTable(); ceUpdateStats(); ceRenderDetail();
+  ceLog('완료 - 성공: ' + CE.data.length + '/' + total, CE.data.length ? 'success' : 'error');
+  btn.disabled = false; btn.textContent = '전체 추출';
+  document.getElementById('ceBtnDownload').disabled = !CE.data.length;
+  setTimeout(function() { pBar.classList.remove('active'); }, 1000);
 }
 
-function ceSelectRow(idx){
-  CE.selectedIdx=idx;
-  var rows=document.querySelectorAll('#ceTableWrap tbody tr');
-  for(var i=0;i<rows.length;i++)rows[i].classList.toggle('ce-row--selected',i===idx);
+/* ── Row Selection + Detail ── */
+function ceSelectRow(idx) {
+  CE.selectedIdx = idx;
+  var rows = document.querySelectorAll('#ceTableWrap tbody tr');
+  for (var i = 0; i < rows.length; i++) rows[i].classList.toggle('ce-row--selected', i === idx);
   ceRenderDetail();
 }
 
-function ceRenderDetail(){
-  var el=document.getElementById('ceDetail');
-  if(CE.selectedIdx<0||!CE.data[CE.selectedIdx]){el.innerHTML='<div class="ce-detail__empty">좌측 테이블에서 행을 선택하세요</div>';return;}
-  var d=CE.data[CE.selectedIdx];
-  var fields=[['체결일',d.contractDate],['대표자',d.representative],['매장전화',d.storePhone],['휴대전화',d.mobilePhone],['주소',d.address],['이메일',d.email],['운영시간',d.operatingHours],['__divider__'],['은행명',d.bankName],['계좌번호',d.accountNumber],['명의주',d.accountHolder],['사업자번호',d.businessNumber]];
-  var grid='';fields.forEach(function(f){if(f[0]==='__divider__'){grid+='<div class="ce-detail__divider"></div>';return;}grid+='<div class="ce-detail__label">'+f[0]+'</div><div class="ce-detail__value" title="'+((f[1]||'').replace(/"/g,'&quot;'))+'">'+(f[1]||'-')+'</div>';});
-  el.innerHTML='<div class="ce-detail__body"><div class="ce-detail__name">'+(d.storeName||'-')+'</div><div class="ce-detail__grid">'+grid+'</div></div><div class="ce-detail__actions"><button class="ce-action-btn" onclick="ceOpenAction(\'store\')">제휴점 만들기</button><button class="ce-action-btn" onclick="ceOpenAction(\'settle\')">구정산정보 만들기</button><button class="ce-action-btn" onclick="ceOpenAction(\'vendor\')">거래처 만들기</button><button class="ce-action-btn" onclick="ceOpenAction(\'contract\')">계약서 만들기</button></div>';
+function ceRenderDetail() {
+  var el = document.getElementById('ceDetail');
+  if (CE.selectedIdx < 0 || !CE.data[CE.selectedIdx]) {
+    el.innerHTML = '<div class="ce-detail__empty">좌측 테이블에서 행을 선택하세요</div>'; return;
+  }
+  var d = CE.data[CE.selectedIdx];
+  var fields = [
+    ['체결일', d.contractDate], ['대표자', d.representative],
+    ['매장전화', d.storePhone], ['휴대전화', d.mobilePhone],
+    ['주소', d.address], ['이메일', d.email], ['운영시간', d.operatingHours],
+    ['__divider__'],
+    ['은행명', d.bankName], ['계좌번호', d.accountNumber],
+    ['명의주', d.accountHolder], ['사업자번호', d.businessNumber]
+  ];
+  var grid = '';
+  fields.forEach(function(f) {
+    if (f[0] === '__divider__') { grid += '<div class="ce-detail__divider"></div>'; return; }
+    grid += '<div class="ce-detail__label">' + f[0] + '</div><div class="ce-detail__value" title="' + ((f[1] || '').replace(/"/g, '&quot;')) + '">' + (f[1] || '-') + '</div>';
+  });
+  el.innerHTML =
+    '<div class="ce-detail__body">' +
+      '<div class="ce-detail__name">' + (d.storeName || '-') + '</div>' +
+      '<div class="ce-detail__grid">' + grid + '</div>' +
+    '</div>' +
+    '<div class="ce-detail__actions">' +
+      '<button class="ce-action-btn" onclick="ceOpenAction(\'store\')">제휴점 만들기</button>' +
+      '<button class="ce-action-btn" onclick="ceOpenAction(\'settle\')">구정산정보 만들기</button>' +
+      '<button class="ce-action-btn" onclick="ceOpenAction(\'vendor\')">거래처 만들기</button>' +
+      '<button class="ce-action-btn" onclick="ceOpenAction(\'contract\')">계약서 만들기</button>' +
+    '</div>';
 }
 
-function ceOpenAction(type){
-  var d=CE.data[CE.selectedIdx];if(!d)return;
-  var baseUrl=CE.actionUrls[type];
-  if(!baseUrl){ceLog(type+' URL 미설정','info');return;}
-  var url=baseUrl.replace(/\{(\w+)\}/g,function(_,k){return encodeURIComponent(d[k]||'');});
-  window.open(url,'_blank');
+function ceOpenAction(type) {
+  var d = CE.data[CE.selectedIdx]; if (!d) return;
+  var baseUrl = CE.actionUrls[type];
+  if (!baseUrl) { ceLog(type + ' URL 미설정', 'info'); return; }
+  var url = baseUrl.replace(/\{(\w+)\}/g, function(_, k) { return encodeURIComponent(d[k] || ''); });
+  window.open(url, '_blank');
 }
 
-function ceRenderResultTable(){
-  var wrap=document.getElementById('ceTableWrap');document.getElementById('ceResultBadge').textContent=CE.data.length;
-  var btnCopy=document.getElementById('ceBtnCopy');
-  if(!CE.data.length){wrap.innerHTML='<div class="ce-empty">추출 결과가 여기에 표시됩니다</div>';btnCopy.style.display='none';return;}
-  btnCopy.style.display='';
-  var H=['#','체결일','상호','대표자','매장전화','휴대전화','주소','이메일','운영시간','은행명','계좌번호','명의주','사업자번호'];
-  var K=['contractDate','storeName','representative','storePhone','mobilePhone','address','email','operatingHours','bankName','accountNumber','accountHolder','businessNumber'];
-  var html='<table><thead><tr>'+H.map(function(h){return'<th>'+h+'</th>';}).join('')+'</tr></thead><tbody>';
-  CE.data.forEach(function(d,i){html+='<tr onclick="ceSelectRow('+i+')"><td class="rn">'+(i+1)+'</td>'+K.map(function(k){return'<td'+(k==='address'?' class="addr"':'')+' title="'+((d[k]||'').replace(/"/g,'&quot;'))+'">'+(d[k]||'-')+'</td>';}).join('')+'</tr>';});
-  wrap.innerHTML=html+'</tbody></table>';
+/* ── Table ── */
+function ceRenderResultTable() {
+  var wrap = document.getElementById('ceTableWrap');
+  document.getElementById('ceResultBadge').textContent = CE.data.length;
+  var btnCopy = document.getElementById('ceBtnCopy');
+  if (!CE.data.length) { wrap.innerHTML = '<div class="ce-empty">추출 결과가 여기에 표시됩니다</div>'; btnCopy.style.display = 'none'; return; }
+  btnCopy.style.display = '';
+  var H = ['#','체결일','상호','대표자','매장전화','휴대전화','주소','이메일','운영시간','은행명','계좌번호','명의주','사업자번호'];
+  var K = ['contractDate','storeName','representative','storePhone','mobilePhone','address','email','operatingHours','bankName','accountNumber','accountHolder','businessNumber'];
+  var html = '<table><thead><tr>' + H.map(function(h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>';
+  CE.data.forEach(function(d, i) {
+    html += '<tr onclick="ceSelectRow(' + i + ')"><td class="rn">' + (i + 1) + '</td>' +
+      K.map(function(k) { return '<td' + (k === 'address' ? ' class="addr"' : '') + ' title="' + ((d[k] || '').replace(/"/g, '&quot;')) + '">' + (d[k] || '-') + '</td>'; }).join('') + '</tr>';
+  });
+  wrap.innerHTML = html + '</tbody></table>';
 }
 
-function ceDownloadExcel(){
-  if(!CE.data.length)return;
-  var H=['체결일','상호','대표자','매장전화번호','휴대전화번호','주소','이메일','운영시간','은행명','계좌번호','명의주','사업자번호'];
-  var K=['contractDate','storeName','representative','storePhone','mobilePhone','address','email','operatingHours','bankName','accountNumber','accountHolder','businessNumber'];
-  var ws=XLSX.utils.aoa_to_sheet([H].concat(CE.data.map(function(d){return K.map(function(k){return d[k]||'';});})));
-  ws['!cols']=[{wch:12},{wch:15},{wch:10},{wch:14},{wch:14},{wch:35},{wch:25},{wch:14},{wch:12},{wch:18},{wch:15},{wch:14}];
-  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'제휴점 계약 데이터');
-  var now=new Date();XLSX.writeFile(wb,'제휴점_계약추출_'+now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'.xlsx');
-  ceLog('엑셀 다운로드 완료','success');
+/* ── Excel / Clipboard ── */
+function ceDownloadExcel() {
+  if (!CE.data.length) return;
+  var H = ['체결일','상호','대표자','매장전화번호','휴대전화번호','주소','이메일','운영시간','은행명','계좌번호','명의주','사업자번호'];
+  var K = ['contractDate','storeName','representative','storePhone','mobilePhone','address','email','operatingHours','bankName','accountNumber','accountHolder','businessNumber'];
+  var ws = XLSX.utils.aoa_to_sheet([H].concat(CE.data.map(function(d) { return K.map(function(k) { return d[k] || ''; }); })));
+  ws['!cols'] = [{wch:12},{wch:15},{wch:10},{wch:14},{wch:14},{wch:35},{wch:25},{wch:14},{wch:12},{wch:18},{wch:15},{wch:14}];
+  var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '제휴점 계약 데이터');
+  var now = new Date();
+  XLSX.writeFile(wb, '제휴점_계약추출_' + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '.xlsx');
+  ceLog('엑셀 다운로드 완료', 'success');
 }
 
-function ceCopyToClipboard(){
-  if(!CE.data.length)return;
-  var H=['체결일','상호','대표자','매장전화번호','휴대전화번호','주소','이메일','운영시간','은행명','계좌번호','명의주','사업자번호'];
-  var K=['contractDate','storeName','representative','storePhone','mobilePhone','address','email','operatingHours','bankName','accountNumber','accountHolder','businessNumber'];
-  var tsv=H.join('\t')+'\n';CE.data.forEach(function(d){tsv+=K.map(function(k){return d[k]||'';}).join('\t')+'\n';});
-  navigator.clipboard.writeText(tsv).then(function(){ceLog('클립보드 복사 완료','success');var b=document.getElementById('ceBtnCopy'),o=b.textContent;b.classList.add('ce-btn--copied');b.textContent='복사됨';setTimeout(function(){b.textContent=o;b.classList.remove('ce-btn--copied');},1500);});
+function ceCopyToClipboard() {
+  if (!CE.data.length) return;
+  var H = ['체결일','상호','대표자','매장전화번호','휴대전화번호','주소','이메일','운영시간','은행명','계좌번호','명의주','사업자번호'];
+  var K = ['contractDate','storeName','representative','storePhone','mobilePhone','address','email','operatingHours','bankName','accountNumber','accountHolder','businessNumber'];
+  var tsv = H.join('\t') + '\n';
+  CE.data.forEach(function(d) { tsv += K.map(function(k) { return d[k] || ''; }).join('\t') + '\n'; });
+  navigator.clipboard.writeText(tsv).then(function() {
+    ceLog('클립보드 복사 완료', 'success');
+    var b = document.getElementById('ceBtnCopy'), o = b.textContent;
+    b.classList.add('ce-btn--copied'); b.textContent = '복사됨';
+    setTimeout(function() { b.textContent = o; b.classList.remove('ce-btn--copied'); }, 1500);
+  });
 }
 
-function ceClearAll(){
-  CE.files=[];CE.data=[];CE.selectedIdx=-1;
-  ceRenderFileList();ceRenderResultTable();ceUpdateStats();ceRenderDetail();
-  document.getElementById('ceBtnExtract').disabled=true;document.getElementById('ceBtnDownload').disabled=true;
-  document.getElementById('ceDebugArea').textContent='';ceLog('초기화','info');
+/* ── Utilities ── */
+function ceClearAll() {
+  CE.files = []; CE.data = []; CE.selectedIdx = -1;
+  ceRenderFileList(); ceRenderResultTable(); ceUpdateStats(); ceRenderDetail();
+  document.getElementById('ceBtnExtract').disabled = true;
+  document.getElementById('ceBtnDownload').disabled = true;
+  document.getElementById('ceDebugArea').textContent = '';
+  ceLog('초기화', 'info');
 }
-function ceLog(msg,type){
-  type=type||'';var a=document.getElementById('ceLogArea'),now=new Date();
-  var t=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
-  var l=document.createElement('div');l.className='ce-log__line'+(type?' ce-log__line--'+type:'');
-  l.innerHTML='<span class="ce-log__time">['+t+']</span>'+msg;a.insertBefore(l,a.firstChild);
-  while(a.children.length>100)a.removeChild(a.lastChild);
+
+function ceLog(msg, type) {
+  type = type || '';
+  var a = document.getElementById('ceLogArea'), now = new Date();
+  var t = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+  var l = document.createElement('div');
+  l.className = 'ce-log__line' + (type ? ' ce-log__line--' + type : '');
+  l.innerHTML = '<span class="ce-log__time">[' + t + ']</span>' + msg;
+  a.insertBefore(l, a.firstChild);
+  while (a.children.length > 100) a.removeChild(a.lastChild);
 }
-function ceClearLog(){document.getElementById('ceLogArea').innerHTML='';}
-function ceToggleDebug(){document.getElementById('ceDebugArea').classList.toggle('visible');}
-ceLog('준비 완료','info');
+
+function ceClearLog() { document.getElementById('ceLogArea').innerHTML = ''; }
+function ceToggleDebug() { document.getElementById('ceDebugArea').classList.toggle('visible'); }
+
+ceLog('준비 완료', 'info');
 </script>
-</body>
-</html>
