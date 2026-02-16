@@ -296,7 +296,7 @@ async function wfPoll(jid,sd,ed){
 /* ═══ Process ═══ */
 function wfProcess(rows,sd,ed){
     W.raw=rows.map(function(r){return{
-        comId:Number(r.comId)||0, name:r.name||'',
+        comId:String(r.comId||''), name:r.name||'',
         executeDate:r.executeDate||'', userCount:Number(r.userCount)||0,
         totalAmount:Number(r.totalAmount)||0, avgPerUser:Number(r.avgPerUser)||0
     }});
@@ -350,9 +350,9 @@ function wfRender(){
     tb.innerHTML=W.filtered.map(function(g,i){
         var sel=W.selComId===g.comId?' selected':'';
         var neg=g.totalAmount<0?' amount-neg':'';
-        return '<tr class="'+sel+'" onclick="wfSelect('+g.comId+')">'
+        return '<tr class="'+sel+'" onclick="wfSelect(\''+g.comId+'\')">'
             +'<td class="col-rank">'+(i+1)+'</td>'
-            +'<td class="col-id">'+g.comId+'</td>'
+            +'<td class="col-id" title="'+g.comId+'">'+g.comId.slice(0,8)+'</td>'
             +'<td>'+g.name+'</td>'
             +'<td class="col-r'+neg+'">'+wfFmt(g.totalAmount)+'</td>'
             +'<td class="col-c">'+g.userCount.toLocaleString()+'</td>'
@@ -372,7 +372,6 @@ function wfSelect(cid){
     W.selComId=W.selComId===cid?null:cid;
     wfRender();wfRenderDetail();
 }
-
 /* ═══ Detail ═══ */
 function wfRenderDetail(){
     var body=document.getElementById('wfDetail');
@@ -447,7 +446,7 @@ function wfBuildCompare(prevRows,prevSd,prevEd){
     // 전년 데이터 그룹화
     var prevMap={};
     prevRows.forEach(function(r){
-        var cid=Number(r.comId)||0;
+        var cid=String(r.comId||'');
         if(!prevMap[cid])prevMap[cid]={comId:cid,name:r.name||'',totalAmount:0,userCount:0,txCount:0};
         prevMap[cid].totalAmount+=Number(r.totalAmount)||0;
         prevMap[cid].userCount+=Number(r.userCount)||0;
@@ -532,7 +531,7 @@ function wfBuildCompare(prevRows,prevSd,prevEd){
     cmpRows.slice(0,30).forEach(function(r){
         var pct=r.prevAmt!==0?((r.diff/Math.abs(r.prevAmt))*100).toFixed(1)+'%':(r.curAmt>0?'NEW':'-');
         var cls=r.diff>0?' style="color:#22c55e"':r.diff<0?' style="color:#e85d5d"':'';
-        h+='<tr><td class="col-id">'+r.comId+'</td><td>'+r.name+'</td>'
+        h+='<tr><td class="col-id" title="'+r.comId+'">'+r.comId.slice(0,8)+'</td><td>'+r.name+'</td>'
             +'<td class="col-r">'+wfFmt(r.curAmt)+'</td>'
             +'<td class="col-r" style="color:#94a3b8">'+wfFmt(r.prevAmt)+'</td>'
             +'<td class="col-r"'+cls+'>'+wfDiffFmt(r.diff)+'</td>'
