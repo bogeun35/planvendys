@@ -1,0 +1,694 @@
+<!--
+title: 복지대장 지급현황 대시보드
+meta: 최종 수정: 2025.02.16
+-->
+
+<style>
+.wf-dash {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 12px;
+    color: #1a2332;
+}
+
+/* 상단 컨트롤 바 */
+.wf-dash__controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f8fafd;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+}
+.wf-dash__controls label {
+    font-weight: 600;
+    color: #4a5568;
+    white-space: nowrap;
+}
+.wf-dash__controls select,
+.wf-dash__controls input[type="month"] {
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 3px;
+    font-size: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #fff;
+    color: #1a2332;
+    outline: none;
+}
+.wf-dash__controls select:focus,
+.wf-dash__controls input[type="month"]:focus {
+    border-color: #4a90d9;
+    box-shadow: 0 0 0 1px #4a90d9;
+}
+.wf-dash__btn {
+    padding: 4px 14px;
+    background: #4a90d9;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-size: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+.wf-dash__btn:hover {
+    background: #3a7bc8;
+}
+.wf-dash__btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+.wf-dash__status {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-left: auto;
+    white-space: nowrap;
+}
+.wf-dash__status--error {
+    color: #e85d5d;
+}
+.wf-dash__status--loading {
+    color: #d49a2a;
+}
+
+/* 요약 카드 */
+.wf-dash__summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+.wf-dash__card {
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+}
+.wf-dash__card-label {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+.wf-dash__card-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a2332;
+    font-family: 'JetBrains Mono', monospace;
+}
+.wf-dash__card-sub {
+    font-size: 10px;
+    color: #4a5568;
+    margin-top: 2px;
+}
+
+/* 2단 레이아웃: 왼쪽 테이블 + 오른쪽 상세 */
+.wf-dash__body {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 12px;
+    min-height: 0;
+}
+
+/* 테이블 패널 */
+.wf-dash__table-panel {
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.wf-dash__table-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: #f8fafd;
+    border-bottom: 1px solid #e2e8f0;
+}
+.wf-dash__table-header input {
+    flex: 1;
+    padding: 3px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+}
+.wf-dash__table-header input:focus {
+    border-color: #4a90d9;
+}
+.wf-dash__table-header span {
+    font-size: 11px;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+.wf-dash__table-wrap {
+    overflow-y: auto;
+    max-height: 480px;
+}
+.wf-dash__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.wf-dash__table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.wf-dash__table th {
+    padding: 5px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #4a5568;
+    background: #f0f4f9;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+.wf-dash__table th:hover {
+    background: #e6ecf3;
+}
+.wf-dash__table th.sort-asc::after { content: ' ↑'; color: #4a90d9; }
+.wf-dash__table th.sort-desc::after { content: ' ↓'; color: #4a90d9; }
+.wf-dash__table td {
+    padding: 4px 10px;
+    border-bottom: 1px solid #f0f4f9;
+    white-space: nowrap;
+}
+.wf-dash__table tr:hover td {
+    background: #f8fafd;
+}
+.wf-dash__table tr.selected td {
+    background: #eef4fb;
+}
+.wf-dash__table .col-amount {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+}
+.wf-dash__table .col-date {
+    color: #4a5568;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+}
+.wf-dash__table .col-rank {
+    color: #94a3b8;
+    font-size: 11px;
+    text-align: center;
+    width: 32px;
+}
+.amount-negative {
+    color: #e85d5d;
+}
+
+/* 오른쪽 상세 패널 */
+.wf-dash__detail {
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.wf-dash__detail-header {
+    padding: 8px 12px;
+    background: #f8fafd;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 11px;
+}
+.wf-dash__detail-body {
+    padding: 12px;
+    overflow-y: auto;
+    max-height: 480px;
+}
+.wf-dash__detail-empty {
+    color: #94a3b8;
+    font-size: 11px;
+    text-align: center;
+    padding: 40px 12px;
+}
+.wf-dash__detail-company {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #1a2332;
+}
+.wf-dash__detail-total {
+    font-size: 11px;
+    color: #4a5568;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f4f9;
+}
+.wf-dash__detail-total strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a2332;
+    font-family: 'JetBrains Mono', monospace;
+}
+.wf-dash__detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.wf-dash__detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    background: #f8fafd;
+    border-radius: 3px;
+    font-size: 11px;
+}
+.wf-dash__detail-row .date {
+    color: #4a5568;
+    font-family: 'JetBrains Mono', monospace;
+}
+.wf-dash__detail-row .amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+
+/* 바 차트 */
+.wf-dash__bar-wrap {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f4f9;
+}
+.wf-dash__bar-title {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+.wf-dash__bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+    font-size: 10px;
+}
+.wf-dash__bar .bar-label {
+    width: 54px;
+    text-align: right;
+    color: #4a5568;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+}
+.wf-dash__bar .bar-fill {
+    height: 14px;
+    background: #4a90d9;
+    border-radius: 2px;
+    min-width: 2px;
+    transition: width 0.3s ease;
+}
+.wf-dash__bar .bar-value {
+    color: #94a3b8;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+}
+
+/* 빈 상태 */
+.wf-dash__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #94a3b8;
+    font-size: 13px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: #fff;
+}
+
+/* 로딩 스피너 */
+@keyframes wf-spin {
+    to { transform: rotate(360deg); }
+}
+.wf-dash__spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #d1d5db;
+    border-top-color: #4a90d9;
+    border-radius: 50%;
+    animation: wf-spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+</style>
+
+<div class="wf-dash" id="wfDash">
+    <!-- 컨트롤 바 -->
+    <div class="wf-dash__controls">
+        <label>시작일</label>
+        <input type="date" id="wfStartDate" />
+        <label>종료일</label>
+        <input type="date" id="wfEndDate" />
+        <button class="wf-dash__btn" id="wfFetch" onclick="wfFetchData()">조회</button>
+        <span class="wf-dash__status" id="wfStatus">조회 버튼을 눌러주세요</span>
+    </div>
+
+    <!-- 요약 카드 -->
+    <div class="wf-dash__summary" id="wfSummary" style="display:none;">
+        <div class="wf-dash__card">
+            <div class="wf-dash__card-label">총 지급액</div>
+            <div class="wf-dash__card-value" id="wfTotalAmount">-</div>
+        </div>
+        <div class="wf-dash__card">
+            <div class="wf-dash__card-label">업체 수</div>
+            <div class="wf-dash__card-value" id="wfCompanyCount">-</div>
+        </div>
+        <div class="wf-dash__card">
+            <div class="wf-dash__card-label">건수</div>
+            <div class="wf-dash__card-value" id="wfTxCount">-</div>
+        </div>
+        <div class="wf-dash__card">
+            <div class="wf-dash__card-label">업체당 평균</div>
+            <div class="wf-dash__card-value" id="wfAvgAmount">-</div>
+        </div>
+    </div>
+
+    <!-- 메인 2단 -->
+    <div class="wf-dash__body" id="wfBody" style="display:none;">
+        <!-- 왼쪽: 테이블 -->
+        <div class="wf-dash__table-panel">
+            <div class="wf-dash__table-header">
+                <input type="text" id="wfSearch" placeholder="업체명 검색..." oninput="wfFilterTable()" />
+                <span id="wfRowCount">0건</span>
+            </div>
+            <div class="wf-dash__table-wrap">
+                <table class="wf-dash__table">
+                    <thead>
+                        <tr>
+                            <th class="col-rank" onclick="wfSort('rank')">#</th>
+                            <th onclick="wfSort('name')">업체명</th>
+                            <th onclick="wfSort('executeDate')">지급일</th>
+                            <th class="col-amount" onclick="wfSort('totalAmount')">지급액</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wfTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 상세 -->
+        <div class="wf-dash__detail">
+            <div class="wf-dash__detail-header">업체 상세</div>
+            <div class="wf-dash__detail-body" id="wfDetailBody">
+                <div class="wf-dash__detail-empty">테이블에서 업체를 클릭하세요</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 빈 상태 -->
+    <div class="wf-dash__empty" id="wfEmpty">
+        조회 기간을 선택하고 조회 버튼을 눌러주세요
+    </div>
+</div>
+
+<script>
+(function() {
+    const API_BASE = 'https://redash.sikdae.com';
+    const QUERY_ID = 1339;
+    const API_KEY = 'BYpS0PP282p1tNUZT9L4qmEG6D7dh6HNSpAZSCIV';
+
+    // 기본값: 이번 달 1일 ~ 오늘
+    const now = new Date();
+    const startInput = document.getElementById('wfStartDate');
+    const endInput = document.getElementById('wfEndDate');
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    startInput.value = `${y}-${m}-01`;
+    endInput.value = `${y}-${m}-${d}`;
+
+    let rawData = [];
+    let filteredData = [];
+    let sortCol = 'totalAmount';
+    let sortDir = 'desc';
+    let selectedCompany = null;
+
+    function setStatus(text, type) {
+        const el = document.getElementById('wfStatus');
+        el.textContent = text;
+        el.className = 'wf-dash__status' + (type ? ' wf-dash__status--' + type : '');
+        if (type === 'loading') {
+            el.innerHTML = '<span class="wf-dash__spinner"></span>' + text;
+        }
+    }
+
+    window.wfFetchData = async function() {
+        const startDate = startInput.value;
+        const endDate = endInput.value;
+        if (!startDate || !endDate) return;
+
+        const btn = document.getElementById('wfFetch');
+        btn.disabled = true;
+        setStatus('데이터 조회 중...', 'loading');
+
+        try {
+            // POST로 파라미터와 함께 실행 요청 (endDate +1일은 SQL에서 DATE_ADD 처리)
+            const postRes = await fetch(`${API_BASE}/api/queries/${QUERY_ID}/results?api_key=${API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    parameters: {
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    max_age: 0
+                })
+            });
+
+            const postData = await postRes.json();
+
+            // 결과가 바로 오는 경우 (캐시 등)
+            if (postData.query_result) {
+                processResult(postData.query_result.data.rows);
+                btn.disabled = false;
+                return;
+            }
+
+            // job 폴링
+            if (postData.job) {
+                await pollJob(postData.job.id);
+                btn.disabled = false;
+                return;
+            }
+
+            // 둘 다 아니면 기존 GET 방식으로 폴백
+            throw new Error('파라미터 방식 실패, GET 폴백');
+
+        } catch(e) {
+            console.warn('POST 실패, GET 폴백:', e.message);
+            // 기존 GET 방식 폴백 (하드코딩된 쿼리의 캐시 결과)
+            try {
+                const getRes = await fetch(`${API_BASE}/api/queries/${QUERY_ID}/results.json?api_key=${API_KEY}`);
+                const getData = await getRes.json();
+                if (getData.query_result) {
+                    // GET 결과에서 선택한 날짜 범위에 해당하는 데이터만 필터링
+                    const rows = getData.query_result.data.rows.filter(r => {
+                        return r.executeDate >= startDate && r.executeDate <= endDate;
+                    });
+                    if (rows.length > 0) {
+                        processResult(rows);
+                        setStatus(`캐시 데이터 사용 (원본 쿼리 날짜 기준)`, '');
+                    } else {
+                        setStatus('해당 월 데이터 없음 (Redash 쿼리 파라미터 설정 필요)', 'error');
+                        document.getElementById('wfEmpty').style.display = 'flex';
+                        document.getElementById('wfBody').style.display = 'none';
+                        document.getElementById('wfSummary').style.display = 'none';
+                    }
+                } else {
+                    throw new Error('결과 없음');
+                }
+            } catch(e2) {
+                setStatus('데이터 조회 실패: ' + e2.message, 'error');
+            }
+        }
+        btn.disabled = false;
+    };
+
+    async function pollJob(jobId) {
+        for (let i = 0; i < 60; i++) {
+            await sleep(1000);
+            const res = await fetch(`${API_BASE}/api/jobs/${jobId}?api_key=${API_KEY}`);
+            const data = await res.json();
+            const job = data.job;
+
+            if (job.status === 3) {
+                // 완료 - query_result_id로 결과 조회
+                const resultRes = await fetch(`${API_BASE}/api/query_results/${job.query_result_id}.json?api_key=${API_KEY}`);
+                const resultData = await resultRes.json();
+                processResult(resultData.query_result.data.rows);
+                return;
+            } else if (job.status === 4) {
+                throw new Error('쿼리 실행 실패: ' + (job.error || '알 수 없는 오류'));
+            }
+
+            setStatus(`쿼리 실행 중... (${i + 1}s)`, 'loading');
+        }
+        throw new Error('쿼리 실행 타임아웃');
+    }
+
+    function sleep(ms) {
+        return new Promise(r => setTimeout(r, ms));
+    }
+
+    function processResult(rows) {
+        rawData = rows.map((r, i) => ({
+            ...r,
+            totalAmount: Number(r.totalAmount) || 0,
+            rank: i + 1
+        }));
+
+        // 합산 통계 (업체별)
+        const companyMap = {};
+        rawData.forEach(r => {
+            if (!companyMap[r.name]) companyMap[r.name] = 0;
+            companyMap[r.name] += r.totalAmount;
+        });
+
+        const totalAmount = rawData.reduce((s, r) => s + r.totalAmount, 0);
+        const companyCount = Object.keys(companyMap).length;
+
+        document.getElementById('wfTotalAmount').textContent = formatAmount(totalAmount);
+        document.getElementById('wfCompanyCount').textContent = companyCount.toLocaleString() + '개';
+        document.getElementById('wfTxCount').textContent = rawData.length.toLocaleString() + '건';
+        document.getElementById('wfAvgAmount').textContent = companyCount > 0 ? formatAmount(Math.round(totalAmount / companyCount)) : '-';
+
+        document.getElementById('wfSummary').style.display = 'grid';
+        document.getElementById('wfBody').style.display = 'grid';
+        document.getElementById('wfEmpty').style.display = 'none';
+
+        sortCol = 'totalAmount';
+        sortDir = 'desc';
+        selectedCompany = null;
+        document.getElementById('wfSearch').value = '';
+        renderTable();
+        renderDetail();
+
+        const month = startInput.value;
+        setStatus(`${startDate} ~ ${endDate} 조회 완료 (${rawData.length}건)`, '');
+    }
+
+    function renderTable() {
+        const search = document.getElementById('wfSearch').value.toLowerCase();
+        filteredData = rawData.filter(r => !search || r.name.toLowerCase().includes(search));
+
+        // 정렬
+        filteredData.sort((a, b) => {
+            let va = a[sortCol], vb = b[sortCol];
+            if (typeof va === 'string') {
+                va = va.toLowerCase(); vb = vb.toLowerCase();
+            }
+            if (va < vb) return sortDir === 'asc' ? -1 : 1;
+            if (va > vb) return sortDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        // 순위 재할당
+        filteredData.forEach((r, i) => r._idx = i + 1);
+
+        const tbody = document.getElementById('wfTableBody');
+        tbody.innerHTML = filteredData.map(r => `
+            <tr class="${selectedCompany === r.name ? 'selected' : ''}" onclick="wfSelectRow('${r.name.replace(/'/g, "\\'")}')">
+                <td class="col-rank">${r._idx}</td>
+                <td>${r.name}</td>
+                <td class="col-date">${r.executeDate}</td>
+                <td class="col-amount ${r.totalAmount < 0 ? 'amount-negative' : ''}">${formatAmount(r.totalAmount)}</td>
+            </tr>
+        `).join('');
+
+        document.getElementById('wfRowCount').textContent = filteredData.length + '건';
+
+        // 헤더 정렬 표시
+        document.querySelectorAll('.wf-dash__table th').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+        });
+    }
+
+    window.wfFilterTable = function() {
+        renderTable();
+    };
+
+    window.wfSort = function(col) {
+        if (col === 'rank') col = 'totalAmount';
+        if (sortCol === col) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortCol = col;
+            sortDir = col === 'name' ? 'asc' : 'desc';
+        }
+        renderTable();
+    };
+
+    window.wfSelectRow = function(name) {
+        selectedCompany = selectedCompany === name ? null : name;
+        renderTable();
+        renderDetail();
+    };
+
+    function renderDetail() {
+        const body = document.getElementById('wfDetailBody');
+        if (!selectedCompany) {
+            body.innerHTML = '<div class="wf-dash__detail-empty">테이블에서 업체를 클릭하세요</div>';
+            return;
+        }
+
+        const rows = rawData.filter(r => r.name === selectedCompany).sort((a, b) => a.executeDate.localeCompare(b.executeDate));
+        const total = rows.reduce((s, r) => s + r.totalAmount, 0);
+        const maxAmt = Math.max(...rows.map(r => Math.abs(r.totalAmount)), 1);
+
+        body.innerHTML = `
+            <div class="wf-dash__detail-company">${selectedCompany}</div>
+            <div class="wf-dash__detail-total">
+                총 지급액: <strong>${formatAmount(total)}</strong>
+                <div style="margin-top:2px;">지급 ${rows.length}건</div>
+            </div>
+            <div class="wf-dash__detail-list">
+                ${rows.map(r => `
+                    <div class="wf-dash__detail-row">
+                        <span class="date">${r.executeDate}</span>
+                        <span class="amount ${r.totalAmount < 0 ? 'amount-negative' : ''}">${formatAmount(r.totalAmount)}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="wf-dash__bar-wrap">
+                <div class="wf-dash__bar-title">일별 지급 분포</div>
+                ${rows.map(r => `
+                    <div class="wf-dash__bar">
+                        <span class="bar-label">${r.executeDate.slice(5)}</span>
+                        <span class="bar-fill" style="width:${Math.max((Math.abs(r.totalAmount) / maxAmt) * 140, 2)}px; background:${r.totalAmount < 0 ? '#e85d5d' : '#4a90d9'}"></span>
+                        <span class="bar-value">${shortAmount(r.totalAmount)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function formatAmount(v) {
+        if (v === 0) return '0';
+        const prefix = v < 0 ? '-' : '';
+        const abs = Math.abs(v);
+        return prefix + abs.toLocaleString() + '원';
+    }
+
+    function shortAmount(v) {
+        const prefix = v < 0 ? '-' : '';
+        const abs = Math.abs(v);
+        if (abs >= 100000000) return prefix + (abs / 100000000).toFixed(1) + '억';
+        if (abs >= 10000) return prefix + (abs / 10000).toFixed(0) + '만';
+        return prefix + abs.toLocaleString();
+    }
+})();
+</script>
