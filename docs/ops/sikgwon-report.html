@@ -116,6 +116,7 @@ meta: 최종 수정: 2026.02.16
         <button class="sk-btn" onclick="skHot('thisMonth',this)">이번달</button>
         <div class="sk-sep"></div>
         <button class="sk-btn sk-btn--primary" id="skFetchBtn" onclick="skFetch()">조회</button>
+        <button class="sk-btn" id="skStopBtn" onclick="skStop()" style="display:none;color:#e85d5d;border-color:#e85d5d;">중단</button>
         <button class="sk-btn sk-btn--green" id="skDlAllBtn" onclick="skDownloadAll()" disabled>전체 엑셀 다운로드</button>
         <span class="sk-status" id="skStatus"></span>
     </div>
@@ -182,7 +183,8 @@ var SK = {
     deptMap: {},
     deptList: [],
     selectedDept: null, // null = 전체
-    fetching: false
+    fetching: false,
+    aborted: false
 };
 
 /* ── 초기화 ── */
@@ -239,22 +241,33 @@ async function skFetchDay(dateStr, comid) {
         action: 'post', queryId: SK.QID,
         startdate: dateStr, enddate: dateStr, comid: comid
     });
-    if (d.query_result) return d.query_result.data.rows || [];
-    if (d.job) return await skPollJob(d.job.id);
-    return [];
+    console.log('[skFetchDay] ' + dateStr, JSON.stringify(d).substring(0, 300));
+    // 즉시 결과
+    if (d.query_result && d.query_result.data) return d.query_result.data.rows || [];
+    // job 비동기
+    var jobId = d.job && (d.job.id || d.job.job_id);
+    if (!jobId && d.job_id) jobId = d.job_id;
+    if (jobId && jobId !== 'undefined') return await skPollJob(jobId);
+    // 응답 구조 알 수 없음
+    console.warn('[skFetchDay] 알 수 없는 응답:', JSON.stringify(d));
+    throw new Error('알 수 없는 응답 구조');
 }
 
 async function skPollJob(jobId) {
+    console.log('[skPollJob] jobId=' + jobId);
     for (var i = 0; i < 120; i++) {
+        if (SK.aborted) throw new Error('중단됨');
         await new Promise(function(r) { setTimeout(r, 1500); });
         var d = await skApi({ action: 'job', jobId: jobId });
+        console.log('[skPollJob] #' + i, 'status=' + (d.job && d.job.status));
         if (d.job && d.job.status === 3) {
-            var res = await skApi({ action: 'result', resultId: d.job.query_result_id });
+            var rid = d.job.query_result_id;
+            var res = await skApi({ action: 'result', resultId: rid });
             return (res.query_result && res.query_result.data.rows) || [];
         }
-        if (d.job && d.job.status === 4) throw new Error('쿼리 실패');
+        if (d.job && (d.job.status === 4 || d.job.status === 5)) throw new Error('쿼리 실패 (status=' + d.job.status + ')');
     }
-    throw new Error('타임아웃');
+    throw new Error('폴링 타임아웃');
 }
 
 /* ── 핫키 ── */
@@ -277,10 +290,17 @@ function skHot(key, el) {
     if (el) el.classList.add('sk-btn--active');
 }
 
+/* ── 중단 ── */
+function skStop() {
+    SK.aborted = true;
+    document.getElementById('skStopBtn').style.display = 'none';
+}
+
 /* ── 메인 조회 (1일씩 루프) ── */
 async function skFetch() {
     if (SK.fetching) return;
     SK.fetching = true;
+    SK.aborted = false;
     SK.raw = [];
     SK.selectedDept = null;
 
@@ -290,8 +310,10 @@ async function skFetch() {
     if (!sd || !ed || !comid) { alert('comid, 시작일, 종료일을 입력하세요.'); SK.fetching = false; return; }
 
     var fetchBtn = document.getElementById('skFetchBtn');
+    var stopBtn = document.getElementById('skStopBtn');
     var dlBtn = document.getElementById('skDlAllBtn');
     fetchBtn.disabled = true;
+    stopBtn.style.display = '';
     dlBtn.disabled = true;
     document.getElementById('skCards').style.display = 'none';
     document.getElementById('skBody').style.display = 'none';
@@ -312,6 +334,10 @@ async function skFetch() {
     var errors = [];
 
     while (cur <= ed) {
+        if (SK.aborted) {
+            plog.innerHTML += '<span style="color:#d49a2a">사용자 중단</span><br>';
+            break;
+        }
         dayIdx++;
         var pct = Math.round((dayIdx / totalDays) * 100);
         pbar.style.width = pct + '%';
@@ -333,11 +359,12 @@ async function skFetch() {
     }
 
     pbar.style.width = '100%';
-    ptext.textContent = '완료 - ' + SK.raw.length.toLocaleString() + '건';
-    statusEl.textContent = SK.raw.length.toLocaleString() + '건 조회 완료' + (errors.length ? ' (실패 ' + errors.length + '일)' : '');
+    ptext.textContent = '완료 - ' + SK.raw.length.toLocaleString() + '건' + (SK.aborted ? ' (중단됨)' : '');
+    statusEl.textContent = SK.raw.length.toLocaleString() + '건 조회 완료' + (errors.length ? ' (실패 ' + errors.length + '일)' : '') + (SK.aborted ? ' [중단]' : '');
 
-    skProcess();
+    if (SK.raw.length > 0) skProcess();
     fetchBtn.disabled = false;
+    stopBtn.style.display = 'none';
     dlBtn.disabled = SK.raw.length === 0;
     SK.fetching = false;
 }
