@@ -61,11 +61,18 @@
           "desc": "재무기획 관련 도구",
           "children": [
  {
-              "id": "billing-match.html",
+              "id": "billing-match",
               "title": "입금내역 매핑",
               "icon": "doc",
               "desc": "입금내역 매핑",
               "file": "docs/ops/billing-match.html"
+            },
+             {
+              "id": "settlement-transfer",
+              "title": "입금내역 매핑",
+              "icon": "doc",
+              "desc": "입금내역 매핑",
+              "file": "docs/ops/settlement-transfer.html"
             }
             
           ]
