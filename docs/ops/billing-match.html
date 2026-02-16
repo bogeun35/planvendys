@@ -1,0 +1,704 @@
+<!--
+title: 청구-입금 매칭 검증
+meta: 최종 수정: 2026.02.16
+-->
+
+<style>
+.bm { font-family: 'Noto Sans KR', sans-serif; font-size: 12px; color: #1a2332; position: relative; }
+.bm * { box-sizing: border-box; }
+.bm-ctrl { display: flex; align-items: center; gap: 6px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 8px; flex-wrap: wrap; }
+.bm-ctrl input[type="date"] { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 3px 6px; border: 1px solid #d1d5db; border-radius: 3px; }
+.bm-ctrl label { font-size: 11px; color: #4a5568; }
+.bm-btn { padding: 3px 10px; font-size: 11px; border: 1px solid #d1d5db; border-radius: 3px; background: #fff; cursor: pointer; color: #4a5568; }
+.bm-btn:hover { border-color: #4a90d9; color: #4a90d9; }
+.bm-btn--primary { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+.bm-btn--primary:hover { background: #3a7bc8; }
+.bm-btn--active { background: #eef4fb; border-color: #4a90d9; color: #4a90d9; }
+.bm-status { margin-left: auto; font-size: 11px; color: #94a3b8; }
+
+.bm-summary { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 8px; }
+.bm-card { background: #f8fafd; border: 1px solid #e2e8f0; border-radius: 3px; padding: 8px 10px; }
+.bm-card__label { font-size: 10px; color: #94a3b8; margin-bottom: 2px; }
+.bm-card__value { font-size: 15px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: #1a2332; }
+.bm-card__value--green { color: #22c55e; }
+.bm-card__value--red { color: #e85d5d; }
+
+.bm-tolerance { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 11px; color: #4a5568; }
+.bm-tolerance input[type="number"] { width: 60px; font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 2px 6px; border: 1px solid #d1d5db; border-radius: 3px; text-align: right; }
+.bm-tolerance select { font-size: 11px; padding: 2px 6px; border: 1px solid #d1d5db; border-radius: 3px; }
+
+.bm-body { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bm-panel { border: 1px solid #e2e8f0; border-radius: 3px; display: flex; flex-direction: column; max-height: calc(100vh - 260px); }
+.bm-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: #f8fafd; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+.bm-panel__title { font-size: 12px; font-weight: 600; color: #1a2332; }
+.bm-panel__count { font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; }
+.bm-panel__search { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+.bm-panel__search input { flex: 1; font-size: 11px; padding: 2px 6px; border: 1px solid #d1d5db; border-radius: 3px; }
+.bm-panel__filter { display: flex; gap: 4px; }
+.bm-panel__filter .bm-btn { font-size: 10px; padding: 1px 6px; }
+.bm-tbl-wrap { flex: 1; overflow: auto; }
+.bm-tbl { width: 100%; border-collapse: collapse; }
+.bm-tbl th { position: sticky; top: 0; background: #f0f4f9; font-size: 10px; font-weight: 600; color: #4a5568; padding: 4px 8px; text-align: left; border-bottom: 1px solid #d1d5db; cursor: pointer; white-space: nowrap; z-index: 1; }
+.bm-tbl th:hover { color: #4a90d9; }
+.bm-tbl td { padding: 3px 8px; border-bottom: 1px solid #f0f4f9; font-size: 11px; white-space: nowrap; }
+.bm-tbl tr:hover td { background: #f8fafd; }
+.bm-tbl tr.bm-row--matched td { background: #f0fdf4; }
+.bm-tbl tr.bm-row--selected td { background: #eef4fb; }
+.bm-tbl tr.bm-row--highlight td { background: #fefce8; }
+.bm-tbl .bm-num { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.bm-tbl .bm-tag { display: inline-block; padding: 0 4px; border-radius: 2px; font-size: 9px; font-weight: 600; }
+.bm-tag--matched { background: #dcfce7; color: #16a34a; }
+.bm-tag--auto { background: #dbeafe; color: #2563eb; }
+.bm-tag--unmatched { background: #fee2e2; color: #dc2626; }
+.bm-tag--partial { background: #fef3c7; color: #d97706; }
+.bm-tag--diff { background: #fef3c7; color: #d97706; font-family: 'JetBrains Mono', monospace; }
+.bm-match-line { background: #fafafa; border: 1px solid #e2e8f0; border-radius: 3px; margin-top: 8px; padding: 8px 10px; }
+.bm-match-line__title { font-size: 11px; font-weight: 600; margin-bottom: 4px; }
+
+.bm-loading { position: absolute; inset: 0; background: rgba(255,255,255,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; border-radius: 3px; }
+.bm-loading__text { font-size: 12px; color: #4a5568; margin-bottom: 8px; }
+.bm-loading__bar { width: 200px; height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
+.bm-loading__fill { height: 100%; background: #4a90d9; transition: width 0.3s; }
+.bm-hidden { display: none !important; }
+
+.bm-copy-ok { color: #22c55e; font-size: 11px; margin-left: 6px; opacity: 0; transition: opacity 0.3s; }
+.bm-copy-ok--show { opacity: 1; }
+</style>
+
+<div class="bm" id="bmRoot">
+  <!-- Loading -->
+  <div class="bm-loading bm-hidden" id="bmLoading">
+    <div class="bm-loading__text" id="bmLoadText">데이터 조회 중...</div>
+    <div class="bm-loading__bar"><div class="bm-loading__fill" id="bmLoadBar" style="width:0%"></div></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="bm-ctrl">
+    <label>시작일</label>
+    <input type="date" id="bmStart">
+    <label>종료일</label>
+    <input type="date" id="bmEnd">
+    <button class="bm-btn bm-btn--primary" onclick="bmFetch()">조회</button>
+    <button class="bm-btn" onclick="bmHot('thisMonth',this)">이번달</button>
+    <button class="bm-btn" onclick="bmHot('lastMonth',this)">지난달</button>
+    <button class="bm-btn" onclick="bmHot('twoMonthsAgo',this)">지지난달</button>
+    <span class="bm-status" id="bmStatus"></span>
+  </div>
+
+  <!-- Summary -->
+  <div class="bm-summary" id="bmSummary">
+    <div class="bm-card"><div class="bm-card__label">청구서 건수</div><div class="bm-card__value" id="bmSBillCnt">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">청구 총액</div><div class="bm-card__value" id="bmSBillAmt">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">입금 건수</div><div class="bm-card__value" id="bmSDepCnt">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">입금 총액</div><div class="bm-card__value" id="bmSDepAmt">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">매칭 성공</div><div class="bm-card__value bm-card__value--green" id="bmSMatchCnt">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">미매칭</div><div class="bm-card__value bm-card__value--red" id="bmSUnmatchCnt">-</div></div>
+  </div>
+
+  <!-- Tolerance + Match -->
+  <div class="bm-tolerance">
+    <span>금액 허용 오차</span>
+    <input type="number" id="bmTolerance" value="2" min="0" max="100">
+    <span>원</span>
+    <span style="margin-left:12px">매칭 기준</span>
+    <select id="bmMatchMode">
+      <option value="both">정규식적요 + 금액</option>
+      <option value="desc">정규식적요만</option>
+      <option value="amount">금액만</option>
+    </select>
+    <button class="bm-btn" onclick="bmRunMatch()">매칭 실행</button>
+    <button class="bm-btn" onclick="bmCopyResult()" id="bmCopyBtn">결과 복사</button>
+    <span class="bm-copy-ok" id="bmCopyOk">복사 완료</span>
+  </div>
+
+  <!-- 2-Panel -->
+  <div class="bm-body">
+    <!-- Left: Bills -->
+    <div class="bm-panel">
+      <div class="bm-panel__header">
+        <span class="bm-panel__title">청구서 (입금약정일 기준)</span>
+        <span class="bm-panel__count" id="bmBillCount">0건</span>
+      </div>
+      <div class="bm-panel__search">
+        <input type="text" placeholder="청구서명/예금주 검색" id="bmBillSearch" oninput="bmRenderBills()">
+        <div class="bm-panel__filter">
+          <button class="bm-btn bm-btn--active" onclick="bmBillFilter('all',this)">전체</button>
+          <button class="bm-btn" onclick="bmBillFilter('matched',this)">매칭</button>
+          <button class="bm-btn" onclick="bmBillFilter('unmatched',this)">미매칭</button>
+        </div>
+      </div>
+      <div class="bm-tbl-wrap">
+        <table class="bm-tbl">
+          <thead>
+            <tr>
+              <th onclick="bmSortBill('billIdx')">#</th>
+              <th onclick="bmSortBill('billName')">청구서명</th>
+              <th onclick="bmSortBill('depositAccountHolder')">예금주</th>
+              <th onclick="bmSortBill('regExDepositAccountHolder')">정규식예금주</th>
+              <th onclick="bmSortBill('totalAmount')" style="text-align:right">청구액(원)</th>
+              <th onclick="bmSortBill('payDate')">약정일</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody id="bmBillBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right: Bank Statements -->
+    <div class="bm-panel">
+      <div class="bm-panel__header">
+        <span class="bm-panel__title">입금내역 (거래일 기준)</span>
+        <span class="bm-panel__count" id="bmDepCount">0건</span>
+      </div>
+      <div class="bm-panel__search">
+        <input type="text" placeholder="적요 검색" id="bmDepSearch" oninput="bmRenderDeps()">
+        <div class="bm-panel__filter">
+          <button class="bm-btn bm-btn--active" onclick="bmDepFilter('all',this)">전체</button>
+          <button class="bm-btn" onclick="bmDepFilter('matched',this)">매칭</button>
+          <button class="bm-btn" onclick="bmDepFilter('unmatched',this)">미매칭</button>
+        </div>
+      </div>
+      <div class="bm-tbl-wrap">
+        <table class="bm-tbl">
+          <thead>
+            <tr>
+              <th onclick="bmSortDep('bankStatementIdx')">#</th>
+              <th onclick="bmSortDep('description')">적요</th>
+              <th onclick="bmSortDep('regExDescription')">정규식적요</th>
+              <th onclick="bmSortDep('depositAmount')" style="text-align:right">입금액(원)</th>
+              <th onclick="bmSortDep('matchedAmount')" style="text-align:right">매칭액(원)</th>
+              <th>매칭 청구서</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody id="bmDepBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Match Result Panel -->
+  <div class="bm-match-line bm-hidden" id="bmMatchResult">
+    <div class="bm-match-line__title">매칭 결과 상세</div>
+    <div id="bmMatchDetail"></div>
+  </div>
+</div>
+
+<script>
+/* ===== Global State ===== */
+var BM = {
+    PROXY: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
+    QID_BILL: 1354,
+    QID_DEP: 1355,
+    bills: [],
+    deps: [],
+    billFilter: 'all',
+    depFilter: 'all',
+    billSortCol: 'totalAmount',
+    billSortDir: 'desc',
+    depSortCol: 'depositAmount',
+    depSortDir: 'desc',
+    matches: [],
+    selectedBillIdx: null,
+    selectedDepIdx: null
+};
+
+/* ===== Normalize (regex description logic) ===== */
+function bmNormalize(s) {
+    if (!s) return '';
+    s = String(s);
+    // 일반 공백 제거
+    s = s.replace(/\s/g, '');
+    // 아스키코드 41377 (특수 공백 \uA1A1) 제거
+    s = s.replace(/\uA1A1/g, '');
+    // （주） 제거 (아스키코드 41896=\uFF08, 41897=\uFF09)
+    s = s.replace(/\uFF08\uc8FC\uFF09/g, '');
+    // ㈜ 제거 (아스키코드 41695=\uA31F → 실제로는 \u321C)
+    s = s.replace(/\u321C/g, '');
+    // 개별 특수 괄호 제거
+    s = s.replace(/\uFF08/g, '');
+    s = s.replace(/\uFF09/g, '');
+    // (주) 제거
+    s = s.replace(/\(\uc8FC\)/g, '');
+    s = s.replace(/\(주\)/g, '');
+    // 주식회사 제거
+    s = s.replace(/주식회사/g, '');
+    return s;
+}
+
+/* ===== API ===== */
+function bmApi(p) {
+    var qs = Object.keys(p).map(function(k) { return k + '=' + encodeURIComponent(p[k]); }).join('&');
+    return fetch(BM.PROXY + '?' + qs, { redirect: 'follow' }).then(function(r) { return r.json(); });
+}
+
+/* ===== Date Helpers ===== */
+function bmDateStr(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function bmHot(key, el) {
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth();
+    var s, e;
+    switch(key) {
+        case 'thisMonth':
+            s = new Date(y, m, 1); e = new Date(y, m+1, 0); break;
+        case 'lastMonth':
+            s = new Date(y, m-1, 1); e = new Date(y, m, 0); break;
+        case 'twoMonthsAgo':
+            s = new Date(y, m-2, 1); e = new Date(y, m-1, 0); break;
+    }
+    document.getElementById('bmStart').value = bmDateStr(s);
+    document.getElementById('bmEnd').value = bmDateStr(e);
+    // active toggle
+    var btns = el.parentElement.querySelectorAll ? document.querySelectorAll('.bm-ctrl .bm-btn:not(.bm-btn--primary)') : [];
+    btns.forEach(function(b) { b.classList.remove('bm-btn--active'); });
+    el.classList.add('bm-btn--active');
+}
+
+/* ===== Init default dates ===== */
+(function() {
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth();
+    document.getElementById('bmStart').value = bmDateStr(new Date(y, m, 1));
+    document.getElementById('bmEnd').value = bmDateStr(new Date(y, m+1, 0));
+})();
+
+/* ===== Fetch ===== */
+async function bmFetch() {
+    var sd = document.getElementById('bmStart').value;
+    var ed = document.getElementById('bmEnd').value;
+    if (!sd || !ed) return;
+
+    bmShowLoading('청구서 데이터 조회 중...', 10);
+    BM.bills = [];
+    BM.deps = [];
+    BM.matches = [];
+
+    try {
+        // 1) Fetch bills
+        var billRows = await bmFetchQuery(BM.QID_BILL, sd, ed, '청구서');
+        bmShowLoading('입금내역 데이터 조회 중...', 50);
+
+        // 2) Fetch deposits
+        var depRows = await bmFetchQuery(BM.QID_DEP, sd, ed, '입금내역');
+        bmShowLoading('데이터 처리 중...', 85);
+
+        // Process
+        BM.bills = billRows.map(function(r) {
+            return {
+                billIdx: Number(r.billIdx) || 0,
+                billName: String(r.billName || ''),
+                companyId: String(r.companyId || ''),
+                payDate: String(r.payDate || ''),
+                depositAccountHolder: String(r.depositAccountHolder || ''),
+                regExDepositAccountHolder: String(r.regExDepositAccountHolder || ''),
+                serviceTransactionAmount: Number(r.serviceTransactionAmount) || 0,
+                serviceChargeAmount: Number(r.serviceChargeAmount) || 0,
+                otherAmount: Number(r.otherAmount) || 0,
+                totalAmount: Number(r.totalAmount) || 0,
+                _matchStatus: 'unmatched',
+                _matchedDepIdx: null,
+                _diff: 0
+            };
+        });
+
+        BM.deps = depRows.map(function(r) {
+            return {
+                bankStatementIdx: Number(r.bankStatementIdx) || 0,
+                description: String(r.description || ''),
+                regExDescription: String(r.regExDescription || ''),
+                depositAmount: Number(r.depositAmount) || 0,
+                matchedAmount: Number(r.matchedAmount) || 0,
+                billIdx: r.billIdx ? Number(r.billIdx) : null,
+                _matchStatus: r.billIdx ? 'auto' : 'unmatched',
+                _matchedBillIdx: r.billIdx ? Number(r.billIdx) : null,
+                _diff: 0
+            };
+        });
+
+        bmShowLoading('완료', 100);
+        setTimeout(bmHideLoading, 300);
+
+        document.getElementById('bmStatus').textContent =
+            '청구서 ' + BM.bills.length + '건 / 입금 ' + BM.deps.length + '건 조회 완료';
+
+        bmRenderSummary();
+        bmRenderBills();
+        bmRenderDeps();
+
+    } catch(err) {
+        bmHideLoading();
+        document.getElementById('bmStatus').textContent = '오류: ' + err.message;
+    }
+}
+
+async function bmFetchQuery(qid, sd, ed, label) {
+    var d = await bmApi({ action: 'post', queryId: qid, startDate: sd, endDate: ed });
+    if (d.query_result) return d.query_result.data.rows;
+    if (d.job) return await bmPoll(d.job.id, label);
+    throw new Error(label + ' 쿼리 실패');
+}
+
+async function bmPoll(jid, label) {
+    for (var i = 0; i < 60; i++) {
+        await new Promise(function(r) { setTimeout(r, 1000); });
+        var d = await bmApi({ action: 'job', jobId: jid });
+        if (d.job && d.job.status === 3) {
+            var res = await bmApi({ action: 'result', resultId: d.job.query_result_id });
+            return res.query_result.data.rows;
+        }
+        if (d.job && d.job.status === 4) throw new Error(label + ' 쿼리 실패 (job error)');
+    }
+    throw new Error(label + ' 타임아웃');
+}
+
+/* ===== Loading ===== */
+function bmShowLoading(text, pct) {
+    document.getElementById('bmLoading').classList.remove('bm-hidden');
+    document.getElementById('bmLoadText').textContent = text;
+    document.getElementById('bmLoadBar').style.width = pct + '%';
+}
+function bmHideLoading() {
+    document.getElementById('bmLoading').classList.add('bm-hidden');
+}
+
+/* ===== Format ===== */
+function bmN(v) {
+    if (v === 0) return '0';
+    return (v < 0 ? '-' : '') + Math.abs(v).toLocaleString();
+}
+function bmS(v) {
+    var p = v < 0 ? '-' : '', a = Math.abs(v);
+    if (a >= 1e8) return p + (a / 1e8).toFixed(1) + '억';
+    if (a >= 1e4) return p + (a / 1e4).toFixed(0) + '만';
+    return p + a.toLocaleString();
+}
+
+/* ===== Summary ===== */
+function bmRenderSummary() {
+    var billTotal = 0, depTotal = 0, matchCnt = 0, unmatchBill = 0;
+    BM.bills.forEach(function(b) {
+        billTotal += b.totalAmount;
+        if (b._matchStatus !== 'unmatched') matchCnt++;
+        else unmatchBill++;
+    });
+    BM.deps.forEach(function(d) { depTotal += d.depositAmount; });
+    var unmatchDep = BM.deps.filter(function(d) { return d._matchStatus === 'unmatched'; }).length;
+
+    document.getElementById('bmSBillCnt').textContent = BM.bills.length + '건';
+    document.getElementById('bmSBillAmt').textContent = bmS(billTotal);
+    document.getElementById('bmSDepCnt').textContent = BM.deps.length + '건';
+    document.getElementById('bmSDepAmt').textContent = bmS(depTotal);
+    document.getElementById('bmSMatchCnt').textContent = matchCnt + '건';
+    document.getElementById('bmSUnmatchCnt').textContent = unmatchBill + ' / ' + unmatchDep;
+}
+
+/* ===== Matching Logic ===== */
+function bmRunMatch() {
+    var tolerance = Number(document.getElementById('bmTolerance').value) || 0;
+    var mode = document.getElementById('bmMatchMode').value;
+
+    // Reset
+    BM.bills.forEach(function(b) { b._matchStatus = 'unmatched'; b._matchedDepIdx = null; b._diff = 0; });
+    BM.deps.forEach(function(d) {
+        // 기존 DB 매칭(billIdx)은 auto로 유지
+        if (d.billIdx) {
+            d._matchStatus = 'auto';
+            d._matchedBillIdx = d.billIdx;
+        } else {
+            d._matchStatus = 'unmatched';
+            d._matchedBillIdx = null;
+        }
+        d._diff = 0;
+    });
+
+    // Mark bills that have auto-matched deposits
+    BM.deps.forEach(function(dep) {
+        if (dep._matchStatus === 'auto' && dep.billIdx) {
+            var bill = BM.bills.find(function(b) { return b.billIdx === dep.billIdx; });
+            if (bill) {
+                bill._matchStatus = 'auto';
+                bill._matchedDepIdx = dep.bankStatementIdx;
+            }
+        }
+    });
+
+    // Try matching unmatched bills with unmatched deposits
+    var unmatchedBills = BM.bills.filter(function(b) { return b._matchStatus === 'unmatched'; });
+    var unmatchedDeps = BM.deps.filter(function(d) { return d._matchStatus === 'unmatched'; });
+
+    var usedDepIndices = {};
+
+    unmatchedBills.forEach(function(bill) {
+        var normBill = bmNormalize(bill.regExDepositAccountHolder || bill.depositAccountHolder);
+        if (!normBill && mode !== 'amount') return;
+
+        for (var i = 0; i < unmatchedDeps.length; i++) {
+            var dep = unmatchedDeps[i];
+            if (usedDepIndices[dep.bankStatementIdx]) continue;
+
+            var normDep = bmNormalize(dep.regExDescription || dep.description);
+            var descMatch = normBill && normDep && normBill === normDep;
+            var amtDiff = Math.abs(bill.totalAmount - dep.depositAmount);
+            var amtMatch = amtDiff <= tolerance;
+
+            var matched = false;
+            if (mode === 'both') matched = descMatch && amtMatch;
+            else if (mode === 'desc') matched = descMatch;
+            else if (mode === 'amount') matched = amtMatch;
+
+            if (matched) {
+                bill._matchStatus = 'matched';
+                bill._matchedDepIdx = dep.bankStatementIdx;
+                bill._diff = bill.totalAmount - dep.depositAmount;
+                dep._matchStatus = 'matched';
+                dep._matchedBillIdx = bill.billIdx;
+                dep._diff = bill.totalAmount - dep.depositAmount;
+                usedDepIndices[dep.bankStatementIdx] = true;
+                break;
+            }
+        }
+    });
+
+    BM.matches = [];
+    BM.bills.forEach(function(b) {
+        if (b._matchStatus !== 'unmatched') {
+            BM.matches.push({ billIdx: b.billIdx, depIdx: b._matchedDepIdx, status: b._matchStatus, diff: b._diff });
+        }
+    });
+
+    bmRenderSummary();
+    bmRenderBills();
+    bmRenderDeps();
+
+    document.getElementById('bmStatus').textContent =
+        '매칭 완료: ' + BM.matches.length + '건 성공, ' +
+        BM.bills.filter(function(b) { return b._matchStatus === 'unmatched'; }).length + '건 미매칭';
+}
+
+/* ===== Render Bills ===== */
+function bmRenderBills() {
+    var search = (document.getElementById('bmBillSearch').value || '').toLowerCase();
+    var filtered = BM.bills.filter(function(b) {
+        if (BM.billFilter === 'matched' && b._matchStatus === 'unmatched') return false;
+        if (BM.billFilter === 'unmatched' && b._matchStatus !== 'unmatched') return false;
+        if (search) {
+            var haystack = (b.billName + ' ' + b.depositAccountHolder + ' ' + b.regExDepositAccountHolder).toLowerCase();
+            if (haystack.indexOf(search) === -1) return false;
+        }
+        return true;
+    });
+
+    // Sort
+    var col = BM.billSortCol, dir = BM.billSortDir === 'asc' ? 1 : -1;
+    filtered.sort(function(a, b) {
+        var va = a[col], vb = b[col];
+        if (typeof va === 'number') return (va - vb) * dir;
+        return String(va).localeCompare(String(vb)) * dir;
+    });
+
+    var html = '';
+    filtered.forEach(function(b) {
+        var cls = b._matchStatus !== 'unmatched' ? 'bm-row--matched' : '';
+        if (BM.selectedBillIdx === b.billIdx) cls += ' bm-row--selected';
+        var tag = '';
+        if (b._matchStatus === 'auto') tag = '<span class="bm-tag bm-tag--auto">DB매칭</span>';
+        else if (b._matchStatus === 'matched') {
+            tag = '<span class="bm-tag bm-tag--matched">매칭</span>';
+            if (b._diff !== 0) tag += ' <span class="bm-tag bm-tag--diff">' + (b._diff > 0 ? '+' : '') + b._diff + '</span>';
+        }
+        else tag = '<span class="bm-tag bm-tag--unmatched">미매칭</span>';
+
+        html += '<tr class="' + cls + '" onclick="bmSelectBill(' + b.billIdx + ')">' +
+            '<td>' + b.billIdx + '</td>' +
+            '<td title="' + b.billName + '">' + (b.billName.length > 20 ? b.billName.substring(0,20) + '..' : b.billName) + '</td>' +
+            '<td>' + b.depositAccountHolder + '</td>' +
+            '<td>' + b.regExDepositAccountHolder + '</td>' +
+            '<td class="bm-num">' + bmN(b.totalAmount) + '</td>' +
+            '<td>' + b.payDate + '</td>' +
+            '<td>' + tag + '</td></tr>';
+    });
+
+    document.getElementById('bmBillBody').innerHTML = html;
+    document.getElementById('bmBillCount').textContent = filtered.length + '건';
+}
+
+/* ===== Render Deposits ===== */
+function bmRenderDeps() {
+    var search = (document.getElementById('bmDepSearch').value || '').toLowerCase();
+    var filtered = BM.deps.filter(function(d) {
+        if (BM.depFilter === 'matched' && d._matchStatus === 'unmatched') return false;
+        if (BM.depFilter === 'unmatched' && d._matchStatus !== 'unmatched') return false;
+        if (search) {
+            var haystack = (d.description + ' ' + d.regExDescription).toLowerCase();
+            if (haystack.indexOf(search) === -1) return false;
+        }
+        return true;
+    });
+
+    var col = BM.depSortCol, dir = BM.depSortDir === 'asc' ? 1 : -1;
+    filtered.sort(function(a, b) {
+        var va = a[col], vb = b[col];
+        if (typeof va === 'number') return (va - vb) * dir;
+        return String(va).localeCompare(String(vb)) * dir;
+    });
+
+    var html = '';
+    filtered.forEach(function(d) {
+        var cls = d._matchStatus !== 'unmatched' ? 'bm-row--matched' : '';
+        if (BM.selectedDepIdx === d.bankStatementIdx) cls += ' bm-row--selected';
+        var tag = '';
+        if (d._matchStatus === 'auto') tag = '<span class="bm-tag bm-tag--auto">DB매칭</span>';
+        else if (d._matchStatus === 'matched') {
+            tag = '<span class="bm-tag bm-tag--matched">매칭</span>';
+            if (d._diff !== 0) tag += ' <span class="bm-tag bm-tag--diff">' + (d._diff > 0 ? '+' : '') + d._diff + '</span>';
+        }
+        else tag = '<span class="bm-tag bm-tag--unmatched">미매칭</span>';
+
+        var billRef = d._matchedBillIdx ? String(d._matchedBillIdx) : '-';
+
+        html += '<tr class="' + cls + '" onclick="bmSelectDep(' + d.bankStatementIdx + ')">' +
+            '<td>' + d.bankStatementIdx + '</td>' +
+            '<td title="' + d.description + '">' + (d.description.length > 20 ? d.description.substring(0,20) + '..' : d.description) + '</td>' +
+            '<td>' + d.regExDescription + '</td>' +
+            '<td class="bm-num">' + bmN(d.depositAmount) + '</td>' +
+            '<td class="bm-num">' + (d.matchedAmount ? bmN(d.matchedAmount) : '-') + '</td>' +
+            '<td>' + billRef + '</td>' +
+            '<td>' + tag + '</td></tr>';
+    });
+
+    document.getElementById('bmDepBody').innerHTML = html;
+    document.getElementById('bmDepCount').textContent = filtered.length + '건';
+}
+
+/* ===== Selection & Highlight ===== */
+function bmSelectBill(billIdx) {
+    BM.selectedBillIdx = billIdx;
+    var bill = BM.bills.find(function(b) { return b.billIdx === billIdx; });
+    if (bill && bill._matchedDepIdx) {
+        BM.selectedDepIdx = bill._matchedDepIdx;
+    } else {
+        BM.selectedDepIdx = null;
+    }
+    bmRenderBills();
+    bmRenderDeps();
+    bmShowMatchDetail(bill);
+}
+
+function bmSelectDep(depIdx) {
+    BM.selectedDepIdx = depIdx;
+    var dep = BM.deps.find(function(d) { return d.bankStatementIdx === depIdx; });
+    if (dep && dep._matchedBillIdx) {
+        BM.selectedBillIdx = dep._matchedBillIdx;
+    } else {
+        BM.selectedBillIdx = null;
+    }
+    bmRenderBills();
+    bmRenderDeps();
+    if (dep && dep._matchedBillIdx) {
+        var bill = BM.bills.find(function(b) { return b.billIdx === dep._matchedBillIdx; });
+        bmShowMatchDetail(bill);
+    }
+}
+
+function bmShowMatchDetail(bill) {
+    var panel = document.getElementById('bmMatchResult');
+    var detail = document.getElementById('bmMatchDetail');
+    if (!bill) { panel.classList.add('bm-hidden'); return; }
+
+    var dep = null;
+    if (bill._matchedDepIdx) {
+        dep = BM.deps.find(function(d) { return d.bankStatementIdx === bill._matchedDepIdx; });
+    }
+
+    var h = '<table class="bm-tbl" style="margin-bottom:0"><thead><tr>' +
+        '<th>항목</th><th>청구서</th><th>입금내역</th><th>비교</th></tr></thead><tbody>';
+    h += '<tr><td>원본명</td><td>' + bill.depositAccountHolder + '</td><td>' + (dep ? dep.description : '-') + '</td><td></td></tr>';
+    h += '<tr><td>정규식처리</td><td>' + bill.regExDepositAccountHolder + '</td><td>' + (dep ? dep.regExDescription : '-') + '</td>';
+    if (dep) {
+        var nb = bmNormalize(bill.regExDepositAccountHolder || bill.depositAccountHolder);
+        var nd = bmNormalize(dep.regExDescription || dep.description);
+        h += '<td>' + (nb === nd ? '<span class="bm-tag bm-tag--matched">일치</span>' : '<span class="bm-tag bm-tag--unmatched">불일치</span> ' + nb + ' vs ' + nd) + '</td>';
+    } else { h += '<td>-</td>'; }
+    h += '</tr>';
+    h += '<tr><td>Normalize</td><td>' + bmNormalize(bill.regExDepositAccountHolder || bill.depositAccountHolder) + '</td><td>' + (dep ? bmNormalize(dep.regExDescription || dep.description) : '-') + '</td><td></td></tr>';
+    h += '<tr><td>금액</td><td class="bm-num">' + bmN(bill.totalAmount) + '</td><td class="bm-num">' + (dep ? bmN(dep.depositAmount) : '-') + '</td>';
+    if (dep) {
+        var diff = bill.totalAmount - dep.depositAmount;
+        h += '<td class="bm-num">' + (diff === 0 ? '<span class="bm-tag bm-tag--matched">일치</span>' : '<span class="bm-tag bm-tag--diff">차이 ' + (diff > 0 ? '+' : '') + bmN(diff) + '원</span>') + '</td>';
+    } else { h += '<td>-</td>'; }
+    h += '</tr></tbody></table>';
+
+    detail.innerHTML = h;
+    panel.classList.remove('bm-hidden');
+}
+
+/* ===== Filters ===== */
+function bmBillFilter(f, el) {
+    BM.billFilter = f;
+    el.parentElement.querySelectorAll('.bm-btn').forEach(function(b) { b.classList.remove('bm-btn--active'); });
+    el.classList.add('bm-btn--active');
+    bmRenderBills();
+}
+function bmDepFilter(f, el) {
+    BM.depFilter = f;
+    el.parentElement.querySelectorAll('.bm-btn').forEach(function(b) { b.classList.remove('bm-btn--active'); });
+    el.classList.add('bm-btn--active');
+    bmRenderDeps();
+}
+
+/* ===== Sort ===== */
+function bmSortBill(col) {
+    if (BM.billSortCol === col) BM.billSortDir = BM.billSortDir === 'asc' ? 'desc' : 'asc';
+    else { BM.billSortCol = col; BM.billSortDir = 'desc'; }
+    bmRenderBills();
+}
+function bmSortDep(col) {
+    if (BM.depSortCol === col) BM.depSortDir = BM.depSortDir === 'asc' ? 'desc' : 'asc';
+    else { BM.depSortCol = col; BM.depSortDir = 'desc'; }
+    bmRenderDeps();
+}
+
+/* ===== Copy Result ===== */
+function bmCopyResult() {
+    var lines = ['billIdx\tbankStatementIdx\t매칭상태\t청구액\t입금액\t차이\t청구서명\t예금주\t적요'];
+    BM.bills.forEach(function(b) {
+        var dep = null;
+        if (b._matchedDepIdx) dep = BM.deps.find(function(d) { return d.bankStatementIdx === b._matchedDepIdx; });
+        lines.push([
+            b.billIdx,
+            b._matchedDepIdx || '',
+            b._matchStatus === 'auto' ? 'DB매칭' : b._matchStatus === 'matched' ? '매칭' : '미매칭',
+            b.totalAmount,
+            dep ? dep.depositAmount : '',
+            dep ? b.totalAmount - dep.depositAmount : '',
+            b.billName,
+            b.depositAccountHolder,
+            dep ? dep.description : ''
+        ].join('\t'));
+    });
+    // Unmatched deposits
+    BM.deps.forEach(function(d) {
+        if (d._matchStatus === 'unmatched') {
+            lines.push([
+                '',
+                d.bankStatementIdx,
+                '미매칭(입금)',
+                '',
+                d.depositAmount,
+                '',
+                '',
+                '',
+                d.description
+            ].join('\t'));
+        }
+    });
+
+    navigator.clipboard.writeText(lines.join('\n')).then(function() {
+        var ok = document.getElementById('bmCopyOk');
+        ok.classList.add('bm-copy-ok--show');
+        setTimeout(function() { ok.classList.remove('bm-copy-ok--show'); }, 1500);
+    });
+}
+</script>
