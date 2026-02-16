@@ -1,1 +1,1013 @@
+<!--
+title: 단체선물대장 주문현황
+meta: 최종 수정: 2026.02.16
+-->
 
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ── reset ── */
+.gg *{margin:0;padding:0;box-sizing:border-box}
+
+/* ── root ── */
+.gg{
+    font-family:'Noto Sans KR',sans-serif;
+    font-size:12px;
+    color:#1a2332;
+    background:#fff;
+    display:flex;flex-direction:column;
+    height:calc(100vh - 40px);
+    overflow:hidden;
+    line-height:1.5;
+    position:relative;
+}
+
+/* ── control bar ── */
+.gg-ctrl{
+    display:flex;align-items:center;gap:6px;
+    padding:10px 16px;
+    border-bottom:1px solid #e2e8f0;
+    flex-shrink:0;
+    background:#f8fafd;
+    flex-wrap:wrap;
+}
+.gg-ctrl input[type="date"]{
+    padding:4px 8px;border:1px solid #cbd5e1;border-radius:3px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:#1a2332;
+    background:#fff;outline:none;
+}
+.gg-ctrl input[type="date"]:focus{border-color:#4a90d9;box-shadow:0 0 0 2px rgba(74,144,217,.15)}
+.gg-ctrl-btn{
+    padding:4px 10px;border:1px solid #cbd5e1;border-radius:3px;
+    background:#fff;color:#4a5568;font-size:11px;font-family:'Noto Sans KR',sans-serif;
+    cursor:pointer;transition:all .12s;white-space:nowrap;
+}
+.gg-ctrl-btn:hover{background:#eef4fb;color:#4a90d9;border-color:#4a90d9}
+.gg-ctrl-btn.active{background:#4a90d9;color:#fff;border-color:#4a90d9}
+.gg-ctrl-btn.primary{background:#4a90d9;color:#fff;border-color:#4a90d9}
+.gg-ctrl-btn.primary:hover{background:#3a7bc8}
+.gg-ctrl-sep{width:1px;height:20px;background:#e2e8f0;margin:0 2px}
+.gg-ctrl-status{margin-left:auto;font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace}
+
+/* ── tabs ── */
+.gg-tabs{
+    display:flex;border-bottom:1px solid #e2e8f0;flex-shrink:0;background:#fff;padding:0 16px;
+}
+.gg-tab{
+    padding:8px 16px;border:none;background:none;color:#94a3b8;font-size:12px;font-weight:600;
+    cursor:pointer;border-bottom:2px solid transparent;font-family:'Noto Sans KR',sans-serif;transition:all .12s;
+}
+.gg-tab:hover{color:#4a5568}
+.gg-tab.active{color:#4a90d9;border-bottom-color:#4a90d9}
+
+/* ── main area ── */
+.gg-main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.gg-panel{display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0}
+.gg-panel.active{display:flex}
+
+/* ── summary cards ── */
+.gg-cards{
+    display:flex;gap:8px;padding:10px 16px 6px;flex-shrink:0;overflow-x:auto;
+}
+.gg-card{
+    background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;
+    padding:8px 12px;min-width:100px;flex:1;
+}
+.gg-card__label{font-size:10px;color:#94a3b8;font-weight:600;letter-spacing:.3px;margin-bottom:2px;text-transform:uppercase}
+.gg-card__value{font-size:15px;font-weight:800;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.gg-card__sub{font-size:10px;color:#94a3b8;margin-top:1px}
+.gg-c-default{color:#1a2332}
+.gg-c-gray{color:#6b7280}
+.gg-c-blue{color:#2563eb}
+.gg-c-yellow{color:#d49a2a}
+.gg-c-green{color:#22c55e}
+.gg-c-accent{color:#4a90d9}
+.gg-c-orange{color:#ea580c}
+.gg-c-red{color:#e85d5d}
+
+/* ── filter bar ── */
+.gg-filter{
+    display:flex;gap:6px;padding:6px 16px 8px;flex-shrink:0;align-items:center;flex-wrap:wrap;
+}
+.gg-filter input,.gg-filter select{
+    padding:5px 10px;border:1px solid #cbd5e1;border-radius:3px;
+    font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#1a2332;background:#fff;outline:none;
+}
+.gg-filter input:focus,.gg-filter select:focus{border-color:#4a90d9;box-shadow:0 0 0 2px rgba(74,144,217,.15)}
+.gg-filter input{flex:1;min-width:160px}
+.gg-filter select{min-width:100px}
+
+/* ── grid wrapper ── */
+.gg-grid{
+    flex:1;margin:0 16px 10px;border:1px solid #e2e8f0;border-radius:4px;
+    overflow:hidden;display:flex;flex-direction:column;background:#fff;min-height:0;
+}
+.gg-grid__scroll{flex:1;overflow:auto;min-height:0}
+.gg-grid__scroll::-webkit-scrollbar{width:5px;height:5px}
+.gg-grid__scroll::-webkit-scrollbar-track{background:#f1f5f9}
+.gg-grid__scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+
+/* ── table ── */
+.gg table{width:100%;border-collapse:collapse;font-size:11px}
+.gg thead{position:sticky;top:0;z-index:2}
+.gg th{
+    background:#f0f4f9;color:#4a5568;font-weight:600;font-size:10px;letter-spacing:.3px;
+    padding:6px 10px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;
+}
+.gg tbody tr{border-bottom:1px solid #f1f5f9;transition:background .08s}
+.gg tbody tr:hover{background:#f8fafd}
+.gg tbody tr.gg-clickable{cursor:pointer}
+.gg td{padding:5px 10px;color:#4a5568;white-space:nowrap}
+.gg td.gg-num{text-align:right;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:600;color:#1a2332}
+.gg td.gg-amt{text-align:right;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:600;color:#4a90d9}
+.gg-tr-warn{background:#fef2f2!important}
+
+/* ── footer ── */
+.gg-footer{
+    padding:6px 10px;background:#f8fafd;border-top:1px solid #e2e8f0;
+    font-size:11px;color:#94a3b8;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
+}
+.gg-pager{display:flex;align-items:center;gap:4px}
+.gg-pager button{
+    padding:3px 8px;border:1px solid #cbd5e1;background:#fff;border-radius:3px;
+    cursor:pointer;font-size:10px;color:#4a5568;font-family:'Noto Sans KR',sans-serif;
+}
+.gg-pager button:hover:not(:disabled){background:#eef4fb;color:#4a90d9;border-color:#4a90d9}
+.gg-pager button:disabled{opacity:.35;cursor:default}
+.gg-pager span{font-weight:600;color:#1a2332;font-family:'JetBrains Mono',monospace;font-size:11px}
+
+/* ── badge ── */
+.gg-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.gg-b-none{background:#f1f5f9;color:#6b7280}
+.gg-b-selected{background:#eef4fb;color:#2563eb}
+.gg-b-confirmed{background:#fef9ee;color:#d49a2a}
+.gg-b-delivered{background:#ecfdf5;color:#22c55e}
+
+/* ── status bar ── */
+.gg-sbar{display:flex;height:5px;border-radius:3px;overflow:hidden;background:#f1f5f9;min-width:70px}
+.gg-sbar div{height:100%}
+.gg-s1{background:#94a3b8}.gg-s2{background:#4a90d9}.gg-s3{background:#d49a2a}.gg-s4{background:#22c55e}
+.gg-sbar-pct{font-size:10px;color:#94a3b8;font-weight:600;margin-left:4px;font-family:'JetBrains Mono',monospace}
+
+/* ── detail panel ── */
+.gg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:999;display:none}
+.gg-overlay.open{display:block}
+.gg-detail{
+    position:fixed;top:0;right:0;bottom:0;width:880px;max-width:95vw;
+    background:#fff;border-left:1px solid #e2e8f0;box-shadow:-4px 0 16px rgba(0,0,0,.08);
+    z-index:1000;transform:translateX(100%);transition:transform .2s ease;
+    display:flex;flex-direction:column;
+}
+.gg-detail.open{transform:translateX(0)}
+.gg-detail__header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px;border-bottom:1px solid #e2e8f0;flex-shrink:0;
+}
+.gg-detail__header h2{font-size:13px;font-weight:700}
+.gg-detail__close{
+    width:26px;height:26px;border:1px solid #e2e8f0;background:#fff;border-radius:3px;
+    color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;
+}
+.gg-detail__close:hover{background:#fef2f2;color:#e85d5d;border-color:#e85d5d}
+.gg-detail__body{flex:1;overflow-y:auto;padding:16px}
+.gg-detail__body::-webkit-scrollbar{width:5px}
+.gg-detail__body::-webkit-scrollbar-thumb{background:#ddd;border-radius:3px}
+
+/* ── detail grid ── */
+.gg-dg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.gg-di{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px}
+.gg-di__label{font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.gg-di__value{font-size:13px;font-weight:700;margin-top:2px;font-family:'JetBrains Mono',monospace}
+.gg-dsection{font-size:11px;font-weight:700;color:#4a5568;letter-spacing:.3px;margin:14px 0 5px}
+.gg-dtable{border:1px solid #e2e8f0;border-radius:4px;overflow:hidden;max-height:260px;overflow-y:auto}
+.gg-dtable table{font-size:10px}
+.gg-dtable th{padding:5px 8px;font-size:9px}
+.gg-dtable td{padding:4px 8px}
+
+/* ── loading ── */
+.gg-loading{
+    position:absolute;inset:0;background:rgba(255,255,255,.92);z-index:50;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+}
+.gg-loading.hidden{display:none}
+.gg-spinner{width:24px;height:24px;border:3px solid #e2e8f0;border-top-color:#4a90d9;border-radius:50%;animation:gg-spin .5s linear infinite}
+@keyframes gg-spin{to{transform:rotate(360deg)}}
+.gg-loading__text{font-size:12px;color:#94a3b8}
+.gg-loading__bar{width:200px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}
+.gg-loading__fill{height:100%;background:#4a90d9;border-radius:2px;width:0;transition:width .3s}
+
+/* ── date chart area ── */
+.gg-date-layout{display:flex;flex:1;gap:10px;padding:0 16px 10px;min-height:0;overflow:hidden}
+.gg-date-charts{flex:1;display:flex;flex-direction:column;gap:8px;min-height:0}
+.gg-chart-box{
+    flex:1;background:#fff;border:1px solid #e2e8f0;border-radius:4px;
+    padding:10px;display:flex;flex-direction:column;min-height:0;
+}
+.gg-chart-box__title{font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:6px}
+.gg-chart-box__canvas{flex:1;min-height:0;position:relative}
+
+/* ── clipboard btn ── */
+.gg-copy-btn{
+    padding:3px 8px;border:1px solid #cbd5e1;background:#fff;border-radius:3px;
+    font-size:10px;color:#4a5568;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .15s;
+}
+.gg-copy-btn:hover{background:#eef4fb;color:#4a90d9;border-color:#4a90d9}
+.gg-copy-btn.copied{background:#ecfdf5;color:#22c55e;border-color:#22c55e}
+
+/* ── excel btn ── */
+.gg-xl-btn{
+    padding:4px 10px;border:1px solid #cbd5e1;background:#fff;border-radius:3px;
+    font-size:11px;color:#4a5568;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .12s;
+}
+.gg-xl-btn:hover{background:#eef4fb;color:#4a90d9;border-color:#4a90d9}
+
+@media(max-width:768px){
+    .gg-cards{padding:6px 10px}.gg-filter{padding:4px 10px}.gg-grid{margin:0 10px 6px}
+    .gg-card{min-width:80px;padding:6px 8px}.gg-card__value{font-size:12px}
+    .gg-detail{width:100vw;max-width:100vw}
+    .gg-ctrl{padding:6px 10px}
+}
+</style>
+
+<div class="gg" id="ggRoot">
+    <!-- loading overlay -->
+    <div class="gg-loading" id="ggLoading">
+        <div class="gg-spinner"></div>
+        <div class="gg-loading__text" id="ggLoadingText">Redash 쿼리 실행 중...</div>
+        <div class="gg-loading__bar"><div class="gg-loading__fill" id="ggLoadingFill"></div></div>
+    </div>
+
+    <!-- control bar -->
+    <div class="gg-ctrl">
+        <input type="date" id="ggSD" title="시작일">
+        <span style="color:#94a3b8;font-size:11px">~</span>
+        <input type="date" id="ggED" title="종료일">
+        <button class="gg-ctrl-btn primary" onclick="ggFetch()">조회</button>
+        <div class="gg-ctrl-sep"></div>
+        <button class="gg-ctrl-btn" onclick="ggHot('thisMonth',this)">이번달</button>
+        <button class="gg-ctrl-btn" onclick="ggHot('lastMonth',this)">지난달</button>
+        <button class="gg-ctrl-btn" onclick="ggHot('twoMonthsAgo',this)">지지난달</button>
+        <button class="gg-ctrl-btn" onclick="ggHot('thisYear',this)">올해</button>
+        <button class="gg-ctrl-btn" onclick="ggHot('lastYear',this)">작년</button>
+        <div class="gg-ctrl-sep"></div>
+        <button class="gg-xl-btn" onclick="ggExcel()">Excel 다운로드</button>
+        <span class="gg-ctrl-status" id="ggStatus"></span>
+    </div>
+
+    <!-- tabs -->
+    <div class="gg-tabs">
+        <button class="gg-tab active" data-t="all" onclick="ggTab('all',this)">전체 현황</button>
+        <button class="gg-tab" data-t="comp" onclick="ggTab('comp',this)">고객사별</button>
+        <button class="gg-tab" data-t="prod" onclick="ggTab('prod',this)">상품별</button>
+        <button class="gg-tab" data-t="store" onclick="ggTab('store',this)">매입처(제휴점)별</button>
+        <button class="gg-tab" data-t="date" onclick="ggTab('date',this)">일자별 현황</button>
+    </div>
+
+    <div class="gg-main">
+        <!-- ═══ 전체 현황 ═══ -->
+        <div class="gg-panel active" id="gg-p-all">
+            <div class="gg-cards" id="ggAC"></div>
+            <div class="gg-filter">
+                <input type="text" id="ggAS" placeholder="고객사, 상품명, 제휴점, 수령인 검색...">
+                <select id="ggAF">
+                    <option value="">전체 상태</option>
+                    <option value="미선택">미선택</option>
+                    <option value="선택완료">선택완료</option>
+                    <option value="주문확정">주문확정</option>
+                    <option value="배송완료">배송완료</option>
+                </select>
+            </div>
+            <div class="gg-grid"><div class="gg-grid__scroll"><table><thead><tr>
+                <th style="width:36px">#</th><th>고객사</th><th>수령인</th><th>상품명</th><th>제휴점</th><th>상태</th><th>확정일자</th>
+                <th style="text-align:right">판매가(원)</th><th style="text-align:right">매입가(원)</th><th style="text-align:right">예상금액(원)</th>
+            </tr></thead><tbody id="ggAB"></tbody></table></div>
+            <div class="gg-footer">
+                <span id="ggACnt">0건</span>
+                <div class="gg-pager">
+                    <button onclick="ggPgAll(-1)" id="ggAPrev" disabled>이전</button>
+                    <span id="ggAPg">1/1</span>
+                    <button onclick="ggPgAll(1)" id="ggANext" disabled>다음</button>
+                </div>
+                <span id="ggAAmt"></span>
+            </div></div>
+        </div>
+
+        <!-- ═══ 고객사별 ═══ -->
+        <div class="gg-panel" id="gg-p-comp">
+            <div class="gg-cards" id="ggCC"></div>
+            <div class="gg-filter">
+                <input type="text" id="ggCS" placeholder="고객사명 검색...">
+                <button class="gg-copy-btn" onclick="ggCopyComp(this)">클립보드 복사</button>
+            </div>
+            <div class="gg-grid"><div class="gg-grid__scroll"><table><thead><tr>
+                <th style="width:36px">#</th><th>고객사명</th>
+                <th style="text-align:right">전체</th><th style="text-align:right">미선택</th><th style="text-align:right">선택완료</th><th style="text-align:right">주문확정</th><th style="text-align:right">배송완료</th>
+                <th style="text-align:right">판매금액(원)</th><th style="text-align:right">매입금액(원)</th><th style="text-align:right">마진(원)</th><th style="text-align:right">마진율</th>
+                <th style="text-align:right">예상금액(원)</th><th>선택률</th><th style="min-width:80px">진행</th>
+            </tr></thead><tbody id="ggCB"></tbody></table></div>
+            <div class="gg-footer">
+                <span id="ggCCnt">0개</span>
+                <div class="gg-pager">
+                    <button onclick="ggPgComp(-1)" id="ggCPrev" disabled>이전</button>
+                    <span id="ggCPg">1/1</span>
+                    <button onclick="ggPgComp(1)" id="ggCNext" disabled>다음</button>
+                </div>
+                <span></span>
+            </div></div>
+        </div>
+
+        <!-- ═══ 상품별 ═══ -->
+        <div class="gg-panel" id="gg-p-prod">
+            <div class="gg-cards" id="ggPC"></div>
+            <div class="gg-filter">
+                <input type="text" id="ggPS" placeholder="상품명, 상품코드 검색...">
+                <button class="gg-copy-btn" onclick="ggCopyProd(this)">클립보드 복사</button>
+            </div>
+            <div class="gg-grid"><div class="gg-grid__scroll"><table><thead><tr>
+                <th style="width:36px">#</th><th>상품코드</th><th>상품명</th><th>제휴점</th>
+                <th style="text-align:right">수량</th><th style="text-align:right">고객사수</th>
+                <th style="text-align:right">판매금액(원)</th><th style="text-align:right">매입금액(원)</th><th style="text-align:right">마진(원)</th><th style="text-align:right">마진율</th>
+                <th style="text-align:right">예상금액(원)</th><th style="min-width:80px">상태</th>
+            </tr></thead><tbody id="ggPB"></tbody></table></div>
+            <div class="gg-footer"><span id="ggPCnt">0개</span><span></span></div></div>
+        </div>
+
+        <!-- ═══ 매입처(제휴점)별 ═══ -->
+        <div class="gg-panel" id="gg-p-store">
+            <div class="gg-cards" id="ggSC"></div>
+            <div class="gg-filter">
+                <input type="text" id="ggSS" placeholder="제휴점명 검색...">
+                <button class="gg-copy-btn" onclick="ggCopyStore(this)">클립보드 복사</button>
+            </div>
+            <div class="gg-grid"><div class="gg-grid__scroll"><table><thead><tr>
+                <th style="width:36px">#</th><th>제휴점명</th>
+                <th style="text-align:right">전체수량</th><th style="text-align:right">상품종류</th><th style="text-align:right">고객사수</th>
+                <th style="text-align:right">판매금액(원)</th><th style="text-align:right">매입금액(원)</th><th style="text-align:right">마진(원)</th><th style="text-align:right">마진율</th>
+                <th style="text-align:right">평균단가(원)</th><th style="text-align:right">예상금액(원)</th><th style="min-width:80px">상태</th>
+            </tr></thead><tbody id="ggSTB"></tbody></table></div>
+            <div class="gg-footer"><span id="ggSTCnt">0개</span><span></span></div></div>
+        </div>
+
+        <!-- ═══ 일자별 현황 ═══ -->
+        <div class="gg-panel" id="gg-p-date">
+            <div class="gg-cards" id="ggDC"></div>
+            <div class="gg-filter">
+                <input type="date" id="ggDFrom" style="min-width:120px">
+                <input type="date" id="ggDTo" style="min-width:120px">
+                <select id="ggDGroup"><option value="day">일별</option><option value="week">주별</option><option value="month">월별</option></select>
+            </div>
+            <div class="gg-date-layout">
+                <div class="gg-date-charts">
+                    <div class="gg-chart-box">
+                        <div class="gg-chart-box__title">확정 건수 추이</div>
+                        <div class="gg-chart-box__canvas"><canvas id="ggChart1"></canvas></div>
+                    </div>
+                    <div class="gg-chart-box">
+                        <div class="gg-chart-box__title">확정 금액 추이</div>
+                        <div class="gg-chart-box__canvas"><canvas id="ggChart2"></canvas></div>
+                    </div>
+                </div>
+                <div class="gg-grid" style="flex:1;margin:0">
+                    <div class="gg-grid__scroll"><table><thead><tr>
+                        <th>일자</th><th style="text-align:right">건수</th><th style="text-align:right">판매금액(원)</th><th style="text-align:right">매입금액(원)</th><th style="text-align:right">마진(원)</th><th style="text-align:right">누적건수</th><th style="text-align:right">누적판매(원)</th>
+                    </tr></thead><tbody id="ggDB"></tbody></table></div>
+                    <div class="gg-footer"><span id="ggDCnt">0행</span><span id="ggDAmt"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- detail panel -->
+<div class="gg-overlay" id="ggOv" onclick="ggCloseDetail()"></div>
+<div class="gg-detail" id="ggDp">
+    <div class="gg-detail__header">
+        <h2 id="ggDpTitle">상세</h2>
+        <button class="gg-detail__close" onclick="ggCloseDetail()">X</button>
+    </div>
+    <div class="gg-detail__body" id="ggDpBody"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+<script>
+/* ══════════════════════════════════════════════════
+   단체선물대장 대시보드 (gg prefix)
+   Redash QID: 1335 | GAS Proxy
+   ══════════════════════════════════════════════════ */
+
+var GG = {
+    PROXY: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
+    QID: 1335,
+    raw: [],
+    allFiltered: [],
+    allPage: 1,
+    compList: [],
+    compPage: 1,
+    PG: 100,
+    chart1: null,
+    chart2: null
+};
+
+/* ── API ── */
+function ggApi(params) {
+    var qs = Object.keys(params).map(function(k) { return k + '=' + encodeURIComponent(params[k]); }).join('&');
+    return fetch(GG.PROXY + '?' + qs, { redirect: 'follow' }).then(function(r) { return r.json(); });
+}
+
+/* ── Loading ── */
+function ggShowLoading(text, pct) {
+    document.getElementById('ggLoading').classList.remove('hidden');
+    document.getElementById('ggLoadingText').textContent = text || 'Redash 쿼리 실행 중...';
+    document.getElementById('ggLoadingFill').style.width = (pct || 0) + '%';
+}
+function ggHideLoading() {
+    document.getElementById('ggLoading').classList.add('hidden');
+}
+
+/* ── Date helpers ── */
+function ggDateStr(d) { return d.toISOString().slice(0, 10); }
+function ggLastDay(y, m) { return new Date(y, m + 1, 0).getDate(); }
+
+/* ── Hotkeys ── */
+function ggHot(key, el) {
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth();
+    var s, e;
+    switch (key) {
+        case 'thisMonth':
+            s = new Date(y, m, 1); e = new Date(y, m, ggLastDay(y, m)); break;
+        case 'lastMonth':
+            s = new Date(y, m - 1, 1); e = new Date(y, m - 1, ggLastDay(y, m - 1)); break;
+        case 'twoMonthsAgo':
+            s = new Date(y, m - 2, 1); e = new Date(y, m - 2, ggLastDay(y, m - 2)); break;
+        case 'thisYear':
+            s = new Date(y, 0, 1); e = new Date(y, 11, 31); break;
+        case 'lastYear':
+            s = new Date(y - 1, 0, 1); e = new Date(y - 1, 11, 31); break;
+        default: return;
+    }
+    document.getElementById('ggSD').value = ggDateStr(s);
+    document.getElementById('ggED').value = ggDateStr(e);
+    document.querySelectorAll('.gg-ctrl-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (el) el.classList.add('active');
+    ggFetch();
+}
+
+/* ── Fetch ── */
+async function ggFetch() {
+    var sd = document.getElementById('ggSD').value;
+    var ed = document.getElementById('ggED').value;
+    if (!sd || !ed) { alert('날짜를 선택하세요.'); return; }
+    ggShowLoading('Redash 쿼리 실행 중...', 10);
+    try {
+        var d = await ggApi({ action: 'post', queryId: GG.QID, startdate: sd, enddate: ed });
+        if (d.query_result) {
+            ggShowLoading('데이터 처리 중...', 80);
+            ggProcess(d.query_result.data.rows);
+        } else if (d.job) {
+            await ggPoll(d.job.id, sd, ed);
+        } else {
+            throw new Error('예상치 못한 응답');
+        }
+    } catch (err) {
+        ggHideLoading();
+        document.getElementById('ggStatus').textContent = '오류: ' + err.message;
+    }
+}
+
+async function ggPoll(jid) {
+    for (var i = 0; i < 60; i++) {
+        ggShowLoading('쿼리 실행 대기 중... (' + (i + 1) + 's)', 10 + Math.min(i, 40));
+        await new Promise(function(r) { setTimeout(r, 1000); });
+        var d = await ggApi({ action: 'job', jobId: jid });
+        if (d.job && d.job.status === 3) {
+            ggShowLoading('결과 조회 중...', 60);
+            var res = await ggApi({ action: 'result', resultId: d.job.query_result_id });
+            ggShowLoading('데이터 처리 중...', 80);
+            ggProcess(res.query_result.data.rows);
+            return;
+        }
+        if (d.job && d.job.status === 4) throw new Error('쿼리 실행 실패');
+    }
+    throw new Error('쿼리 타임아웃 (60초)');
+}
+
+/* ── Data Helpers ── */
+function ggN(v) { return (v === 0) ? '0' : (v < 0 ? '-' : '') + Math.abs(v).toLocaleString(); }
+function ggE(s) { return (s || '').replace(/</g, '&lt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;'); }
+function ggBadge(s) {
+    var cls = { '미선택': 'gg-b-none', '선택완료': 'gg-b-selected', '주문확정': 'gg-b-confirmed', '배송완료': 'gg-b-delivered' };
+    return '<span class="gg-badge ' + (cls[s] || 'gg-b-none') + '">' + s + '</span>';
+}
+function ggStatusBar(c) {
+    var t = c.t || 1;
+    return '<div class="gg-sbar"><div class="gg-s1" style="width:' + (c.p / t * 100) + '%"></div><div class="gg-s2" style="width:' + (c.c / t * 100) + '%"></div><div class="gg-s3" style="width:' + (c.cf / t * 100) + '%"></div><div class="gg-s4" style="width:' + (c.d / t * 100) + '%"></div></div>';
+}
+
+/* row-level accessors */
+function ggSell(r) { return (r.status !== '미선택') ? (Number(r.totalPrice) || 0) : 0; }
+function ggCost(r) { return (r.status !== '미선택') ? (Number(r.supplyPrice) || 0) : 0; }
+function ggExpected(r) {
+    if (r.status !== '미선택') return 0;
+    var m = String(r.memo || '').replace(/,/g, '').replace(/없음/g, '');
+    return parseInt(m) || 0;
+}
+
+function ggCount(rows) {
+    var c = { t: rows.length, p: 0, c: 0, cf: 0, d: 0 };
+    rows.forEach(function(r) {
+        if (r.status === '미선택') c.p++;
+        else if (r.status === '선택완료') c.c++;
+        else if (r.status === '주문확정') c.cf++;
+        else if (r.status === '배송완료') c.d++;
+    });
+    return c;
+}
+function ggSums(rows) {
+    var sell = 0, cost = 0, ex = 0;
+    rows.forEach(function(r) { sell += ggSell(r); cost += ggCost(r); ex += ggExpected(r); });
+    return { sell: sell, cost: cost, margin: sell - cost, rate: sell ? ((sell - cost) / sell * 100) : 0, ex: ex };
+}
+
+/* ── Process ── */
+function ggProcess(rows) {
+    GG.raw = rows.map(function(r) {
+        return {
+            idx: String(r.groupGiftReceiverIdx || ''),
+            productCode: String(r.productCode || ''),
+            productName: String(r.productName || ''),
+            receiverName: String(r.receiverName || ''),
+            receiverPhone: String(r.receiverPhone || ''),
+            status: String(r.status || ''),
+            companyId: String(r.companyId || ''),
+            name: String(r.name || ''),
+            comname: String(r.comname || ''),
+            confirmDate: String(r.confirmDate || ''),
+            memo: String(r.memo || ''),
+            sid: String(r.sid || ''),
+            storename: String(r.storename || ''),
+            totalPrice: Number(r.totalPrice) || 0,
+            supplyPrice: Number(r.supplyPrice) || 0,
+            templateIdx: String(r.groupGiftTemplateIdx || '')
+        };
+    });
+
+    var sd = document.getElementById('ggSD').value;
+    var ed = document.getElementById('ggED').value;
+    document.getElementById('ggStatus').textContent = sd + ' ~ ' + ed + ' | ' + ggN(GG.raw.length) + '건 | ' + new Date().toLocaleTimeString('ko-KR');
+
+    ggRenderAll();
+    ggRenderComp();
+    ggRenderProd();
+    ggRenderStore();
+    ggRenderDate();
+    ggHideLoading();
+}
+
+/* ── Summary Cards ── */
+function ggMakeCards(id, rows) {
+    var c = ggCount(rows), s = ggSums(rows);
+    var rate = c.t ? ((c.c + c.cf + c.d) / c.t * 100).toFixed(1) : '0.0';
+    document.getElementById(id).innerHTML =
+        '<div class="gg-card"><div class="gg-card__label">전체</div><div class="gg-card__value gg-c-default">' + ggN(c.t) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">미선택</div><div class="gg-card__value gg-c-gray">' + ggN(c.p) + '</div><div class="gg-card__sub">' + (c.t ? (c.p / c.t * 100).toFixed(1) : 0) + '%</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">선택완료</div><div class="gg-card__value gg-c-blue">' + ggN(c.c) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">주문확정</div><div class="gg-card__value gg-c-yellow">' + ggN(c.cf) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">배송완료</div><div class="gg-card__value gg-c-green">' + ggN(c.d) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">판매금액</div><div class="gg-card__value gg-c-accent">' + ggN(s.sell) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">매입금액</div><div class="gg-card__value gg-c-orange">' + ggN(s.cost) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">마진</div><div class="gg-card__value" style="color:' + (s.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(s.margin) + '</div><div class="gg-card__sub">' + s.rate.toFixed(1) + '%</div></div>';
+}
+
+/* ══════ 전체 현황 ══════ */
+function ggRenderAll() {
+    var q = (document.getElementById('ggAS').value || '').toLowerCase();
+    var sf = document.getElementById('ggAF').value;
+    GG.allFiltered = GG.raw.filter(function(r) {
+        if (sf && r.status !== sf) return false;
+        if (q && [r.name, r.comname, r.productName, r.productCode, r.storename, r.receiverName].join(' ').toLowerCase().indexOf(q) === -1) return false;
+        return true;
+    });
+    GG.allFiltered.sort(function(a, b) { return (parseInt(b.idx) || 0) - (parseInt(a.idx) || 0); });
+    GG.allPage = 1;
+    ggPageAll();
+    ggMakeCards('ggAC', GG.raw);
+    var s = ggSums(GG.allFiltered);
+    document.getElementById('ggACnt').textContent = ggN(GG.allFiltered.length) + '건';
+    document.getElementById('ggAAmt').textContent = '판매: ' + ggN(s.sell) + ' | 매입: ' + ggN(s.cost) + ' | 마진: ' + ggN(s.margin);
+}
+function ggPageAll() {
+    var total = Math.ceil(GG.allFiltered.length / GG.PG) || 1;
+    if (GG.allPage < 1) GG.allPage = 1;
+    if (GG.allPage > total) GG.allPage = total;
+    var start = (GG.allPage - 1) * GG.PG, show = GG.allFiltered.slice(start, start + GG.PG);
+    document.getElementById('ggAB').innerHTML = show.length === 0
+        ? '<tr><td colspan="10" style="text-align:center;padding:30px;color:#94a3b8">데이터가 없습니다.</td></tr>'
+        : show.map(function(r, i) {
+            var sell = ggSell(r), cost = ggCost(r), ex = ggExpected(r);
+            var warn = (r.status === '미선택' || r.status === '선택완료');
+            return '<tr' + (warn ? ' class="gg-tr-warn"' : '') + '>' +
+                '<td>' + (start + i + 1) + '</td>' +
+                '<td>' + ggE(r.comname || r.name) + '</td>' +
+                '<td>' + ggE(r.receiverName) + '</td>' +
+                '<td>' + ggE(r.productName) + '</td>' +
+                '<td>' + ggE(r.storename) + '</td>' +
+                '<td>' + ggBadge(r.status) + '</td>' +
+                '<td style="font-family:JetBrains Mono,monospace;font-size:10px">' + (r.confirmDate || '-') + '</td>' +
+                '<td class="gg-amt">' + (sell ? ggN(sell) : '-') + '</td>' +
+                '<td class="gg-num" style="color:#ea580c">' + (cost ? ggN(cost) : '-') + '</td>' +
+                '<td class="gg-num" style="color:#94a3b8">' + (ex ? ggN(ex) : '-') + '</td></tr>';
+        }).join('');
+    document.getElementById('ggAPg').textContent = GG.allPage + '/' + total;
+    document.getElementById('ggAPrev').disabled = GG.allPage <= 1;
+    document.getElementById('ggANext').disabled = GG.allPage >= total;
+}
+function ggPgAll(d) { GG.allPage += d; ggPageAll(); }
+
+/* ══════ 고객사별 ══════ */
+function ggAggComp() {
+    var m = {};
+    GG.raw.forEach(function(r) {
+        var n = r.comname || r.name || '미분류';
+        if (!m[n]) m[n] = { name: n, rows: [] };
+        m[n].rows.push(r);
+    });
+    return Object.values(m).map(function(g) {
+        var c = ggCount(g.rows), s = ggSums(g.rows);
+        return { name: g.name, rows: g.rows, t: c.t, p: c.p, c: c.c, cf: c.cf, d: c.d, sell: s.sell, cost: s.cost, margin: s.margin, marginRate: s.rate, ex: s.ex, rate: c.t ? ((c.c + c.cf + c.d) / c.t * 100) : 0 };
+    });
+}
+function ggRenderComp() {
+    var q = (document.getElementById('ggCS').value || '').toLowerCase();
+    GG.compList = ggAggComp();
+    if (q) GG.compList = GG.compList.filter(function(c) { return c.name.toLowerCase().indexOf(q) !== -1; });
+    GG.compList.sort(function(a, b) { return b.t - a.t; });
+    GG.compPage = 1;
+    ggPageComp();
+    ggMakeCards('ggCC', GG.raw);
+    document.getElementById('ggCCnt').textContent = GG.compList.length + '개 고객사';
+}
+function ggPageComp() {
+    var total = Math.ceil(GG.compList.length / GG.PG) || 1;
+    if (GG.compPage > total) GG.compPage = total;
+    var start = (GG.compPage - 1) * GG.PG, show = GG.compList.slice(start, start + GG.PG);
+    document.getElementById('ggCB').innerHTML = show.length === 0
+        ? '<tr><td colspan="14" style="text-align:center;padding:30px;color:#94a3b8">없음</td></tr>'
+        : show.map(function(c, i) {
+            var warn = c.p > 0 || c.c > 0;
+            return '<tr class="gg-clickable' + (warn ? ' gg-tr-warn' : '') + '" onclick="ggDetailComp(\'' + ggE(c.name) + '\')">' +
+                '<td>' + (start + i + 1) + '</td><td><strong>' + ggE(c.name) + '</strong></td>' +
+                '<td class="gg-num">' + ggN(c.t) + '</td>' +
+                '<td class="gg-num" style="color:#94a3b8">' + (c.p ? '<strong style="color:#e85d5d">' + ggN(c.p) + '</strong>' : '-') + '</td>' +
+                '<td class="gg-num" style="color:#2563eb">' + (c.c ? '<strong style="color:#ea580c">' + ggN(c.c) + '</strong>' : '-') + '</td>' +
+                '<td class="gg-num" style="color:#d49a2a">' + ggN(c.cf) + '</td>' +
+                '<td class="gg-num" style="color:#22c55e">' + ggN(c.d) + '</td>' +
+                '<td class="gg-amt">' + ggN(c.sell) + '</td>' +
+                '<td class="gg-num" style="color:#ea580c">' + ggN(c.cost) + '</td>' +
+                '<td class="gg-num" style="color:' + (c.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(c.margin) + '</td>' +
+                '<td class="gg-num" style="color:' + (c.marginRate >= 0 ? '#22c55e' : '#e85d5d') + '">' + c.marginRate.toFixed(1) + '%</td>' +
+                '<td class="gg-num" style="color:#94a3b8">' + ggN(c.ex) + '</td>' +
+                '<td style="color:#4a90d9;font-weight:700">' + c.rate.toFixed(1) + '%</td>' +
+                '<td>' + ggStatusBar(c) + '<span class="gg-sbar-pct">' + c.rate.toFixed(0) + '%</span></td></tr>';
+        }).join('');
+    document.getElementById('ggCPg').textContent = GG.compPage + '/' + total;
+    document.getElementById('ggCPrev').disabled = GG.compPage <= 1;
+    document.getElementById('ggCNext').disabled = GG.compPage >= total;
+}
+function ggPgComp(d) { GG.compPage += d; ggPageComp(); }
+
+/* ══════ 상품별 ══════ */
+function ggAggProd() {
+    var m = {};
+    GG.raw.forEach(function(r) {
+        var k = r.productCode || '미지정';
+        if (!m[k]) m[k] = { code: r.productCode || '미지정', name: r.productName || '미지정', store: r.storename || '-', rows: [], cs: new Set() };
+        m[k].rows.push(r);
+        m[k].cs.add(r.comname || r.name || '미분류');
+    });
+    return Object.values(m).map(function(g) {
+        var c = ggCount(g.rows), s = ggSums(g.rows);
+        return { code: g.code, name: g.name, store: g.store, rows: g.rows, t: c.t, p: c.p, c: c.c, cf: c.cf, d: c.d, sell: s.sell, cost: s.cost, margin: s.margin, marginRate: s.rate, ex: s.ex, comps: g.cs.size };
+    });
+}
+function ggRenderProd() {
+    var q = (document.getElementById('ggPS').value || '').toLowerCase();
+    var L = ggAggProd();
+    if (q) L = L.filter(function(p) { return (p.name + ' ' + p.code).toLowerCase().indexOf(q) !== -1; });
+    L.sort(function(a, b) { return b.t - a.t; });
+    ggMakeCards('ggPC', GG.raw);
+    document.getElementById('ggPB').innerHTML = L.length === 0
+        ? '<tr><td colspan="12" style="text-align:center;padding:30px;color:#94a3b8">없음</td></tr>'
+        : L.map(function(p, i) {
+            var rate = p.t ? ((p.c + p.cf + p.d) / p.t * 100) : 0;
+            return '<tr class="gg-clickable" onclick="ggDetailProd(\'' + ggE(p.code) + '\')">' +
+                '<td>' + (i + 1) + '</td>' +
+                '<td style="font-family:JetBrains Mono,monospace;font-size:10px">' + ggE(p.code) + '</td>' +
+                '<td>' + ggE(p.name) + '</td><td>' + ggE(p.store) + '</td>' +
+                '<td class="gg-num">' + ggN(p.t) + '</td><td class="gg-num">' + p.comps + '</td>' +
+                '<td class="gg-amt">' + ggN(p.sell) + '</td>' +
+                '<td class="gg-num" style="color:#ea580c">' + ggN(p.cost) + '</td>' +
+                '<td class="gg-num" style="color:' + (p.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(p.margin) + '</td>' +
+                '<td class="gg-num" style="color:' + (p.marginRate >= 0 ? '#22c55e' : '#e85d5d') + '">' + p.marginRate.toFixed(1) + '%</td>' +
+                '<td class="gg-num" style="color:#94a3b8">' + ggN(p.ex) + '</td>' +
+                '<td>' + ggStatusBar(p) + '<span class="gg-sbar-pct">' + rate.toFixed(0) + '%</span></td></tr>';
+        }).join('');
+    document.getElementById('ggPCnt').textContent = L.length + '개 상품';
+}
+
+/* ══════ 매입처(제휴점)별 ══════ */
+function ggAggStore() {
+    var m = {};
+    GG.raw.forEach(function(r) {
+        var n = r.storename || '미지정';
+        if (!m[n]) m[n] = { name: n, rows: [], ps: new Set(), cs: new Set() };
+        m[n].rows.push(r);
+        m[n].ps.add(r.productCode || '미지정');
+        m[n].cs.add(r.comname || r.name || '미분류');
+    });
+    return Object.values(m).map(function(g) {
+        var c = ggCount(g.rows), s = ggSums(g.rows);
+        return { name: g.name, rows: g.rows, t: c.t, p: c.p, c: c.c, cf: c.cf, d: c.d, sell: s.sell, cost: s.cost, margin: s.margin, marginRate: s.rate, ex: s.ex, prods: g.ps.size, comps: g.cs.size, avg: c.t ? Math.round(s.sell / c.t) : 0 };
+    });
+}
+function ggRenderStore() {
+    var q = (document.getElementById('ggSS').value || '').toLowerCase();
+    var L = ggAggStore();
+    if (q) L = L.filter(function(s) { return s.name.toLowerCase().indexOf(q) !== -1; });
+    L.sort(function(a, b) { return b.t - a.t; });
+    ggMakeCards('ggSC', GG.raw);
+    document.getElementById('ggSTB').innerHTML = L.length === 0
+        ? '<tr><td colspan="12" style="text-align:center;padding:30px;color:#94a3b8">없음</td></tr>'
+        : L.map(function(s, i) {
+            var rate = s.t ? ((s.c + s.cf + s.d) / s.t * 100) : 0;
+            return '<tr class="gg-clickable" onclick="ggDetailStore(\'' + ggE(s.name) + '\')">' +
+                '<td>' + (i + 1) + '</td><td><strong>' + ggE(s.name) + '</strong></td>' +
+                '<td class="gg-num">' + ggN(s.t) + '</td><td class="gg-num">' + s.prods + '</td><td class="gg-num">' + s.comps + '</td>' +
+                '<td class="gg-amt">' + ggN(s.sell) + '</td>' +
+                '<td class="gg-num" style="color:#ea580c">' + ggN(s.cost) + '</td>' +
+                '<td class="gg-num" style="color:' + (s.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(s.margin) + '</td>' +
+                '<td class="gg-num" style="color:' + (s.marginRate >= 0 ? '#22c55e' : '#e85d5d') + '">' + s.marginRate.toFixed(1) + '%</td>' +
+                '<td class="gg-amt">' + ggN(s.avg) + '</td>' +
+                '<td class="gg-num" style="color:#94a3b8">' + ggN(s.ex) + '</td>' +
+                '<td>' + ggStatusBar(s) + '<span class="gg-sbar-pct">' + rate.toFixed(0) + '%</span></td></tr>';
+        }).join('');
+    document.getElementById('ggSTCnt').textContent = L.length + '개 제휴점';
+}
+
+/* ══════ 일자별 현황 ══════ */
+function ggRenderDate() {
+    var fromVal = document.getElementById('ggDFrom').value;
+    var toVal = document.getElementById('ggDTo').value;
+    var group = document.getElementById('ggDGroup').value;
+
+    var allS = ggSums(GG.raw), allC = ggCount(GG.raw);
+    var noDate = GG.raw.filter(function(r) { return !r.confirmDate || !r.confirmDate.trim(); });
+    var noDateC = ggCount(noDate), noDateS = ggSums(noDate);
+
+    document.getElementById('ggDC').innerHTML =
+        '<div class="gg-card"><div class="gg-card__label">전체</div><div class="gg-card__value gg-c-default">' + ggN(allC.t) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">확정일자 있음</div><div class="gg-card__value gg-c-accent">' + ggN(allC.t - noDate.length) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">미확정(일자없음)</div><div class="gg-card__value gg-c-gray">' + ggN(noDate.length) + '</div><div class="gg-card__sub">미선택 ' + ggN(noDateC.p) + '건</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">판매금액</div><div class="gg-card__value gg-c-accent">' + ggN(allS.sell) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">매입금액</div><div class="gg-card__value gg-c-orange">' + ggN(allS.cost) + '</div></div>' +
+        '<div class="gg-card"><div class="gg-card__label">마진</div><div class="gg-card__value" style="color:' + (allS.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(allS.margin) + '</div></div>';
+
+    var dated = GG.raw.filter(function(r) { return r.confirmDate && r.confirmDate.trim(); });
+    if (fromVal) dated = dated.filter(function(r) { return r.confirmDate >= fromVal; });
+    if (toVal) dated = dated.filter(function(r) { return r.confirmDate <= toVal; });
+
+    var gmap = {};
+    dated.forEach(function(r) {
+        var key = r.confirmDate.slice(0, 10);
+        if (group === 'month') key = key.slice(0, 7);
+        else if (group === 'week') {
+            var dt = new Date(key), day = dt.getDay() || 7;
+            dt.setDate(dt.getDate() - day + 1);
+            key = dt.toISOString().slice(0, 10) + '~';
+        }
+        if (!gmap[key]) gmap[key] = { key: key, cnt: 0, sell: 0, cost: 0 };
+        gmap[key].cnt++;
+        gmap[key].sell += ggSell(r);
+        gmap[key].cost += ggCost(r);
+    });
+    var sorted = Object.values(gmap).sort(function(a, b) { return a.key.localeCompare(b.key); });
+
+    var cumCnt = 0, cumSell = 0;
+    sorted.forEach(function(s) { cumCnt += s.cnt; cumSell += s.sell; s.cumCnt = cumCnt; s.cumSell = cumSell; s.margin = s.sell - s.cost; });
+
+    // Charts
+    if (GG.chart1) { GG.chart1.destroy(); GG.chart1 = null; }
+    if (GG.chart2) { GG.chart2.destroy(); GG.chart2 = null; }
+    if (sorted.length > 0) {
+        var lb = sorted.map(function(s) { return s.key; });
+        GG.chart1 = new Chart(document.getElementById('ggChart1'), {
+            type: 'bar', data: { labels: lb, datasets: [
+                { type: 'bar', label: '확정건수', data: sorted.map(function(s) { return s.cnt; }), backgroundColor: 'rgba(74,144,217,.5)', borderRadius: 3, yAxisID: 'y' },
+                { type: 'line', label: '누적건수', data: sorted.map(function(s) { return s.cumCnt; }), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,.06)', pointRadius: 1.5, borderWidth: 1.5, fill: true, yAxisID: 'y2' }
+            ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 6, font: { size: 9, family: 'Noto Sans KR' } } } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 8 }, maxRotation: 45 }, grid: { color: '#f1f5f9' } }, y: { position: 'left', ticks: { color: '#4a5568', precision: 0, font: { size: 9 } }, grid: { color: '#f1f5f9' } }, y2: { position: 'right', ticks: { color: '#22c55e', precision: 0, font: { size: 9 } }, grid: { drawOnChartArea: false } } } }
+        });
+        GG.chart2 = new Chart(document.getElementById('ggChart2'), {
+            type: 'bar', data: { labels: lb, datasets: [
+                { type: 'bar', label: '판매금액', data: sorted.map(function(s) { return s.sell; }), backgroundColor: 'rgba(74,144,217,.4)', borderRadius: 3, yAxisID: 'y' },
+                { type: 'bar', label: '매입금액', data: sorted.map(function(s) { return s.cost; }), backgroundColor: 'rgba(234,88,12,.3)', borderRadius: 3, yAxisID: 'y' },
+                { type: 'line', label: '누적판매', data: sorted.map(function(s) { return s.cumSell; }), borderColor: '#4a90d9', backgroundColor: 'rgba(74,144,217,.06)', pointRadius: 1.5, borderWidth: 1.5, fill: true, yAxisID: 'y2' }
+            ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 6, font: { size: 9, family: 'Noto Sans KR' } } } }, scales: { x: { stacked: true, ticks: { color: '#94a3b8', font: { size: 8 }, maxRotation: 45 }, grid: { color: '#f1f5f9' } }, y: { stacked: true, position: 'left', ticks: { color: '#4a5568', callback: function(v) { return (v / 10000).toFixed(0) + '만'; }, font: { size: 9 } }, grid: { color: '#f1f5f9' } }, y2: { position: 'right', ticks: { color: '#4a90d9', callback: function(v) { return (v / 10000).toFixed(0) + '만'; }, font: { size: 9 } }, grid: { drawOnChartArea: false } } } }
+        });
+    }
+
+    var rev = sorted.slice().reverse();
+    var noDateRow = noDate.length > 0
+        ? '<tr style="background:#fef2f2"><td><strong>미확정</strong></td><td class="gg-num">' + ggN(noDate.length) + '</td><td class="gg-amt">' + ggN(noDateS.sell) + '</td><td class="gg-num" style="color:#ea580c">' + ggN(noDateS.cost) + '</td><td class="gg-num" style="color:' + (noDateS.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(noDateS.margin) + '</td><td class="gg-num">-</td><td class="gg-amt">-</td></tr>'
+        : '';
+    document.getElementById('ggDB').innerHTML = (rev.length === 0 && noDate.length === 0)
+        ? '<tr><td colspan="7" style="text-align:center;padding:30px;color:#94a3b8">데이터가 없습니다.</td></tr>'
+        : rev.map(function(s) {
+            return '<tr><td><strong>' + s.key + '</strong></td><td class="gg-num">' + ggN(s.cnt) + '</td><td class="gg-amt">' + ggN(s.sell) + '</td><td class="gg-num" style="color:#ea580c">' + ggN(s.cost) + '</td><td class="gg-num" style="color:' + (s.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(s.margin) + '</td><td class="gg-num">' + ggN(s.cumCnt) + '</td><td class="gg-amt">' + ggN(s.cumSell) + '</td></tr>';
+        }).join('') + noDateRow;
+    document.getElementById('ggDCnt').textContent = (sorted.length + (noDate.length ? 1 : 0)) + '행';
+    document.getElementById('ggDAmt').textContent = '판매: ' + ggN(allS.sell) + ' | 매입: ' + ggN(allS.cost) + ' | 마진: ' + ggN(allS.margin);
+}
+
+/* ══════ Detail Panel ══════ */
+function ggOpenDetail() {
+    document.getElementById('ggOv').classList.add('open');
+    document.getElementById('ggDp').classList.add('open');
+}
+function ggCloseDetail() {
+    document.getElementById('ggOv').classList.remove('open');
+    document.getElementById('ggDp').classList.remove('open');
+}
+
+function ggDetailComp(name) {
+    var rows = GG.raw.filter(function(r) { return (r.comname || r.name || '미분류') === name; });
+    var c = ggCount(rows), s = ggSums(rows);
+    var pm = {};
+    rows.forEach(function(r) {
+        var k = r.productCode || '미지정';
+        if (!pm[k]) pm[k] = { code: r.productCode, name: r.productName, store: r.storename, cnt: 0, p: 0, sel: 0, cfm: 0, dlv: 0, sell: 0, cost: 0, ex: 0 };
+        pm[k].cnt++;
+        if (r.status === '미선택') pm[k].p++;
+        else if (r.status === '선택완료') pm[k].sel++;
+        else if (r.status === '주문확정') pm[k].cfm++;
+        else if (r.status === '배송완료') pm[k].dlv++;
+        pm[k].sell += ggSell(r); pm[k].cost += ggCost(r); pm[k].ex += ggExpected(r);
+    });
+    var prods = Object.values(pm).sort(function(a, b) { return b.cnt - a.cnt; });
+    var pending = rows.filter(function(r) { return r.status === '미선택'; });
+
+    document.getElementById('ggDpTitle').textContent = name;
+    document.getElementById('ggDpBody').innerHTML =
+        '<div class="gg-dg">' +
+            '<div class="gg-di"><div class="gg-di__label">전체</div><div class="gg-di__value">' + ggN(c.t) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">선택률</div><div class="gg-di__value gg-c-accent">' + (c.t ? ((c.c + c.cf + c.d) / c.t * 100).toFixed(1) : 0) + '%</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">미선택</div><div class="gg-di__value gg-c-gray">' + ggN(c.p) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">판매금액</div><div class="gg-di__value gg-c-accent">' + ggN(s.sell) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">매입금액</div><div class="gg-di__value gg-c-orange">' + ggN(s.cost) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">마진</div><div class="gg-di__value" style="color:' + (s.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(s.margin) + '</div><div style="font-size:9px;color:#94a3b8">마진율 ' + s.rate.toFixed(1) + '%</div></div>' +
+        '</div>' +
+        '<div class="gg-dsection">상품별 분포 (' + prods.length + '종)</div>' +
+        '<div class="gg-dtable"><table><thead><tr><th>상품코드</th><th>상품명</th><th>제휴점</th><th style="text-align:right">전체</th><th style="text-align:right;color:#94a3b8">미선택</th><th style="text-align:right;color:#2563eb">선택</th><th style="text-align:right;color:#d49a2a">확정</th><th style="text-align:right;color:#22c55e">배송</th><th style="text-align:right">판매</th><th style="text-align:right">매입</th><th style="text-align:right">마진</th></tr></thead><tbody>' +
+        prods.map(function(p) { var mg = p.sell - p.cost; return '<tr><td style="font-family:JetBrains Mono,monospace;font-size:9px">' + ggE(p.code) + '</td><td>' + ggE(p.name) + '</td><td>' + ggE(p.store) + '</td><td class="gg-num">' + ggN(p.cnt) + '</td><td class="gg-num" style="color:#94a3b8">' + (p.p || '-') + '</td><td class="gg-num" style="color:#2563eb">' + (p.sel || '-') + '</td><td class="gg-num" style="color:#d49a2a">' + (p.cfm || '-') + '</td><td class="gg-num" style="color:#22c55e">' + (p.dlv || '-') + '</td><td class="gg-amt">' + ggN(p.sell) + '</td><td class="gg-num" style="color:#ea580c">' + ggN(p.cost) + '</td><td class="gg-num" style="color:' + (mg >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(mg) + '</td></tr>'; }).join('') +
+        '</tbody></table></div>' +
+        '<div class="gg-dsection" style="color:#e85d5d">미선택 목록 (' + ggN(pending.length) + '건)</div>' +
+        (pending.length === 0 ? '<div style="padding:10px;color:#94a3b8;font-size:11px">미선택 건이 없습니다.</div>'
+        : '<div class="gg-dtable" style="max-height:240px"><table><thead><tr><th>#</th><th>수령인</th><th>연락처</th><th>상품명</th><th>제휴점</th><th style="text-align:right">예상금액(원)</th></tr></thead><tbody>' +
+        pending.slice(0, 500).map(function(r, i) { return '<tr' + (i % 2 ? '' : ' style="background:#fef2f2"') + '><td>' + (i + 1) + '</td><td><strong>' + ggE(r.receiverName) + '</strong></td><td style="font-family:JetBrains Mono,monospace;font-size:10px">' + ggE(r.receiverPhone) + '</td><td>' + ggE(r.productName) + '</td><td>' + ggE(r.storename) + '</td><td class="gg-num" style="color:#ea580c">' + ggN(ggExpected(r)) + '</td></tr>'; }).join('') +
+        '</tbody></table></div>');
+    ggOpenDetail();
+}
+
+function ggDetailProd(code) {
+    var rows = GG.raw.filter(function(r) { return (r.productCode || '미지정') === code; });
+    var c = ggCount(rows), s = ggSums(rows), f = rows[0] || {};
+    var cm = {};
+    rows.forEach(function(r) { var n = r.comname || r.name || '미분류'; if (!cm[n]) cm[n] = { name: n, cnt: 0, sell: 0, cost: 0, ex: 0 }; cm[n].cnt++; cm[n].sell += ggSell(r); cm[n].cost += ggCost(r); cm[n].ex += ggExpected(r); });
+    var comps = Object.values(cm).sort(function(a, b) { return b.cnt - a.cnt; });
+
+    document.getElementById('ggDpTitle').textContent = f.productName || code;
+    document.getElementById('ggDpBody').innerHTML =
+        '<div style="font-family:JetBrains Mono,monospace;color:#94a3b8;font-size:10px;margin-bottom:10px">' + ggE(code) + '</div>' +
+        '<div class="gg-dg">' +
+            '<div class="gg-di"><div class="gg-di__label">전체</div><div class="gg-di__value">' + ggN(c.t) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">제휴점</div><div class="gg-di__value" style="font-size:11px;font-family:Noto Sans KR,sans-serif">' + ggE(f.storename || '-') + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">선택률</div><div class="gg-di__value gg-c-accent">' + (c.t ? ((c.c + c.cf + c.d) / c.t * 100).toFixed(1) : 0) + '%</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">판매금액</div><div class="gg-di__value gg-c-accent">' + ggN(s.sell) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">매입금액</div><div class="gg-di__value gg-c-orange">' + ggN(s.cost) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">마진</div><div class="gg-di__value" style="color:' + (s.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(s.margin) + '</div><div style="font-size:9px;color:#94a3b8">마진율 ' + s.rate.toFixed(1) + '%</div></div>' +
+        '</div>' +
+        '<div class="gg-dsection">고객사별 분포 (' + comps.length + '개)</div>' +
+        '<div class="gg-dtable"><table><thead><tr><th>고객사</th><th style="text-align:right">수량</th><th style="text-align:right">판매</th><th style="text-align:right">매입</th><th style="text-align:right">마진</th></tr></thead><tbody>' +
+        comps.map(function(c) { var mg = c.sell - c.cost; return '<tr><td><strong>' + ggE(c.name) + '</strong></td><td class="gg-num">' + ggN(c.cnt) + '</td><td class="gg-amt">' + ggN(c.sell) + '</td><td class="gg-num" style="color:#ea580c">' + ggN(c.cost) + '</td><td class="gg-num" style="color:' + (mg >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(mg) + '</td></tr>'; }).join('') +
+        '</tbody></table></div>';
+    ggOpenDetail();
+}
+
+function ggDetailStore(name) {
+    var rows = GG.raw.filter(function(r) { return (r.storename || '미지정') === name; });
+    var c = ggCount(rows), s = ggSums(rows);
+    var pm = {};
+    rows.forEach(function(r) { var k = r.productCode || '미지정'; if (!pm[k]) pm[k] = { code: r.productCode, name: r.productName, cnt: 0, sell: 0, cost: 0, ex: 0 }; pm[k].cnt++; pm[k].sell += ggSell(r); pm[k].cost += ggCost(r); pm[k].ex += ggExpected(r); });
+    var prods = Object.values(pm).sort(function(a, b) { return b.cnt - a.cnt; });
+    var cm = {};
+    rows.forEach(function(r) { var n = r.comname || r.name || '미분류'; if (!cm[n]) cm[n] = { name: n, cnt: 0, sell: 0, cost: 0 }; cm[n].cnt++; cm[n].sell += ggSell(r); cm[n].cost += ggCost(r); });
+    var comps = Object.values(cm).sort(function(a, b) { return b.cnt - a.cnt; });
+
+    document.getElementById('ggDpTitle').textContent = name;
+    document.getElementById('ggDpBody').innerHTML =
+        '<div class="gg-dg">' +
+            '<div class="gg-di"><div class="gg-di__label">전체 수량</div><div class="gg-di__value">' + ggN(c.t) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">상품 종류</div><div class="gg-di__value">' + prods.length + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">고객사 수</div><div class="gg-di__value">' + comps.length + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">판매금액</div><div class="gg-di__value gg-c-accent">' + ggN(s.sell) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">매입금액</div><div class="gg-di__value gg-c-orange">' + ggN(s.cost) + '</div></div>' +
+            '<div class="gg-di"><div class="gg-di__label">마진</div><div class="gg-di__value" style="color:' + (s.margin >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(s.margin) + '</div><div style="font-size:9px;color:#94a3b8">마진율 ' + s.rate.toFixed(1) + '%</div></div>' +
+        '</div>' +
+        '<div class="gg-dsection">상품별 (' + prods.length + '종)</div>' +
+        '<div class="gg-dtable"><table><thead><tr><th>상품코드</th><th>상품명</th><th style="text-align:right">수량</th><th style="text-align:right">판매</th><th style="text-align:right">매입</th><th style="text-align:right">마진</th></tr></thead><tbody>' +
+        prods.map(function(p) { var mg = p.sell - p.cost; return '<tr><td style="font-family:JetBrains Mono,monospace;font-size:9px">' + ggE(p.code) + '</td><td>' + ggE(p.name) + '</td><td class="gg-num">' + ggN(p.cnt) + '</td><td class="gg-amt">' + ggN(p.sell) + '</td><td class="gg-num" style="color:#ea580c">' + ggN(p.cost) + '</td><td class="gg-num" style="color:' + (mg >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(mg) + '</td></tr>'; }).join('') +
+        '</tbody></table></div>' +
+        '<div class="gg-dsection">고객사 (' + comps.length + '개)</div>' +
+        '<div class="gg-dtable"><table><thead><tr><th>고객사</th><th style="text-align:right">수량</th><th style="text-align:right">판매</th><th style="text-align:right">매입</th><th style="text-align:right">마진</th></tr></thead><tbody>' +
+        comps.map(function(c) { var mg = c.sell - c.cost; return '<tr><td>' + ggE(c.name) + '</td><td class="gg-num">' + ggN(c.cnt) + '</td><td class="gg-amt">' + ggN(c.sell) + '</td><td class="gg-num" style="color:#ea580c">' + ggN(c.cost) + '</td><td class="gg-num" style="color:' + (mg >= 0 ? '#22c55e' : '#e85d5d') + '">' + ggN(mg) + '</td></tr>'; }).join('') +
+        '</tbody></table></div>';
+    ggOpenDetail();
+}
+
+/* ══════ Tabs ══════ */
+function ggTab(t, el) {
+    document.querySelectorAll('.gg-tab').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.gg-panel').forEach(function(p) { p.classList.remove('active'); });
+    el.classList.add('active');
+    document.getElementById('gg-p-' + t).classList.add('active');
+}
+
+/* ══════ Clipboard ══════ */
+function ggCopyComp(btn) {
+    var L = ggAggComp().sort(function(a, b) { return b.t - a.t; });
+    var header = ['고객사', '전체', '미선택', '선택완료', '주문확정', '배송완료', '판매금액', '매입금액', '마진', '마진율', '예상금액', '선택률'].join('\t');
+    var body = L.map(function(c) { return [c.name, c.t, c.p, c.c, c.cf, c.d, c.sell, c.cost, c.margin, c.marginRate.toFixed(1) + '%', c.ex, c.rate.toFixed(1) + '%'].join('\t'); }).join('\n');
+    ggCopyText(header + '\n' + body, btn);
+}
+function ggCopyProd(btn) {
+    var L = ggAggProd().sort(function(a, b) { return b.t - a.t; });
+    var header = ['상품코드', '상품명', '제휴점', '수량', '고객사수', '판매금액', '매입금액', '마진', '마진율', '예상금액'].join('\t');
+    var body = L.map(function(p) { return [p.code, p.name, p.store, p.t, p.comps, p.sell, p.cost, p.margin, p.marginRate.toFixed(1) + '%', p.ex].join('\t'); }).join('\n');
+    ggCopyText(header + '\n' + body, btn);
+}
+function ggCopyStore(btn) {
+    var L = ggAggStore().sort(function(a, b) { return b.t - a.t; });
+    var header = ['제휴점', '전체수량', '상품종류', '고객사수', '판매금액', '매입금액', '마진', '마진율', '평균단가', '예상금액'].join('\t');
+    var body = L.map(function(s) { return [s.name, s.t, s.prods, s.comps, s.sell, s.cost, s.margin, s.marginRate.toFixed(1) + '%', s.avg, s.ex].join('\t'); }).join('\n');
+    ggCopyText(header + '\n' + body, btn);
+}
+function ggCopyText(text, btn) {
+    navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = '복사 완료';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = '클립보드 복사'; btn.classList.remove('copied'); }, 1500);
+    });
+}
+
+/* ══════ Excel ══════ */
+function ggExcel() {
+    if (!GG.raw.length) { alert('데이터가 없습니다.'); return; }
+    if (typeof XLSX === 'undefined') { alert('XLSX 라이브러리를 로드하지 못했습니다.'); return; }
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(GG.raw.map(function(r, i) {
+        return { '번호': i + 1, '고객사': r.comname || r.name, '수령인': r.receiverName, '상품코드': r.productCode, '상품명': r.productName, '제휴점': r.storename, '상태': r.status, '확정일자': r.confirmDate, '판매가': ggSell(r), '매입가': ggCost(r), '마진': ggSell(r) - ggCost(r), '예상금액': ggExpected(r) };
+    })), '전체');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ggAggComp().sort(function(a, b) { return b.t - a.t; }).map(function(c) {
+        return { '고객사': c.name, '전체': c.t, '미선택': c.p, '선택완료': c.c, '주문확정': c.cf, '배송완료': c.d, '판매금액': c.sell, '매입금액': c.cost, '마진': c.margin, '마진율': c.marginRate.toFixed(1) + '%', '예상금액': c.ex };
+    })), '고객사별');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ggAggProd().sort(function(a, b) { return b.t - a.t; }).map(function(p) {
+        return { '상품코드': p.code, '상품명': p.name, '제휴점': p.store, '수량': p.t, '고객사수': p.comps, '판매금액': p.sell, '매입금액': p.cost, '마진': p.margin, '마진율': p.marginRate.toFixed(1) + '%', '예상금액': p.ex };
+    })), '상품별');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ggAggStore().sort(function(a, b) { return b.t - a.t; }).map(function(s) {
+        return { '제휴점': s.name, '수량': s.t, '상품종류': s.prods, '고객사수': s.comps, '판매금액': s.sell, '매입금액': s.cost, '마진': s.margin, '마진율': s.marginRate.toFixed(1) + '%', '평균단가': s.avg, '예상금액': s.ex };
+    })), '제휴점별');
+    var sd = document.getElementById('ggSD').value, ed = document.getElementById('ggED').value;
+    XLSX.writeFile(wb, '단체선물_' + sd + '_' + ed + '.xlsx');
+}
+
+/* ══════ Events ══════ */
+function ggDebounce(fn, ms) { var t; return function() { clearTimeout(t); var a = arguments; t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
+
+document.getElementById('ggAS').addEventListener('input', ggDebounce(ggRenderAll, 200));
+document.getElementById('ggAF').addEventListener('change', ggRenderAll);
+document.getElementById('ggCS').addEventListener('input', ggDebounce(ggRenderComp, 200));
+document.getElementById('ggPS').addEventListener('input', ggDebounce(ggRenderProd, 200));
+document.getElementById('ggSS').addEventListener('input', ggDebounce(ggRenderStore, 200));
+document.getElementById('ggDFrom').addEventListener('change', ggRenderDate);
+document.getElementById('ggDTo').addEventListener('change', ggRenderDate);
+document.getElementById('ggDGroup').addEventListener('change', ggRenderDate);
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') ggCloseDetail(); });
+
+/* ══════ Init ══════ */
+(function ggInit() {
+    // Default: 2026-01-01 ~ 2026-02-28
+    document.getElementById('ggSD').value = '2026-01-01';
+    document.getElementById('ggED').value = '2026-02-28';
+    ggFetch();
+})();
+</script>
