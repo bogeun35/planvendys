@@ -1,0 +1,446 @@
+<!--
+title: 정산 이체 관리
+meta: 최종 수정: 2026.02.17
+-->
+
+<style>
+.st{font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;position:relative}.st *{box-sizing:border-box}
+.st-ctrl{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid #e2e8f0;margin-bottom:8px;flex-wrap:wrap}
+.st-ctrl input[type="date"]{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 6px;border:1px solid #d1d5db;border-radius:3px}
+.st-ctrl label{font-size:11px;color:#4a5568}
+.st-btn{padding:3px 10px;font-size:11px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;color:#4a5568;white-space:nowrap}
+.st-btn:hover{border-color:#4a90d9;color:#4a90d9}
+.st-btn--primary{background:#4a90d9;color:#fff;border-color:#4a90d9}.st-btn--primary:hover{background:#3a7bc8}
+.st-btn--active{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
+.st-btn--green{border-color:#22c55e;color:#22c55e}.st-btn--green:hover{background:#f0fdf4}
+.st-btn--sm{font-size:10px;padding:2px 8px}
+.st-status{margin-left:auto;font-size:11px;color:#94a3b8}
+.st-summary{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:8px}
+.st-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:3px;padding:6px 8px}
+.st-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
+.st-card__value{font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a2332}
+.st-insight{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.st-insight__box{border:1px solid #e2e8f0;border-radius:3px;padding:8px 10px;background:#fff}
+.st-insight__title{font-size:11px;font-weight:600;color:#1a2332;margin-bottom:6px}
+.st-insight__chart{display:flex;align-items:flex-end;gap:2px;height:60px}
+.st-insight__bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center}
+.st-insight__bar{width:100%;min-width:8px;background:#4a90d9;border-radius:2px 2px 0 0;cursor:pointer;position:relative}
+.st-insight__bar:hover{background:#3a7bc8}
+.st-insight__bar-label{font-size:8px;color:#94a3b8;margin-top:2px}
+.st-insight__bar-tip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#1a2332;color:#fff;padding:2px 6px;border-radius:3px;font-size:10px;white-space:nowrap;z-index:10;font-family:'JetBrains Mono',monospace}
+.st-insight__bar:hover .st-insight__bar-tip{display:block}
+.st-insight__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;font-size:10px}
+.st-insight__stat-label{color:#94a3b8}.st-insight__stat-value{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11px}
+.st-tools{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:11px;color:#4a5568;flex-wrap:wrap}
+.st-body{display:grid;grid-template-columns:1fr 320px;gap:8px}
+.st-panel{border:1px solid #e2e8f0;border-radius:3px;display:flex;flex-direction:column;max-height:calc(100vh - 320px)}
+.st-panel__header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#f8fafd;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.st-panel__title{font-size:12px;font-weight:600;color:#1a2332}
+.st-panel__count{font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace}
+.st-panel__search{display:flex;align-items:center;gap:4px;padding:4px 10px;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.st-panel__search input{flex:1;font-size:11px;padding:2px 6px;border:1px solid #d1d5db;border-radius:3px}
+.st-panel__filter{display:flex;gap:4px}
+.st-panel__filter .st-btn{font-size:10px;padding:1px 6px}
+.st-tbl-wrap{flex:1;overflow:auto}
+.st-tbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.st-tbl th,.st-tbl td{overflow:hidden;text-overflow:ellipsis}
+.st-tbl th{position:sticky;top:0;background:#f0f4f9;font-size:10px;font-weight:600;color:#4a5568;padding:4px 6px;text-align:left;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;z-index:1}
+.st-tbl th:hover{color:#4a90d9}
+.st-tbl td{padding:3px 6px;border-bottom:1px solid #f0f4f9;font-size:11px;white-space:nowrap}
+.st-tbl tr:hover td{background:#f8fafd}
+.st-tbl tr.st-row--sel td{background:#eef4fb}
+.st-tbl .st-num{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px}
+.st-tbl .st-dim{color:#94a3b8;font-size:10px}
+.st-detail{border:1px solid #e2e8f0;border-radius:3px;display:flex;flex-direction:column;max-height:calc(100vh - 320px)}
+.st-detail__header{padding:6px 10px;background:#f8fafd;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:600;flex-shrink:0}
+.st-detail__body{flex:1;overflow:auto;padding:8px 10px;font-size:11px}
+.st-detail__row{display:grid;grid-template-columns:90px 1fr;gap:2px 8px;margin-bottom:3px}
+.st-detail__label{color:#94a3b8;font-size:10px}
+.st-detail__value{font-size:11px;color:#1a2332}
+.st-detail__sep{border-top:1px solid #e2e8f0;margin:6px 0}
+.st-copy-ok{color:#22c55e;font-size:11px;margin-left:6px;opacity:0;transition:opacity 0.3s}
+.st-copy-ok--show{opacity:1}
+.st-loading{position:absolute;inset:0;background:rgba(255,255,255,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;border-radius:3px}
+.st-loading__text{font-size:12px;color:#4a5568;margin-bottom:8px}
+.st-loading__bar{width:200px;height:3px;background:#e2e8f0;border-radius:2px;overflow:hidden}
+.st-loading__fill{height:100%;background:#4a90d9;transition:width 0.3s}
+.st-hidden{display:none !important}
+.st-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:200;display:flex;align-items:center;justify-content:center}
+.st-modal{background:#fff;border-radius:4px;border:1px solid #d1d5db;width:560px;max-height:80vh;display:flex;flex-direction:column}
+.st-modal__head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:600}
+.st-modal__close{cursor:pointer;font-size:16px;color:#94a3b8;border:none;background:none}.st-modal__close:hover{color:#1a2332}
+.st-modal__body{padding:10px 14px;overflow:auto;flex:1}
+.st-modal__foot{padding:8px 14px;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:6px}
+.st-modal-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.st-modal-tbl th{background:#f0f4f9;padding:3px 8px;text-align:left;font-size:10px;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db}
+.st-modal-tbl td{padding:3px 8px;border-bottom:1px solid #f0f4f9}
+</style>
+
+<div class="st" id="stRoot">
+  <div class="st-loading st-hidden" id="stLoading">
+    <div class="st-loading__text" id="stLoadText">데이터 조회 중...</div>
+    <div class="st-loading__bar"><div class="st-loading__fill" id="stLoadBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="st-ctrl">
+    <label>시작일</label><input type="date" id="stStart">
+    <label>종료일</label><input type="date" id="stEnd">
+    <button class="st-btn st-btn--primary" onclick="stFetch()">조회</button>
+    <button class="st-btn" onclick="stHot('thisMonth',this)">이번달</button>
+    <button class="st-btn" onclick="stHot('lastMonth',this)">지난달</button>
+    <button class="st-btn" onclick="stHot('twoMonthsAgo',this)">지지난달</button>
+    <span class="st-status" id="stStatus"></span>
+  </div>
+
+  <div class="st-summary">
+    <div class="st-card"><div class="st-card__label">이체 건수</div><div class="st-card__value" id="stSCnt">-</div></div>
+    <div class="st-card"><div class="st-card__label">이체 총액</div><div class="st-card__value" id="stSAmt">-</div></div>
+    <div class="st-card"><div class="st-card__label">거래처 수</div><div class="st-card__value" id="stSBiz">-</div></div>
+    <div class="st-card"><div class="st-card__label">이체일 수</div><div class="st-card__value" id="stSDays">-</div></div>
+    <div class="st-card"><div class="st-card__label">건당 평균</div><div class="st-card__value" id="stSAvg">-</div></div>
+    <div class="st-card"><div class="st-card__label">일 평균</div><div class="st-card__value" id="stSDayAvg">-</div></div>
+  </div>
+
+  <div class="st-insight st-hidden" id="stInsight">
+    <div class="st-insight__box">
+      <div class="st-insight__title">이체일자별 이체 현황</div>
+      <div class="st-insight__chart" id="stDailyChart"></div>
+      <div class="st-insight__stats" id="stDailyStats"></div>
+    </div>
+    <div class="st-insight__box">
+      <div class="st-insight__title">출금은행별 이체 현황</div>
+      <div id="stBankSummary" style="font-size:11px"></div>
+    </div>
+  </div>
+
+  <div class="st-tools">
+    <input type="text" placeholder="거래처명/사업자번호 검색" id="stSearch" oninput="stRender()" style="font-size:11px;padding:2px 6px;border:1px solid #d1d5db;border-radius:3px;width:200px">
+    <button class="st-btn" onclick="stCopy()">결과 복사</button>
+    <button class="st-btn st-btn--green" onclick="stShowVoucherModal()">전표 다운로드</button>
+    <span class="st-copy-ok" id="stCopyOk">복사 완료</span>
+  </div>
+
+  <div class="st-body">
+    <div class="st-panel">
+      <div class="st-panel__header">
+        <span class="st-panel__title">이체내역</span>
+        <span class="st-panel__count" id="stCount">0건</span>
+      </div>
+      <div class="st-tbl-wrap"><table class="st-tbl"><colgroup>
+        <col style="width:55px"><col style="width:72px"><col style="width:130px"><col style="width:100px"><col style="width:110px"><col style="width:100px"><col style="width:100px">
+      </colgroup><thead><tr>
+        <th onclick="stSort('settlementTransferStatementIdx')">#</th>
+        <th onclick="stSort('transferDate')">이체일</th>
+        <th onclick="stSort('accountBizName')">거래처명</th>
+        <th onclick="stSort('accountBizNumber')">사업자번호</th>
+        <th onclick="stSort('amount')" style="text-align:right">이체금액(원)</th>
+        <th onclick="stSort('vendysWithdrawalBankName')">출금은행</th>
+        <th onclick="stSort('transferBankName')">입금은행</th>
+      </tr></thead><tbody id="stBody"></tbody></table></div>
+    </div>
+
+    <div class="st-detail">
+      <div class="st-detail__header">이체 상세</div>
+      <div class="st-detail__body" id="stDetailBody">
+        <span class="st-dim">좌측 목록에서 항목을 선택하세요</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="st-modal-bg st-hidden" id="stVoucherModal" onclick="if(event.target===this)stCloseModal()">
+  <div class="st-modal">
+    <div class="st-modal__head"><span>이체전표 다운로드</span><button class="st-modal__close" onclick="stCloseModal()">&times;</button></div>
+    <div class="st-modal__body" id="stVoucherBody"></div>
+    <div class="st-modal__foot">
+      <button class="st-btn" onclick="stCloseModal()">닫기</button>
+      <button class="st-btn st-btn--primary" onclick="stDownloadAll()">전체 다운로드</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var ST={
+    PROXY:'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
+    TEMPLATE_URL:'https://bogeun35.github.io/planvendys/docs/ops/templates/voucher-template.xlsx',
+    QID:1356,
+    rows:[],filtered:[],dateGroups:{},
+    sortCol:'transferDate',sortDir:'desc',
+    selectedIdx:null
+};
+
+/* ===== Utils ===== */
+function stApi(p){var qs=Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k]);}).join('&');return fetch(ST.PROXY+'?'+qs,{redirect:'follow'}).then(function(r){return r.json();});}
+function stDS(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function stDC(s){return s?s.replace(/-/g,''):'';}
+function stN(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString();}
+function stS(v){var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+(a/1e4).toFixed(0)+'만';return p+a.toLocaleString();}
+
+function stHot(key,el){
+    var now=new Date(),y=now.getFullYear(),m=now.getMonth(),s,e;
+    switch(key){case 'thisMonth':s=new Date(y,m,1);e=new Date(y,m+1,0);break;case 'lastMonth':s=new Date(y,m-1,1);e=new Date(y,m,0);break;case 'twoMonthsAgo':s=new Date(y,m-2,1);e=new Date(y,m-1,0);break;}
+    document.getElementById('stStart').value=stDS(s);document.getElementById('stEnd').value=stDS(e);
+    document.querySelectorAll('.st-ctrl .st-btn:not(.st-btn--primary)').forEach(function(b){b.classList.remove('st-btn--active');});el.classList.add('st-btn--active');
+}
+(function(){var now=new Date(),y=now.getFullYear(),m=now.getMonth();document.getElementById('stStart').value=stDS(new Date(y,m,1));document.getElementById('stEnd').value=stDS(new Date(y,m+1,0));})();
+
+/* ===== Fetch ===== */
+async function stFetch(){
+    var sd=document.getElementById('stStart').value,ed=document.getElementById('stEnd').value;if(!sd||!ed)return;
+    document.getElementById('stLoading').classList.remove('st-hidden');
+    document.getElementById('stLoadText').textContent='이체내역 조회 중...';document.getElementById('stLoadBar').style.width='20%';
+    ST.rows=[];ST.selectedIdx=null;
+    try{
+        var d=await stApi({action:'post',queryId:ST.QID,startDate:sd,endDate:ed});
+        var rows;
+        if(d.query_result){rows=d.query_result.data.rows;}
+        else if(d.job){rows=await stPoll(d.job.id);}
+        else throw new Error('응답 오류');
+        document.getElementById('stLoadBar').style.width='80%';
+        ST.rows=rows.map(function(r){
+            return{
+                settlementTransferStatementIdx:Number(r.settlementTransferStatementIdx)||0,
+                settlementIdx:Number(r.settlementIdx)||0,
+                amount:Number(r.amount)||0,
+                transferDate:String(r.transferDate||'').replace(/T.*/,'').substring(0,10),
+                transferType:String(r.transferType||''),
+                transferBankName:String(r.transferBankName||''),
+                transferBankAccountNumber:String(r.transferBankAccountNumber||''),
+                transferBankAccountHolder:String(r.transferBankAccountHolder||''),
+                telegramNo:String(r.telegramNo||''),
+                transferMemo:String(r.transferMemo||''),
+                accountBizName:String(r.accountBizName||''),
+                accountBizNumber:String(r.accountBizNumber||''),
+                accountBankName:String(r.accountBankName||''),
+                accountBankAccountHolder:String(r.accountBankAccountHolder||''),
+                vendysWithdrawalBankName:String(r.vendysWithdrawalBankName||''),
+                vendysWithdrawalBankAccountHolder:String(r.vendysWithdrawalBankAccountHolder||''),
+                withdrawalRemark:String(r.withdrawalRemark||''),
+                depositRemark:String(r.depositRemark||''),
+                serviceTransactionAmount:Number(r.serviceTransactionAmount)||0,
+                feeAmount:Number(r.feeAmount)||0,
+                partnerContractIdx:Number(r.partnerContractIdx)||0
+            };
+        });
+        document.getElementById('stLoadBar').style.width='100%';
+        setTimeout(function(){document.getElementById('stLoading').classList.add('st-hidden');},300);
+        document.getElementById('stStatus').textContent=ST.rows.length+'건 조회됨';
+        stRenderAll();
+    }catch(err){document.getElementById('stLoading').classList.add('st-hidden');document.getElementById('stStatus').textContent='오류: '+err.message;}
+}
+async function stPoll(jid){
+    for(var i=0;i<120;i++){await new Promise(function(r){setTimeout(r,1000);});
+        var d=await stApi({action:'job',jobId:jid});
+        document.getElementById('stLoadBar').style.width=(20+Math.min(i,60))+'%';
+        if(d.job&&d.job.status===3){var res=await stApi({action:'result',resultId:d.job.query_result_id});return res.query_result.data.rows;}
+        if(d.job&&d.job.status===4)throw new Error('쿼리 실패');}
+    throw new Error('타임아웃');
+}
+
+function stRenderAll(){stRenderSummary();stRenderInsight();stRender();}
+
+/* ===== Summary ===== */
+function stRenderSummary(){
+    var total=0,bizSet=new Set(),daySet=new Set();
+    ST.rows.forEach(function(r){total+=r.amount;bizSet.add(r.accountBizNumber);daySet.add(r.transferDate);});
+    document.getElementById('stSCnt').textContent=stN(ST.rows.length)+'건';
+    document.getElementById('stSAmt').textContent=stS(total);
+    document.getElementById('stSBiz').textContent=stN(bizSet.size)+'개';
+    document.getElementById('stSDays').textContent=stN(daySet.size)+'일';
+    document.getElementById('stSAvg').textContent=ST.rows.length>0?stS(Math.round(total/ST.rows.length)):'-';
+    document.getElementById('stSDayAvg').textContent=daySet.size>0?stS(Math.round(total/daySet.size)):'-';
+}
+
+/* ===== Insight ===== */
+function stRenderInsight(){
+    document.getElementById('stInsight').classList.remove('st-hidden');
+    // 일자별 차트
+    var pd={};ST.rows.forEach(function(r){var d=r.transferDate;if(!d)return;if(!pd[d])pd[d]={amount:0,count:0};pd[d].amount+=r.amount;pd[d].count++;});
+    var dates=Object.keys(pd).sort(),maxA=0;dates.forEach(function(d){if(pd[d].amount>maxA)maxA=pd[d].amount;});
+    var ch='';dates.forEach(function(d){var v=pd[d],pct=maxA>0?(v.amount/maxA*100):0;
+        ch+='<div class="st-insight__bar-wrap"><div class="st-insight__bar" style="height:'+Math.max(pct,2)+'%"><div class="st-insight__bar-tip">'+d.substring(5)+' '+stN(v.amount)+'원 ('+v.count+'건)</div></div><div class="st-insight__bar-label">'+d.substring(5)+'</div></div>';});
+    document.getElementById('stDailyChart').innerHTML=ch||'<span class="st-dim">데이터 없음</span>';
+    if(dates.length>0){var ams=dates.map(function(d){return pd[d].amount;}),tot=ams.reduce(function(a,b){return a+b;},0);
+        document.getElementById('stDailyStats').innerHTML='<div><div class="st-insight__stat-label">일평균</div><div class="st-insight__stat-value">'+stS(Math.round(tot/ams.length))+'</div></div><div><div class="st-insight__stat-label">최고</div><div class="st-insight__stat-value">'+stS(Math.max.apply(null,ams))+'</div></div><div><div class="st-insight__stat-label">최저</div><div class="st-insight__stat-value">'+stS(Math.min.apply(null,ams))+'</div></div>';}
+
+    // 출금은행별
+    var bk={};ST.rows.forEach(function(r){var b=r.vendysWithdrawalBankName||'(미지정)';if(!bk[b])bk[b]={amount:0,count:0};bk[b].amount+=r.amount;bk[b].count++;});
+    var bks=Object.keys(bk).sort(function(a,b){return bk[b].amount-bk[a].amount;});
+    var bh='<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">';
+    bks.forEach(function(b){bh+='<div><span class="st-insight__stat-label">'+b+'</span><div class="st-insight__stat-value">'+stS(bk[b].amount)+' <span style="font-size:9px;color:#94a3b8">('+stN(bk[b].count)+'건)</span></div></div>';});
+    bh+='</div>';
+    document.getElementById('stBankSummary').innerHTML=bh;
+}
+
+/* ===== Table ===== */
+function stRender(){
+    var q=(document.getElementById('stSearch').value||'').toLowerCase();
+    ST.filtered=ST.rows.filter(function(r){
+        if(!q)return true;
+        return(r.accountBizName+' '+r.accountBizNumber+' '+r.transferBankAccountHolder+' '+r.withdrawalRemark+' '+r.depositRemark).toLowerCase().indexOf(q)!==-1;
+    });
+    var col=ST.sortCol,dir=ST.sortDir==='asc'?1:-1;
+    ST.filtered.sort(function(a,b){var va=a[col],vb=b[col];if(typeof va==='number')return(va-vb)*dir;return String(va).localeCompare(String(vb))*dir;});
+    var h='';ST.filtered.forEach(function(r){
+        var cls=ST.selectedIdx===r.settlementTransferStatementIdx?'st-row--sel':'';
+        h+='<tr class="'+cls+'" onclick="stSelect('+r.settlementTransferStatementIdx+')"><td>'+r.settlementTransferStatementIdx+'</td><td>'+r.transferDate+'</td><td title="'+r.accountBizName+'">'+r.accountBizName+'</td><td class="st-dim">'+r.accountBizNumber+'</td><td class="st-num">'+stN(r.amount)+'</td><td>'+r.vendysWithdrawalBankName+'</td><td>'+r.transferBankName+'</td></tr>';
+    });
+    document.getElementById('stBody').innerHTML=h;
+    document.getElementById('stCount').textContent=ST.filtered.length+'건'+(q?' (검색)':'');
+}
+
+function stSort(c){if(ST.sortCol===c)ST.sortDir=ST.sortDir==='asc'?'desc':'asc';else{ST.sortCol=c;ST.sortDir=c==='amount'?'desc':'asc';}stRender();}
+
+/* ===== Detail ===== */
+function stSelect(idx){
+    ST.selectedIdx=idx;stRender();
+    var r=ST.rows.find(function(x){return x.settlementTransferStatementIdx===idx;});if(!r)return;
+    var h='';
+    h+='<div class="st-detail__row"><div class="st-detail__label">이체번호</div><div class="st-detail__value">'+r.settlementTransferStatementIdx+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">정산번호</div><div class="st-detail__value">'+r.settlementIdx+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">이체일</div><div class="st-detail__value">'+r.transferDate+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">이체금액</div><div class="st-detail__value" style="font-family:JetBrains Mono,monospace;font-weight:700">'+stN(r.amount)+' 원</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">이체유형</div><div class="st-detail__value">'+r.transferType+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">전문번호</div><div class="st-detail__value" style="font-family:JetBrains Mono,monospace">'+r.telegramNo+'</div></div>';
+    h+='<div class="st-detail__sep"></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">거래처명</div><div class="st-detail__value" style="font-weight:600">'+r.accountBizName+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">사업자번호</div><div class="st-detail__value" style="font-family:JetBrains Mono,monospace">'+r.accountBizNumber+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">입금은행</div><div class="st-detail__value">'+r.transferBankName+' '+r.transferBankAccountNumber+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">입금예금주</div><div class="st-detail__value">'+r.transferBankAccountHolder+'</div></div>';
+    h+='<div class="st-detail__sep"></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">출금은행</div><div class="st-detail__value">'+r.vendysWithdrawalBankName+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">출금예금주</div><div class="st-detail__value">'+r.vendysWithdrawalBankAccountHolder+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">출금적요</div><div class="st-detail__value">'+r.withdrawalRemark+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">입금적요</div><div class="st-detail__value">'+r.depositRemark+'</div></div>';
+    if(r.transferMemo)h+='<div class="st-detail__row"><div class="st-detail__label">메모</div><div class="st-detail__value">'+r.transferMemo+'</div></div>';
+    h+='<div class="st-detail__sep"></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">거래금액</div><div class="st-detail__value" style="font-family:JetBrains Mono,monospace">'+stN(r.serviceTransactionAmount)+'</div></div>';
+    h+='<div class="st-detail__row"><div class="st-detail__label">수수료</div><div class="st-detail__value" style="font-family:JetBrains Mono,monospace">'+stN(r.feeAmount)+'</div></div>';
+    document.getElementById('stDetailBody').innerHTML=h;
+}
+
+/* ===== Copy ===== */
+function stCopy(){
+    var lines=['이체번호\t이체일\t거래처명\t사업자번호\t이체금액\t출금은행\t입금은행\t입금계좌\t입금예금주\t출금적요\t입금적요'];
+    ST.filtered.forEach(function(r){lines.push([r.settlementTransferStatementIdx,r.transferDate,r.accountBizName,r.accountBizNumber,r.amount,r.vendysWithdrawalBankName,r.transferBankName,r.transferBankAccountNumber,r.transferBankAccountHolder,r.withdrawalRemark,r.depositRemark].join('\t'));});
+    navigator.clipboard.writeText(lines.join('\n')).then(function(){var ok=document.getElementById('stCopyOk');ok.classList.add('st-copy-ok--show');setTimeout(function(){ok.classList.remove('st-copy-ok--show');},1500);});
+}
+
+/* ===== 전표 모달 ===== */
+function stBuildDateGroups(){
+    ST.dateGroups={};
+    ST.rows.forEach(function(r){
+        var dt=r.transferDate;if(!dt)return;
+        if(!ST.dateGroups[dt])ST.dateGroups[dt]={date:dt,entries:[],total:0};
+        ST.dateGroups[dt].entries.push(r);
+        ST.dateGroups[dt].total+=r.amount;
+    });
+}
+
+function stShowVoucherModal(){
+    stBuildDateGroups();
+    var dates=Object.keys(ST.dateGroups).sort();
+    if(dates.length===0){alert('이체내역이 없습니다.');return;}
+    var h='<table class="st-modal-tbl"><thead><tr><th>이체일</th><th style="text-align:right">이체금액</th><th style="text-align:right">건수</th><th style="width:80px"></th></tr></thead><tbody>';
+    dates.forEach(function(dt){var g=ST.dateGroups[dt];
+        h+='<tr><td>'+dt+'</td><td class="st-num">'+stN(g.total)+'</td><td class="st-num">'+g.entries.length+'</td><td><button class="st-btn st-btn--sm st-btn--primary" onclick="stDownload(\''+dt+'\')">다운로드</button></td></tr>';
+    });
+    h+='</tbody></table>';
+    document.getElementById('stVoucherBody').innerHTML=h;
+    document.getElementById('stVoucherModal').classList.remove('st-hidden');
+}
+function stCloseModal(){document.getElementById('stVoucherModal').classList.add('st-hidden');}
+
+/* ===== 전표 생성 ===== */
+function stLoadSheetJS(cb){if(window.XLSX){cb();return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=cb;s.onerror=function(){alert('SheetJS 로드 실패');};document.head.appendChild(s);}
+
+async function stFetchTemplate(){
+    if(ST.templateBuf)return ST.templateBuf;
+    var resp=await fetch(ST.TEMPLATE_URL);ST.templateBuf=await resp.arrayBuffer();return ST.templateBuf;
+}
+
+function stMakeRows(dt){
+    var grp=ST.dateGroups[dt];if(!grp)return[];
+    var rows=[],seq=1,dtc=stDC(dt);
+    // 출금은행별 집계
+    var bankMap={};grp.entries.forEach(function(r){var b=r.vendysWithdrawalBankName||'';if(!bankMap[b])bankMap[b]=0;bankMap[b]+=r.amount;});
+    var bankNames=Object.keys(bankMap);var bankStr=bankNames.length>0?'_'+bankNames.join('/'):'';
+
+    // 대변: 보통예금 (출금 합계) - TODO: 계정코드 나중에
+    var r1=new Array(43).fill('');
+    r1[0]=seq;r1[1]='10/조정전표';r1[6]=dtc;
+    r1[9]='';          // DEPT_CD - TODO
+    r1[10]='2/대변';r1[11]='';  // ACCT_CD - TODO: 보통예금
+    r1[14]=grp.total;r1[15]='이체전표'+bankStr+'_'+dtc;
+    r1[19]='KRW';r1[20]=1;r1[22]=grp.total;
+    rows.push(r1);
+
+    // 차변: 미지급금 (개별 이체) - TODO: 계정코드 나중에
+    grp.entries.forEach(function(e){
+        var r=new Array(43).fill('');
+        r[0]=seq;r[1]='10/조정전표';r[6]=dtc;
+        r[9]='';          // DEPT_CD - TODO
+        r[10]='1/차변';r[11]='';  // ACCT_CD - TODO: 미지급금
+        r[13]=e.accountBizNumber||'';  // PARTNER_NO
+        r[14]=e.amount;
+        r[15]=(e.accountBizName||'')+'_'+(e.vendysWithdrawalBankName||'');
+        r[19]='KRW';r[20]=1;r[22]=e.amount;
+        rows.push(r);
+    });
+    return rows;
+}
+
+async function stDownload(dt){
+    stLoadSheetJS(async function(){
+        try{
+            var buf=await stFetchTemplate();
+            var wb=XLSX.read(buf,{type:'array'});
+            var ws=wb.Sheets[wb.SheetNames[0]];
+            var dataRows=stMakeRows(dt);
+            dataRows.forEach(function(row,ri){
+                row.forEach(function(val,ci){
+                    if(val==='')return;
+                    var addr=XLSX.utils.encode_cell({r:4+ri,c:ci});
+                    ws[addr]={v:val,t:typeof val==='number'?'n':'s'};
+                });
+            });
+            var range=XLSX.utils.decode_range(ws['!ref']||'A1');
+            if(4+dataRows.length-1>range.e.r)range.e.r=4+dataRows.length-1;
+            if(42>range.e.c)range.e.c=42;
+            ws['!ref']=XLSX.utils.encode_range(range);
+            XLSX.writeFile(wb,'전표입력_'+stDC(dt)+'_이체전표.xlsx');
+        }catch(err){alert('전표 생성 실패: '+err.message);}
+    });
+}
+
+async function stDownloadAll(){
+    var dates=Object.keys(ST.dateGroups).sort();if(dates.length===0)return;
+    stLoadSheetJS(async function(){
+        try{
+            var buf=await stFetchTemplate();
+            var wb=XLSX.read(buf,{type:'array'});
+            var ws=wb.Sheets[wb.SheetNames[0]];
+            var allRows=[],seq=1;
+            dates.forEach(function(dt){
+                var rows=stMakeRows(dt);
+                rows.forEach(function(r){r[0]=seq;});
+                allRows=allRows.concat(rows);seq++;
+            });
+            allRows.forEach(function(row,ri){
+                row.forEach(function(val,ci){
+                    if(val==='')return;
+                    var addr=XLSX.utils.encode_cell({r:4+ri,c:ci});
+                    ws[addr]={v:val,t:typeof val==='number'?'n':'s'};
+                });
+            });
+            var range=XLSX.utils.decode_range(ws['!ref']||'A1');
+            if(4+allRows.length-1>range.e.r)range.e.r=4+allRows.length-1;
+            if(42>range.e.c)range.e.c=42;
+            ws['!ref']=XLSX.utils.encode_range(range);
+            var sd=document.getElementById('stStart').value.replace(/-/g,''),ed=document.getElementById('stEnd').value.replace(/-/g,'');
+            XLSX.writeFile(wb,'전표입력_'+sd+'_'+ed+'_이체전표.xlsx');
+            stCloseModal();
+        }catch(err){alert('전표 생성 실패: '+err.message);}
+    });
+}
+</script>
