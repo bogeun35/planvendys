@@ -105,7 +105,7 @@ meta: 최종 수정: 2026.02.16
 
   <div class="bm-insight bm-hidden" id="bmInsight">
     <div class="bm-insight__box">
-      <div class="bm-insight__title">입금약정일별 청구 현황</div>
+      <div class="bm-insight__title">입금일자별 입금 현황</div>
       <div class="bm-insight__chart" id="bmPaydateChart"></div>
       <div class="bm-insight__stats" id="bmPaydateStats"></div>
     </div>
@@ -249,6 +249,7 @@ async function bmFetch(){
                 _normalized:bmNormalize(dbReg||orig),depositAmount:Number(r.depositAmount)||0,
                 matchedAmount:Number(r.matchedAmount)||0,billIdx:r.billIdx?Number(r.billIdx):null,
                 accountBizNumber:String(r.accountBizNumber||''),codeName:String(r.codeName||''),
+                transactionDate:String(r.transactionDate||'').substring(0,10),
                 _matchStatus:r.billIdx?'linked':'unmatched',_matchedBillIdx:r.billIdx?Number(r.billIdx):null,_diff:0};
         });
 
@@ -301,8 +302,8 @@ function bmRenderSummary(){
 
 function bmRenderInsight(){
     document.getElementById('bmInsight').classList.remove('bm-hidden');
-    // 약정일별 차트
-    var pd={};BM.bills.forEach(function(b){var d=b.payDate.substring(0,10);if(!d)return;if(!pd[d])pd[d]={amount:0,count:0};pd[d].amount+=b.totalAmount;pd[d].count++;});
+    // 입금일자별 차트
+    var pd={};BM.deps.forEach(function(d){var dt=d.transactionDate;if(!dt)return;if(!pd[dt])pd[dt]={amount:0,count:0};pd[dt].amount+=d.depositAmount;pd[dt].count++;});
     var dates=Object.keys(pd).sort();var maxA=0;dates.forEach(function(d){if(pd[d].amount>maxA)maxA=pd[d].amount;});
     var ch='';dates.forEach(function(d){var v=pd[d],pct=maxA>0?(v.amount/maxA*100):0,day=d.substring(5);
         ch+='<div class="bm-insight__bar-wrap"><div class="bm-insight__bar" style="height:'+Math.max(pct,2)+'%"><div class="bm-insight__bar-tip">'+day+' '+bmN(v.amount)+'원 ('+v.count+'건)</div></div><div class="bm-insight__bar-label">'+day+'</div></div>';});
@@ -438,7 +439,7 @@ function bmDownloadVoucher(){
     linkedDeps.forEach(function(dep){
         var bill=BM.bills.find(function(b){return b.billIdx===dep.billIdx;});
         if(!bill)return;
-        var dt=bmDateCompact(bill.payDate);
+        var dt=bmDateCompact(dep.transactionDate);
         if(!dt)return;
         if(!dateGroups[dt])dateGroups[dt]={date:dt,entries:[]};
         var matchedAmt=dep.matchedAmount||0;
@@ -469,76 +470,67 @@ function bmDownloadVoucher(){
         var totalDeposit=0;
         grp.entries.forEach(function(e){totalDeposit+=e.depositAmount;});
 
-        // 1행: 차변 - 보통예금(11020101) - 입금 합계
-        // 이 날짜 그룹의 대표 은행명 수집
         var bankNames=[];
         grp.entries.forEach(function(e){if(e.dep.codeName&&bankNames.indexOf(e.dep.codeName)===-1)bankNames.push(e.dep.codeName);});
         var bankStr=bankNames.length>0?'_'+bankNames.join('/'):'';
         var row1=new Array(43).fill('');
-        row1[0]=seq;              // EVDN_SQ
-        row1[1]='10/조정전표';     // EVDN_TP_CD
-        row1[6]=dt;               // EVDN_DT_EVI
-        row1[9]='300007';         // DEPT_CD (재무기획)
-        row1[10]='1/차변';        // DRCRFG_CD
-        row1[11]='11020101';      // ACCT_CD (보통예금)
-        row1[14]=totalDeposit;    // DOCU_AMT
-        row1[15]='입금전표'+bankStr+'_'+dt;   // NOTE_DC
-        row1[19]='KRW';          // CRNC_CD
-        row1[20]=1;              // EXRT_RT
-        row1[22]=totalDeposit;   // TRAN_AMT
+        row1[0]=seq;
+        row1[1]='10/조정전표';
+        row1[6]=dt;
+        row1[9]='300007';
+        row1[10]='1/차변';
+        row1[11]='11020101';
+        row1[14]=totalDeposit;
+        row1[15]='입금전표'+bankStr+'_'+dt;
+        row1[19]='KRW';
+        row1[20]=1;
+        row1[22]=totalDeposit;
         rows.push(row1);
 
-        // N행: 대변 - 미수금(12071101) or 선수금-과오입금(21110118)
         grp.entries.forEach(function(e){
             var bankNm=e.dep.codeName?'_'+e.dep.codeName:'';
-            // 연결금액 -> 미수금
             if(e.matchedAmt>0){
                 var row2=new Array(43).fill('');
-                row2[0]=seq;
-                row2[1]='10/조정전표';
-                row2[6]=dt;
-                row2[9]=e.deptCd;
-                row2[10]='2/대변';
-                row2[11]='12071101';       // 미수금
-                row2[12]='';               // PARTNER_CD
-                row2[13]=e.bill.accountBizNumber||''; // PARTNER_NO
+                row2[0]=seq;row2[1]='10/조정전표';row2[6]=dt;row2[9]=e.deptCd;
+                row2[10]='2/대변';row2[11]='12071101';
+                row2[13]=e.bill.accountBizNumber||'';
                 row2[14]=e.matchedAmt;
                 row2[15]=(e.bill.billName||e.dep.description)+bankNm;
-                row2[19]='KRW';
-                row2[20]=1;
-                row2[22]=e.matchedAmt;
+                row2[19]='KRW';row2[20]=1;row2[22]=e.matchedAmt;
                 rows.push(row2);
             }
-            // 초과분 -> 선수금-과오입금
             if(e.excess>0){
                 var row3=new Array(43).fill('');
-                row3[0]=seq;
-                row3[1]='10/조정전표';
-                row3[6]=dt;
-                row3[9]=e.deptCd;
-                row3[10]='2/대변';
-                row3[11]='21110118';       // 선수금-과오입금
+                row3[0]=seq;row3[1]='10/조정전표';row3[6]=dt;row3[9]=e.deptCd;
+                row3[10]='2/대변';row3[11]='21110118';
                 row3[13]=e.bill.accountBizNumber||'';
                 row3[14]=e.excess;
                 row3[15]='과오입금_'+(e.bill.billName||e.dep.description)+bankNm;
-                row3[19]='KRW';
-                row3[20]=1;
-                row3[22]=e.excess;
+                row3[19]='KRW';row3[20]=1;row3[22]=e.excess;
                 rows.push(row3);
             }
         });
         seq++;
     });
 
-    // TSV -> 다운로드
-    var tsv=rows.map(function(r){return r.join('\t');}).join('\n');
-    var blob=new Blob(['\uFEFF'+tsv],{type:'text/tab-separated-values;charset=utf-8'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url;
-    var sd=document.getElementById('bmStart').value.replace(/-/g,'');
-    var ed=document.getElementById('bmEnd').value.replace(/-/g,'');
-    a.download='전표입력_'+sd+'_'+ed+'_입금전표.tsv';
-    a.click();URL.revokeObjectURL(url);
+    // SheetJS xlsx 다운로드
+    bmLoadSheetJS(function(){
+        var ws=XLSX.utils.aoa_to_sheet(rows);
+        var wb=XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb,ws,'Sheet1');
+        var sd=document.getElementById('bmStart').value.replace(/-/g,'');
+        var ed=document.getElementById('bmEnd').value.replace(/-/g,'');
+        XLSX.writeFile(wb,'전표입력_'+sd+'_'+ed+'_입금전표.xlsx');
+    });
+}
+
+/* SheetJS CDN 동적 로드 */
+function bmLoadSheetJS(cb){
+    if(window.XLSX){cb();return;}
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=cb;
+    s.onerror=function(){alert('SheetJS 라이브러리 로드 실패');};
+    document.head.appendChild(s);
 }
 </script>
