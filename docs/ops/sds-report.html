@@ -381,10 +381,10 @@ async function skFetch() {
 function skProcess() {
     if (SK.raw.length === 0) return;
 
-    // 날짜 T 제거 (2026-02-02T06:39:35 → 2026-02-02)
+    // 날짜 T 제거 (2026-02-02T06:39:35 → 2026-02-02 06:39:35)
     SK.raw.forEach(function(r) {
         if (r['날짜'] && String(r['날짜']).indexOf('T') >= 0) {
-            r['날짜'] = String(r['날짜']).split('T')[0];
+            r['날짜'] = String(r['날짜']).replace('T', ' ');
         }
     });
 
