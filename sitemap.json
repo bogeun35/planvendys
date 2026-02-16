@@ -142,11 +142,11 @@
             },
                   
             {
-              "id": "ops-cs",
-              "title": "CS 대응 매뉴얼",
+              "id": "sikgwon-report",
+              "title": "SDS 파일전송",
               "icon": "doc",
-              "desc": "고객 문의 처리 가이드",
-              "file": "docs/ops/cs.html"
+              "desc": "SDS 전용 식대상세내역",
+              "file": "docs/ops/sikgwon-report.html"
             },
             {
               "id": "ops-deploy",
