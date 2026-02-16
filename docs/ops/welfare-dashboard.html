@@ -3,10 +3,6 @@ title: 복지대장 지급현황 대시보드
 meta: 최종 수정: 2025.02.16
 -->
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/styles/handsontable.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/styles/ht-theme-main.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
-
 <style>
 .wf{display:flex;flex-direction:column;gap:12px;font-size:12px;color:#1a2332;position:relative}
 .wf-loading{display:none;position:absolute;inset:0;background:rgba(255,255,255,.85);z-index:50;flex-direction:column;align-items:center;justify-content:center;gap:10px;border-radius:4px}
@@ -21,6 +17,9 @@ meta: 최종 수정: 2025.02.16
 .wf-btn{padding:4px 14px;background:#4a90d9;color:#fff;border:none;border-radius:3px;font-size:12px;font-family:'Noto Sans KR',sans-serif;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
 .wf-btn:hover{background:#3a7bc8}
 .wf-btn:disabled{background:#94a3b8;cursor:not-allowed}
+.wf-btn--sm{padding:3px 10px;font-size:11px;font-weight:500;background:#fff;color:#4a5568;border:1px solid #d1d5db}
+.wf-btn--sm:hover{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
+.wf-btn--sm.copied{background:#22c55e;color:#fff;border-color:#22c55e}
 .wf-hots{display:flex;gap:4px;margin-left:4px;padding-left:8px;border-left:1px solid #e2e8f0}
 .wf-hot{padding:3px 8px;background:#fff;color:#4a5568;border:1px solid #d1d5db;border-radius:3px;font-size:11px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s}
 .wf-hot:hover{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
@@ -37,12 +36,30 @@ meta: 최종 수정: 2025.02.16
 .wf-grid-toolbar input{flex:1;padding:3px 8px;border:1px solid #d1d5db;border-radius:3px;font-size:11px;font-family:'Noto Sans KR',sans-serif;outline:none}
 .wf-grid-toolbar input:focus{border-color:#4a90d9}
 .wf-grid-toolbar span{font-size:11px;color:#94a3b8;white-space:nowrap}
+.wf-grid-wrap{overflow:auto;max-height:440px}
+.wf-grid{width:100%;border-collapse:collapse;font-size:12px;user-select:text}
+.wf-grid thead{position:sticky;top:0;z-index:2}
+.wf-grid th{padding:5px 10px;text-align:left;font-weight:600;color:#4a5568;background:#f0f4f9;border-bottom:1px solid #e2e8f0;border-right:1px solid #edf1f7;white-space:nowrap;cursor:pointer;user-select:none}
+.wf-grid th:last-child{border-right:none}
+.wf-grid th:hover{background:#e6ecf3}
+.wf-grid td{padding:4px 10px;border-bottom:1px solid #f0f4f9;border-right:1px solid #f5f7fa;white-space:nowrap}
+.wf-grid td:last-child{border-right:none}
+.wf-grid tbody tr{cursor:pointer;transition:background .08s}
+.wf-grid tbody tr:hover td{background:#f8fafd}
+.wf-grid tbody tr.selected td{background:#eef4fb}
+.wf-grid td.cell-sel{background:#dce6f2!important;outline:1px solid #4a90d9;outline-offset:-1px}
+.wf-grid td.cell-rng{background:#eef4fb!important}
+.wf-grid .col-r{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px}
+.wf-grid .col-c{text-align:center}
+.wf-grid .col-id{color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:10px}
+.wf-grid .col-rank{color:#94a3b8;font-size:11px;text-align:center;width:32px}
+.amount-neg{color:#e85d5d}
 .wf-detail{border:1px solid #e2e8f0;border-radius:4px;background:#fff;display:flex;flex-direction:column;overflow:hidden}
 .wf-detail__head{padding:8px 12px;background:#f8fafd;border-bottom:1px solid #e2e8f0;font-weight:600;color:#4a5568;font-size:11px}
 .wf-detail__body{padding:12px;overflow-y:auto;max-height:440px}
 .wf-detail__empty{color:#94a3b8;font-size:11px;text-align:center;padding:40px 12px}
 .wf-detail__name{font-size:14px;font-weight:700;margin-bottom:2px;color:#1a2332}
-.wf-detail__id{font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;margin-bottom:10px;word-break:break-all}
+.wf-detail__id{font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;margin-bottom:10px;word-break:break-all}
 .wf-detail__stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #f0f4f9}
 .wf-detail__stat-label{font-size:10px;color:#94a3b8}
 .wf-detail__stat-value{font-size:13px;font-weight:700;color:#1a2332;font-family:'JetBrains Mono',monospace}
@@ -55,7 +72,6 @@ meta: 최종 수정: 2025.02.16
 .wf-bar .bl{width:54px;text-align:right;color:#4a5568;font-family:'JetBrains Mono',monospace;flex-shrink:0}
 .wf-bar .bf{height:14px;border-radius:2px;min-width:2px;transition:width .3s ease}
 .wf-bar .bv{color:#94a3b8;font-family:'JetBrains Mono',monospace;flex-shrink:0}
-.amount-neg{color:#e85d5d}
 .wf-compare{border:1px solid #e2e8f0;border-radius:4px;background:#fff;overflow:hidden}
 .wf-compare__head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8fafd;border-bottom:1px solid #e2e8f0}
 .wf-compare__title{font-size:12px;font-weight:600;color:#4a5568}
@@ -122,8 +138,22 @@ meta: 최종 수정: 2025.02.16
             <div class="wf-grid-toolbar">
                 <input type="text" id="wfSearch" placeholder="고객사명 또는 comId 검색..." oninput="wfFilter()" />
                 <span id="wfCount">0개사</span>
+                <button class="wf-btn--sm" id="wfCopyBtn" onclick="wfCopyTable()">클립보드 복사</button>
             </div>
-            <div id="wfGridWrap" style="height:440px;overflow:hidden"></div>
+            <div class="wf-grid-wrap" id="wfGridWrap">
+                <table class="wf-grid" id="wfGrid">
+                    <thead><tr>
+                        <th class="col-rank" onclick="wfSort('rank')">#</th>
+                        <th onclick="wfSort('comId')">comId</th>
+                        <th onclick="wfSort('name')">고객사명</th>
+                        <th class="col-r" onclick="wfSort('totalAmount')">지급액</th>
+                        <th class="col-c" onclick="wfSort('userCount')">사용자</th>
+                        <th class="col-r" onclick="wfSort('avgPerUser')">인당 평균</th>
+                        <th class="col-c" onclick="wfSort('txCount')">건수</th>
+                    </tr></thead>
+                    <tbody id="wfTbody"></tbody>
+                </table>
+            </div>
         </div>
         <div class="wf-detail">
             <div class="wf-detail__head">고객사 상세 (날짜별)</div>
@@ -141,20 +171,19 @@ meta: 최종 수정: 2025.02.16
 </div>
 
 <script>
-var W = {
+var W={
     PROXY:'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
-    QID:1339, raw:[], grouped:[], filtered:[], selComId:null, hot:null
+    QID:1339, raw:[], grouped:[], filtered:[], sortCol:'totalAmount', sortDir:'desc', selComId:null
 };
 
-/* ═══ API ═══ */
 function wfApi(p){var q=Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k])}).join('&');return fetch(W.PROXY+'?'+q,{redirect:'follow'}).then(function(r){return r.json()})}
 
-/* ═══ Loading ═══ */
+/* Loading */
 function wfLoadShow(m,p){document.getElementById('wfLoading').classList.add('active');document.getElementById('wfLoadText').textContent=m||'';document.getElementById('wfLoadFill').style.width=(p||10)+'%'}
 function wfLoadProg(m,p){document.getElementById('wfLoadText').textContent=m;document.getElementById('wfLoadFill').style.width=p+'%'}
 function wfLoadHide(){document.getElementById('wfLoading').classList.remove('active')}
 
-/* ═══ Date ═══ */
+/* Date */
 function wfFd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function wfLd(y,m){return new Date(y,m,0).getDate()}
 function wfHot(k,el){
@@ -175,7 +204,7 @@ function wfHot(k,el){
 function wfSetStatus(t,err){var el=document.getElementById('wfStatus');el.className='wf-status'+(err?' wf-status--err':'');el.textContent=t}
 function wfShowEmpty(){document.getElementById('wfEmpty').style.display='flex';document.getElementById('wfBody').style.display='none';document.getElementById('wfCards').style.display='none';document.getElementById('wfCompare').style.display='none'}
 
-/* ═══ Fetch ═══ */
+/* Fetch */
 async function wfFetch(){
     var sd=document.getElementById('wfStart').value,ed=document.getElementById('wfEnd').value;
     if(!sd||!ed)return;
@@ -201,134 +230,134 @@ async function wfPoll(jid,sd,ed){
     throw new Error('타임아웃');
 }
 
-/* ═══ Process (로우 데이터 → 프론트 그룹핑) ═══ */
+/* Process */
 function wfProcess(rows,sd,ed){
-    // 로우 단위 파싱
     W.raw=rows.map(function(r){return{
         comId:String(r.comId||''),name:String(r.name||''),
         userId:String(r.userId||''),executeDate:String(r.executeDate||''),
         amount:Number(r.amount)||0
     }});
-
-    // comId별 그룹핑
-    var map={};
-    var allUsers=new Set();
+    var map={},allUsers=new Set();
     W.raw.forEach(function(r){
         allUsers.add(r.userId);
         if(!map[r.comId])map[r.comId]={comId:r.comId,name:r.name,totalAmount:0,users:new Set(),txCount:0};
-        var g=map[r.comId];
-        g.totalAmount+=r.amount;
-        g.users.add(r.userId);
-        g.txCount++;
+        var g=map[r.comId];g.totalAmount+=r.amount;g.users.add(r.userId);g.txCount++;
     });
-    W.grouped=Object.values(map).map(function(g){
-        g.userCount=g.users.size;
-        g.avgPerUser=g.userCount>0?Math.round(g.totalAmount/g.userCount):0;
-        return g;
-    });
+    W.grouped=Object.values(map).map(function(g){g.userCount=g.users.size;g.avgPerUser=g.userCount>0?Math.round(g.totalAmount/g.userCount):0;return g});
     W.grouped.sort(function(a,b){return b.totalAmount-a.totalAmount});
 
-    // Summary
-    var ta=0,tc=W.grouped.length,tu=allUsers.size;
-    W.grouped.forEach(function(g){ta+=g.totalAmount});
+    var ta=0;W.grouped.forEach(function(g){ta+=g.totalAmount});
     document.getElementById('cTotal').textContent=wfFmt(ta);
-    document.getElementById('cCompany').textContent=tc.toLocaleString()+'개';
-    document.getElementById('cUsers').textContent=tu.toLocaleString()+'명';
+    document.getElementById('cCompany').textContent=W.grouped.length.toLocaleString()+'개';
+    document.getElementById('cUsers').textContent=allUsers.size.toLocaleString()+'명';
     document.getElementById('cTx').textContent=W.raw.length.toLocaleString()+'건';
-    document.getElementById('cAvgUser').textContent=tu>0?wfFmt(Math.round(ta/tu)):'-';
+    document.getElementById('cAvgUser').textContent=allUsers.size>0?wfFmt(Math.round(ta/allUsers.size)):'-';
 
     document.getElementById('wfCards').style.display='grid';
     document.getElementById('wfBody').style.display='grid';
     document.getElementById('wfCompare').style.display='block';
     document.getElementById('wfEmpty').style.display='none';
 
-    W.selComId=null;
+    W.sortCol='totalAmount';W.sortDir='desc';W.selComId=null;
     document.getElementById('wfSearch').value='';
-    wfBuildGrid();
-    wfRenderDetail();
-    wfSetStatus(sd+' ~ '+ed+' ('+tc+'개사, '+W.raw.length+'건)');
+    wfRender();wfRenderDetail();
+    wfSetStatus(sd+' ~ '+ed+' ('+W.grouped.length+'개사, '+W.raw.length+'건)');
 }
 
-/* ═══ Handsontable Grid ═══ */
-function wfBuildGrid(){
-    wfFilter(); // filtered 세팅
-    var data=W.filtered.map(function(g,i){
-        return[i+1, g.comId, g.name, g.totalAmount, g.userCount, g.avgPerUser, g.txCount];
+/* Grid Render */
+function wfRender(){
+    var q=(document.getElementById('wfSearch').value||'').toLowerCase();
+    W.filtered=W.grouped.filter(function(g){return!q||g.name.toLowerCase().indexOf(q)>=0||g.comId.toLowerCase().indexOf(q)>=0});
+    W.filtered.sort(function(a,b){
+        var va=a[W.sortCol],vb=b[W.sortCol];
+        if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase()}
+        return W.sortDir==='asc'?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0);
     });
-
-    if(W.hot){W.hot.destroy();W.hot=null}
-
-    var container=document.getElementById('wfGridWrap');
-    W.hot=new Handsontable(container,{
-        data:data,
-        colHeaders:['#','comId','고객사명','지급액','사용자','인당 평균','건수'],
-        columns:[
-            {type:'numeric',width:36,readOnly:true,className:'htCenter'},
-            {type:'text',width:270,readOnly:true},
-            {type:'text',width:140,readOnly:true},
-            {type:'numeric',width:120,readOnly:true,numericFormat:{pattern:'0,0',culture:'ko-KR'}},
-            {type:'numeric',width:60,readOnly:true,className:'htCenter'},
-            {type:'numeric',width:100,readOnly:true,numericFormat:{pattern:'0,0',culture:'ko-KR'}},
-            {type:'numeric',width:50,readOnly:true,className:'htCenter'}
-        ],
-        rowHeaders:false,
-        columnSorting:true,
-        manualColumnResize:true,
-        selectionMode:'range',
-        copyPaste:true,
-        readOnly:true,
-        height:'100%',
-        stretchH:'last',
-        autoWrapRow:true,
-        autoWrapCol:true,
-        licenseKey:'non-commercial-and-evaluation',
-        afterSelection:function(row){
-            if(row>=0&&row<W.filtered.length){
-                var comId=W.filtered[row].comId;
-                if(W.selComId!==comId){W.selComId=comId;wfRenderDetail()}
-            }
-        },
-        cells:function(row,col){
-            var cp={};
-            if(col===3||col===5){
-                if(this.instance&&this.instance.getDataAtCell){
-                    var v=this.instance.getDataAtCell(row,col);
-                    if(typeof v==='number'&&v<0)cp.className='amount-neg';
-                }
-            }
-            return cp;
-        }
-    });
+    document.getElementById('wfTbody').innerHTML=W.filtered.map(function(g,i){
+        var sel=W.selComId===g.comId?' selected':'';
+        var neg=g.totalAmount<0?' amount-neg':'';
+        return'<tr class="'+sel+'" onclick="wfSelect(\''+g.comId.replace(/'/g,"\\'")+'\')">'
+            +'<td class="col-rank">'+(i+1)+'</td>'
+            +'<td class="col-id">'+g.comId+'</td>'
+            +'<td>'+g.name+'</td>'
+            +'<td class="col-r'+neg+'">'+wfFmt(g.totalAmount)+'</td>'
+            +'<td class="col-c">'+g.userCount.toLocaleString()+'</td>'
+            +'<td class="col-r">'+wfFmt(g.avgPerUser)+'</td>'
+            +'<td class="col-c">'+g.txCount+'</td></tr>';
+    }).join('');
     document.getElementById('wfCount').textContent=W.filtered.length+'개사';
 }
+function wfFilter(){wfRender()}
+function wfSort(c){
+    if(c==='rank')c='totalAmount';
+    if(W.sortCol===c){W.sortDir=W.sortDir==='asc'?'desc':'asc'}
+    else{W.sortCol=c;W.sortDir=c==='name'||c==='comId'?'asc':'desc'}
+    wfRender();
+}
+function wfSelect(cid){W.selComId=W.selComId===cid?null:cid;wfRender();wfRenderDetail()}
 
-function wfFilter(){
-    var q=(document.getElementById('wfSearch').value||'').toLowerCase();
-    W.filtered=W.grouped.filter(function(g){
-        return!q||g.name.toLowerCase().indexOf(q)>=0||g.comId.toLowerCase().indexOf(q)>=0;
+/* 클립보드 복사 (헤더 포함, 탭 구분) */
+function wfCopyTable(){
+    var header=['#','comId','고객사명','지급액','사용자','인당 평균','건수'].join('\t');
+    var rows=W.filtered.map(function(g,i){
+        return[(i+1),g.comId,g.name,g.totalAmount,g.userCount,g.avgPerUser,g.txCount].join('\t');
     });
-    if(W.hot){
-        var data=W.filtered.map(function(g,i){
-            return[i+1,g.comId,g.name,g.totalAmount,g.userCount,g.avgPerUser,g.txCount];
-        });
-        W.hot.loadData(data);
-        document.getElementById('wfCount').textContent=W.filtered.length+'개사';
-    }
+    var text=header+'\n'+rows.join('\n');
+    navigator.clipboard.writeText(text).then(function(){
+        var btn=document.getElementById('wfCopyBtn');
+        btn.textContent='복사 완료';btn.classList.add('copied');
+        setTimeout(function(){btn.textContent='클립보드 복사';btn.classList.remove('copied')},1500);
+    });
 }
 
-/* ═══ Detail ═══ */
+/* 셀 범위 선택 + Ctrl+C */
+(function(){
+    var dragging=false,startTd=null,endTd=null;
+    document.addEventListener('mousedown',function(e){
+        var td=e.target.closest('#wfGrid td');if(!td)return;
+        dragging=true;startTd=endTd=td;hlCells();
+    });
+    document.addEventListener('mousemove',function(e){
+        if(!dragging)return;var td=e.target.closest('#wfGrid td');
+        if(td){endTd=td;hlCells()}
+    });
+    document.addEventListener('mouseup',function(){dragging=false});
+    document.addEventListener('copy',function(e){
+        var sels=document.querySelectorAll('#wfGrid td.cell-sel,#wfGrid td.cell-rng');
+        if(!sels.length)return;
+        var rmap={};
+        sels.forEach(function(td){
+            var tr=td.parentElement,ri=Array.from(tr.parentElement.children).indexOf(tr);
+            var ci=Array.from(tr.children).indexOf(td);
+            if(!rmap[ri])rmap[ri]={};rmap[ri][ci]=td.textContent.trim();
+        });
+        var lines=Object.keys(rmap).sort(function(a,b){return a-b}).map(function(ri){
+            var cols=rmap[ri];return Object.keys(cols).sort(function(a,b){return a-b}).map(function(ci){return cols[ci]}).join('\t');
+        });
+        e.clipboardData.setData('text/plain',lines.join('\n'));e.preventDefault();
+    });
+    function hlCells(){
+        document.querySelectorAll('#wfGrid td.cell-sel,#wfGrid td.cell-rng').forEach(function(td){td.classList.remove('cell-sel','cell-rng')});
+        if(!startTd||!endTd)return;
+        var tbody=document.getElementById('wfTbody');if(!tbody)return;
+        var rows=Array.from(tbody.children);
+        var sr=rows.indexOf(startTd.parentElement),sc=Array.from(startTd.parentElement.children).indexOf(startTd);
+        var er=rows.indexOf(endTd.parentElement),ec=Array.from(endTd.parentElement.children).indexOf(endTd);
+        var r1=Math.min(sr,er),r2=Math.max(sr,er),c1=Math.min(sc,ec),c2=Math.max(sc,ec);
+        for(var ri=r1;ri<=r2;ri++){var row=rows[ri];if(!row)continue;var cells=row.children;for(var ci=c1;ci<=c2;ci++){if(cells[ci])cells[ci].classList.add(ri===sr&&ci===sc?'cell-sel':'cell-rng')}}
+    }
+})();
+
+/* Detail */
 function wfRenderDetail(){
     var body=document.getElementById('wfDetail');
     if(!W.selComId){body.innerHTML='<div class="wf-detail__empty">테이블에서 고객사를 클릭하세요</div>';return}
     var g=W.grouped.find(function(x){return x.comId===W.selComId});
     if(!g){body.innerHTML='<div class="wf-detail__empty">데이터 없음</div>';return}
-
-    // 날짜별 그룹핑
     var dateMap={};
     W.raw.filter(function(r){return r.comId===W.selComId}).forEach(function(r){
         if(!dateMap[r.executeDate])dateMap[r.executeDate]={date:r.executeDate,amount:0,users:new Set(),count:0};
-        var d=dateMap[r.executeDate];
-        d.amount+=r.amount;d.users.add(r.userId);d.count++;
+        var d=dateMap[r.executeDate];d.amount+=r.amount;d.users.add(r.userId);d.count++;
     });
     var dates=Object.values(dateMap).sort(function(a,b){return a.date.localeCompare(b.date)});
     var mx=Math.max.apply(null,dates.map(function(d){return Math.abs(d.amount)}).concat([1]));
@@ -342,16 +371,13 @@ function wfRenderDetail(){
         +'<div><div class="wf-detail__stat-label">건수</div><div class="wf-detail__stat-value">'+g.txCount+'건</div></div>'
         +'</div>'
         +'<div style="font-size:11px;color:#4a5568;font-weight:600;margin-bottom:6px">날짜별 내역</div>';
-
     dates.forEach(function(d){
         var neg=d.amount<0?' amount-neg':'';
         var w=Math.max((Math.abs(d.amount)/mx)*100,2);
-        h+='<div class="wf-detail__row">'
-            +'<span class="d">'+d.date+'</span>'
+        h+='<div class="wf-detail__row"><span class="d">'+d.date+'</span>'
             +'<span class="bf" style="flex:1;height:12px;border-radius:2px;background:'+(d.amount<0?'#e85d5d':'#4a90d9')+';width:'+w+'%"></span>'
             +'<span class="a'+neg+'">'+wfShort(d.amount)+'</span></div>';
     });
-
     h+='<div class="wf-detail__bar-section"><div class="wf-detail__bar-title">일별 지급 분포</div>';
     dates.forEach(function(d){
         var w2=Math.max((Math.abs(d.amount)/mx)*140,2);
@@ -359,11 +385,10 @@ function wfRenderDetail(){
             +'<span class="bf" style="width:'+w2+'px;background:'+(d.amount<0?'#e85d5d':'#4a90d9')+'"></span>'
             +'<span class="bv">'+wfShort(d.amount)+' ('+d.users.size+'명)</span></div>';
     });
-    h+='</div>';
-    body.innerHTML=h;
+    h+='</div>';body.innerHTML=h;
 }
 
-/* ═══ Compare ═══ */
+/* Compare */
 async function wfCmpFetch(){
     var sd=document.getElementById('wfStart').value,ed=document.getElementById('wfEnd').value;
     if(!sd||!ed||!W.raw.length)return;
@@ -374,26 +399,20 @@ async function wfCmpFetch(){
         var d=await wfApi({action:'post',queryId:W.QID,startDate:psd,endDate:ped});
         if(d&&d.query_result){wfLoadProg('비교 처리 중...',80);wfBuildCmp(d.query_result.data.rows,psd,ped);wfLoadHide();document.getElementById('wfCmpBtn').disabled=false;return}
         if(d&&d.job){
-            for(var i=0;i<60;i++){
-                await new Promise(function(r){setTimeout(r,1000)});
-                wfLoadProg('쿼리 실행 중... ('+(i+1)+'s)',15+Math.min(i*1.2,60));
+            for(var i=0;i<60;i++){await new Promise(function(r){setTimeout(r,1000)});wfLoadProg('쿼리 실행 중... ('+(i+1)+'s)',15+Math.min(i*1.2,60));
                 var j=await wfApi({action:'job',jobId:d.job.id});
                 if(j.job.status===3){wfLoadProg('비교 처리 중...',80);var rd=await wfApi({action:'result',resultId:j.job.query_result_id});wfBuildCmp(rd.query_result.data.rows,psd,ped);wfLoadHide();document.getElementById('wfCmpBtn').disabled=false;return}
                 if(j.job.status===4)throw new Error(j.job.error||'fail');
-            }
-            throw new Error('타임아웃');
-        }
-        throw new Error(d&&d.message?d.message:'응답 없음');
+            }throw new Error('타임아웃');
+        }throw new Error(d&&d.message?d.message:'응답 없음');
     }catch(e){wfLoadHide();document.getElementById('wfCmpBody').innerHTML='<div class="wf-compare__empty" style="color:#e85d5d">비교 실패: '+e.message+'</div>'}
     document.getElementById('wfCmpBtn').disabled=false;
 }
-
 function wfShiftY(ds,off){var p=ds.split('-');var y=parseInt(p[0])+off,m=parseInt(p[1]),d=parseInt(p[2]),mx=wfLd(y,m);if(d>mx)d=mx;return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
 
 function wfBuildCmp(prevRows,psd,ped){
     var sd=document.getElementById('wfStart').value;
-    // 전년 그룹핑
-    var pm={};var prevAll=new Set();
+    var pm={},prevAll=new Set();
     prevRows.forEach(function(r){
         var cid=String(r.comId||''),amt=Number(r.amount)||0,uid=String(r.userId||'');
         prevAll.add(uid);
@@ -401,12 +420,9 @@ function wfBuildCmp(prevRows,psd,ped){
         pm[cid].totalAmount+=amt;pm[cid].users.add(uid);pm[cid].txCount++;
     });
     var prevArr=Object.values(pm).map(function(g){g.userCount=g.users.size;return g});
-
-    // 현재 합산
     var curTot=0,curUsers=new Set();
     W.raw.forEach(function(r){curTot+=r.amount;curUsers.add(r.userId)});
     var curUC=curUsers.size,curCC=W.grouped.length;
-
     var prevTot=0;prevArr.forEach(function(g){prevTot+=g.totalAmount});
     var prevUC=prevAll.size,prevCC=prevArr.length;
 
@@ -417,7 +433,6 @@ function wfBuildCmp(prevRows,psd,ped){
     h+=wfCmpCard('인당 평균',curUC>0?Math.round(curTot/curUC):0,prevUC>0?Math.round(prevTot/prevUC):0,true);
     h+='</div>';
 
-    // 월별 차트
     var curM=wfByMonth(W.raw,'amount'),prevM=wfByMonth(prevRows.map(function(r){return{executeDate:String(r.executeDate||''),amount:Number(r.amount)||0}}),'amount');
     var months=wfMergeM(curM,prevM,sd.slice(0,4),psd.slice(0,4));
     if(months.length>0){
@@ -437,13 +452,9 @@ function wfBuildCmp(prevRows,psd,ped){
         h+='</div></div>';
     }
 
-    // 고객사별 비교 테이블
     h+='<div style="font-size:11px;color:#4a5568;font-weight:600;margin-bottom:6px">고객사별 전년 비교 (상위 30)</div>';
     var cmpRows=[];
-    W.grouped.forEach(function(g){
-        var prev=pm[g.comId];
-        cmpRows.push({comId:g.comId,name:g.name,curAmt:g.totalAmount,prevAmt:prev?prev.totalAmount:0,diff:g.totalAmount-(prev?prev.totalAmount:0)});
-    });
+    W.grouped.forEach(function(g){var prev=pm[g.comId];cmpRows.push({comId:g.comId,name:g.name,curAmt:g.totalAmount,prevAmt:prev?prev.totalAmount:0,diff:g.totalAmount-(prev?prev.totalAmount:0)})});
     prevArr.forEach(function(p){if(!W.grouped.find(function(g){return g.comId===p.comId}))cmpRows.push({comId:p.comId,name:p.name,curAmt:0,prevAmt:p.totalAmount,diff:-p.totalAmount})});
     cmpRows.sort(function(a,b){return Math.abs(b.diff)-Math.abs(a.diff)});
 
@@ -462,17 +473,10 @@ function wfCmpCard(label,cur,prev,isMoney){
     var cls=diff>0?'up':diff<0?'down':'flat',arrow=diff>0?'+':'';
     return'<div class="wf-cmp-card"><div class="wf-cmp-card__label">'+label+'</div><div class="wf-cmp-card__row"><div class="wf-cmp-card__val">'+(isMoney?wfShort(cur):cur.toLocaleString())+'</div><div class="wf-cmp-card__change '+cls+'">'+arrow+(isMoney?wfShort(diff):(diff>0?'+':'')+diff)+' ('+pct+'%)</div></div><div class="wf-cmp-card__sub">전년: '+(isMoney?wfShort(prev):prev.toLocaleString())+'</div></div>';
 }
-
 function wfByMonth(rows,field){var m={};rows.forEach(function(r){var mk=r.executeDate?r.executeDate.slice(0,7):'';if(mk)m[mk]=(m[mk]||0)+(Number(r[field])||0)});return m}
-function wfMergeM(a,b,curY,prevY){
-    var ms=new Set();
-    Object.keys(a).forEach(function(k){ms.add(k.slice(5,7))});
-    Object.keys(b).forEach(function(k){ms.add(k.slice(5,7))});
-    return Array.from(ms).sort().map(function(m){return{cur:curY+'-'+m,prev:prevY+'-'+m,label:m+'월'}});
-}
+function wfMergeM(a,b,curY,prevY){var ms=new Set();Object.keys(a).forEach(function(k){ms.add(k.slice(5,7))});Object.keys(b).forEach(function(k){ms.add(k.slice(5,7))});return Array.from(ms).sort().map(function(m){return{cur:curY+'-'+m,prev:prevY+'-'+m,label:m+'월'}})}
 function wfDiffFmt(v){if(v===0)return'-';return(v>0?'+':'')+wfShort(v)}
 
-/* ═══ Format ═══ */
 function wfFmt(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()+'원'}
 function wfShort(v){var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+(a/1e4).toFixed(0)+'만';return p+a.toLocaleString()+'원'}
 function wfShowEmpty(){document.getElementById('wfEmpty').style.display='flex';document.getElementById('wfBody').style.display='none';document.getElementById('wfCards').style.display='none';document.getElementById('wfCompare').style.display='none'}
