@@ -131,7 +131,8 @@
               "title": "복지대장 지급현황",
               "icon": "doc",
               "desc": "복지대장 월별 지급현황 대시보드",
-              "file": "docs/ops/welfare-dashboard.html"
+              "file": "docs/ops/welfare-dashboard.html",
+              "guide": "docs/ops/welfare-dashboard.md"
             },
             {
               "id": "contract-extractor",
