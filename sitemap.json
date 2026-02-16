@@ -127,20 +127,19 @@
           "file": "docs/ops/guide.html",
           "children": [
             {
-            "id": "welfare-dashboard",
-            "title": "복지대장 지급현황",
-            "icon": "doc",
-            "desc": "복지대장 월별 지급현황 대시보드",
-            "file": "docs/ops/welfare-dashboard.html"
+              "id": "welfare-dashboard",
+              "title": "복지대장 지급현황",
+              "icon": "doc",
+              "desc": "복지대장 월별 지급현황 대시보드",
+              "file": "docs/ops/welfare-dashboard.html"
             },
-                        {
-            "id": "contract-extractor",
-            "title": "계약서 데이터 추출",
-            "icon": "doc",
-            "desc": "계약서 데이터를 추출 하여 등록합니다.",
-            "file": "docs/ops/contract-extractor.html"
+            {
+              "id": "contract-extractor",
+              "title": "계약서 데이터 추출",
+              "icon": "doc",
+              "desc": "계약서 데이터를 추출 하여 등록합니다.",
+              "file": "docs/ops/contract-extractor.html"
             },
-                  
             {
               "id": "sds-report",
               "title": "SDS 파일전송",
@@ -155,7 +154,7 @@
               "desc": "단체선물대장 대시보드를 보여줍니다.",
               "file": "docs/ops/giftpresent.html"
             },
-           {
+            {
               "id": "ngr",
               "title": "ngr",
               "icon": "doc",
