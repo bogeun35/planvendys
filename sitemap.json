@@ -149,11 +149,11 @@
               "file": "docs/ops/sds-report.html"
             },
             {
-              "id": "단체선물대장",
+              "id": "giftpresent",
               "title": "단체선물대장",
               "icon": "doc",
               "desc": "단체선물대장 대시보드를 보여줍니다.",
-              "file": "docs/ops/단체선물대장.html"
+              "file": "docs/ops/giftpresent.html"
             }
           ]
         },
