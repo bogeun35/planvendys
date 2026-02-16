@@ -1,0 +1,155 @@
+{
+  "sections": [
+    {
+      "tab": "서비스",
+      "pages": [
+        {
+          "id": "sikgwon",
+          "title": "식권대장",
+          "icon": "folder",
+          "desc": "모바일 식권 서비스",
+          "file": "docs/services/sikgwon/index.html",
+          "children": [
+            {
+              "id": "sikgwon-admin",
+              "title": "관리자 기능",
+              "icon": "doc",
+              "desc": "기업 관리자 대시보드",
+              "file": "docs/services/sikgwon/admin.html",
+              "children": [
+                {
+                  "id": "sikgwon-admin-report",
+                  "title": "리포트",
+                  "icon": "doc",
+                  "desc": "정산/사용 리포트",
+                  "file": "docs/services/sikgwon/admin-report.html"
+                }
+              ]
+            },
+            {
+              "id": "sikgwon-app",
+              "title": "사용자 앱",
+              "icon": "doc",
+              "desc": "임직원용 모바일 앱",
+              "file": "docs/services/sikgwon/app.html"
+            },
+            {
+              "id": "sikgwon-store",
+              "title": "가맹점 관리",
+              "icon": "doc",
+              "desc": "가맹점 등록/운영",
+              "file": "docs/services/sikgwon/store.html"
+            }
+          ]
+        },
+        {
+          "id": "bokji",
+          "title": "복지대장",
+          "icon": "folder",
+          "desc": "기업 복지 포인트 서비스",
+          "file": "docs/services/bokji/index.html",
+          "children": [
+            {
+              "id": "bokji-category",
+              "title": "카테고리 관리",
+              "icon": "doc",
+              "desc": "복지 카테고리 설정",
+              "file": "docs/services/bokji/category.html"
+            }
+          ]
+        },
+        {
+          "id": "quick",
+          "title": "퀵대장",
+          "icon": "folder",
+          "desc": "기업 간 퀵 배송",
+          "file": "docs/services/quick.html"
+        },
+        {
+          "id": "gift",
+          "title": "단체선물대장",
+          "icon": "folder",
+          "desc": "기업 단체 선물 서비스",
+          "file": "docs/services/gift.html"
+        }
+      ]
+    },
+    {
+      "tab": "개발",
+      "pages": [
+        {
+          "id": "api-guide",
+          "title": "API 가이드",
+          "icon": "api",
+          "desc": "내부 API 사용 가이드",
+          "file": "docs/dev/api-guide.html",
+          "children": [
+            {
+              "id": "api-sikgwon",
+              "title": "식권대장 API",
+              "icon": "api",
+              "desc": "식권 관련 엔드포인트",
+              "file": "docs/dev/api-sikgwon.html"
+            },
+            {
+              "id": "api-auth",
+              "title": "인증 API",
+              "icon": "api",
+              "desc": "OAuth, 토큰 관리",
+              "file": "docs/dev/api-auth.html"
+            }
+          ]
+        },
+        {
+          "id": "db-schema",
+          "title": "DB 스키마",
+          "icon": "db",
+          "desc": "데이터베이스 구조",
+          "file": "docs/dev/db-schema.html"
+        },
+        {
+          "id": "dev-env",
+          "title": "개발 환경",
+          "icon": "doc",
+          "desc": "로컬 환경 세팅",
+          "file": "docs/dev/dev-env.html"
+        }
+      ]
+    },
+    {
+      "tab": "운영",
+      "pages": [
+        {
+          "id": "ops-guide",
+          "title": "운영 가이드",
+          "icon": "folder",
+          "desc": "서비스 운영 매뉴얼",
+          "file": "docs/ops/guide.html",
+          "children": [
+            {
+              "id": "ops-cs",
+              "title": "CS 대응 매뉴얼",
+              "icon": "doc",
+              "desc": "고객 문의 처리 가이드",
+              "file": "docs/ops/cs.html"
+            },
+            {
+              "id": "ops-deploy",
+              "title": "배포 프로세스",
+              "icon": "doc",
+              "desc": "서비스 배포 절차",
+              "file": "docs/ops/deploy.html"
+            }
+          ]
+        },
+        {
+          "id": "ops-monitoring",
+          "title": "모니터링",
+          "icon": "doc",
+          "desc": "대시보드 및 알림",
+          "file": "docs/ops/monitoring.html"
+        }
+      ]
+    }
+  ]
+}
