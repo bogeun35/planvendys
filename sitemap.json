@@ -142,11 +142,11 @@
             },
                   
             {
-              "id": "sikgwon-report",
+              "id": "sds-report",
               "title": "SDS 파일전송",
               "icon": "doc",
               "desc": "SDS 전용 식대상세내역",
-              "file": "docs/ops/sikgwon-report.html"
+              "file": "docs/ops/sds-report.html"
             },
             {
               "id": "ops-deploy",
