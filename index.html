@@ -9,160 +9,124 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <style>
     :root {
-      --bg-primary: #ffffff;
-      --bg-secondary: #f8fafd;
-      --bg-tertiary: #f0f4f9;
-      --bg-hover: #e8eef6;
-      --bg-active: #dce6f2;
-      --border: #e2e8f0;
-      --border-subtle: #edf1f7;
-      --text-primary: #1a2332;
-      --text-secondary: #4a5568;
-      --text-muted: #94a3b8;
-      --accent: #4a90d9;
-      --accent-light: #6ba5e7;
-      --accent-dim: rgba(74, 144, 217, 0.06);
-      --accent-border: rgba(74, 144, 217, 0.2);
-      --accent-bg: #eef4fb;
-      --danger: #e85d5d;
-      --warn: #d49a2a;
-      --gnb-h: 48px;
-      --lnb-w: 260px;
+      --bg-primary:#ffffff; --bg-secondary:#f8fafd; --bg-tertiary:#f0f4f9;
+      --bg-hover:#e8eef6; --bg-active:#dce6f2; --border:#e2e8f0;
+      --border-subtle:#edf1f7; --text-primary:#1a2332; --text-secondary:#4a5568;
+      --text-muted:#94a3b8; --accent:#4a90d9; --accent-dim:rgba(74,144,217,0.06);
+      --accent-border:rgba(74,144,217,0.2); --accent-bg:#eef4fb;
+      --danger:#e85d5d; --warn:#d49a2a; --gnb-h:48px; --lnb-w:260px;
     }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Noto Sans KR', -apple-system, sans-serif;
-      background: var(--bg-primary); color: var(--text-primary);
-      height: 100vh; overflow: hidden; font-size: 13px;
-    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);height:100vh;overflow:hidden;font-size:13px}
 
-    /* ═══ LOGIN ═══ */
-    .login-screen { display:flex; align-items:center; justify-content:center; height:100vh; background:var(--bg-secondary); }
-    .login-card { text-align:center; padding:48px; max-width:360px; }
-    .login-logo { font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
-    .login-title { font-size:20px; font-weight:300; color:var(--text-primary); margin-bottom:36px; }
-    .login-btn {
-      display:inline-flex; align-items:center; gap:10px; padding:11px 24px;
-      background:var(--bg-primary); border:1px solid var(--border); border-radius:6px;
-      color:var(--text-primary); font-size:13px; font-family:inherit; cursor:pointer;
-      transition:all 0.15s; box-shadow:0 1px 3px rgba(0,0,0,0.04);
-    }
-    .login-btn:hover { background:var(--bg-tertiary); border-color:var(--accent-border); box-shadow:0 2px 6px rgba(74,144,217,0.08); }
-    .login-btn svg { width:16px; height:16px; }
-    .login-notice { margin-top:20px; font-size:11px; color:var(--text-muted); }
-    .login-error { margin-top:14px; padding:9px 14px; background:rgba(232,93,93,0.06); border:1px solid rgba(232,93,93,0.15); border-radius:5px; font-size:12px; color:var(--danger); display:none; }
+    .login-screen{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg-secondary)}
+    .login-card{text-align:center;padding:48px;max-width:360px}
+    .login-logo{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+    .login-title{font-size:20px;font-weight:300;color:var(--text-primary);margin-bottom:36px}
+    .login-btn{display:inline-flex;align-items:center;gap:10px;padding:11px 24px;background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-size:13px;font-family:inherit;cursor:pointer;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+    .login-btn:hover{background:var(--bg-tertiary);border-color:var(--accent-border)}
+    .login-btn svg{width:16px;height:16px}
+    .login-notice{margin-top:20px;font-size:11px;color:var(--text-muted)}
+    .login-error{margin-top:14px;padding:9px 14px;background:rgba(232,93,93,.06);border:1px solid rgba(232,93,93,.15);border-radius:5px;font-size:12px;color:var(--danger);display:none}
 
-    .loading { display:flex; align-items:center; justify-content:center; height:100vh; background:var(--bg-secondary); }
-    .spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .5s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg-secondary)}
+    .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .5s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ═══ GNB ═══ */
-    .gnb {
-      display:none; height:var(--gnb-h); background:var(--bg-primary);
-      border-bottom:1px solid var(--border); padding:0 20px;
-      align-items:center; justify-content:space-between;
-      position:fixed; top:0; left:0; right:0; z-index:100;
-    }
-    .gnb.active { display:flex; }
-    .gnb-left { display:flex; align-items:center; gap:16px; }
-    .gnb-brand { font-size:12px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--accent); }
-    .gnb-sep { width:1px; height:16px; background:var(--border); }
-    .gnb-tabs { display:flex; gap:2px; }
-    .gnb-tab { padding:6px 12px; border-radius:4px; font-size:12px; color:var(--text-muted); cursor:pointer; transition:all .1s; font-weight:400; }
-    .gnb-tab:hover { color:var(--text-secondary); background:var(--bg-tertiary); }
-    .gnb-tab.active { color:var(--accent); background:var(--accent-dim); font-weight:500; }
-    .gnb-right { display:flex; align-items:center; gap:12px; }
+    .gnb{display:none;height:var(--gnb-h);background:var(--bg-primary);border-bottom:1px solid var(--border);padding:0 20px;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:100}
+    .gnb.active{display:flex}
+    .gnb-left{display:flex;align-items:center;gap:16px}
+    .gnb-brand{font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
+    .gnb-sep{width:1px;height:16px;background:var(--border)}
+    .gnb-tabs{display:flex;gap:2px}
+    .gnb-tab{padding:6px 12px;border-radius:4px;font-size:12px;color:var(--text-muted);cursor:pointer;transition:all .1s}
+    .gnb-tab:hover{color:var(--text-secondary);background:var(--bg-tertiary)}
+    .gnb-tab.active{color:var(--accent);background:var(--accent-dim);font-weight:500}
+    .gnb-right{display:flex;align-items:center;gap:12px}
 
-    /* ═══ SEARCH ═══ */
-    .search-box { position:relative; width:220px; }
-    .search-input {
-      width:100%; padding:6px 10px 6px 30px; background:var(--bg-tertiary);
-      border:1px solid var(--border); border-radius:5px; color:var(--text-primary);
-      font-size:12px; font-family:inherit; outline:none; transition:all .15s;
-    }
-    .search-input::placeholder { color:var(--text-muted); }
-    .search-input:focus { border-color:var(--accent); background:var(--bg-primary); box-shadow:0 0 0 3px var(--accent-dim); }
-    .search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-muted); pointer-events:none; }
-    .search-kbd { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--text-muted); background:var(--bg-primary); padding:1px 5px; border-radius:3px; border:1px solid var(--border); }
-    .search-results { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--bg-primary); border:1px solid var(--border); border-radius:6px; max-height:280px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,0.08); z-index:200; }
-    .search-results.open { display:block; }
-    .search-result-item { padding:8px 12px; cursor:pointer; transition:background .1s; border-bottom:1px solid var(--border-subtle); }
-    .search-result-item:last-child { border-bottom:none; }
-    .search-result-item:hover { background:var(--bg-tertiary); }
-    .search-result-title { font-size:12px; color:var(--text-primary); font-weight:500; }
-    .search-result-path { font-size:10px; color:var(--text-muted); margin-top:2px; }
-    .search-result-snippet { font-size:11px; color:var(--text-muted); margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .search-result-snippet mark { background:var(--accent-bg); color:var(--accent); border-radius:1px; padding:0 1px; }
-    .search-empty { padding:16px 12px; text-align:center; font-size:12px; color:var(--text-muted); }
+    .search-box{position:relative;width:220px}
+    .search-input{width:100%;padding:6px 10px 6px 30px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:5px;color:var(--text-primary);font-size:12px;font-family:inherit;outline:none;transition:all .15s}
+    .search-input::placeholder{color:var(--text-muted)}
+    .search-input:focus{border-color:var(--accent);background:var(--bg-primary);box-shadow:0 0 0 3px var(--accent-dim)}
+    .search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-muted);pointer-events:none}
+    .search-kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-muted);background:var(--bg-primary);padding:1px 5px;border-radius:3px;border:1px solid var(--border)}
+    .search-results{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.08);z-index:200}
+    .search-results.open{display:block}
+    .search-result-item{padding:8px 12px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border-subtle)}
+    .search-result-item:last-child{border-bottom:none}
+    .search-result-item:hover{background:var(--bg-tertiary)}
+    .search-result-title{font-size:12px;color:var(--text-primary);font-weight:500}
+    .search-result-path{font-size:10px;color:var(--text-muted);margin-top:2px}
+    .search-result-snippet{font-size:11px;color:var(--text-muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .search-result-snippet mark{background:var(--accent-bg);color:var(--accent);border-radius:1px;padding:0 1px}
+    .search-empty{padding:16px 12px;text-align:center;font-size:12px;color:var(--text-muted)}
 
-    .gnb-user { display:flex; align-items:center; gap:8px; padding:4px 8px; border-radius:4px; cursor:pointer; transition:background .1s; position:relative; }
-    .gnb-user:hover { background:var(--bg-tertiary); }
-    .gnb-avatar { width:24px; height:24px; border-radius:50%; background:var(--bg-active); overflow:hidden; border:1px solid var(--border); }
-    .gnb-avatar img { width:100%; height:100%; object-fit:cover; }
-    .gnb-username { font-size:12px; color:var(--text-secondary); }
-    .user-menu { display:none; position:absolute; top:calc(100% + 6px); right:0; background:var(--bg-primary); border:1px solid var(--border); border-radius:6px; min-width:140px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.08); z-index:200; }
-    .user-menu.open { display:block; }
-    .user-menu-item { padding:8px 14px; font-size:12px; color:var(--text-secondary); cursor:pointer; transition:all .1s; }
-    .user-menu-item:hover { background:var(--bg-tertiary); color:var(--text-primary); }
-    .user-menu-item.danger { color:var(--danger); }
-    .user-menu-item.danger:hover { background:rgba(232,93,93,0.04); }
+    .gnb-user{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:4px;cursor:pointer;transition:background .1s;position:relative}
+    .gnb-user:hover{background:var(--bg-tertiary)}
+    .gnb-avatar{width:24px;height:24px;border-radius:50%;background:var(--bg-active);overflow:hidden;border:1px solid var(--border)}
+    .gnb-avatar img{width:100%;height:100%;object-fit:cover}
+    .gnb-username{font-size:12px;color:var(--text-secondary)}
+    .user-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;min-width:140px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.08);z-index:200}
+    .user-menu.open{display:block}
+    .user-menu-item{padding:8px 14px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:all .1s}
+    .user-menu-item:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+    .user-menu-item.danger{color:var(--danger)}
+    .user-menu-item.danger:hover{background:rgba(232,93,93,.04)}
 
-    /* ═══ MAIN LAYOUT ═══ */
-    .main-layout { display:none; margin-top:var(--gnb-h); height:calc(100vh - var(--gnb-h)); }
-    .main-layout.active { display:grid; grid-template-columns:var(--lnb-w) 1fr; }
+    .main-layout{display:none;margin-top:var(--gnb-h);height:calc(100vh - var(--gnb-h))}
+    .main-layout.active{display:grid;grid-template-columns:var(--lnb-w) 1fr}
 
-    /* ═══ LNB ═══ */
-    .lnb { background:var(--bg-secondary); border-right:1px solid var(--border); display:flex; flex-direction:column; height:calc(100vh - var(--gnb-h)); overflow:hidden; }
-    .lnb-header { padding:14px 14px 10px; border-bottom:1px solid var(--border-subtle); flex-shrink:0; }
-    .lnb-section-title { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
-    .lnb-tree { flex:1; overflow-y:auto; padding:6px 8px; }
-    .lnb-tree::-webkit-scrollbar { width:3px; }
-    .lnb-tree::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+    .lnb{background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;height:calc(100vh - var(--gnb-h));overflow:hidden}
+    .lnb-header{padding:14px 14px 10px;border-bottom:1px solid var(--border-subtle);flex-shrink:0}
+    .lnb-section-title{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)}
+    .lnb-tree{flex:1;overflow-y:auto;padding:6px 8px}
+    .lnb-tree::-webkit-scrollbar{width:3px}
+    .lnb-tree::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-    .tree-item { border-radius:4px; }
-    .tree-row { display:flex; align-items:center; gap:4px; padding:5px 8px; border-radius:4px; cursor:pointer; transition:all .08s; font-size:13px; color:var(--text-secondary); }
-    .tree-row:hover { background:var(--bg-hover); color:var(--text-primary); }
-    .tree-row.active { background:var(--accent-bg); color:var(--accent); }
-    .tree-toggle { width:16px; height:16px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--text-muted); transition:transform .15s; }
-    .tree-toggle.expanded { transform:rotate(90deg); }
-    .tree-toggle.hidden { visibility:hidden; }
-    .tree-icon { width:14px; height:14px; flex-shrink:0; color:var(--text-muted); opacity:.5; }
-    .tree-row.active .tree-icon { color:var(--accent); opacity:1; }
-    .tree-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .tree-children { display:none; padding-left:16px; }
-    .tree-children.open { display:block; }
+    .tree-row{display:flex;align-items:center;gap:4px;padding:5px 8px;border-radius:4px;cursor:pointer;transition:all .08s;font-size:13px;color:var(--text-secondary)}
+    .tree-row:hover{background:var(--bg-hover);color:var(--text-primary)}
+    .tree-row.active{background:var(--accent-bg);color:var(--accent)}
+    .tree-toggle{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:transform .15s}
+    .tree-toggle.expanded{transform:rotate(90deg)}
+    .tree-toggle.hidden{visibility:hidden}
+    .tree-icon{width:14px;height:14px;flex-shrink:0;color:var(--text-muted);opacity:.5}
+    .tree-row.active .tree-icon{color:var(--accent);opacity:1}
+    .tree-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tree-children{display:none;padding-left:16px}
+    .tree-children.open{display:block}
 
-    /* ═══ CONTENT ═══ */
-    .content-area { height:calc(100vh - var(--gnb-h)); overflow-y:auto; padding:36px 52px 60px; background:var(--bg-primary); }
-    .content-area::-webkit-scrollbar { width:4px; }
-    .content-area::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+    .content-area{height:calc(100vh - var(--gnb-h));overflow-y:auto;padding:36px 52px 60px;background:var(--bg-primary)}
+    .content-area::-webkit-scrollbar{width:4px}
+    .content-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    .content-loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--text-muted);font-size:13px;gap:8px}
+    .content-loading .spinner{width:16px;height:16px}
 
-    .breadcrumb { display:flex; align-items:center; gap:6px; margin-bottom:20px; font-size:12px; }
-    .breadcrumb-item { color:var(--text-muted); cursor:pointer; transition:color .1s; }
-    .breadcrumb-item:hover { color:var(--accent); }
-    .breadcrumb-item.current { color:var(--text-secondary); cursor:default; }
-    .breadcrumb-sep { color:var(--text-muted); font-size:10px; }
+    .breadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:20px;font-size:12px}
+    .breadcrumb-item{color:var(--text-muted);cursor:pointer;transition:color .1s}
+    .breadcrumb-item:hover{color:var(--accent)}
+    .breadcrumb-item.current{color:var(--text-secondary);cursor:default}
+    .breadcrumb-sep{color:var(--text-muted);font-size:10px}
 
-    .doc-title { font-size:24px; font-weight:600; letter-spacing:-.5px; margin-bottom:6px; color:var(--text-primary); }
-    .doc-meta { font-size:11px; color:var(--text-muted); margin-bottom:28px; padding-bottom:16px; border-bottom:1px solid var(--border-subtle); }
-    .doc-body h2 { font-size:16px; font-weight:600; margin:28px 0 10px; color:var(--text-primary); }
-    .doc-body h3 { font-size:14px; font-weight:600; margin:20px 0 8px; color:var(--text-primary); }
-    .doc-body p { font-size:13.5px; line-height:1.8; color:var(--text-secondary); margin-bottom:12px; }
-    .doc-body code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--accent-bg); border:1px solid var(--accent-border); padding:1px 5px; border-radius:3px; color:var(--accent); }
-    .doc-body pre { background:var(--bg-secondary); border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin:14px 0; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.65; color:var(--text-secondary); }
-    .doc-body ul,.doc-body ol { padding-left:20px; margin-bottom:12px; }
-    .doc-body li { font-size:13.5px; line-height:1.8; color:var(--text-secondary); margin-bottom:3px; }
-    .doc-body .callout { padding:12px 16px; background:var(--accent-bg); border-left:3px solid var(--accent); border-radius:0 5px 5px 0; margin:14px 0; font-size:13px; color:var(--text-secondary); line-height:1.65; }
-    .doc-body .callout-warn { padding:12px 16px; background:rgba(212,154,42,0.06); border-left:3px solid var(--warn); border-radius:0 5px 5px 0; margin:14px 0; font-size:13px; color:var(--text-secondary); line-height:1.65; }
-    .doc-body table { width:100%; border-collapse:collapse; margin:14px 0; font-size:13px; }
-    .doc-body th { text-align:left; padding:8px 12px; background:var(--bg-tertiary); border:1px solid var(--border); color:var(--text-primary); font-weight:500; }
-    .doc-body td { padding:8px 12px; border:1px solid var(--border); color:var(--text-secondary); }
+    .doc-title{font-size:24px;font-weight:600;letter-spacing:-.5px;margin-bottom:6px}
+    .doc-meta{font-size:11px;color:var(--text-muted);margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--border-subtle)}
+    .doc-body h2{font-size:16px;font-weight:600;margin:28px 0 10px;color:var(--text-primary)}
+    .doc-body h3{font-size:14px;font-weight:600;margin:20px 0 8px;color:var(--text-primary)}
+    .doc-body p{font-size:13.5px;line-height:1.8;color:var(--text-secondary);margin-bottom:12px}
+    .doc-body code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--accent-bg);border:1px solid var(--accent-border);padding:1px 5px;border-radius:3px;color:var(--accent)}
+    .doc-body pre{background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:14px 18px;margin:14px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.65;color:var(--text-secondary)}
+    .doc-body ul,.doc-body ol{padding-left:20px;margin-bottom:12px}
+    .doc-body li{font-size:13.5px;line-height:1.8;color:var(--text-secondary);margin-bottom:3px}
+    .doc-body .callout{padding:12px 16px;background:var(--accent-bg);border-left:3px solid var(--accent);border-radius:0 5px 5px 0;margin:14px 0;font-size:13px;color:var(--text-secondary);line-height:1.65}
+    .doc-body .callout-warn{padding:12px 16px;background:rgba(212,154,42,.06);border-left:3px solid var(--warn);border-radius:0 5px 5px 0;margin:14px 0;font-size:13px;color:var(--text-secondary);line-height:1.65}
+    .doc-body table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+    .doc-body th{text-align:left;padding:8px 12px;background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-primary);font-weight:500}
+    .doc-body td{padding:8px 12px;border:1px solid var(--border);color:var(--text-secondary)}
 
-    .child-pages { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-top:20px; }
-    .child-page-card { padding:14px 16px; background:var(--bg-primary); border:1px solid var(--border); border-radius:6px; cursor:pointer; transition:all .12s; }
-    .child-page-card:hover { border-color:var(--accent-border); background:var(--accent-bg); box-shadow:0 2px 8px rgba(74,144,217,0.06); }
-    .child-page-card-title { font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:4px; }
-    .child-page-card-desc { font-size:11px; color:var(--text-muted); line-height:1.4; }
+    .child-pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:20px}
+    .child-page-card{padding:14px 16px;background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .12s}
+    .child-page-card:hover{border-color:var(--accent-border);background:var(--accent-bg);box-shadow:0 2px 8px rgba(74,144,217,.06)}
+    .child-page-card-title{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:4px}
+    .child-page-card-desc{font-size:11px;color:var(--text-muted);line-height:1.4}
   </style>
 </head>
 <body>
@@ -198,7 +162,7 @@
         <div class="gnb-avatar" id="gnbAvatar"></div>
         <span class="gnb-username" id="gnbUsername"></span>
         <div class="user-menu" id="userMenu">
-          <div class="user-menu-item" id="userEmail" style="pointer-events:none;color:var(--text-muted);font-size:11px;"></div>
+          <div class="user-menu-item" id="userEmail" style="pointer-events:none;color:var(--text-muted);font-size:11px"></div>
           <div class="user-menu-item danger" onclick="signOut()">로그아웃</div>
         </div>
       </div>
@@ -214,6 +178,7 @@
   </div>
 
 <script>
+// ═══ FIREBASE ═══
 const firebaseConfig = {
   apiKey: "AIzaSyAQE9oQRDUmeX6ZPO2KOcfd1ctBqt6v34w",
   authDomain: "vendys-b1fea.firebaseapp.com",
@@ -223,131 +188,14 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const ALLOWED_DOMAIN = "vendys.co.kr";
 
-const SECTIONS = [
-  {
-    tab: "서비스",
-    pages: [
-      {
-        id: "sikgwon", title: "식권대장", icon: "folder",
-        desc: "모바일 식권 서비스", meta: "최종 수정: 2025.02.16",
-        body: `<p>식권대장 서비스의 기획/운영 종합 문서입니다.</p>
-          <h2>서비스 개요</h2>
-          <p>기업 고객에게 모바일 식권 발급, 사용, 정산까지 원스톱으로 제공하는 B2B 서비스입니다.</p>`,
-        children: [
-          {
-            id: "sikgwon-admin", title: "관리자 기능", icon: "doc",
-            desc: "기업 관리자 대시보드", meta: "최종 수정: 2025.02.15",
-            body: `<h2>관리자 대시보드</h2><p>기업 관리자가 식권 발급, 사용현황, 정산을 관리하는 화면입니다.</p>
-              <ul><li>임직원 등록/해지</li><li>식권 발급 및 한도 설정</li><li>월별 사용 리포트</li><li>정산 내역 조회</li></ul>`,
-            children: [
-              {
-                id: "sikgwon-admin-report", title: "리포트", icon: "doc",
-                desc: "정산/사용 리포트", meta: "최종 수정: 2025.02.14",
-                body: `<h2>리포트 기능</h2><p>월별, 부서별, 가맹점별 사용 현황을 다양한 포맷으로 제공합니다.</p>
-                  <table><tr><th>리포트</th><th>주기</th><th>포맷</th></tr>
-                  <tr><td>사용현황</td><td>일/주/월</td><td>Excel, PDF</td></tr>
-                  <tr><td>정산서</td><td>월</td><td>PDF</td></tr></table>`
-              }
-            ]
-          },
-          {
-            id: "sikgwon-app", title: "사용자 앱", icon: "doc",
-            desc: "임직원용 모바일 앱", meta: "최종 수정: 2025.02.13",
-            body: `<h2>사용자 앱</h2><p>임직원이 식권을 조회하고 QR 결제하는 모바일 앱입니다.</p>
-              <ul><li>홈 - 잔여 식권</li><li>QR 결제</li><li>사용 내역</li><li>주변 가맹점</li></ul>`
-          },
-          {
-            id: "sikgwon-store", title: "가맹점 관리", icon: "doc",
-            desc: "가맹점 등록/운영", meta: "최종 수정: 2025.02.10",
-            body: `<h2>가맹점 관리</h2><p>가맹점 등록, 상태 관리, 정산 프로세스를 다룹니다.</p>
-              <div class="callout">신규 가맹점 등록은 영업팀 승인 후 운영팀에서 처리합니다.</div>`
-          }
-        ]
-      },
-      {
-        id: "bokji", title: "복지대장", icon: "folder",
-        desc: "기업 복지 포인트 서비스", meta: "최종 수정: 2025.02.12",
-        body: `<p>복지대장은 기업 복지 포인트 관리 서비스입니다.</p>`,
-        children: [
-          { id: "bokji-category", title: "카테고리 관리", icon: "doc", desc: "복지 카테고리 설정", meta: "최종 수정: 2025.02.11",
-            body: `<h2>카테고리 관리</h2><p>식비, 자기계발, 건강, 문화 등 카테고리별 한도를 설정합니다.</p>` }
-        ]
-      },
-      {
-        id: "quick", title: "퀵대장", icon: "folder",
-        desc: "기업 간 퀵 배송", meta: "최종 수정: 2025.02.08",
-        body: `<p>퀵대장은 기업 간 퀵 배송 서비스입니다.</p><h2>배송 프로세스</h2><p>주문 접수 > 배차 > 픽업 > 배송 완료</p>`
-      },
-      {
-        id: "gift", title: "단체선물대장", icon: "folder",
-        desc: "기업 단체 선물 서비스", meta: "최종 수정: 2025.02.06",
-        body: `<p>기업 고객이 임직원, 거래처에 단체 선물을 발송하는 서비스입니다.</p>`
-      }
-    ]
-  },
-  {
-    tab: "개발",
-    pages: [
-      {
-        id: "api-guide", title: "API 가이드", icon: "api",
-        desc: "내부 API 사용 가이드", meta: "최종 수정: 2025.02.15",
-        body: `<h2>Base URL</h2>
-          <pre>Production: https://api.vendys.co.kr/v1\nStaging:    https://api-stg.vendys.co.kr/v1</pre>
-          <h2>인증</h2><p>모든 요청에 <code>Authorization: Bearer {token}</code> 헤더가 필요합니다.</p>`,
-        children: [
-          { id: "api-sikgwon", title: "식권대장 API", icon: "api", desc: "식권 관련 엔드포인트", meta: "최종 수정: 2025.02.14",
-            body: `<h2>식권 발급</h2><pre>POST /vouchers/issue\n{\n  "company_id": "C001",\n  "amount": 8000\n}</pre>` },
-          { id: "api-auth", title: "인증 API", icon: "api", desc: "OAuth, 토큰 관리", meta: "최종 수정: 2025.02.13",
-            body: `<h2>토큰 발급</h2><pre>POST /auth/token\n{\n  "grant_type": "client_credentials"\n}</pre>
-              <div class="callout-warn">client_secret은 프론트엔드에 노출하지 마세요.</div>` }
-        ]
-      },
-      {
-        id: "db-schema", title: "DB 스키마", icon: "db",
-        desc: "데이터베이스 구조", meta: "최종 수정: 2025.02.13",
-        body: `<h2>DB 구성</h2>
-          <table><tr><th>DB명</th><th>용도</th><th>엔진</th></tr>
-          <tr><td><code>vendys_main</code></td><td>메인 서비스</td><td>MySQL 8.0</td></tr>
-          <tr><td><code>vendys_log</code></td><td>로그/분석</td><td>ClickHouse</td></tr></table>`
-      },
-      {
-        id: "dev-env", title: "개발 환경", icon: "doc",
-        desc: "로컬 환경 세팅", meta: "최종 수정: 2025.02.10",
-        body: `<h2>필수 도구</h2><ul><li>Git 2.40+</li><li>Node.js 20 LTS</li><li>Docker Desktop</li></ul>
-          <pre>git clone https://github.com/vendys/platform.git\ndocker-compose up -d\nnpm run dev</pre>`
-      }
-    ]
-  },
-  {
-    tab: "운영",
-    pages: [
-      {
-        id: "ops-guide", title: "운영 가이드", icon: "folder",
-        desc: "서비스 운영 매뉴얼", meta: "최종 수정: 2025.02.14",
-        body: `<p>서비스 운영에 필요한 매뉴얼과 프로세스입니다.</p>`,
-        children: [
-          { id: "ops-cs", title: "CS 대응 매뉴얼", icon: "doc", desc: "고객 문의 처리 가이드", meta: "최종 수정: 2025.02.13",
-            body: `<h2>CS 프로세스</h2><ol><li>인입 채널 확인</li><li>문의 유형 분류</li><li>1차 응대</li><li>2차 에스컬레이션</li><li>완료 피드백</li></ol>` },
-          { id: "ops-deploy", title: "배포 프로세스", icon: "doc", desc: "서비스 배포 절차", meta: "최종 수정: 2025.02.12",
-            body: `<h2>배포 절차</h2><pre>main 머지 → CI → Staging → QA → Prod 승인 → 배포</pre>
-              <div class="callout-warn">Production 배포는 팀장 승인 필수</div>` }
-        ]
-      },
-      {
-        id: "ops-monitoring", title: "모니터링", icon: "doc",
-        desc: "대시보드 및 알림", meta: "최종 수정: 2025.02.11",
-        body: `<table><tr><th>도구</th><th>용도</th></tr>
-          <tr><td>Grafana</td><td>서버 메트릭</td></tr>
-          <tr><td>Sentry</td><td>에러 트래킹</td></tr>
-          <tr><td>Redash</td><td>데이터 분석</td></tr></table>`
-      }
-    ]
-  }
-];
-
+// ═══ STATE ═══
+let SECTIONS = [];
 let currentTab = 0, currentPageId = null;
 const expandedNodes = new Set();
+const pageCache = {};  // 로드한 HTML 캐시
+const searchIndex = []; // 검색 인덱스
 
+// ═══ AUTH ═══
 function signIn() {
   const p = new firebase.auth.GoogleAuthProvider();
   p.setCustomParameters({ hd: ALLOWED_DOMAIN });
@@ -374,7 +222,7 @@ auth.onAuthStateChanged(user => {
     document.getElementById("gnbUsername").textContent = user.displayName || user.email.split("@")[0];
     document.getElementById("userEmail").textContent = user.email;
     if (user.photoURL) document.getElementById("gnbAvatar").innerHTML = `<img src="${user.photoURL}">`;
-    initApp();
+    loadSitemap();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
     document.getElementById("gnb").classList.remove("active");
@@ -382,8 +230,67 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-function initApp() { renderGnbTabs(); switchTab(0); }
+// ═══ SITEMAP LOADER ═══
+async function loadSitemap() {
+  try {
+    const res = await fetch('sitemap.json?t=' + Date.now());
+    const data = await res.json();
+    SECTIONS = data.sections;
+    buildSearchIndex(SECTIONS);
+    renderGnbTabs();
+    switchTab(0);
+  } catch (e) {
+    document.getElementById("contentArea").innerHTML =
+      `<div class="content-loading">sitemap.json을 불러올 수 없습니다.</div>`;
+  }
+}
 
+// ═══ PAGE LOADER (개별 HTML 파일 fetch) ═══
+async function loadPageContent(page) {
+  if (!page.file) return page.body || "";
+  if (pageCache[page.id]) return pageCache[page.id];
+
+  try {
+    const res = await fetch(page.file + '?t=' + Date.now());
+    if (!res.ok) throw new Error(res.status);
+    let html = await res.text();
+
+    // HTML 주석에서 메타 추출: <!-- title: ... meta: ... -->
+    const metaMatch = html.match(/<!--\s*([\s\S]*?)-->/);
+    if (metaMatch) {
+      const metaBlock = metaMatch[1];
+      const metaLine = metaBlock.match(/meta:\s*(.+)/);
+      if (metaLine) page._meta = metaLine[1].trim();
+      html = html.replace(metaMatch[0], '').trim();
+    }
+
+    pageCache[page.id] = html;
+    return html;
+  } catch (e) {
+    return `<p style="color:var(--danger)">문서를 불러올 수 없습니다: ${page.file}</p>`;
+  }
+}
+
+// ═══ SEARCH INDEX ═══
+function buildSearchIndex(sections) {
+  searchIndex.length = 0;
+  for (const s of sections) {
+    indexPages(s.pages, []);
+  }
+}
+function indexPages(pages, trail) {
+  for (const p of pages) {
+    searchIndex.push({
+      id: p.id,
+      title: p.title,
+      desc: p.desc || "",
+      path: [...trail, p.title].join(" > "),
+    });
+    if (p.children) indexPages(p.children, [...trail, p.title]);
+  }
+}
+
+// ═══ GNB ═══
 function renderGnbTabs() {
   document.getElementById("gnbTabs").innerHTML = SECTIONS.map((s, i) =>
     `<div class="gnb-tab${i===currentTab?' active':''}" onclick="switchTab(${i})">${s.tab}</div>`
@@ -399,11 +306,12 @@ function switchTab(idx) {
   if (first) navigateTo(first.id);
 }
 
+// ═══ TREE ═══
 const ICONS = {
-  folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>',
-  doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
-  api: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
-  db: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
+  folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>',
+  doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  api:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+  db:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
 };
 
 function renderTree() {
@@ -413,8 +321,8 @@ function treeNode(page) {
   const has = page.children?.length > 0;
   const exp = expandedNodes.has(page.id);
   const act = currentPageId === page.id;
-  return `<div class="tree-item">
-    <div class="tree-row${act?' active':''}" onclick="onTreeClick('${page.id}')">
+  return `<div>
+    <div class="tree-row${act?' active':''}" onclick="navigateTo('${page.id}')">
       <span class="tree-toggle ${has?(exp?'expanded':''):'hidden'}" onclick="event.stopPropagation();toggleNode('${page.id}')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l10 7-10 7z"/></svg>
       </span>
@@ -424,24 +332,28 @@ function treeNode(page) {
     ${has?`<div class="tree-children${exp?' open':''}">${page.children.map(c=>treeNode(c)).join("")}</div>`:''}
   </div>`;
 }
-function toggleNode(id) { expandedNodes.has(id)?expandedNodes.delete(id):expandedNodes.add(id); renderTree(); }
-function onTreeClick(id) { navigateTo(id); }
+function toggleNode(id){expandedNodes.has(id)?expandedNodes.delete(id):expandedNodes.add(id);renderTree()}
 
-function findPage(id, pages) {
-  for (const p of pages) { if (p.id===id) return p; if (p.children) { const f=findPage(id,p.children); if(f) return f; } } return null;
-}
-function findInAll(id) { for (const s of SECTIONS) { const f=findPage(id,s.pages); if(f) return f; } return null; }
-function getPath(id, pages, trail=[]) {
-  for (const p of pages) { if(p.id===id) return [...trail,p]; if(p.children) { const r=getPath(id,p.children,[...trail,p]); if(r) return r; } } return null;
-}
-function getFullPath(id) { for (const s of SECTIONS) { const p=getPath(id,s.pages); if(p) return p; } return []; }
+// ═══ FIND / PATH ═══
+function findPage(id,pages){for(const p of pages){if(p.id===id)return p;if(p.children){const f=findPage(id,p.children);if(f)return f}}return null}
+function findInAll(id){for(const s of SECTIONS){const f=findPage(id,s.pages);if(f)return f}return null}
+function getPath(id,pages,trail=[]){for(const p of pages){if(p.id===id)return[...trail,p];if(p.children){const r=getPath(id,p.children,[...trail,p]);if(r)return r}}return null}
+function getFullPath(id){for(const s of SECTIONS){const p=getPath(id,s.pages);if(p)return p}return[]}
 
-function navigateTo(id) {
+// ═══ NAVIGATE ═══
+async function navigateTo(id) {
   currentPageId = id;
-  const page = findInAll(id); if(!page) return;
+  const page = findInAll(id);
+  if (!page) return;
   const path = getFullPath(id);
   path.forEach(p => expandedNodes.add(p.id));
   renderTree();
+
+  const el = document.getElementById("contentArea");
+  el.innerHTML = `<div class="content-loading"><div class="spinner"></div> 로딩 중...</div>`;
+
+  const body = await loadPageContent(page);
+  const meta = page._meta || page.meta || "";
 
   const bc = path.map((p,i) => i===path.length-1
     ? `<span class="breadcrumb-item current">${p.title}</span>`
@@ -458,32 +370,28 @@ function navigateTo(id) {
     ).join("")}</div>`;
   }
 
-  const el = document.getElementById("contentArea");
   el.innerHTML = `<div class="breadcrumb">${bc}</div>
     <div class="doc-title">${page.title}</div>
-    <div class="doc-meta">${page.meta||""}</div>
-    <div class="doc-body">${page.body||""}${childHtml}</div>`;
+    <div class="doc-meta">${meta}</div>
+    <div class="doc-body">${body}${childHtml}</div>`;
   el.scrollTop = 0;
+
+  // 검색 인덱스에 본문 추가 (최초 로드 시)
+  const idx = searchIndex.find(x => x.id === id);
+  if (idx && !idx.text) idx.text = body.replace(/<[^>]*>/g, " ");
 }
 
-function flatPages(pages, result=[]) {
-  for (const p of pages) {
-    const path = getFullPath(p.id)?.map(x=>x.title).join(" > ") || p.title;
-    result.push({ id:p.id, title:p.title, path, text:(p.body||"").replace(/<[^>]*>/g," "), desc:p.desc||"" });
-    if (p.children) flatPages(p.children, result);
-  }
-  return result;
-}
-function allPages() { let r=[]; SECTIONS.forEach(s=>flatPages(s.pages,r)); return r; }
-
+// ═══ SEARCH ═══
 const searchInput = document.getElementById("searchInput");
 const searchResults = document.getElementById("searchResults");
 
 searchInput.addEventListener("input", () => {
   const q = searchInput.value.trim().toLowerCase();
   if (!q) { searchResults.classList.remove("open"); return; }
-  const matches = allPages().filter(p =>
-    p.title.toLowerCase().includes(q) || p.text.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)
+  const matches = searchIndex.filter(p =>
+    p.title.toLowerCase().includes(q) ||
+    (p.text||"").toLowerCase().includes(q) ||
+    p.desc.toLowerCase().includes(q)
   ).slice(0, 8);
 
   if (!matches.length) {
@@ -491,9 +399,10 @@ searchInput.addEventListener("input", () => {
   } else {
     searchResults.innerHTML = matches.map(m => {
       let snippet = "";
-      const idx = m.text.toLowerCase().indexOf(q);
+      const text = m.text || "";
+      const idx = text.toLowerCase().indexOf(q);
       if (idx >= 0) {
-        const raw = m.text.slice(Math.max(0,idx-20), idx+q.length+40).trim();
+        const raw = text.slice(Math.max(0,idx-20), idx+q.length+40).trim();
         snippet = raw.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi'), '<mark>$1</mark>');
       }
       return `<div class="search-result-item" onclick="searchGo('${m.id}')">
@@ -508,7 +417,7 @@ searchInput.addEventListener("input", () => {
 
 function searchGo(id) {
   searchInput.value = ""; searchResults.classList.remove("open");
-  for (let i=0;i<SECTIONS.length;i++) { if(findPage(id,SECTIONS[i].pages)){switchTab(i);break;} }
+  for (let i=0;i<SECTIONS.length;i++){if(findPage(id,SECTIONS[i].pages)){switchTab(i);break}}
   navigateTo(id);
 }
 
@@ -517,10 +426,10 @@ document.addEventListener("click", e => {
   if(!e.target.closest(".gnb-user")) document.getElementById("userMenu").classList.remove("open");
 });
 document.addEventListener("keydown", e => {
-  if(e.key==="/"&&document.activeElement!==searchInput){e.preventDefault();searchInput.focus();}
-  if(e.key==="Escape"){searchInput.blur();searchResults.classList.remove("open");}
+  if(e.key==="/"&&document.activeElement!==searchInput){e.preventDefault();searchInput.focus()}
+  if(e.key==="Escape"){searchInput.blur();searchResults.classList.remove("open")}
 });
-function toggleUserMenu(){document.getElementById("userMenu").classList.toggle("open");}
+function toggleUserMenu(){document.getElementById("userMenu").classList.toggle("open")}
 </script>
 </body>
 </html>
