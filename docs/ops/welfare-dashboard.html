@@ -4,352 +4,64 @@ meta: 최종 수정: 2025.02.16
 -->
 
 <style>
-.wf-dash {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    font-size: 12px;
-    color: #1a2332;
-}
-
-/* 컨트롤 바 */
-.wf-dash__controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: #f8fafd;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    flex-wrap: wrap;
-}
-.wf-dash__controls label {
-    font-weight: 600;
-    color: #4a5568;
-    white-space: nowrap;
-}
-.wf-dash__controls input[type="date"] {
-    padding: 4px 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 3px;
-    font-size: 12px;
-    font-family: 'Noto Sans KR', sans-serif;
-    background: #fff;
-    color: #1a2332;
-    outline: none;
-}
-.wf-dash__controls input[type="date"]:focus {
-    border-color: #4a90d9;
-    box-shadow: 0 0 0 1px #4a90d9;
-}
-.wf-dash__btn {
-    padding: 4px 14px;
-    background: #4a90d9;
-    color: #fff;
-    border: none;
-    border-radius: 3px;
-    font-size: 12px;
-    font-family: 'Noto Sans KR', sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.15s;
-}
-.wf-dash__btn:hover { background: #3a7bc8; }
-.wf-dash__btn:disabled { background: #94a3b8; cursor: not-allowed; }
-
-/* 핫버튼 */
-.wf-dash__hotkeys {
-    display: flex;
-    gap: 4px;
-    margin-left: 4px;
-    padding-left: 8px;
-    border-left: 1px solid #e2e8f0;
-}
-.wf-dash__hot {
-    padding: 3px 8px;
-    background: #fff;
-    color: #4a5568;
-    border: 1px solid #d1d5db;
-    border-radius: 3px;
-    font-size: 11px;
-    font-family: 'Noto Sans KR', sans-serif;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s;
-}
-.wf-dash__hot:hover {
-    background: #eef4fb;
-    border-color: #4a90d9;
-    color: #4a90d9;
-}
-.wf-dash__hot.active {
-    background: #eef4fb;
-    border-color: #4a90d9;
-    color: #4a90d9;
-    font-weight: 600;
-}
-
-.wf-dash__status {
-    font-size: 11px;
-    color: #94a3b8;
-    margin-left: auto;
-    white-space: nowrap;
-}
-.wf-dash__status--error { color: #e85d5d; }
-.wf-dash__status--loading { color: #d49a2a; }
-
-/* 요약 카드 */
-.wf-dash__summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-}
-.wf-dash__card {
-    padding: 10px 12px;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-}
-.wf-dash__card-label {
-    font-size: 11px;
-    color: #94a3b8;
-    margin-bottom: 4px;
-}
-.wf-dash__card-value {
-    font-size: 16px;
-    font-weight: 700;
-    color: #1a2332;
-    font-family: 'JetBrains Mono', monospace;
-}
-
-/* 2단 레이아웃 */
-.wf-dash__body {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 12px;
-    min-height: 0;
-}
-
-/* 테이블 패널 */
-.wf-dash__table-panel {
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-.wf-dash__table-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    background: #f8fafd;
-    border-bottom: 1px solid #e2e8f0;
-}
-.wf-dash__table-header input {
-    flex: 1;
-    padding: 3px 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 3px;
-    font-size: 11px;
-    font-family: 'Noto Sans KR', sans-serif;
-    outline: none;
-}
-.wf-dash__table-header input:focus { border-color: #4a90d9; }
-.wf-dash__table-header span {
-    font-size: 11px;
-    color: #94a3b8;
-    white-space: nowrap;
-}
-.wf-dash__table-wrap {
-    overflow-y: auto;
-    max-height: 480px;
-}
-.wf-dash__table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-}
-.wf-dash__table thead {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-.wf-dash__table th {
-    padding: 5px 10px;
-    text-align: left;
-    font-weight: 600;
-    color: #4a5568;
-    background: #f0f4f9;
-    border-bottom: 1px solid #e2e8f0;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-}
-.wf-dash__table th:hover { background: #e6ecf3; }
-.wf-dash__table th.sort-asc::after { content: ' \2191'; color: #4a90d9; }
-.wf-dash__table th.sort-desc::after { content: ' \2193'; color: #4a90d9; }
-.wf-dash__table td {
-    padding: 4px 10px;
-    border-bottom: 1px solid #f0f4f9;
-    white-space: nowrap;
-}
-.wf-dash__table tr { cursor: pointer; }
-.wf-dash__table tr:hover td { background: #f8fafd; }
-.wf-dash__table tr.selected td { background: #eef4fb; }
-.wf-dash__table .col-amount {
-    text-align: right;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-}
-.wf-dash__table .col-date {
-    color: #4a5568;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-}
-.wf-dash__table .col-rank {
-    color: #94a3b8;
-    font-size: 11px;
-    text-align: center;
-    width: 32px;
-}
-.amount-negative { color: #e85d5d; }
-
-/* 상세 패널 */
-.wf-dash__detail {
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-.wf-dash__detail-header {
-    padding: 8px 12px;
-    background: #f8fafd;
-    border-bottom: 1px solid #e2e8f0;
-    font-weight: 600;
-    color: #4a5568;
-    font-size: 11px;
-}
-.wf-dash__detail-body {
-    padding: 12px;
-    overflow-y: auto;
-    max-height: 480px;
-}
-.wf-dash__detail-empty {
-    color: #94a3b8;
-    font-size: 11px;
-    text-align: center;
-    padding: 40px 12px;
-}
-.wf-dash__detail-company {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    color: #1a2332;
-}
-.wf-dash__detail-total {
-    font-size: 11px;
-    color: #4a5568;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f4f9;
-}
-.wf-dash__detail-total strong {
-    font-size: 15px;
-    font-weight: 700;
-    color: #1a2332;
-    font-family: 'JetBrains Mono', monospace;
-}
-.wf-dash__detail-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.wf-dash__detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 8px;
-    background: #f8fafd;
-    border-radius: 3px;
-    font-size: 11px;
-}
-.wf-dash__detail-row .date {
-    color: #4a5568;
-    font-family: 'JetBrains Mono', monospace;
-}
-.wf-dash__detail-row .amount {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600;
-}
-
-/* 바 차트 */
-.wf-dash__bar-wrap {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid #f0f4f9;
-}
-.wf-dash__bar-title {
-    font-size: 11px;
-    color: #94a3b8;
-    margin-bottom: 8px;
-}
-.wf-dash__bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 3px;
-    font-size: 10px;
-}
-.wf-dash__bar .bar-label {
-    width: 54px;
-    text-align: right;
-    color: #4a5568;
-    font-family: 'JetBrains Mono', monospace;
-    flex-shrink: 0;
-}
-.wf-dash__bar .bar-fill {
-    height: 14px;
-    border-radius: 2px;
-    min-width: 2px;
-    transition: width 0.3s ease;
-}
-.wf-dash__bar .bar-value {
-    color: #94a3b8;
-    font-family: 'JetBrains Mono', monospace;
-    flex-shrink: 0;
-}
-
-/* 빈 상태 */
-.wf-dash__empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 300px;
-    color: #94a3b8;
-    font-size: 13px;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    background: #fff;
-}
-
-/* 로딩 */
-@keyframes wf-spin { to { transform: rotate(360deg); } }
-.wf-dash__spinner {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border: 2px solid #d1d5db;
-    border-top-color: #4a90d9;
-    border-radius: 50%;
-    animation: wf-spin 0.6s linear infinite;
-    vertical-align: middle;
-    margin-right: 4px;
-}
+.wf-dash{display:flex;flex-direction:column;gap:12px;font-size:12px;color:#1a2332}
+.wf-dash__controls{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;flex-wrap:wrap}
+.wf-dash__controls label{font-weight:600;color:#4a5568;white-space:nowrap}
+.wf-dash__controls input[type="date"]{padding:4px 8px;border:1px solid #d1d5db;border-radius:3px;font-size:12px;font-family:'Noto Sans KR',sans-serif;background:#fff;color:#1a2332;outline:none}
+.wf-dash__controls input[type="date"]:focus{border-color:#4a90d9;box-shadow:0 0 0 1px #4a90d9}
+.wf-dash__btn{padding:4px 14px;background:#4a90d9;color:#fff;border:none;border-radius:3px;font-size:12px;font-family:'Noto Sans KR',sans-serif;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.wf-dash__btn:hover{background:#3a7bc8}
+.wf-dash__btn:disabled{background:#94a3b8;cursor:not-allowed}
+.wf-dash__hotkeys{display:flex;gap:4px;margin-left:4px;padding-left:8px;border-left:1px solid #e2e8f0}
+.wf-dash__hot{padding:3px 8px;background:#fff;color:#4a5568;border:1px solid #d1d5db;border-radius:3px;font-size:11px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s}
+.wf-dash__hot:hover{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
+.wf-dash__hot.active{background:#eef4fb;border-color:#4a90d9;color:#4a90d9;font-weight:600}
+.wf-dash__status{font-size:11px;color:#94a3b8;margin-left:auto;white-space:nowrap}
+.wf-dash__status--error{color:#e85d5d}
+.wf-dash__status--loading{color:#d49a2a}
+.wf-dash__summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.wf-dash__card{padding:10px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:4px}
+.wf-dash__card-label{font-size:11px;color:#94a3b8;margin-bottom:4px}
+.wf-dash__card-value{font-size:16px;font-weight:700;color:#1a2332;font-family:'JetBrains Mono',monospace}
+.wf-dash__body{display:grid;grid-template-columns:1fr 320px;gap:12px;min-height:0}
+.wf-dash__table-panel{border:1px solid #e2e8f0;border-radius:4px;background:#fff;display:flex;flex-direction:column;overflow:hidden}
+.wf-dash__table-header{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8fafd;border-bottom:1px solid #e2e8f0}
+.wf-dash__table-header input{flex:1;padding:3px 8px;border:1px solid #d1d5db;border-radius:3px;font-size:11px;font-family:'Noto Sans KR',sans-serif;outline:none}
+.wf-dash__table-header input:focus{border-color:#4a90d9}
+.wf-dash__table-header span{font-size:11px;color:#94a3b8;white-space:nowrap}
+.wf-dash__table-wrap{overflow-y:auto;max-height:480px}
+.wf-dash__table{width:100%;border-collapse:collapse;font-size:12px}
+.wf-dash__table thead{position:sticky;top:0;z-index:1}
+.wf-dash__table th{padding:5px 10px;text-align:left;font-weight:600;color:#4a5568;background:#f0f4f9;border-bottom:1px solid #e2e8f0;white-space:nowrap;cursor:pointer;user-select:none}
+.wf-dash__table th:hover{background:#e6ecf3}
+.wf-dash__table td{padding:4px 10px;border-bottom:1px solid #f0f4f9;white-space:nowrap}
+.wf-dash__table tr{cursor:pointer}
+.wf-dash__table tr:hover td{background:#f8fafd}
+.wf-dash__table tr.selected td{background:#eef4fb}
+.wf-dash__table .col-amount{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px}
+.wf-dash__table .col-date{color:#4a5568;font-family:'JetBrains Mono',monospace;font-size:11px}
+.wf-dash__table .col-rank{color:#94a3b8;font-size:11px;text-align:center;width:32px}
+.amount-negative{color:#e85d5d}
+.wf-dash__detail{border:1px solid #e2e8f0;border-radius:4px;background:#fff;display:flex;flex-direction:column;overflow:hidden}
+.wf-dash__detail-header{padding:8px 12px;background:#f8fafd;border-bottom:1px solid #e2e8f0;font-weight:600;color:#4a5568;font-size:11px}
+.wf-dash__detail-body{padding:12px;overflow-y:auto;max-height:480px}
+.wf-dash__detail-empty{color:#94a3b8;font-size:11px;text-align:center;padding:40px 12px}
+.wf-dash__detail-company{font-size:14px;font-weight:700;margin-bottom:10px;color:#1a2332}
+.wf-dash__detail-total{font-size:11px;color:#4a5568;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #f0f4f9}
+.wf-dash__detail-total strong{font-size:15px;font-weight:700;color:#1a2332;font-family:'JetBrains Mono',monospace}
+.wf-dash__detail-list{display:flex;flex-direction:column;gap:4px}
+.wf-dash__detail-row{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:#f8fafd;border-radius:3px;font-size:11px}
+.wf-dash__detail-row .date{color:#4a5568;font-family:'JetBrains Mono',monospace}
+.wf-dash__detail-row .amount{font-family:'JetBrains Mono',monospace;font-weight:600}
+.wf-dash__bar-wrap{margin-top:12px;padding-top:10px;border-top:1px solid #f0f4f9}
+.wf-dash__bar-title{font-size:11px;color:#94a3b8;margin-bottom:8px}
+.wf-dash__bar{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:10px}
+.wf-dash__bar .bar-label{width:54px;text-align:right;color:#4a5568;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.wf-dash__bar .bar-fill{height:14px;border-radius:2px;min-width:2px;transition:width .3s ease}
+.wf-dash__bar .bar-value{color:#94a3b8;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.wf-dash__empty{display:flex;align-items:center;justify-content:center;height:300px;color:#94a3b8;font-size:13px;border:1px solid #e2e8f0;border-radius:4px;background:#fff}
+@keyframes wf-spin{to{transform:rotate(360deg)}}
+.wf-dash__spinner{display:inline-block;width:12px;height:12px;border:2px solid #d1d5db;border-top-color:#4a90d9;border-radius:50%;animation:wf-spin .6s linear infinite;vertical-align:middle;margin-right:4px}
 </style>
 
 <div class="wf-dash" id="wfDash">
@@ -369,26 +81,12 @@ meta: 최종 수정: 2025.02.16
         </div>
         <span class="wf-dash__status" id="wfStatus">조회 버튼을 눌러주세요</span>
     </div>
-
     <div class="wf-dash__summary" id="wfSummary" style="display:none;">
-        <div class="wf-dash__card">
-            <div class="wf-dash__card-label">총 지급액</div>
-            <div class="wf-dash__card-value" id="wfTotalAmount">-</div>
-        </div>
-        <div class="wf-dash__card">
-            <div class="wf-dash__card-label">업체 수</div>
-            <div class="wf-dash__card-value" id="wfCompanyCount">-</div>
-        </div>
-        <div class="wf-dash__card">
-            <div class="wf-dash__card-label">건수</div>
-            <div class="wf-dash__card-value" id="wfTxCount">-</div>
-        </div>
-        <div class="wf-dash__card">
-            <div class="wf-dash__card-label">업체당 평균</div>
-            <div class="wf-dash__card-value" id="wfAvgAmount">-</div>
-        </div>
+        <div class="wf-dash__card"><div class="wf-dash__card-label">총 지급액</div><div class="wf-dash__card-value" id="wfTotalAmount">-</div></div>
+        <div class="wf-dash__card"><div class="wf-dash__card-label">업체 수</div><div class="wf-dash__card-value" id="wfCompanyCount">-</div></div>
+        <div class="wf-dash__card"><div class="wf-dash__card-label">건수</div><div class="wf-dash__card-value" id="wfTxCount">-</div></div>
+        <div class="wf-dash__card"><div class="wf-dash__card-label">업체당 평균</div><div class="wf-dash__card-value" id="wfAvgAmount">-</div></div>
     </div>
-
     <div class="wf-dash__body" id="wfBody" style="display:none;">
         <div class="wf-dash__table-panel">
             <div class="wf-dash__table-header">
@@ -397,349 +95,48 @@ meta: 최종 수정: 2025.02.16
             </div>
             <div class="wf-dash__table-wrap">
                 <table class="wf-dash__table">
-                    <thead>
-                        <tr>
-                            <th class="col-rank" onclick="wfSort('rank')">#</th>
-                            <th onclick="wfSort('name')">업체명</th>
-                            <th onclick="wfSort('executeDate')">지급일</th>
-                            <th class="col-amount" onclick="wfSort('totalAmount')">지급액</th>
-                        </tr>
-                    </thead>
+                    <thead><tr>
+                        <th class="col-rank" onclick="wfSort('rank')">#</th>
+                        <th onclick="wfSort('name')">업체명</th>
+                        <th onclick="wfSort('executeDate')">지급일</th>
+                        <th class="col-amount" onclick="wfSort('totalAmount')">지급액</th>
+                    </tr></thead>
                     <tbody id="wfTableBody"></tbody>
                 </table>
             </div>
         </div>
         <div class="wf-dash__detail">
             <div class="wf-dash__detail-header">업체 상세</div>
-            <div class="wf-dash__detail-body" id="wfDetailBody">
-                <div class="wf-dash__detail-empty">테이블에서 업체를 클릭하세요</div>
-            </div>
+            <div class="wf-dash__detail-body" id="wfDetailBody"><div class="wf-dash__detail-empty">테이블에서 업체를 클릭하세요</div></div>
         </div>
     </div>
-
-    <div class="wf-dash__empty" id="wfEmpty">
-        조회 기간을 선택하고 조회 버튼을 눌러주세요
-    </div>
+    <div class="wf-dash__empty" id="wfEmpty">조회 기간을 선택하고 조회 버튼을 눌러주세요</div>
 </div>
 
 <script>
-(function() {
-    var API_BASE = 'https://redash.sikdae.com';
-    var QUERY_ID = 1339;
-    var API_KEY = 'BYpS0PP282p1tNUZT9L4qmEG6D7dh6HNSpAZSCIV';
-
-    // Google Apps Script 프록시 URL (배포 후 여기에 URL 입력)
-    var PROXY_URL = 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec';
-
-    // 프록시 경유 GET
-    function proxyGet(url) {
-        return fetch(PROXY_URL + '?url=' + encodeURIComponent(url)).then(function(r) { return r.json(); });
-    }
-    // 프록시 경유 POST
-    function proxyPost(url, body) {
-        return fetch(PROXY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ url: url, body: body })
-        }).then(function(r) { return r.json(); });
-    }
-
-    var startInput = document.getElementById('wfStartDate');
-    var endInput = document.getElementById('wfEndDate');
-
-    var rawData = [];
-    var filteredData = [];
-    var sortCol = 'totalAmount';
-    var sortDir = 'desc';
-    var selectedCompany = null;
-
-    function fmtDate(d) {
-        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    }
-    function lastDay(y, m) {
-        return new Date(y, m, 0).getDate();
-    }
-
-    // 핫버튼
-    window.wfSetRange = function(key, el) {
-        var now = new Date();
-        var y = now.getFullYear();
-        var m = now.getMonth(); // 0-based
-        var s, e;
-
-        switch(key) {
-            case 'today':
-                s = e = fmtDate(now);
-                break;
-            case 'thisMonth':
-                s = y + '-' + String(m+1).padStart(2,'0') + '-01';
-                e = y + '-' + String(m+1).padStart(2,'0') + '-' + String(lastDay(y, m+1)).padStart(2,'0');
-                break;
-            case 'lastMonth':
-                var lm = m === 0 ? 11 : m - 1;
-                var ly = m === 0 ? y - 1 : y;
-                s = ly + '-' + String(lm+1).padStart(2,'0') + '-01';
-                e = ly + '-' + String(lm+1).padStart(2,'0') + '-' + String(lastDay(ly, lm+1)).padStart(2,'0');
-                break;
-            case 'twoMonthsAgo':
-                var tm = m - 2, ty = y;
-                if (tm < 0) { tm += 12; ty--; }
-                s = ty + '-' + String(tm+1).padStart(2,'0') + '-01';
-                e = ty + '-' + String(tm+1).padStart(2,'0') + '-' + String(lastDay(ty, tm+1)).padStart(2,'0');
-                break;
-            case 'thisYear':
-                s = y + '-01-01';
-                e = y + '-12-31';
-                break;
-            case 'lastYear':
-                s = (y-1) + '-01-01';
-                e = (y-1) + '-12-31';
-                break;
-        }
-
-        startInput.value = s;
-        endInput.value = e;
-
-        document.querySelectorAll('.wf-dash__hot').forEach(function(b) { b.classList.remove('active'); });
-        if (el) el.classList.add('active');
-    };
-
-    // 기본값: 이번달 1일 ~ 말일
-    (function() {
-        var now = new Date();
-        var y = now.getFullYear();
-        var m = now.getMonth();
-        startInput.value = y + '-' + String(m+1).padStart(2,'0') + '-01';
-        endInput.value = y + '-' + String(m+1).padStart(2,'0') + '-' + String(lastDay(y, m+1)).padStart(2,'0');
-    })();
-
-    function setStatus(text, type) {
-        var el = document.getElementById('wfStatus');
-        el.className = 'wf-dash__status' + (type ? ' wf-dash__status--' + type : '');
-        if (type === 'loading') {
-            el.innerHTML = '<span class="wf-dash__spinner"></span>' + text;
-        } else {
-            el.textContent = text;
-        }
-    }
-
-    function showEmpty() {
-        document.getElementById('wfEmpty').style.display = 'flex';
-        document.getElementById('wfBody').style.display = 'none';
-        document.getElementById('wfSummary').style.display = 'none';
-    }
-
-    // 조회
-    window.wfFetchData = async function() {
-        var startDate = startInput.value;
-        var endDate = endInput.value;
-        if (!startDate || !endDate) return;
-
-        var btn = document.getElementById('wfFetch');
-        btn.disabled = true;
-        setStatus('데이터 조회 중...', 'loading');
-
-        try {
-            // 1차: POST (파라미터 방식) - GAS 프록시 경유
-            var apiUrl = API_BASE + '/api/queries/' + QUERY_ID + '/results?api_key=' + API_KEY;
-            var postData = await proxyPost(apiUrl, {
-                parameters: { startDate: startDate, endDate: endDate },
-                max_age: 0
-            });
-
-            if (postData && !postData.error) {
-                if (postData.query_result) {
-                    processResult(postData.query_result.data.rows, startDate, endDate);
-                    btn.disabled = false;
-                    return;
-                }
-                if (postData.job) {
-                    await pollJob(postData.job.id, startDate, endDate);
-                    btn.disabled = false;
-                    return;
-                }
-            }
-            throw new Error('POST 실패');
-        } catch(e) {
-            console.warn('POST 실패, GET 폴백:', e.message);
-            try {
-                var getUrl = API_BASE + '/api/queries/' + QUERY_ID + '/results.json?api_key=' + API_KEY;
-                var getData = await proxyGet(getUrl);
-
-                if (getData.query_result && getData.query_result.data) {
-                    var sd = startInput.value;
-                    var ed = endInput.value;
-                    var rows = getData.query_result.data.rows.filter(function(r) {
-                        return r.executeDate >= sd && r.executeDate <= ed;
-                    });
-                    if (rows.length > 0) {
-                        processResult(rows, sd, ed);
-                        setStatus('캐시 데이터 (' + rows.length + '건) - Redash 파라미터 설정 시 실시간 조회 가능', '');
-                    } else {
-                        setStatus('해당 기간 데이터 없음', 'error');
-                        showEmpty();
-                    }
-                } else {
-                    throw new Error('결과 없음');
-                }
-            } catch(e2) {
-                setStatus('조회 실패: ' + e2.message, 'error');
-                showEmpty();
-            }
-        }
-        btn.disabled = false;
-    };
-
-    async function pollJob(jobId, startDate, endDate) {
-        for (var i = 0; i < 60; i++) {
-            await new Promise(function(r) { setTimeout(r, 1000); });
-            var jobUrl = API_BASE + '/api/jobs/' + jobId + '?api_key=' + API_KEY;
-            var data = await proxyGet(jobUrl);
-            var job = data.job;
-
-            if (job.status === 3) {
-                var resultUrl = API_BASE + '/api/query_results/' + job.query_result_id + '.json?api_key=' + API_KEY;
-                var resultData = await proxyGet(resultUrl);
-                processResult(resultData.query_result.data.rows, startDate, endDate);
-                return;
-            }
-            if (job.status === 4) {
-                throw new Error(job.error || '쿼리 실행 실패');
-            }
-            setStatus('쿼리 실행 중... (' + (i + 1) + 's)', 'loading');
-        }
-        throw new Error('타임아웃');
-    }
-
-    function processResult(rows, startDate, endDate) {
-        rawData = rows.map(function(r, i) {
-            return { name: r.name, executeDate: r.executeDate, totalAmount: Number(r.totalAmount) || 0, rank: i + 1 };
-        });
-
-        var companyMap = {};
-        rawData.forEach(function(r) {
-            if (!companyMap[r.name]) companyMap[r.name] = 0;
-            companyMap[r.name] += r.totalAmount;
-        });
-
-        var totalAmount = rawData.reduce(function(s, r) { return s + r.totalAmount; }, 0);
-        var companyCount = Object.keys(companyMap).length;
-
-        document.getElementById('wfTotalAmount').textContent = formatAmount(totalAmount);
-        document.getElementById('wfCompanyCount').textContent = companyCount.toLocaleString() + '개';
-        document.getElementById('wfTxCount').textContent = rawData.length.toLocaleString() + '건';
-        document.getElementById('wfAvgAmount').textContent = companyCount > 0 ? formatAmount(Math.round(totalAmount / companyCount)) : '-';
-
-        document.getElementById('wfSummary').style.display = 'grid';
-        document.getElementById('wfBody').style.display = 'grid';
-        document.getElementById('wfEmpty').style.display = 'none';
-
-        sortCol = 'totalAmount';
-        sortDir = 'desc';
-        selectedCompany = null;
-        document.getElementById('wfSearch').value = '';
-        renderTable();
-        renderDetail();
-
-        setStatus(startDate + ' ~ ' + endDate + ' 조회 완료 (' + rawData.length + '건)', '');
-    }
-
-    function renderTable() {
-        var search = document.getElementById('wfSearch').value.toLowerCase();
-        filteredData = rawData.filter(function(r) { return !search || r.name.toLowerCase().indexOf(search) >= 0; });
-
-        filteredData.sort(function(a, b) {
-            var va = a[sortCol], vb = b[sortCol];
-            if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
-            if (va < vb) return sortDir === 'asc' ? -1 : 1;
-            if (va > vb) return sortDir === 'asc' ? 1 : -1;
-            return 0;
-        });
-
-        filteredData.forEach(function(r, i) { r._idx = i + 1; });
-
-        var tbody = document.getElementById('wfTableBody');
-        tbody.innerHTML = filteredData.map(function(r) {
-            return '<tr class="' + (selectedCompany === r.name ? 'selected' : '') + '" onclick="wfSelectRow(\'' + r.name.replace(/'/g, "\\'") + '\')">'
-                + '<td class="col-rank">' + r._idx + '</td>'
-                + '<td>' + r.name + '</td>'
-                + '<td class="col-date">' + r.executeDate + '</td>'
-                + '<td class="col-amount ' + (r.totalAmount < 0 ? 'amount-negative' : '') + '">' + formatAmount(r.totalAmount) + '</td>'
-                + '</tr>';
-        }).join('');
-
-        document.getElementById('wfRowCount').textContent = filteredData.length + '건';
-    }
-
-    window.wfFilterTable = function() { renderTable(); };
-
-    window.wfSort = function(col) {
-        if (col === 'rank') col = 'totalAmount';
-        if (sortCol === col) {
-            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-        } else {
-            sortCol = col;
-            sortDir = col === 'name' ? 'asc' : 'desc';
-        }
-        renderTable();
-    };
-
-    window.wfSelectRow = function(name) {
-        selectedCompany = selectedCompany === name ? null : name;
-        renderTable();
-        renderDetail();
-    };
-
-    function renderDetail() {
-        var body = document.getElementById('wfDetailBody');
-        if (!selectedCompany) {
-            body.innerHTML = '<div class="wf-dash__detail-empty">테이블에서 업체를 클릭하세요</div>';
-            return;
-        }
-
-        var rows = rawData.filter(function(r) { return r.name === selectedCompany; }).sort(function(a, b) { return a.executeDate.localeCompare(b.executeDate); });
-        var total = rows.reduce(function(s, r) { return s + r.totalAmount; }, 0);
-        var maxAmt = Math.max.apply(null, rows.map(function(r) { return Math.abs(r.totalAmount); }).concat([1]));
-
-        var html = '<div class="wf-dash__detail-company">' + selectedCompany + '</div>'
-            + '<div class="wf-dash__detail-total">총 지급액: <strong>' + formatAmount(total) + '</strong>'
-            + '<div style="margin-top:2px;">지급 ' + rows.length + '건</div></div>'
-            + '<div class="wf-dash__detail-list">';
-
-        rows.forEach(function(r) {
-            html += '<div class="wf-dash__detail-row">'
-                + '<span class="date">' + r.executeDate + '</span>'
-                + '<span class="amount ' + (r.totalAmount < 0 ? 'amount-negative' : '') + '">' + formatAmount(r.totalAmount) + '</span>'
-                + '</div>';
-        });
-
-        html += '</div><div class="wf-dash__bar-wrap"><div class="wf-dash__bar-title">일별 지급 분포</div>';
-
-        rows.forEach(function(r) {
-            var w = Math.max((Math.abs(r.totalAmount) / maxAmt) * 140, 2);
-            var bg = r.totalAmount < 0 ? '#e85d5d' : '#4a90d9';
-            html += '<div class="wf-dash__bar">'
-                + '<span class="bar-label">' + r.executeDate.slice(5) + '</span>'
-                + '<span class="bar-fill" style="width:' + w + 'px;background:' + bg + '"></span>'
-                + '<span class="bar-value">' + shortAmount(r.totalAmount) + '</span>'
-                + '</div>';
-        });
-
-        html += '</div>';
-        body.innerHTML = html;
-    }
-
-    function formatAmount(v) {
-        if (v === 0) return '0';
-        var prefix = v < 0 ? '-' : '';
-        return prefix + Math.abs(v).toLocaleString() + '원';
-    }
-    function shortAmount(v) {
-        var prefix = v < 0 ? '-' : '';
-        var abs = Math.abs(v);
-        if (abs >= 100000000) return prefix + (abs / 100000000).toFixed(1) + '억';
-        if (abs >= 10000) return prefix + (abs / 10000).toFixed(0) + '만';
-        return prefix + abs.toLocaleString();
-    }
-})();
+var _wf = {
+    API_BASE: 'https://redash.sikdae.com',
+    QUERY_ID: 1339,
+    API_KEY: 'BYpS0PP282p1tNUZT9L4qmEG6D7dh6HNSpAZSCIV',
+    PROXY_URL: 'https://script.google.com/macros/s/여기에_배포ID_입력/exec',
+    rawData: [], filteredData: [], sortCol: 'totalAmount', sortDir: 'desc', selectedCompany: null
+};
+function wfProxyGet(u){return fetch(_wf.PROXY_URL+'?url='+encodeURIComponent(u)).then(function(r){return r.json()})}
+function wfProxyPost(u,b){return fetch(_wf.PROXY_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({url:u,body:b})}).then(function(r){return r.json()})}
+function wfFmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function wfLastDay(y,m){return new Date(y,m,0).getDate()}
+function wfSetRange(key,el){var now=new Date(),y=now.getFullYear(),m=now.getMonth(),s,e;switch(key){case'today':s=e=wfFmtDate(now);break;case'thisMonth':s=y+'-'+String(m+1).padStart(2,'0')+'-01';e=y+'-'+String(m+1).padStart(2,'0')+'-'+String(wfLastDay(y,m+1)).padStart(2,'0');break;case'lastMonth':var lm=m===0?11:m-1,ly=m===0?y-1:y;s=ly+'-'+String(lm+1).padStart(2,'0')+'-01';e=ly+'-'+String(lm+1).padStart(2,'0')+'-'+String(wfLastDay(ly,lm+1)).padStart(2,'0');break;case'twoMonthsAgo':var tm=m-2,ty=y;if(tm<0){tm+=12;ty--}s=ty+'-'+String(tm+1).padStart(2,'0')+'-01';e=ty+'-'+String(tm+1).padStart(2,'0')+'-'+String(wfLastDay(ty,tm+1)).padStart(2,'0');break;case'thisYear':s=y+'-01-01';e=y+'-12-31';break;case'lastYear':s=(y-1)+'-01-01';e=(y-1)+'-12-31';break}document.getElementById('wfStartDate').value=s;document.getElementById('wfEndDate').value=e;var bs=document.querySelectorAll('.wf-dash__hot');for(var i=0;i<bs.length;i++)bs[i].classList.remove('active');if(el)el.classList.add('active')}
+(function(){var now=new Date(),y=now.getFullYear(),m=now.getMonth();document.getElementById('wfStartDate').value=y+'-'+String(m+1).padStart(2,'0')+'-01';document.getElementById('wfEndDate').value=y+'-'+String(m+1).padStart(2,'0')+'-'+String(wfLastDay(y,m+1)).padStart(2,'0')})();
+function wfSetStatus(t,type){var el=document.getElementById('wfStatus');el.className='wf-dash__status'+(type?' wf-dash__status--'+type:'');if(type==='loading'){el.innerHTML='<span class="wf-dash__spinner"></span>'+t}else{el.textContent=t}}
+function wfShowEmpty(){document.getElementById('wfEmpty').style.display='flex';document.getElementById('wfBody').style.display='none';document.getElementById('wfSummary').style.display='none'}
+async function wfFetchData(){var sd=document.getElementById('wfStartDate').value,ed=document.getElementById('wfEndDate').value;if(!sd||!ed)return;var btn=document.getElementById('wfFetch');btn.disabled=true;wfSetStatus('데이터 조회 중...','loading');try{var url=_wf.API_BASE+'/api/queries/'+_wf.QUERY_ID+'/results?api_key='+_wf.API_KEY;var d=await wfProxyPost(url,{parameters:{startDate:sd,endDate:ed},max_age:0});if(d&&!d.error){if(d.query_result){wfProcessResult(d.query_result.data.rows,sd,ed);btn.disabled=false;return}if(d.job){await wfPollJob(d.job.id,sd,ed);btn.disabled=false;return}}throw new Error('POST fail')}catch(e){console.warn('POST fail, GET fallback:',e.message);try{var gu=_wf.API_BASE+'/api/queries/'+_wf.QUERY_ID+'/results.json?api_key='+_wf.API_KEY;var gd=await wfProxyGet(gu);if(gd&&gd.query_result&&gd.query_result.data){var s2=document.getElementById('wfStartDate').value,e2=document.getElementById('wfEndDate').value;var rows=gd.query_result.data.rows.filter(function(r){return r.executeDate>=s2&&r.executeDate<=e2});if(rows.length>0){wfProcessResult(rows,s2,e2);wfSetStatus('캐시 ('+rows.length+'건)','')}else{wfSetStatus('해당 기간 데이터 없음','error');wfShowEmpty()}}else throw new Error('no data')}catch(e2){wfSetStatus('조회 실패: '+e2.message,'error');wfShowEmpty()}}btn.disabled=false}
+async function wfPollJob(jid,sd,ed){for(var i=0;i<60;i++){await new Promise(function(r){setTimeout(r,1000)});var d=await wfProxyGet(_wf.API_BASE+'/api/jobs/'+jid+'?api_key='+_wf.API_KEY);if(d.job.status===3){var rd=await wfProxyGet(_wf.API_BASE+'/api/query_results/'+d.job.query_result_id+'.json?api_key='+_wf.API_KEY);wfProcessResult(rd.query_result.data.rows,sd,ed);return}if(d.job.status===4)throw new Error(d.job.error||'fail');wfSetStatus('실행 중... ('+(i+1)+'s)','loading')}throw new Error('timeout')}
+function wfProcessResult(rows,sd,ed){_wf.rawData=rows.map(function(r){return{name:r.name,executeDate:r.executeDate,totalAmount:Number(r.totalAmount)||0}});var cm={};_wf.rawData.forEach(function(r){if(!cm[r.name])cm[r.name]=0;cm[r.name]+=r.totalAmount});var ta=_wf.rawData.reduce(function(s,r){return s+r.totalAmount},0),cc=Object.keys(cm).length;document.getElementById('wfTotalAmount').textContent=wfFmt(ta);document.getElementById('wfCompanyCount').textContent=cc.toLocaleString()+'개';document.getElementById('wfTxCount').textContent=_wf.rawData.length.toLocaleString()+'건';document.getElementById('wfAvgAmount').textContent=cc>0?wfFmt(Math.round(ta/cc)):'-';document.getElementById('wfSummary').style.display='grid';document.getElementById('wfBody').style.display='grid';document.getElementById('wfEmpty').style.display='none';_wf.sortCol='totalAmount';_wf.sortDir='desc';_wf.selectedCompany=null;document.getElementById('wfSearch').value='';wfRenderTable();wfRenderDetail();wfSetStatus(sd+' ~ '+ed+' ('+_wf.rawData.length+'건)','')}
+function wfRenderTable(){var q=document.getElementById('wfSearch').value.toLowerCase();_wf.filteredData=_wf.rawData.filter(function(r){return!q||r.name.toLowerCase().indexOf(q)>=0});_wf.filteredData.sort(function(a,b){var va=a[_wf.sortCol],vb=b[_wf.sortCol];if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase()}if(va<vb)return _wf.sortDir==='asc'?-1:1;if(va>vb)return _wf.sortDir==='asc'?1:-1;return 0});var tb=document.getElementById('wfTableBody');tb.innerHTML=_wf.filteredData.map(function(r,i){return'<tr class="'+(_wf.selectedCompany===r.name?'selected':'')+'" onclick="wfSelectRow(\''+r.name.replace(/'/g,"\\'")+'\')">'+'<td class="col-rank">'+(i+1)+'</td><td>'+r.name+'</td><td class="col-date">'+r.executeDate+'</td><td class="col-amount'+(r.totalAmount<0?' amount-negative':'')+'">'+wfFmt(r.totalAmount)+'</td></tr>'}).join('');document.getElementById('wfRowCount').textContent=_wf.filteredData.length+'건'}
+function wfFilterTable(){wfRenderTable()}
+function wfSort(c){if(c==='rank')c='totalAmount';if(_wf.sortCol===c){_wf.sortDir=_wf.sortDir==='asc'?'desc':'asc'}else{_wf.sortCol=c;_wf.sortDir=c==='name'?'asc':'desc'}wfRenderTable()}
+function wfSelectRow(n){_wf.selectedCompany=_wf.selectedCompany===n?null:n;wfRenderTable();wfRenderDetail()}
+function wfRenderDetail(){var body=document.getElementById('wfDetailBody');if(!_wf.selectedCompany){body.innerHTML='<div class="wf-dash__detail-empty">테이블에서 업체를 클릭하세요</div>';return}var rows=_wf.rawData.filter(function(r){return r.name===_wf.selectedCompany}).sort(function(a,b){return a.executeDate.localeCompare(b.executeDate)});var tot=rows.reduce(function(s,r){return s+r.totalAmount},0);var mx=Math.max.apply(null,rows.map(function(r){return Math.abs(r.totalAmount)}).concat([1]));var h='<div class="wf-dash__detail-company">'+_wf.selectedCompany+'</div><div class="wf-dash__detail-total">총 지급액: <strong>'+wfFmt(tot)+'</strong><div style="margin-top:2px">지급 '+rows.length+'건</div></div><div class="wf-dash__detail-list">';rows.forEach(function(r){h+='<div class="wf-dash__detail-row"><span class="date">'+r.executeDate+'</span><span class="amount'+(r.totalAmount<0?' amount-negative':'')+'">'+wfFmt(r.totalAmount)+'</span></div>'});h+='</div><div class="wf-dash__bar-wrap"><div class="wf-dash__bar-title">일별 지급 분포</div>';rows.forEach(function(r){var w=Math.max((Math.abs(r.totalAmount)/mx)*140,2);h+='<div class="wf-dash__bar"><span class="bar-label">'+r.executeDate.slice(5)+'</span><span class="bar-fill" style="width:'+w+'px;background:'+(r.totalAmount<0?'#e85d5d':'#4a90d9')+'"></span><span class="bar-value">'+wfShort(r.totalAmount)+'</span></div>'});h+='</div>';body.innerHTML=h}
+function wfFmt(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()+'원'}
+function wfShort(v){var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+(a/1e4).toFixed(0)+'만';return p+a.toLocaleString()}
 </script>
