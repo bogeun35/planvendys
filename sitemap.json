@@ -6,138 +6,83 @@
         {
           "id": "sitemap",
           "title": "사이트맵",
-          "icon": "folder",
-          "desc": "업무용 사이트맵",
-          "file": "docs/ops/vone.html",
-        },
-        {
-          "id": "bokji",
-          "title": "복지대장",
-          "icon": "folder",
-          "desc": "기업 복지 포인트 서비스",
-          "file": "docs/services/bokji/index.html",
-          "children": [
-            {
-              "id": "bokji-category",
-              "title": "카테고리 관리",
-              "icon": "doc",
-              "desc": "복지 카테고리 설정",
-              "file": "docs/services/bokji/category.html"
-            }
-          ]
-        },
-        {
-          "id": "quick",
-          "title": "퀵대장",
-          "icon": "folder",
-          "desc": "기업 간 퀵 배송",
-          "file": "docs/services/quick.html"
-        },
-        {
-          "id": "gift",
-          "title": "단체선물대장",
-          "icon": "folder",
-          "desc": "기업 단체 선물 서비스",
-          "file": "docs/services/gift.html"
-        }
-      ]
-    },
-    {
-      "tab": "개발",
-      "pages": [
-        {
-          "id": "api-guide",
-          "title": "API 가이드",
-          "icon": "api",
-          "desc": "내부 API 사용 가이드",
-          "file": "docs/dev/api-guide.html",
-          "children": [
-            {
-              "id": "api-sikgwon",
-              "title": "식권대장 API",
-              "icon": "api",
-              "desc": "식권 관련 엔드포인트",
-              "file": "docs/dev/api-sikgwon.html"
-            },
-            {
-              "id": "api-auth",
-              "title": "인증 API",
-              "icon": "api",
-              "desc": "OAuth, 토큰 관리",
-              "file": "docs/dev/api-auth.html"
-            }
-          ]
-        },
-        {
-          "id": "db-schema",
-          "title": "DB 스키마",
-          "icon": "db",
-          "desc": "데이터베이스 구조",
-          "file": "docs/dev/db-schema.html"
-        },
-        {
-          "id": "dev-env",
-          "title": "개발 환경",
           "icon": "doc",
-          "desc": "로컬 환경 세팅",
-          "file": "docs/dev/dev-env.html"
-        }
-      ]
-    },
-    {
-      "tab": "운영",
-      "pages": [
+          "desc": "업무용 사이트맵",
+          "file": "docs/ops/service-links.html"
+        },
         {
-          "id": "ops-guide",
-          "title": "운영 가이드",
+          "id": "alliance-sales",
+          "title": "제휴영업",
           "icon": "folder",
-          "desc": "서비스 운영 매뉴얼",
-          "file": "docs/ops/guide.html",
+          "desc": "제휴영업 관련 도구",
           "children": [
-            {
-              "id": "welfare-dashboard",
-              "title": "복지대장 지급현황",
-              "icon": "doc",
-              "desc": "복지대장 월별 지급현황 대시보드",
-              "file": "docs/ops/welfare-dashboard.html",
-              "guide": "docs/ops/welfare-dashboard.md"
-            },
             {
               "id": "contract-extractor",
               "title": "계약서 데이터 추출",
               "icon": "doc",
-              "desc": "계약서 데이터를 추출 하여 등록합니다.",
+              "desc": "계약서 데이터를 추출하여 등록합니다.",
               "file": "docs/ops/contract-extractor.html"
-            },
+            }
+          ]
+        },
+        {
+          "id": "strategic-sales",
+          "title": "전략영업",
+          "icon": "folder",
+          "desc": "전략영업 관련 도구",
+          "children": [
             {
               "id": "sds-report",
               "title": "SDS 파일전송",
               "icon": "doc",
               "desc": "SDS 전용 식대상세내역",
               "file": "docs/ops/sds-report.html"
-            },
+            }
+          ]
+        },
+        {
+          "id": "customer-sales",
+          "title": "고객영업",
+          "icon": "folder",
+          "desc": "고객영업 관련 도구",
+          "children": []
+        },
+        {
+          "id": "finance",
+          "title": "재무기획",
+          "icon": "folder",
+          "desc": "재무기획 관련 도구",
+          "children": []
+        },
+        {
+          "id": "statistics",
+          "title": "통계",
+          "icon": "folder",
+          "desc": "통계 대시보드",
+          "children": [
+            {
+              "id": "welfare-dashboard",
+              "title": "복지대장 지급현황",
+              "icon": "doc",
+              "desc": "복지대장 월별 지급현황 대시보드",
+              "file": "docs/ops/welfare-dashboard.html"
+            }
+          ]
+        },
+        {
+          "id": "report",
+          "title": "리포트",
+          "icon": "folder",
+          "desc": "리포트 도구",
+          "children": [
             {
               "id": "giftpresent",
               "title": "단체선물대장",
               "icon": "doc",
               "desc": "단체선물대장 대시보드를 보여줍니다.",
               "file": "docs/ops/giftpresent.html"
-            },
-            {
-              "id": "ngr",
-              "title": "ngr",
-              "icon": "doc",
-              "desc": "ngr입니다",
-              "file": "docs/ops/ngr.html"
             }
           ]
-        },
-        {
-          "id": "ops-monitoring",
-          "title": "모니터링",
-          "icon": "doc",
-          "desc": "대시보드 및 알림",
-          "file": "docs/ops/monitoring.html"
         }
       ]
     }
