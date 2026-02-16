@@ -107,6 +107,36 @@ meta: 최종 수정: 2025.02.16
 .wf-cmp-table .col-r{text-align:right;font-family:'JetBrains Mono',monospace}
 .wf-cmp-table .col-id{color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:10px}
 .wf-cmp-table tbody tr:hover td{background:#f8fafd}
+/* Insight Section */
+.wf-insight{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.wf-insight__panel{border:1px solid #e2e8f0;border-radius:4px;background:#fff;padding:12px;overflow:hidden}
+.wf-insight__title{font-size:11px;font-weight:600;color:#4a5568;margin-bottom:10px}
+.wf-insight__bars{display:flex;align-items:flex-end;gap:1px;height:120px;border-bottom:1px solid #e2e8f0}
+.wf-insight__bar-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
+.wf-insight__bar-fill{width:100%;border-radius:2px 2px 0 0;min-height:1px;background:#4a90d9;transition:height .3s}
+.wf-insight__bar-label{font-size:8px;color:#94a3b8;font-family:'JetBrains Mono',monospace;padding-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center}
+.wf-insight__row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:11px}
+.wf-insight__row .lbl{width:80px;color:#4a5568;flex-shrink:0;font-size:10px}
+.wf-insight__row .bar{height:14px;border-radius:2px;background:#4a90d9;min-width:2px;transition:width .3s}
+.wf-insight__row .bar.acc{background:#d49a2a}
+.wf-insight__row .val{color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:10px;flex-shrink:0;white-space:nowrap}
+.wf-insight__dist-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:11px}
+.wf-insight__dist-row .lbl{width:90px;color:#4a5568;font-size:10px;flex-shrink:0}
+.wf-insight__dist-row .cnt{width:40px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:#1a2332;flex-shrink:0}
+.wf-insight__dist-row .bar{height:12px;border-radius:2px;background:#4a90d9;min-width:2px;flex:1;max-width:150px}
+
+/* Detail 2-column layout */
+.wf-detail__dates{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}
+.wf-detail__date-header{display:grid;grid-template-columns:72px 1fr 58px;gap:4px;padding:3px 6px;font-size:10px;font-weight:600;color:#94a3b8;border-bottom:1px solid #e2e8f0}
+.wf-detail__date-row{padding:4px 6px;border-radius:3px;background:#f8fafd}
+.wf-detail__date-summary{display:grid;grid-template-columns:72px 1fr 58px;gap:4px;align-items:center;font-size:11px}
+.wf-detail__date-summary .d{color:#4a5568;font-family:'JetBrains Mono',monospace}
+.wf-detail__date-summary .a{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right}
+.wf-detail__users{margin-top:3px;padding-left:4px;border-left:2px solid #e2e8f0}
+.wf-detail__user-row{display:grid;grid-template-columns:1fr 58px;gap:4px;padding:1px 6px;font-size:10px;color:#94a3b8}
+.wf-detail__user-row .uid{font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis}
+.wf-detail__user-row .ua{font-family:'JetBrains Mono',monospace;text-align:right;color:#4a5568}
+
 .wf-empty{display:flex;align-items:center;justify-content:center;height:200px;color:#94a3b8;font-size:13px;border:1px solid #e2e8f0;border-radius:4px;background:#fff}
 @keyframes wf-spin{to{transform:rotate(360deg)}}
 </style>
@@ -164,6 +194,11 @@ meta: 최종 수정: 2025.02.16
             <div class="wf-detail__body" id="wfDetail"><div class="wf-detail__empty">테이블에서 고객사를 클릭하세요</div></div>
         </div>
     </div>
+    <div class="wf-insight" id="wfInsight" style="display:none">
+        <div class="wf-insight__panel" id="wfInsDaily"><div class="wf-insight__title">일자별 지급 추이</div></div>
+        <div class="wf-insight__panel" id="wfInsPareto"><div class="wf-insight__title">상위 고객사 집중도</div></div>
+        <div class="wf-insight__panel" id="wfInsDist"><div class="wf-insight__title">고객사 규모 분포</div></div>
+    </div>
     <div class="wf-compare" id="wfCompare" style="display:none">
         <div class="wf-compare__head">
             <div class="wf-compare__title">전년 동기간 비교</div>
@@ -205,7 +240,7 @@ function wfHot(k,el){
 }
 (function(){var n=new Date(),y=n.getFullYear(),m=n.getMonth();document.getElementById('wfStart').value=y+'-'+String(m+1).padStart(2,'0')+'-01';document.getElementById('wfEnd').value=y+'-'+String(m+1).padStart(2,'0')+'-'+String(wfLd(y,m+1)).padStart(2,'0')})();
 function wfSetStatus(t,err){var el=document.getElementById('wfStatus');el.className='wf-status'+(err?' wf-status--err':'');el.textContent=t}
-function wfShowEmpty(){document.getElementById('wfEmpty').style.display='flex';document.getElementById('wfBody').style.display='none';document.getElementById('wfCards').style.display='none';document.getElementById('wfCompare').style.display='none'}
+function wfShowEmpty(){document.getElementById('wfEmpty').style.display='flex';document.getElementById('wfBody').style.display='none';document.getElementById('wfCards').style.display='none';document.getElementById('wfInsight').style.display='none';document.getElementById('wfCompare').style.display='none'}
 
 /* Fetch */
 async function wfFetch(){
@@ -251,11 +286,12 @@ function wfProcess(rows,sd,ed){
     document.getElementById('cAvgUser').textContent=(allUsers.size>0?wfN(Math.round(ta/allUsers.size)):'-')+'원';
     document.getElementById('wfCards').style.display='grid';
     document.getElementById('wfBody').style.display='grid';
+    document.getElementById('wfInsight').style.display='grid';
     document.getElementById('wfCompare').style.display='block';
     document.getElementById('wfEmpty').style.display='none';
     W.sortCol='totalAmount';W.sortDir='desc';W.selComId=null;
     document.getElementById('wfSearch').value='';
-    wfRender();wfRenderDetail();
+    wfRender();wfRenderDetail();wfRenderInsight();
     wfSetStatus(sd+' ~ '+ed+' ('+W.grouped.length+'개사, '+W.raw.length+'건)');
 }
 
@@ -316,19 +352,24 @@ function wfClip(text,btnId){
     }
 })();
 
-/* Detail */
+/* Detail - 2단 구조: 날짜별 요약 + userId 리스트 */
 function wfRenderDetail(){
     var body=document.getElementById('wfDetail');
     if(!W.selComId){body.innerHTML='<div class="wf-detail__empty">테이블에서 고객사를 클릭하세요</div>';return}
     var g=W.grouped.find(function(x){return x.comId===W.selComId});
     if(!g){body.innerHTML='<div class="wf-detail__empty">데이터 없음</div>';return}
-    var dateMap={};
+
+    // 날짜별 그룹 + 각 날짜의 userId별 내역
+    var dateMap={},rawByDate={};
     W.raw.filter(function(r){return r.comId===W.selComId}).forEach(function(r){
         if(!dateMap[r.executeDate])dateMap[r.executeDate]={date:r.executeDate,amount:0,users:new Set(),count:0};
         var d=dateMap[r.executeDate];d.amount+=r.amount;d.users.add(r.userId);d.count++;
+        if(!rawByDate[r.executeDate])rawByDate[r.executeDate]=[];
+        rawByDate[r.executeDate].push({userId:r.userId,amount:r.amount});
     });
     var dates=Object.values(dateMap).sort(function(a,b){return a.date.localeCompare(b.date)});
     var mx=Math.max.apply(null,dates.map(function(d){return Math.abs(d.amount)}).concat([1]));
+
     var h='<div class="wf-detail__name">'+g.name+'</div>'
         +'<div class="wf-detail__id">'+g.comId+'</div>'
         +'<div class="wf-detail__stats">'
@@ -336,19 +377,148 @@ function wfRenderDetail(){
         +'<div><div class="wf-detail__stat-label">고유 사용자</div><div class="wf-detail__stat-value">'+g.userCount.toLocaleString()+'명</div></div>'
         +'<div><div class="wf-detail__stat-label">인당 평균</div><div class="wf-detail__stat-value">'+wfN(g.avgPerUser)+'원</div></div>'
         +'<div><div class="wf-detail__stat-label">건수</div><div class="wf-detail__stat-value">'+g.txCount+'건</div></div>'
-        +'</div><div style="font-size:11px;color:#4a5568;font-weight:600;margin-bottom:6px">날짜별 내역</div>';
+        +'</div>';
+
+    h+='<div style="font-size:11px;color:#4a5568;font-weight:600;margin-bottom:4px">날짜별 내역 + 사용자</div>';
+    h+='<div class="wf-detail__date-header"><span>날짜</span><span></span><span style="text-align:right">소계</span></div>';
+    h+='<div class="wf-detail__dates">';
     dates.forEach(function(d){
         var w=Math.max((Math.abs(d.amount)/mx)*100,2);
-        h+='<div class="wf-detail__row"><span class="d">'+d.date+'</span>'
-            +'<span class="bf" style="flex:1;height:12px;border-radius:2px;background:'+(d.amount<0?'#e85d5d':'#4a90d9')+';width:'+w+'%"></span>'
-            +'<span class="a">'+wfS(d.amount)+'</span></div>';
+        var users=rawByDate[d.date]||[];
+        h+='<div class="wf-detail__date-row">'
+            +'<div class="wf-detail__date-summary">'
+            +'<span class="d">'+d.date.slice(5)+'</span>'
+            +'<span class="bf" style="height:10px;border-radius:2px;background:'+(d.amount<0?'#e85d5d':'#4a90d9')+';width:'+w+'%"></span>'
+            +'<span class="a'+(d.amount<0?' amount-neg':'')+'">'+wfS(d.amount)+'</span>'
+            +'</div>';
+        // userId별 하위 리스트
+        if(users.length>0){
+            h+='<div class="wf-detail__users">';
+            users.sort(function(a,b){return Math.abs(b.amount)-Math.abs(a.amount)});
+            users.forEach(function(u){
+                h+='<div class="wf-detail__user-row">'
+                    +'<span class="uid" title="'+u.userId+'">'+u.userId.slice(0,8)+'</span>'
+                    +'<span class="ua'+(u.amount<0?' amount-neg':'')+'">'+wfN(u.amount)+'</span></div>';
+            });
+            h+='</div>';
+        }
+        h+='</div>';
     });
-    h+='<div class="wf-detail__bar-section"><div class="wf-detail__bar-title">일별 지급 분포</div>';
+    h+='</div>';
+    body.innerHTML=h;
+}
+
+/* ═══ Insight ═══ */
+function wfRenderInsight(){
+    wfInsDaily();
+    wfInsPareto();
+    wfInsDist();
+}
+
+/* 1. 일자별 전체 지급 추이 */
+function wfInsDaily(){
+    var el=document.getElementById('wfInsDaily');
+    var dateMap={};
+    W.raw.forEach(function(r){
+        if(!dateMap[r.executeDate])dateMap[r.executeDate]={amount:0,count:0,users:new Set()};
+        var d=dateMap[r.executeDate];d.amount+=r.amount;d.count++;d.users.add(r.userId);
+    });
+    var dates=Object.keys(dateMap).sort();
+    if(!dates.length){el.innerHTML='<div class="wf-insight__title">일자별 지급 추이</div><div style="color:#94a3b8;font-size:11px;text-align:center;padding:20px">데이터 없음</div>';return}
+    var mx=0;dates.forEach(function(d){mx=Math.max(mx,dateMap[d].amount)});
+    if(mx===0)mx=1;
+
+    var h='<div class="wf-insight__title">일자별 지급 추이 ('+dates.length+'일)</div>';
+    h+='<div class="wf-insight__bars">';
     dates.forEach(function(d){
-        var w2=Math.max((Math.abs(d.amount)/mx)*140,2);
-        h+='<div class="wf-bar"><span class="bl">'+d.date.slice(5)+'</span><span class="bf" style="width:'+w2+'px;background:'+(d.amount<0?'#e85d5d':'#4a90d9')+'"></span><span class="bv">'+wfS(d.amount)+' ('+d.users.size+'명)</span></div>';
+        var v=dateMap[d];
+        var pct=Math.max((v.amount/mx)*100,1);
+        h+='<div class="wf-insight__bar-col" title="'+d+'\n'+wfS(v.amount)+' / '+v.users.size+'명 / '+v.count+'건">'
+            +'<div class="wf-insight__bar-fill" style="height:'+pct+'%"></div>'
+            +'</div>';
     });
-    h+='</div>';body.innerHTML=h;
+    h+='</div><div style="display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;font-family:JetBrains Mono,monospace;margin-top:2px"><span>'+dates[0].slice(5)+'</span><span>'+dates[dates.length-1].slice(5)+'</span></div>';
+    // 요약
+    var total=0,maxDay='',maxAmt=0,minDay='',minAmt=Infinity;
+    dates.forEach(function(d){var a=dateMap[d].amount;total+=a;if(a>maxAmt){maxAmt=a;maxDay=d}if(a<minAmt){minAmt=a;minDay=d}});
+    var avg=dates.length>0?Math.round(total/dates.length):0;
+    h+='<div style="margin-top:8px;font-size:10px;color:#4a5568;line-height:1.6">'
+        +'일평균: <b style="font-family:JetBrains Mono,monospace">'+wfS(avg)+'</b>'
+        +' / 최고: <b style="font-family:JetBrains Mono,monospace">'+maxDay.slice(5)+' '+wfS(maxAmt)+'</b>'
+        +' / 최저: <b style="font-family:JetBrains Mono,monospace">'+minDay.slice(5)+' '+wfS(minAmt)+'</b></div>';
+    el.innerHTML=h;
+}
+
+/* 2. 상위 고객사 집중도 (파레토) */
+function wfInsPareto(){
+    var el=document.getElementById('wfInsPareto');
+    var sorted=W.grouped.slice().sort(function(a,b){return b.totalAmount-a.totalAmount});
+    var total=0;sorted.forEach(function(g){total+=g.totalAmount});
+    if(!sorted.length||total===0){el.innerHTML='<div class="wf-insight__title">상위 고객사 집중도</div><div style="color:#94a3b8;font-size:11px;text-align:center;padding:20px">데이터 없음</div>';return}
+
+    // 구간별 누적 계산
+    var tiers=[1,3,5,10,20,50];
+    var results=[];
+    tiers.forEach(function(n){
+        if(n>sorted.length)return;
+        var sum=0;for(var i=0;i<n&&i<sorted.length;i++)sum+=sorted[i].totalAmount;
+        var pct=(sum/total*100).toFixed(1);
+        results.push({n:n,sum:sum,pct:parseFloat(pct)});
+    });
+
+    var h='<div class="wf-insight__title">상위 고객사 집중도 (총 '+sorted.length+'개사)</div>';
+    results.forEach(function(r){
+        h+='<div class="wf-insight__row">'
+            +'<span class="lbl">상위 '+r.n+'개사</span>'
+            +'<span class="bar" style="width:'+Math.max(r.pct*1.2,2)+'px"></span>'
+            +'<span class="bar acc" style="width:'+Math.max(r.pct*1.2,2)+'px;opacity:0.3"></span>'
+            +'<span class="val">'+r.pct+'% ('+wfS(r.sum)+')</span></div>';
+    });
+    // 상위 5개사 리스트
+    h+='<div style="margin-top:8px;border-top:1px solid #f0f4f9;padding-top:6px">';
+    sorted.slice(0,5).forEach(function(g,i){
+        var pct=(g.totalAmount/total*100).toFixed(1);
+        h+='<div style="display:flex;gap:4px;font-size:10px;margin-bottom:2px;align-items:center">'
+            +'<span style="color:#94a3b8;width:14px;text-align:right">'+(i+1)+'</span>'
+            +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4a5568">'+g.name+'</span>'
+            +'<span style="font-family:JetBrains Mono,monospace;color:#1a2332;font-weight:600">'+pct+'%</span></div>';
+    });
+    h+='</div>';
+    el.innerHTML=h;
+}
+
+/* 3. 고객사 규모 분포 */
+function wfInsDist(){
+    var el=document.getElementById('wfInsDist');
+    var buckets=[
+        {label:'1억 이상',min:1e8,max:Infinity,count:0,sum:0},
+        {label:'5천만~1억',min:5e7,max:1e8,count:0,sum:0},
+        {label:'1천만~5천만',min:1e7,max:5e7,count:0,sum:0},
+        {label:'500만~1천만',min:5e6,max:1e7,count:0,sum:0},
+        {label:'100만~500만',min:1e6,max:5e6,count:0,sum:0},
+        {label:'10만~100만',min:1e5,max:1e6,count:0,sum:0},
+        {label:'10만 미만',min:0,max:1e5,count:0,sum:0}
+    ];
+    W.grouped.forEach(function(g){
+        var a=g.totalAmount;
+        for(var i=0;i<buckets.length;i++){
+            if(a>=buckets[i].min&&a<buckets[i].max){buckets[i].count++;buckets[i].sum+=a;break}
+        }
+    });
+    var maxCnt=0;buckets.forEach(function(b){if(b.count>maxCnt)maxCnt=b.count});
+    if(maxCnt===0)maxCnt=1;
+
+    var h='<div class="wf-insight__title">고객사 규모 분포 (지급액 기준)</div>';
+    buckets.forEach(function(b){
+        if(b.count===0)return;
+        var w=Math.max((b.count/maxCnt)*120,2);
+        h+='<div class="wf-insight__dist-row">'
+            +'<span class="lbl">'+b.label+'</span>'
+            +'<span class="cnt">'+b.count+'개사</span>'
+            +'<span class="bar" style="width:'+w+'px"></span>'
+            +'<span class="val">'+wfS(b.sum)+'</span></div>';
+    });
+    el.innerHTML=h;
 }
 
 /* ═══ Compare ═══ */
