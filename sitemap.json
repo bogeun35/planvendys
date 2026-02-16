@@ -133,6 +133,13 @@
             "desc": "복지대장 월별 지급현황 대시보드",
             "file": "docs/ops/welfare-dashboard.html"
             },
+                        {
+            "id": "contract-extractor",
+            "title": "계약서 데이터 추출",
+            "icon": "doc",
+            "desc": "계약서 데이터를 추출 하여 등록합니다.",
+            "file": "docs/ops/contract-extractor.html"
+            },
                   
             {
               "id": "ops-cs",
