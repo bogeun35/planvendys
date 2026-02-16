@@ -37,6 +37,13 @@
               "icon": "doc",
               "desc": "SDS 전용 식대상세내역",
               "file": "docs/ops/sds-report.html"
+            },
+              {
+              "id": "nepass-settlemnet",
+              "title": "네패스 수기정산",
+              "icon": "doc",
+              "desc": "네패스 정산을 위한 상세내역",
+              "file": "docs/ops/nepass-settlemnet.html"
             }
           ]
         },
