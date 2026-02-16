@@ -1,0 +1,679 @@
+<!--
+title: 매출통계 대시보드
+meta: 최종 수정: 2026.02.17
+-->
+
+<style>
+.sl{font-family:'Noto Sans KR','JetBrains Mono',sans-serif;font-size:12px;color:#1a2332;position:relative}
+.sl *{box-sizing:border-box}
+.sl-ctrl{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid #e2e8f0;flex-wrap:wrap}
+.sl-ctrl label{font-size:11px;color:#94a3b8}
+.sl-ctrl select,.sl-ctrl input{height:28px;border:1px solid #d1d5db;border-radius:3px;font-size:12px;padding:0 6px;font-family:'JetBrains Mono',monospace}
+.sl-ctrl select{min-width:80px}
+.sl-btn{height:28px;padding:0 10px;border:1px solid #d1d5db;border-radius:3px;background:#fff;font-size:11px;cursor:pointer;color:#4a5568;white-space:nowrap}
+.sl-btn:hover{background:#f0f4f9}
+.sl-btn--hot{border-color:#4a90d9;color:#4a90d9}
+.sl-btn--hot.active{background:#4a90d9;color:#fff}
+.sl-btn--go{background:#4a90d9;color:#fff;border-color:#4a90d9;font-weight:600}
+.sl-btn--go:hover{background:#3a7bc8}
+.sl-status{margin-left:auto;font-size:11px;color:#94a3b8}
+.sl-sep{width:1px;height:20px;background:#e2e8f0;margin:0 2px}
+
+/* 로딩 */
+.sl-loading{position:absolute;inset:0;background:rgba(255,255,255,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;display:none}
+.sl-loading.show{display:flex}
+.sl-loading__bar{width:200px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}
+.sl-loading__fill{height:100%;background:#4a90d9;border-radius:2px;transition:width .3s}
+.sl-loading__text{font-size:11px;color:#94a3b8;margin-top:6px}
+
+/* 탭 */
+.sl-tabs{display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-top:8px}
+.sl-tab{padding:6px 14px;font-size:12px;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:500}
+.sl-tab:hover{color:#4a5568}
+.sl-tab.active{color:#4a90d9;border-bottom-color:#4a90d9;font-weight:600}
+
+/* 서머리 */
+.sl-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:10px 0}
+.sl-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px}
+.sl-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
+.sl-card__val{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a2332}
+.sl-card__sub{font-size:10px;color:#94a3b8;margin-top:1px}
+.sl-card__change{font-size:10px;font-family:'JetBrains Mono',monospace}
+.sl-card__change.up{color:#22c55e}
+.sl-card__change.down{color:#e85d5d}
+
+/* 인사이트 패널 */
+.sl-insight{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.sl-insight__box{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:10px}
+.sl-insight__title{font-size:11px;font-weight:600;color:#4a5568;margin-bottom:6px}
+.sl-chart{width:100%;height:120px;display:flex;align-items:flex-end;gap:2px}
+.sl-chart-bar{background:#4a90d9;border-radius:2px 2px 0 0;min-width:8px;flex:1;position:relative;cursor:pointer;transition:background .15s}
+.sl-chart-bar:hover{background:#3a7bc8}
+.sl-chart-bar.prev{background:#d1d5db}
+.sl-chart-bar.prev:hover{background:#b0b8c4}
+.sl-chart-tip{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#1a2332;color:#fff;padding:2px 6px;border-radius:3px;font-size:10px;white-space:nowrap;display:none;z-index:10;font-family:'JetBrains Mono',monospace}
+.sl-chart-bar:hover .sl-chart-tip{display:block}
+.sl-chart-labels{display:flex;gap:2px;margin-top:2px}
+.sl-chart-labels span{flex:1;text-align:center;font-size:9px;color:#94a3b8}
+.sl-legend{display:flex;gap:10px;margin-top:4px;font-size:10px;color:#94a3b8}
+.sl-legend i{display:inline-block;width:8px;height:8px;border-radius:1px;margin-right:3px;vertical-align:middle}
+
+/* 전년비교 카드 */
+.sl-cmp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:8px 0}
+.sl-cmp-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px}
+.sl-cmp-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
+.sl-cmp-card__val{font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.sl-cmp-card__row{display:flex;align-items:baseline;gap:6px}
+.sl-cmp-card__sub{font-size:10px;color:#94a3b8;margin-top:1px}
+
+/* 2단 레이아웃 */
+.sl-split{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.sl-panel{border:1px solid #e2e8f0;border-radius:4px;overflow:hidden;display:flex;flex-direction:column}
+.sl-panel__head{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#f8fafd;border-bottom:1px solid #e2e8f0}
+.sl-panel__title{font-size:11px;font-weight:600;color:#4a5568}
+.sl-search{height:24px;border:1px solid #d1d5db;border-radius:3px;font-size:11px;padding:0 6px;width:160px}
+.sl-copy-btn{height:24px;padding:0 8px;border:1px solid #d1d5db;border-radius:3px;background:#fff;font-size:10px;cursor:pointer;color:#4a5568;margin-left:4px}
+.sl-copy-btn:hover{background:#f0f4f9}
+.sl-copy-btn.copied{background:#22c55e;color:#fff;border-color:#22c55e}
+
+/* 테이블 */
+.sl-tbl-wrap{overflow:auto;flex:1;max-height:420px}
+.sl-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.sl-tbl thead{position:sticky;top:0;z-index:5}
+.sl-tbl th{background:#f0f4f9;padding:4px 8px;text-align:left;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;font-size:10px;user-select:none}
+.sl-tbl th:hover{background:#e2e8f0}
+.sl-tbl th.num,.sl-tbl td.num{text-align:right;font-family:'JetBrains Mono',monospace}
+.sl-tbl th .sort-arrow{font-size:9px;margin-left:2px;color:#94a3b8}
+.sl-tbl th.sorted .sort-arrow{color:#4a90d9}
+.sl-tbl td{padding:4px 8px;border-bottom:1px solid #f0f4f9;white-space:nowrap}
+.sl-tbl tr:hover{background:#f8fafd}
+.sl-tbl tr.selected{background:#eef4fb}
+.sl-tbl tr{cursor:pointer}
+
+/* 상세 패널 */
+.sl-detail{padding:8px;font-size:11px;overflow:auto;max-height:420px}
+.sl-detail__empty{color:#94a3b8;text-align:center;padding:40px 0}
+.sl-detail__name{font-size:14px;font-weight:700;margin-bottom:2px}
+.sl-detail__group{font-size:11px;color:#94a3b8;margin-bottom:8px}
+.sl-detail__grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px}
+.sl-detail__item{background:#f8fafd;padding:4px 8px;border-radius:3px}
+.sl-detail__item-label{font-size:9px;color:#94a3b8}
+.sl-detail__item-val{font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.sl-detail__section{font-size:11px;font-weight:600;color:#4a5568;margin:6px 0 4px;padding-bottom:2px;border-bottom:1px solid #e2e8f0}
+.sl-mini-tbl{width:100%;border-collapse:collapse;font-size:10px}
+.sl-mini-tbl th{background:#f0f4f9;padding:3px 6px;text-align:left;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db}
+.sl-mini-tbl th.num,.sl-mini-tbl td.num{text-align:right;font-family:'JetBrains Mono',monospace}
+.sl-mini-tbl td{padding:3px 6px;border-bottom:1px solid #f0f4f9}
+
+/* 반응형 */
+@media(max-width:900px){
+  .sl-split{grid-template-columns:1fr}
+  .sl-insight{grid-template-columns:1fr}
+}
+</style>
+
+<div class="sl" id="slRoot">
+  <!-- 로딩 오버레이 -->
+  <div class="sl-loading" id="slLoading">
+    <div class="sl-loading__bar"><div class="sl-loading__fill" id="slLoadFill" style="width:0%"></div></div>
+    <div class="sl-loading__text" id="slLoadText">CSV 로딩 중...</div>
+  </div>
+
+  <!-- 컨트롤 바 -->
+  <div class="sl-ctrl">
+    <label>조회월</label>
+    <select id="slYear"></select>
+    <select id="slMonth"></select>
+    <button class="sl-btn sl-btn--go" onclick="slFetch()">조회</button>
+    <div class="sl-sep"></div>
+    <button class="sl-btn sl-btn--hot" onclick="slHot('thisMonth',this)">이번달</button>
+    <button class="sl-btn sl-btn--hot" onclick="slHot('lastMonth',this)">지난달</button>
+    <button class="sl-btn sl-btn--hot" onclick="slHot('twoMonthsAgo',this)">지지난달</button>
+    <button class="sl-btn sl-btn--hot" onclick="slHot('thisYear',this)">올해</button>
+    <button class="sl-btn sl-btn--hot" onclick="slHot('lastYear',this)">작년</button>
+    <div class="sl-status" id="slStatus"></div>
+  </div>
+
+  <!-- 서비스 탭 -->
+  <div class="sl-tabs" id="slTabs">
+    <div class="sl-tab active" onclick="slSetTab('all',this)">전체</div>
+    <div class="sl-tab" onclick="slSetTab('sikgwon',this)">식권대장</div>
+    <div class="sl-tab" onclick="slSetTab('bokji',this)">복지대장</div>
+    <div class="sl-tab" onclick="slSetTab('mall',this)">복지대장몰</div>
+  </div>
+
+  <!-- 메인 콘텐츠 -->
+  <div id="slBody" style="display:none">
+    <!-- 서머리 카드 -->
+    <div class="sl-cards" id="slCards"></div>
+
+    <!-- 인사이트 (월별추이 + 전년비교) -->
+    <div class="sl-insight" id="slInsight"></div>
+
+    <!-- 2단: 고객사 테이블 + 상세 -->
+    <div class="sl-split">
+      <div class="sl-panel">
+        <div class="sl-panel__head">
+          <span class="sl-panel__title" id="slTblTitle">고객사별 현황</span>
+          <div style="display:flex;align-items:center">
+            <input type="text" class="sl-search" id="slSearch" placeholder="고객사 검색..." oninput="slRenderTable()">
+            <button class="sl-copy-btn" id="slCopyBtn" onclick="slCopyTable()">클립보드 복사</button>
+          </div>
+        </div>
+        <div class="sl-tbl-wrap" id="slTblWrap"></div>
+      </div>
+      <div class="sl-panel">
+        <div class="sl-panel__head">
+          <span class="sl-panel__title">고객사 상세</span>
+        </div>
+        <div class="sl-detail" id="slDetail">
+          <div class="sl-detail__empty">좌측 테이블에서 고객사를 선택하세요</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 빈 상태 -->
+  <div id="slEmpty" style="display:none;text-align:center;padding:60px 0;color:#94a3b8">
+    <div style="font-size:14px;margin-bottom:4px">데이터가 없습니다</div>
+    <div style="font-size:11px">조회 버튼을 눌러주세요</div>
+  </div>
+</div>
+
+<script>
+/* ===== 전역 상태 ===== */
+var SL = {
+    CSV_BASE: '/planvendys/data/stats-',
+    cache: {},
+    raw: [],
+    filtered: [],
+    grouped: [],
+    prevRaw: [],
+    prevGrouped: [],
+    tab: 'all',
+    sortCol: 'txAmount',
+    sortDir: 'desc',
+    selectedId: null,
+    yearRange: 'month',
+    queryYear: null,
+    queryMonth: null
+};
+
+/* ===== 유틸 ===== */
+function slN(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
+function slS(v){var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+Math.round(a/1e4)+'만';return p+a.toLocaleString()}
+function slD(v){if(v===0)return'-';return(v>0?'+':'')+slN(v)}
+function slPct(cur,prev){if(!prev)return cur?'NEW':'-';if(!cur)return'OUT';return((cur-prev)/Math.abs(prev)*100).toFixed(1)+'%'}
+
+/* ===== 초기화 ===== */
+(function slInit(){
+    var now=new Date(),y=now.getFullYear(),m=now.getMonth();
+    var selY=document.getElementById('slYear'),selM=document.getElementById('slMonth');
+    for(var i=2020;i<=y;i++){var o=document.createElement('option');o.value=i;o.textContent=i+'년';selY.appendChild(o)}
+    selY.value=y;
+    for(var j=0;j<12;j++){var o2=document.createElement('option');o2.value=j;o2.textContent=(j+1)+'월';selM.appendChild(o2)}
+    selM.value=m;
+    slFetch();
+})();
+
+/* ===== 핫키 ===== */
+function slHot(key,el){
+    var now=new Date(),y=now.getFullYear(),m=now.getMonth();
+    var sy,sm;
+    document.querySelectorAll('.sl-btn--hot').forEach(function(b){b.classList.remove('active')});
+    if(el)el.classList.add('active');
+    switch(key){
+        case'thisMonth':sy=y;sm=m;SL.yearRange='month';break;
+        case'lastMonth':var d=new Date(y,m-1,1);sy=d.getFullYear();sm=d.getMonth();SL.yearRange='month';break;
+        case'twoMonthsAgo':var d2=new Date(y,m-2,1);sy=d2.getFullYear();sm=d2.getMonth();SL.yearRange='month';break;
+        case'thisYear':sy=y;sm=-1;SL.yearRange='year';break;
+        case'lastYear':sy=y-1;sm=-1;SL.yearRange='year';break;
+    }
+    document.getElementById('slYear').value=sy;
+    if(sm>=0){document.getElementById('slMonth').value=sm}
+    SL.yearRange=sm<0?'year':'month';
+    slFetch();
+}
+
+/* ===== CSV 로드 ===== */
+function slShowLoad(pct,text){
+    var ld=document.getElementById('slLoading');
+    ld.classList.add('show');
+    document.getElementById('slLoadFill').style.width=pct+'%';
+    document.getElementById('slLoadText').textContent=text;
+}
+function slHideLoad(){document.getElementById('slLoading').classList.remove('show')}
+
+async function slLoadCSV(year){
+    if(SL.cache[year])return SL.cache[year];
+    var url=SL.CSV_BASE+year+'.csv';
+    var resp=await fetch(url);
+    if(!resp.ok)return[];
+    var text=await resp.text();
+    var rows=slParseCSV(text);
+    SL.cache[year]=rows;
+    return rows;
+}
+
+function slParseCSV(text){
+    var lines=text.split('\n');
+    if(lines.length<2)return[];
+    var headers=lines[0].split('\t').map(function(h){return h.trim().replace(/\r/g,'')});
+    // 탭 구분이 아닐 수 있으니 콤마도 시도
+    if(headers.length<5){headers=lines[0].split(',').map(function(h){return h.trim().replace(/"/g,'').replace(/\r/g,'')})}
+    var sep=headers.length>=5?'\t':',';
+    if(lines[0].indexOf('\t')===-1)sep=',';
+
+    var result=[];
+    for(var i=1;i<lines.length;i++){
+        var line=lines[i].trim();
+        if(!line)continue;
+        var vals=line.split(sep).map(function(v){return v.trim().replace(/"/g,'').replace(/\r/g,'')});
+        var row={};
+        headers.forEach(function(h,idx){row[h]=vals[idx]||''});
+        result.push(row);
+    }
+    return result;
+}
+
+/* ===== 날짜 파싱 ===== */
+function slParseDate(s){
+    // "2020. 1. 1" → "2020-01"
+    if(!s)return'';
+    s=String(s).trim();
+    // YYYY. M. D 형식
+    var m1=s.match(/^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})$/);
+    if(m1)return m1[1]+'-'+('0'+m1[2]).slice(-2);
+    // YYYY-MM-DD 형식
+    var m2=s.match(/^(\d{4})-(\d{2})/);
+    if(m2)return m2[1]+'-'+m2[2];
+    return'';
+}
+
+/* ===== 서비스 분류 ===== */
+function slService(type){
+    if(!type)return'sikgwon';
+    type=String(type).trim();
+    if(type==='복지대장몰')return'mall';
+    if(type==='복지포인트 전환')return'bokji';
+    return'sikgwon';
+}
+
+/* ===== 데이터 조회 ===== */
+async function slFetch(){
+    var y=parseInt(document.getElementById('slYear').value);
+    var m=parseInt(document.getElementById('slMonth').value);
+    SL.queryYear=y;
+    SL.queryMonth=m;
+
+    slShowLoad(10,'CSV 로딩 중...');
+    try{
+        var rows=await slLoadCSV(y);
+        slShowLoad(40,'전년 데이터 로딩 중...');
+        var prevRows=await slLoadCSV(y-1);
+        slShowLoad(70,'데이터 처리 중...');
+
+        // 현재 기간 필터
+        if(SL.yearRange==='month'){
+            var ym=y+'-'+('0'+(m+1)).slice(-2);
+            SL.raw=rows.filter(function(r){return slParseDate(r['날짜'])===ym});
+            var prevYm=(y-1)+'-'+('0'+(m+1)).slice(-2);
+            SL.prevRaw=prevRows.filter(function(r){return slParseDate(r['날짜'])===prevYm});
+        }else{
+            SL.raw=rows;
+            SL.prevRaw=prevRows;
+        }
+
+        slShowLoad(90,'렌더링 중...');
+        slProcess();
+        slHideLoad();
+
+        var cnt=SL.raw.length;
+        var label=SL.yearRange==='year'?y+'년 전체':y+'년 '+(m+1)+'월';
+        document.getElementById('slStatus').textContent=label+' / '+cnt.toLocaleString()+'건';
+    }catch(ex){
+        slHideLoad();
+        document.getElementById('slStatus').textContent='오류: '+ex.message;
+    }
+}
+
+/* ===== 데이터 처리 ===== */
+function slProcess(){
+    SL.grouped=slGroupBy(SL.raw);
+    SL.prevGrouped=slGroupBy(SL.prevRaw);
+    SL.selectedId=null;
+    slApplyTab();
+}
+
+function slGroupBy(rows){
+    var map={};
+    rows.forEach(function(r){
+        var id=String(r['고객사ID']||'');
+        if(!id)return;
+        if(!map[id])map[id]={
+            id:id,name:String(r['고객사명']||''),group:String(r['고객사그룹']||''),
+            service:slService(r['제휴점유형']),serviceType:String(r['제휴점유형']||''),
+            txAmount:0,salesAmount:0,billingAmount:0,settlementAmount:0,
+            orderCount:0,userCount:0,txCount:0,cancelCount:0,
+            soloCount:0,togetherCount:0,
+            pointTotal:0,pointMeal:0,pointDaejang:0,pointCoupon:0,pointEasy:0,
+            deliveryFee:0,
+            dates:{},rows:[]
+        };
+        var g=map[id];
+        var amt=slNum(r['거래액']);
+        g.txAmount+=amt;
+        g.salesAmount+=slNum(r['매출액']);
+        g.billingAmount+=slNum(r['고객사 청구 금액']);
+        g.settlementAmount+=slNum(r['제휴점 정산 금액']);
+        g.orderCount+=slNum(r['주문 수']);
+        g.userCount+=slNum(r['고유 사용자 수']);
+        g.txCount+=slNum(r['정상거래']);
+        g.cancelCount+=slNum(r['취소거래']);
+        g.soloCount+=slNum(r['혼자결제']);
+        g.togetherCount+=slNum(r['함께결제']);
+        g.pointTotal+=slNum(r['포인트 사용 합계']);
+        g.pointMeal+=slNum(r['식대/복지 포인트']);
+        g.pointDaejang+=slNum(r['대장포인트']);
+        g.pointCoupon+=slNum(r['대장쿠폰']);
+        g.pointEasy+=slNum(r['간편결제']);
+        g.deliveryFee+=slNum(r['배송비']);
+
+        var ym=slParseDate(r['날짜']);
+        if(!g.dates[ym])g.dates[ym]={txAmount:0,orderCount:0,userCount:0,txCount:0};
+        g.dates[ym].txAmount+=amt;
+        g.dates[ym].orderCount+=slNum(r['주문 수']);
+        g.dates[ym].userCount+=slNum(r['고유 사용자 수']);
+        g.dates[ym].txCount+=slNum(r['정상거래']);
+        g.rows.push(r);
+    });
+    return Object.values(map);
+}
+
+function slNum(v){
+    if(v===undefined||v===null||v==='')return 0;
+    var n=Number(String(v).replace(/,/g,''));
+    return isNaN(n)?0:n;
+}
+
+/* ===== 탭 ===== */
+function slSetTab(tab,el){
+    SL.tab=tab;
+    document.querySelectorAll('.sl-tab').forEach(function(t){t.classList.remove('active')});
+    if(el)el.classList.add('active');
+    slApplyTab();
+}
+
+function slApplyTab(){
+    var cur=SL.grouped,prev=SL.prevGrouped;
+    if(SL.tab!=='all'){
+        cur=cur.filter(function(g){return g.service===SL.tab});
+        prev=prev.filter(function(g){return g.service===SL.tab});
+    }
+    SL.filtered=cur;
+    SL.filteredPrev=prev;
+    slRenderCards();
+    slRenderInsight();
+    slRenderTable();
+    slRenderDetail();
+    document.getElementById('slBody').style.display='block';
+    document.getElementById('slEmpty').style.display='none';
+}
+
+/* ===== 서머리 카드 ===== */
+function slRenderCards(){
+    var cur=SL.filtered,prev=SL.filteredPrev||[];
+    var cTx=0,cSales=0,cBill=0,cSettle=0,cOrder=0,cUser=0,cComp=cur.length;
+    cur.forEach(function(g){cTx+=g.txAmount;cSales+=g.salesAmount;cBill+=g.billingAmount;cSettle+=g.settlementAmount;cOrder+=g.orderCount;cUser+=g.userCount});
+    var pTx=0,pSales=0,pBill=0,pSettle=0,pOrder=0,pUser=0,pComp=prev.length;
+    prev.forEach(function(g){pTx+=g.txAmount;pSales+=g.salesAmount;pBill+=g.billingAmount;pSettle+=g.settlementAmount;pOrder+=g.orderCount;pUser+=g.userCount});
+
+    function card(label,cur,prev,money){
+        var diff=cur-prev;
+        var pct=prev?((diff/Math.abs(prev))*100).toFixed(1)+'%':(cur?'NEW':'-');
+        var cls=diff>0?'up':diff<0?'down':'';
+        var arrow=diff>0?'+':'';
+        return'<div class="sl-card"><div class="sl-card__label">'+label+'</div>'
+            +'<div class="sl-card__val">'+(money?slS(cur):slN(cur))+'</div>'
+            +'<div class="sl-card__change '+cls+'">전년 '+(money?slS(prev):slN(prev))+' / '+arrow+pct+'</div></div>';
+    }
+
+    document.getElementById('slCards').innerHTML=
+        card('거래액',cTx,pTx,true)+card('매출액',cSales,pSales,true)
+        +card('고객사 청구',cBill,pBill,true)+card('제휴점 정산',cSettle,pSettle,true)
+        +card('주문 수',cOrder,pOrder,false)+card('고유 사용자',cUser,pUser,false)
+        +card('고객사 수',cComp,pComp,false);
+}
+
+/* ===== 인사이트 ===== */
+function slRenderInsight(){
+    var el=document.getElementById('slInsight');
+    // 월별 추이 (올해 vs 전년)
+    var curByMonth={},prevByMonth={};
+    SL.filtered.forEach(function(g){Object.keys(g.dates).forEach(function(ym){curByMonth[ym]=(curByMonth[ym]||0)+g.dates[ym].txAmount})});
+    (SL.filteredPrev||[]).forEach(function(g){Object.keys(g.dates).forEach(function(ym){prevByMonth[ym]=(prevByMonth[ym]||0)+g.dates[ym].txAmount})});
+
+    // 월별 차트 (최대 12개월)
+    var months=[];
+    if(SL.yearRange==='year'){
+        for(var i=1;i<=12;i++)months.push(('0'+i).slice(-2));
+    }else{
+        months=[('0'+(SL.queryMonth+1)).slice(-2)];
+    }
+
+    var chartHtml='';
+    if(SL.yearRange==='year'){
+        var allVals=[];
+        months.forEach(function(mm){
+            var ck=SL.queryYear+'-'+mm;
+            var pk=(SL.queryYear-1)+'-'+mm;
+            allVals.push(curByMonth[ck]||0);
+            allVals.push(prevByMonth[pk]||0);
+        });
+        var maxV=Math.max.apply(null,allVals)||1;
+
+        var bars='';
+        months.forEach(function(mm){
+            var ck=SL.queryYear+'-'+mm;
+            var pk=(SL.queryYear-1)+'-'+mm;
+            var cv=curByMonth[ck]||0;
+            var pv=prevByMonth[pk]||0;
+            var ch=Math.max(cv/maxV*100,1);
+            var ph=Math.max(pv/maxV*100,1);
+            bars+='<div style="flex:1;display:flex;gap:1px;align-items:flex-end">'
+                +'<div class="sl-chart-bar prev" style="height:'+ph+'%;flex:1"><div class="sl-chart-tip">'+(SL.queryYear-1)+'.'+mm+' '+slS(pv)+'</div></div>'
+                +'<div class="sl-chart-bar" style="height:'+ch+'%;flex:1"><div class="sl-chart-tip">'+SL.queryYear+'.'+mm+' '+slS(cv)+'</div></div>'
+                +'</div>';
+        });
+        var labels='<div class="sl-chart-labels">';
+        months.forEach(function(mm){labels+='<span>'+parseInt(mm)+'월</span>'});
+        labels+='</div>';
+
+        chartHtml='<div class="sl-insight__box"><div class="sl-insight__title">월별 거래액 추이 (전년 비교)</div>'
+            +'<div class="sl-chart">'+bars+'</div>'+labels
+            +'<div class="sl-legend"><span><i style="background:#d1d5db"></i>'+(SL.queryYear-1)+'년</span><span><i style="background:#4a90d9"></i>'+SL.queryYear+'년</span></div></div>';
+    }else{
+        // 단월 → 서비스별 비중
+        var svcData={sikgwon:0,bokji:0,mall:0};
+        SL.grouped.forEach(function(g){svcData[g.service]=(svcData[g.service]||0)+g.txAmount});
+        var total=svcData.sikgwon+svcData.bokji+svcData.mall||1;
+        var svcNames={sikgwon:'식권대장',bokji:'복지대장',mall:'복지대장몰'};
+        var svcColors={sikgwon:'#4a90d9',bokji:'#22c55e',mall:'#d49a2a'};
+        var svcBars='';
+        ['sikgwon','bokji','mall'].forEach(function(k){
+            var pct=(svcData[k]/total*100);
+            svcBars+='<div style="flex:1;text-align:center">'
+                +'<div class="sl-chart-bar" style="height:'+Math.max(pct,2)+'%;background:'+svcColors[k]+';margin:0 auto;width:60%">'
+                +'<div class="sl-chart-tip">'+svcNames[k]+' '+slS(svcData[k])+' ('+pct.toFixed(1)+'%)</div></div>'
+                +'<div style="font-size:9px;color:#94a3b8;margin-top:2px">'+svcNames[k]+'</div>'
+                +'</div>';
+        });
+        chartHtml='<div class="sl-insight__box"><div class="sl-insight__title">서비스별 거래액 비중</div>'
+            +'<div class="sl-chart" style="height:100px">'+svcBars+'</div></div>';
+    }
+
+    // 상위 고객사 집중도
+    var sorted=SL.filtered.slice().sort(function(a,b){return b.txAmount-a.txAmount});
+    var totalTx=0;sorted.forEach(function(g){totalTx+=g.txAmount});
+    var top5=0,top10=0,top20=0;
+    sorted.forEach(function(g,i){
+        if(i<5)top5+=g.txAmount;
+        if(i<10)top10+=g.txAmount;
+        if(i<20)top20+=g.txAmount;
+    });
+    var concHtml='<div class="sl-insight__box"><div class="sl-insight__title">상위 고객사 집중도</div>'
+        +'<table class="sl-mini-tbl"><tr><th>구분</th><th class="num">거래액</th><th class="num">비중</th></tr>'
+        +'<tr><td>Top 5</td><td class="num">'+slS(top5)+'</td><td class="num">'+(totalTx?(top5/totalTx*100).toFixed(1):0)+'%</td></tr>'
+        +'<tr><td>Top 10</td><td class="num">'+slS(top10)+'</td><td class="num">'+(totalTx?(top10/totalTx*100).toFixed(1):0)+'%</td></tr>'
+        +'<tr><td>Top 20</td><td class="num">'+slS(top20)+'</td><td class="num">'+(totalTx?(top20/totalTx*100).toFixed(1):0)+'%</td></tr>'
+        +'<tr><td>전체 ('+sorted.length+'사)</td><td class="num">'+slS(totalTx)+'</td><td class="num">100%</td></tr>'
+        +'</table></div>';
+
+    el.innerHTML=chartHtml+concHtml;
+}
+
+/* ===== 고객사 테이블 ===== */
+function slSort(col){
+    if(SL.sortCol===col){SL.sortDir=SL.sortDir==='desc'?'asc':'desc'}
+    else{SL.sortCol=col;SL.sortDir='desc'}
+    slRenderTable();
+}
+
+function slRenderTable(){
+    var search=(document.getElementById('slSearch').value||'').toLowerCase();
+    var data=SL.filtered.slice();
+    if(search)data=data.filter(function(g){return g.name.toLowerCase().indexOf(search)!==-1||g.group.toLowerCase().indexOf(search)!==-1});
+
+    // 정렬
+    var col=SL.sortCol,dir=SL.sortDir==='asc'?1:-1;
+    data.sort(function(a,b){
+        var va=typeof a[col]==='string'?a[col]:a[col]||0;
+        var vb=typeof b[col]==='string'?b[col]:b[col]||0;
+        if(typeof va==='string')return va.localeCompare(vb)*dir;
+        return(va-vb)*dir;
+    });
+
+    var cols=[
+        {key:'name',label:'고객사명',num:false},
+        {key:'group',label:'그룹',num:false},
+        {key:'txAmount',label:'거래액(원)',num:true},
+        {key:'salesAmount',label:'매출액(원)',num:true},
+        {key:'billingAmount',label:'청구(원)',num:true},
+        {key:'orderCount',label:'주문',num:true},
+        {key:'userCount',label:'사용자',num:true},
+        {key:'txCount',label:'거래건',num:true}
+    ];
+
+    var h='<table class="sl-tbl"><thead><tr>';
+    cols.forEach(function(c){
+        var sorted=SL.sortCol===c.key;
+        var arrow=sorted?(SL.sortDir==='asc'?'&#9650;':'&#9660;'):'&#9650;';
+        h+='<th class="'+(c.num?'num ':'')+( sorted?'sorted':'')+'" onclick="slSort(\''+c.key+'\')">'+c.label+'<span class="sort-arrow">'+arrow+'</span></th>';
+    });
+    h+='</tr></thead><tbody>';
+
+    data.forEach(function(g){
+        var sel=SL.selectedId===g.id?'selected':'';
+        h+='<tr class="'+sel+'" onclick="slSelect(\''+g.id+'\')">'
+            +'<td>'+g.name+'</td>'
+            +'<td>'+g.group+'</td>'
+            +'<td class="num">'+slN(g.txAmount)+'</td>'
+            +'<td class="num">'+slN(g.salesAmount)+'</td>'
+            +'<td class="num">'+slN(g.billingAmount)+'</td>'
+            +'<td class="num">'+slN(g.orderCount)+'</td>'
+            +'<td class="num">'+slN(g.userCount)+'</td>'
+            +'<td class="num">'+slN(g.txCount)+'</td>'
+            +'</tr>';
+    });
+    h+='</tbody></table>';
+
+    document.getElementById('slTblWrap').innerHTML=h;
+    document.getElementById('slTblTitle').textContent='고객사별 현황 ('+data.length+'사)';
+}
+
+/* ===== 고객사 선택 → 상세 ===== */
+function slSelect(id){
+    SL.selectedId=id;
+    slRenderTable();
+    slRenderDetail();
+}
+
+function slRenderDetail(){
+    var el=document.getElementById('slDetail');
+    if(!SL.selectedId){el.innerHTML='<div class="sl-detail__empty">좌측 테이블에서 고객사를 선택하세요</div>';return}
+    var g=SL.filtered.find(function(x){return x.id===SL.selectedId});
+    if(!g){el.innerHTML='<div class="sl-detail__empty">선택된 고객사를 찾을 수 없습니다</div>';return}
+
+    // 전년 데이터
+    var pg=(SL.filteredPrev||[]).find(function(x){return x.id===g.id});
+
+    var h='<div class="sl-detail__name">'+g.name+'</div>';
+    h+='<div class="sl-detail__group">'+g.group+' / '+g.serviceType+'</div>';
+
+    // 주요 지표
+    h+='<div class="sl-detail__grid">';
+    function detItem(label,cur,prev,money){
+        var diff=cur-(prev||0);
+        var cls=diff>0?'up':diff<0?'down':'';
+        h+='<div class="sl-detail__item"><div class="sl-detail__item-label">'+label+'</div>'
+            +'<div class="sl-detail__item-val">'+(money?slS(cur):slN(cur))+'</div>'
+            +(prev!==undefined?'<div class="sl-card__change '+cls+'" style="font-size:9px">전년 '+(money?slS(prev||0):slN(prev||0))+' / '+(diff>0?'+':'')+slPct(cur,prev||0)+'</div>':'')
+            +'</div>';
+    }
+    detItem('거래액',g.txAmount,pg?pg.txAmount:undefined,true);
+    detItem('매출액',g.salesAmount,pg?pg.salesAmount:undefined,true);
+    detItem('고객사 청구',g.billingAmount,pg?pg.billingAmount:undefined,true);
+    detItem('제휴점 정산',g.settlementAmount,pg?pg.settlementAmount:undefined,true);
+    detItem('주문 수',g.orderCount,pg?pg.orderCount:undefined,false);
+    detItem('고유 사용자',g.userCount,pg?pg.userCount:undefined,false);
+    h+='</div>';
+
+    // 결제 구성
+    h+='<div class="sl-detail__section">결제 구성</div>';
+    h+='<table class="sl-mini-tbl"><tr><th>구분</th><th class="num">건수/금액</th></tr>';
+    h+='<tr><td>혼자결제</td><td class="num">'+slN(g.soloCount)+'</td></tr>';
+    h+='<tr><td>함께결제</td><td class="num">'+slN(g.togetherCount)+'</td></tr>';
+    h+='<tr><td>취소</td><td class="num">'+slN(g.cancelCount)+'</td></tr>';
+    h+='</table>';
+
+    // 포인트 구성
+    h+='<div class="sl-detail__section">포인트 사용</div>';
+    h+='<table class="sl-mini-tbl"><tr><th>구분</th><th class="num">금액(원)</th></tr>';
+    h+='<tr><td>식대/복지 포인트</td><td class="num">'+slN(g.pointMeal)+'</td></tr>';
+    h+='<tr><td>대장포인트</td><td class="num">'+slN(g.pointDaejang)+'</td></tr>';
+    h+='<tr><td>대장쿠폰</td><td class="num">'+slN(g.pointCoupon)+'</td></tr>';
+    h+='<tr><td>간편결제</td><td class="num">'+slN(g.pointEasy)+'</td></tr>';
+    h+='<tr style="font-weight:600"><td>합계</td><td class="num">'+slN(g.pointTotal)+'</td></tr>';
+    h+='</table>';
+
+    // 배송비
+    if(g.deliveryFee){
+        h+='<div class="sl-detail__section">배송비</div>';
+        h+='<div style="font-family:JetBrains Mono;font-size:13px;font-weight:600">'+slN(g.deliveryFee)+'원</div>';
+    }
+
+    el.innerHTML=h;
+}
+
+/* ===== 클립보드 복사 ===== */
+function slCopyTable(){
+    var data=SL.filtered.slice().sort(function(a,b){
+        var col=SL.sortCol,dir=SL.sortDir==='asc'?1:-1;
+        var va=a[col]||0,vb=b[col]||0;
+        if(typeof va==='string')return va.localeCompare(vb)*dir;
+        return(va-vb)*dir;
+    });
+    var header='고객사명\t그룹\t거래액\t매출액\t청구금액\t주문수\t사용자수\t거래건수';
+    var lines=[header];
+    data.forEach(function(g){
+        lines.push(g.name+'\t'+g.group+'\t'+g.txAmount+'\t'+g.salesAmount+'\t'+g.billingAmount+'\t'+g.orderCount+'\t'+g.userCount+'\t'+g.txCount);
+    });
+    var text=lines.join('\n');
+    navigator.clipboard.writeText(text).then(function(){
+        var btn=document.getElementById('slCopyBtn');
+        btn.classList.add('copied');
+        btn.textContent='복사 완료';
+        setTimeout(function(){btn.classList.remove('copied');btn.textContent='클립보드 복사'},1500);
+    });
+}
+</script>
