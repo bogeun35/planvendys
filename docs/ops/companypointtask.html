@@ -1,6 +1,5 @@
 <!--
 title: 식대 지급내역
-meta: 최종 수정: 2026.02.17
 -->
 
 <style>
@@ -20,14 +19,14 @@ meta: 최종 수정: 2026.02.17
 .mp-ctrl__sep { width:1px; height:20px; background:#e2e8f0; }
 .mp-ctrl__status { margin-left:auto; font-size:11px; color:#94a3b8; font-family:'JetBrains Mono',monospace; }
 
-/* Loading overlay (main) */
+/* Loading overlay */
 .mp-loading { position:absolute; inset:0; background:rgba(255,255,255,.85); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; border-radius:4px; }
 .mp-loading__bar { width:200px; height:4px; background:#e2e8f0; border-radius:2px; overflow:hidden; }
 .mp-loading__fill { height:100%; background:#4a90d9; border-radius:2px; transition:width .3s; }
 .mp-loading__text { margin-top:8px; font-size:12px; color:#4a5568; }
 .mp-loading--hide { display:none; }
 
-/* Dim overlay (detail loading) */
+/* Dim overlay */
 .mp-dim { position:absolute; inset:0; background:rgba(0,0,0,.35); z-index:90; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:4px; }
 .mp-dim__box { background:#fff; border-radius:4px; padding:16px 24px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.15); }
 .mp-dim__text { font-size:13px; color:#1a2332; margin-bottom:10px; }
@@ -36,18 +35,18 @@ meta: 최종 수정: 2026.02.17
 .mp-dim--hide { display:none; }
 
 /* Summary Cards */
-.mp-summary { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:10px; }
+.mp-summary { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:10px; }
 .mp-card { background:#f8fafd; border:1px solid #e2e8f0; border-radius:4px; padding:8px 12px; }
 .mp-card__label { font-size:11px; color:#94a3b8; margin-bottom:2px; }
-.mp-card__value { font-size:16px; font-weight:700; font-family:'JetBrains Mono',monospace; color:#1a2332; }
+.mp-card__value { font-size:15px; font-weight:700; font-family:'JetBrains Mono',monospace; color:#1a2332; }
 
 /* 2-Panel Layout */
-.mp-panels { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.mp-panel { border:1px solid #e2e8f0; border-radius:4px; display:flex; flex-direction:column; max-height:calc(100vh - 260px); min-height:400px; position:relative; }
+.mp-panels { display:grid; grid-template-columns:3fr 2fr; gap:10px; }
+.mp-panel { border:1px solid #e2e8f0; border-radius:4px; display:flex; flex-direction:column; max-height:calc(100vh - 270px); min-height:400px; position:relative; }
 .mp-panel__head { padding:6px 10px; background:#f8fafd; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; gap:6px; flex-shrink:0; flex-wrap:wrap; }
 .mp-panel__title { font-size:12px; font-weight:700; color:#1a2332; }
 .mp-panel__count { font-size:11px; color:#94a3b8; font-family:'JetBrains Mono',monospace; }
-.mp-panel__search { padding:3px 8px; font-size:12px; border:1px solid #d1d5db; border-radius:3px; width:120px; }
+.mp-panel__search { padding:3px 8px; font-size:12px; border:1px solid #d1d5db; border-radius:3px; width:110px; }
 .mp-panel__search::placeholder { color:#94a3b8; }
 .mp-panel__actions { margin-left:auto; display:flex; gap:4px; align-items:center; }
 
@@ -65,6 +64,7 @@ meta: 최종 수정: 2026.02.17
 .mp tr.mp-row--sel td { background:#eef4fb; }
 .mp .mp-num { text-align:right; font-family:'JetBrains Mono',monospace; font-size:12px; }
 .mp .mp-sort-icon { font-size:10px; margin-left:2px; color:#94a3b8; }
+.mp .mp-id { font-family:'JetBrains Mono',monospace; font-size:10px; color:#94a3b8; max-width:80px; overflow:hidden; text-overflow:ellipsis; }
 
 /* Type badge */
 .mp-badge { display:inline-block; padding:1px 6px; border-radius:2px; font-size:10px; font-weight:500; }
@@ -83,13 +83,11 @@ meta: 최종 수정: 2026.02.17
 </style>
 
 <div class="mp" id="mpRoot">
-  <!-- Main Loading -->
   <div class="mp-loading mp-loading--hide" id="mpLoading">
     <div class="mp-loading__bar"><div class="mp-loading__fill" id="mpProgress" style="width:0%"></div></div>
     <div class="mp-loading__text" id="mpLoadText">쿼리 실행 중...</div>
   </div>
 
-  <!-- Dim overlay for detail loading -->
   <div class="mp-dim mp-dim--hide" id="mpDim">
     <div class="mp-dim__box">
       <div class="mp-dim__text" id="mpDimText">상세 조회 중...</div>
@@ -97,7 +95,6 @@ meta: 최종 수정: 2026.02.17
     </div>
   </div>
 
-  <!-- Control Bar -->
   <div class="mp-ctrl">
     <input type="date" id="mpSD">
     <span style="color:#94a3b8">~</span>
@@ -113,17 +110,16 @@ meta: 최종 수정: 2026.02.17
     <span class="mp-ctrl__status" id="mpStatus"></span>
   </div>
 
-  <!-- Summary Cards -->
   <div class="mp-summary">
-    <div class="mp-card"><div class="mp-card__label">총 지급액</div><div class="mp-card__value" id="mpSumTotal">-</div></div>
-    <div class="mp-card"><div class="mp-card__label">일일식대</div><div class="mp-card__value" id="mpSumDay">-</div></div>
-    <div class="mp-card"><div class="mp-card__label">장기식대</div><div class="mp-card__value" id="mpSumLong">-</div></div>
-    <div class="mp-card"><div class="mp-card__label">신청식대</div><div class="mp-card__value" id="mpSumDemand">-</div></div>
-    <div class="mp-card"><div class="mp-card__label">복지포인트</div><div class="mp-card__value" id="mpSumWelfare">-</div></div>
+    <div class="mp-card"><div class="mp-card__label">총 지급액(원)</div><div class="mp-card__value" id="mpSumTotal">-</div></div>
+    <div class="mp-card"><div class="mp-card__label">일일식대(원)</div><div class="mp-card__value" id="mpSumDay">-</div></div>
+    <div class="mp-card"><div class="mp-card__label">장기식대(원)</div><div class="mp-card__value" id="mpSumLong">-</div></div>
+    <div class="mp-card"><div class="mp-card__label">신청식대(원)</div><div class="mp-card__value" id="mpSumDemand">-</div></div>
+    <div class="mp-card"><div class="mp-card__label">복지포인트(원)</div><div class="mp-card__value" id="mpSumWelfare">-</div></div>
+    <div class="mp-card"><div class="mp-card__label">평균지급액(원)</div><div class="mp-card__value" id="mpSumAvg">-</div></div>
     <div class="mp-card"><div class="mp-card__label">고객사 / 일자</div><div class="mp-card__value" id="mpSumMeta">-</div></div>
   </div>
 
-  <!-- 2-Panel -->
   <div class="mp-panels">
     <!-- Left -->
     <div class="mp-panel">
@@ -131,21 +127,23 @@ meta: 최종 수정: 2026.02.17
         <span class="mp-panel__title">일자별 고객사</span>
         <span class="mp-panel__count" id="mpLeftCount"></span>
         <input class="mp-panel__search" id="mpSearchName" placeholder="고객사명..." oninput="mpRenderLeft()">
-        <input class="mp-panel__search" id="mpSearchComId" placeholder="고객사ID..." oninput="mpRenderLeft()" style="width:100px;font-family:JetBrains Mono,monospace;font-size:11px">
+        <input class="mp-panel__search" id="mpSearchComId" placeholder="고객사ID..." oninput="mpRenderLeft()" style="width:90px;font-family:JetBrains Mono,monospace;font-size:11px">
         <div class="mp-panel__actions">
           <button class="mp-copy" onclick="mpCopyLeft(this)">복사</button>
         </div>
       </div>
       <div class="mp-panel__body" style="overflow-y:auto">
         <table><thead><tr>
-          <th onclick="mpSortLeft('executeDate')" style="width:80px">일자<span class="mp-sort-icon" id="mpSI_executeDate"></span></th>
+          <th onclick="mpSortLeft('executeDate')" style="width:78px">일자<span class="mp-sort-icon" id="mpSI_executeDate"></span></th>
           <th onclick="mpSortLeft('name')">고객사<span class="mp-sort-icon" id="mpSI_name"></span></th>
-          <th onclick="mpSortLeft('mealDay')" class="mp-num" style="width:85px">일일식대(원)<span class="mp-sort-icon" id="mpSI_mealDay"></span></th>
-          <th onclick="mpSortLeft('mealLong')" class="mp-num" style="width:85px">장기식대(원)<span class="mp-sort-icon" id="mpSI_mealLong"></span></th>
-          <th onclick="mpSortLeft('mealDemand')" class="mp-num" style="width:85px">신청식대(원)<span class="mp-sort-icon" id="mpSI_mealDemand"></span></th>
+          <th style="width:80px">고객사ID</th>
+          <th onclick="mpSortLeft('mealDay')" class="mp-num" style="width:90px">일일식대(원)<span class="mp-sort-icon" id="mpSI_mealDay"></span></th>
+          <th onclick="mpSortLeft('mealLong')" class="mp-num" style="width:90px">장기식대(원)<span class="mp-sort-icon" id="mpSI_mealLong"></span></th>
+          <th onclick="mpSortLeft('mealDemand')" class="mp-num" style="width:90px">신청식대(원)<span class="mp-sort-icon" id="mpSI_mealDemand"></span></th>
           <th onclick="mpSortLeft('welfare')" class="mp-num" style="width:90px">복지포인트(원)<span class="mp-sort-icon" id="mpSI_welfare"></span></th>
-          <th onclick="mpSortLeft('totalAmount')" class="mp-num" style="width:90px">총금액(원)<span class="mp-sort-icon" id="mpSI_totalAmount"></span></th>
-          <th onclick="mpSortLeft('userCount')" class="mp-num" style="width:65px">지급수(건)<span class="mp-sort-icon" id="mpSI_userCount"></span></th>
+          <th onclick="mpSortLeft('totalAmount')" class="mp-num" style="width:100px">총금액(원)<span class="mp-sort-icon" id="mpSI_totalAmount"></span></th>
+          <th onclick="mpSortLeft('userCount')" class="mp-num" style="width:60px">지급수(건)<span class="mp-sort-icon" id="mpSI_userCount"></span></th>
+          <th onclick="mpSortLeft('avgAmount')" class="mp-num" style="width:80px">평균(원)<span class="mp-sort-icon" id="mpSI_avgAmount"></span></th>
         </tr></thead><tbody id="mpLeftBody"></tbody></table>
       </div>
     </div>
@@ -156,7 +154,7 @@ meta: 최종 수정: 2026.02.17
         <span class="mp-panel__title" id="mpRightTitle">사용자별 지급내역</span>
         <span class="mp-panel__count" id="mpRightCount"></span>
         <input class="mp-panel__search" id="mpSearchUser" placeholder="사용자명..." oninput="mpFilterRight()">
-        <input class="mp-panel__search" id="mpSearchUserId" placeholder="사용자ID..." oninput="mpFilterRight()" style="width:100px;font-family:JetBrains Mono,monospace;font-size:11px">
+        <input class="mp-panel__search" id="mpSearchUserId" placeholder="사용자ID..." oninput="mpFilterRight()" style="width:90px;font-family:JetBrains Mono,monospace;font-size:11px">
         <div class="mp-panel__actions">
           <button class="mp-copy" onclick="mpCopyRight(this)">복사</button>
         </div>
@@ -188,12 +186,6 @@ var MP = {
 function mpN(v) {
     if (v === 0) return '0';
     return (v < 0 ? '-' : '') + Math.abs(v).toLocaleString();
-}
-function mpS(v) {
-    var p = v < 0 ? '-' : '', a = Math.abs(v);
-    if (a >= 1e8) return p + (a / 1e8).toFixed(1) + '억';
-    if (a >= 1e4) return p + (a / 1e4).toFixed(0) + '만';
-    return p + a.toLocaleString();
 }
 
 function mpApi(params) {
@@ -313,6 +305,8 @@ async function mpFetch() {
 
         mpShowLoad(true, '데이터 처리 중...', 90);
         MP.raw = rows.map(function(r) {
+            var total = Number(r.totalAmount) || 0;
+            var cnt = Number(r.userCount) || 0;
             return {
                 comId: String(r.comId || ''),
                 name: String(r.name || ''),
@@ -321,8 +315,9 @@ async function mpFetch() {
                 mealLong: Number(r.mealLong) || 0,
                 mealDemand: Number(r.mealDemand) || 0,
                 welfare: Number(r.welfare) || 0,
-                totalAmount: Number(r.totalAmount) || 0,
-                userCount: Number(r.userCount) || 0,
+                totalAmount: total,
+                userCount: cnt,
+                avgAmount: cnt > 0 ? Math.floor(total / cnt) : 0,
                 taskIdxList: String(r.taskIdxList || '')
             };
         });
@@ -344,7 +339,7 @@ async function mpFetch() {
 
 function mpRenderSummary() {
     var d = MP.raw;
-    var tot = 0, day = 0, lng = 0, dem = 0, wel = 0;
+    var tot = 0, day = 0, lng = 0, dem = 0, wel = 0, totalCnt = 0;
     var comSet = new Set(), dateSet = new Set();
     d.forEach(function(r) {
         tot += r.totalAmount;
@@ -352,14 +347,16 @@ function mpRenderSummary() {
         lng += r.mealLong;
         dem += r.mealDemand;
         wel += r.welfare;
+        totalCnt += r.userCount;
         comSet.add(r.comId);
         dateSet.add(r.executeDate);
     });
-    document.getElementById('mpSumTotal').textContent = mpS(tot);
-    document.getElementById('mpSumDay').textContent = mpS(day);
-    document.getElementById('mpSumLong').textContent = mpS(lng);
-    document.getElementById('mpSumDemand').textContent = mpS(dem);
-    document.getElementById('mpSumWelfare').textContent = mpS(wel);
+    document.getElementById('mpSumTotal').textContent = mpN(tot);
+    document.getElementById('mpSumDay').textContent = mpN(day);
+    document.getElementById('mpSumLong').textContent = mpN(lng);
+    document.getElementById('mpSumDemand').textContent = mpN(dem);
+    document.getElementById('mpSumWelfare').textContent = mpN(wel);
+    document.getElementById('mpSumAvg').textContent = totalCnt > 0 ? mpN(Math.floor(tot / totalCnt)) : '-';
     document.getElementById('mpSumMeta').textContent = mpN(comSet.size) + '개 / ' + mpN(dateSet.size) + '일';
 }
 
@@ -400,7 +397,7 @@ function mpRenderLeft() {
     var data = MP.filtered;
     document.getElementById('mpLeftCount').textContent = data.length.toLocaleString() + '건';
 
-    ['executeDate','name','mealDay','mealLong','mealDemand','welfare','totalAmount','userCount'].forEach(function(c) {
+    ['executeDate','name','mealDay','mealLong','mealDemand','welfare','totalAmount','userCount','avgAmount'].forEach(function(c) {
         var el = document.getElementById('mpSI_' + c);
         if (el) el.textContent = MP.sortCol === c ? (MP.sortDir === 'asc' ? '▲' : '▼') : '';
     });
@@ -408,19 +405,22 @@ function mpRenderLeft() {
     var html = '';
     data.forEach(function(r, i) {
         var sel = MP.selectedIdx === i;
+        var shortId = r.comId.length > 8 ? r.comId.slice(0, 8) + '..' : r.comId;
         html += '<tr class="' + (sel ? 'mp-row--sel' : '') + '" onclick="mpSelectRow(' + i + ')" style="cursor:pointer">';
         html += '<td style="font-family:JetBrains Mono,monospace;font-size:11px">' + r.executeDate + '</td>';
-        html += '<td title="' + r.comId + '">' + r.name + '</td>';
+        html += '<td>' + r.name + '</td>';
+        html += '<td class="mp-id" title="' + r.comId + '">' + shortId + '</td>';
         html += '<td class="mp-num">' + (r.mealDay ? mpN(r.mealDay) : '-') + '</td>';
         html += '<td class="mp-num">' + (r.mealLong ? mpN(r.mealLong) : '-') + '</td>';
         html += '<td class="mp-num">' + (r.mealDemand ? mpN(r.mealDemand) : '-') + '</td>';
         html += '<td class="mp-num">' + (r.welfare ? mpN(r.welfare) : '-') + '</td>';
         html += '<td class="mp-num" style="font-weight:600">' + mpN(r.totalAmount) + '</td>';
         html += '<td class="mp-num">' + mpN(r.userCount) + '</td>';
+        html += '<td class="mp-num">' + (r.avgAmount ? mpN(r.avgAmount) : '-') + '</td>';
         html += '</tr>';
     });
 
-    document.getElementById('mpLeftBody').innerHTML = html || '<tr><td colspan="8" style="text-align:center;padding:20px;color:#94a3b8">데이터 없음</td></tr>';
+    document.getElementById('mpLeftBody').innerHTML = html || '<tr><td colspan="10" style="text-align:center;padding:20px;color:#94a3b8">데이터 없음</td></tr>';
 }
 
 async function mpSelectRow(idx) {
@@ -497,7 +497,7 @@ function mpRenderRightSummary() {
     el.style.display = '';
     el.className = 'mp-rsummary';
     el.innerHTML =
-        '<div class="mp-rsummary__item">총 지급액 <span class="mp-rsummary__val">' + mpS(total) + '</span></div>' +
+        '<div class="mp-rsummary__item">총 지급액 <span class="mp-rsummary__val">' + mpN(total) + '</span></div>' +
         '<div class="mp-rsummary__item">인원 <span class="mp-rsummary__val">' + mpN(data.length) + '명</span></div>' +
         '<div class="mp-rsummary__item">성공 <span class="mp-rsummary__val" style="color:#22c55e">' + mpN(success) + '</span></div>' +
         '<div class="mp-rsummary__item">대기 <span class="mp-rsummary__val" style="color:#d49a2a">' + mpN(waiting) + '</span>' +
@@ -518,12 +518,13 @@ function mpFilterRight() {
 function mpRenderRight() {
     var data = MP.detailFiltered;
     var html = '<table><thead><tr>';
-    html += '<th style="width:80px">사용자명</th>';
-    html += '<th class="mp-num" style="width:90px">지급액(원)</th>';
-    html += '<th style="width:55px">결과</th>';
-    html += '<th style="width:60px">유형</th>';
-    html += '<th style="width:75px">지급시간</th>';
-    html += '<th style="width:80px">만료일</th>';
+    html += '<th style="width:70px">사용자명</th>';
+    html += '<th style="width:80px">사용자ID</th>';
+    html += '<th class="mp-num" style="width:85px">지급액(원)</th>';
+    html += '<th style="width:40px">결과</th>';
+    html += '<th style="width:55px">유형</th>';
+    html += '<th style="width:65px">지급시간</th>';
+    html += '<th style="width:75px">만료일</th>';
     html += '<th>사유</th>';
     html += '</tr></thead><tbody>';
 
@@ -542,20 +543,22 @@ function mpRenderRight() {
 
         var expDate = r.expireDate ? r.expireDate.slice(0, 10) : '-';
         var execTime = r.executeDate ? r.executeDate.slice(11, 19) : '-';
+        var shortUserId = r.userId.length > 8 ? r.userId.slice(0, 8) + '..' : r.userId;
 
-        html += '<tr title="userId: ' + r.userId + '">';
+        html += '<tr>';
         html += '<td>' + r.userName + '</td>';
+        html += '<td class="mp-id" title="' + r.userId + '">' + shortUserId + '</td>';
         html += '<td class="mp-num">' + mpN(r.amount) + '</td>';
         html += '<td style="' + resultStyle + ';font-weight:500">' + resultLabel + '</td>';
         html += '<td><span class="' + badgeCls + '">' + typeLabel + '</span></td>';
         html += '<td style="font-family:JetBrains Mono,monospace;font-size:11px;text-align:center">' + execTime + '</td>';
         html += '<td style="font-family:JetBrains Mono,monospace;font-size:11px">' + expDate + '</td>';
-        html += '<td style="color:#4a5568;font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis">' + (r.cause || '-') + '</td>';
+        html += '<td style="color:#4a5568;font-size:11px;overflow:hidden;text-overflow:ellipsis">' + (r.cause || '-') + '</td>';
         html += '</tr>';
     });
 
     if (!data.length) {
-        html += '<tr><td colspan="7" style="text-align:center;padding:20px;color:#94a3b8">데이터 없음</td></tr>';
+        html += '<tr><td colspan="8" style="text-align:center;padding:20px;color:#94a3b8">데이터 없음</td></tr>';
     }
 
     html += '</tbody></table>';
@@ -563,9 +566,9 @@ function mpRenderRight() {
 }
 
 function mpCopyLeft(btn) {
-    var lines = ['일자\t고객사\t고객사ID\t일일식대(원)\t장기식대(원)\t신청식대(원)\t복지포인트(원)\t총금액(원)\t지급수(건)'];
+    var lines = ['일자\t고객사\t고객사ID\t일일식대(원)\t장기식대(원)\t신청식대(원)\t복지포인트(원)\t총금액(원)\t지급수(건)\t평균(원)'];
     MP.filtered.forEach(function(r) {
-        lines.push(r.executeDate + '\t' + r.name + '\t' + r.comId + '\t' + r.mealDay + '\t' + r.mealLong + '\t' + r.mealDemand + '\t' + r.welfare + '\t' + r.totalAmount + '\t' + r.userCount);
+        lines.push(r.executeDate + '\t' + r.name + '\t' + r.comId + '\t' + r.mealDay + '\t' + r.mealLong + '\t' + r.mealDemand + '\t' + r.welfare + '\t' + r.totalAmount + '\t' + r.userCount + '\t' + r.avgAmount);
     });
     navigator.clipboard.writeText(lines.join('\n')).then(function() {
         btn.classList.add('mp-copy--ok'); btn.textContent = '완료';
