@@ -46,6 +46,7 @@ meta: 최종 수정: 2026.02.17
 .sl-legend{display:flex;gap:12px;margin-top:4px;font-size:10px;color:#94a3b8;flex-wrap:wrap}
 .sl-legend i{display:inline-block;width:8px;height:8px;border-radius:1px;margin-right:3px;vertical-align:middle}
 .sl-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.sl-grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:8px 0}
 .sl-panel{border:1px solid #e2e8f0;border-radius:4px;overflow:hidden;display:flex;flex-direction:column}
 .sl-panel__head{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#f8fafd;border-bottom:1px solid #e2e8f0;gap:4px}
 .sl-panel__title{font-size:11px;font-weight:600;color:#4a5568;white-space:nowrap}
@@ -89,7 +90,8 @@ meta: 최종 수정: 2026.02.17
 .sl-pivot .yh{background:#eef4fb;font-weight:600}
 .sl-pivot .st{background:#f0f4f9;font-weight:600}
 .sl-pane{display:none}.sl-pane.active{display:block}
-@media(max-width:900px){.sl-grid2{grid-template-columns:1fr}}
+@media(max-width:1200px){.sl-grid4{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.sl-grid2{grid-template-columns:1fr}.sl-grid4{grid-template-columns:1fr}}
 </style>
 
 <div class="sl" id="slRoot">
@@ -304,13 +306,17 @@ function slCat(type){
 }
 var SL_CAT_ORDER=['오프라인','바코드','온라인','복지대장','기타'];
 var SL_CAT_COLOR={'오프라인':'#4a90d9','바코드':'#22c55e','온라인':'#d49a2a','복지대장':'#8b5cf6','기타':'#94a3b8'};
-
-/* === 1. 서비스 통계 === */
 function slSvc(){
     var cs={},ps={};
     var keys=['txAmt','sales','orderCnt','userCnt','solo','together','cancel','normal','admin','easyPay','mealPt','daejangPt','daejangCp','ptSum','delivery','shopFee','bill','settle','salePrice'];
     keys.forEach(function(k){cs[k]=0;ps[k]=0});
-    function ag(rows,s){rows.forEach(function(r){keys.forEach(function(k){s[k]+=RN(r,k)})})}
+    /* 식대/복지포인트 분리 집계 */
+    cs.sikPt=0;cs.bokPt=0;ps.sikPt=0;ps.bokPt=0;
+    function ag(rows,s){rows.forEach(function(r){
+        keys.forEach(function(k){s[k]+=RN(r,k)});
+        var cat=slCat(String(R(r,'shopType')));
+        if(cat==='복지대장')s.bokPt+=RN(r,'txAmt');else s.sikPt+=RN(r,'txAmt');
+    })}
     ag(SL.raw,cs);ag(SL.prevRaw,ps);
     var feeRate=cs.txAmt?(cs.shopFee/cs.txAmt*100):0;
     var pFeeRate=ps.txAmt?(ps.shopFee/ps.txAmt*100):0;
@@ -325,7 +331,7 @@ function slSvc(){
     h+='<div class="sl-card"><div class="sl-card__lbl">수수료율 (수수료/거래액)</div><div class="sl-card__val">'+feeRate.toFixed(2)+'%</div><div class="sl-card__chg '+(feeRate>pFeeRate?'up':'down')+'">전년 '+pFeeRate.toFixed(2)+'%</div></div>';
     h+='</div>';
 
-    /* 결제방식: 바 차트 + 원형 */
+    /* 4단: 결제바 + 결제원형 + 포인트원형 + 포인트바 */
     var payBar=[
         {label:'혼자결제',values:[{name:'전년',value:ps.solo,color:'#d1d5db'},{name:'당기',value:cs.solo,color:'#4a90d9'}]},
         {label:'함께결제',values:[{name:'전년',value:ps.together,color:'#d1d5db'},{name:'당기',value:cs.together,color:'#4a90d9'}]},
@@ -337,26 +343,19 @@ function slSvc(){
         {name:'함께결제',value:cs.together,color:'#06b6d4'},
         {name:'취소거래',value:cs.cancel,color:'#e85d5d'},
         {name:'관리자입력',value:cs.admin,color:'#d49a2a'}];
-    h+='<div class="sl-grid2">'+slBar(payBar,'결제방식별 건수 (전년 비교)')+slPie(payPie,'결제방식 비율 (당기)')+'</div>';
-
-    /* 포인트: 전체 원형 + 식대/복지 제외 비교 */
-    var ptAll=[
-        {name:'식대/복지 포인트',value:cs.mealPt,color:'#22c55e'},
-        {name:'대장포인트',value:cs.daejangPt,color:'#8b5cf6'},
-        {name:'대장쿠폰',value:cs.daejangCp,color:'#f59e0b'},
-        {name:'간편결제',value:cs.easyPay,color:'#06b6d4'}];
-    // 식대/복지 제외 나머지만 확대
-    var ptExcl=[
-        {name:'대장포인트',value:cs.daejangPt,color:'#8b5cf6'},
-        {name:'대장쿠폰',value:cs.daejangCp,color:'#f59e0b'},
-        {name:'간편결제',value:cs.easyPay,color:'#06b6d4'}];
-    var ptExclBar=[
-        {label:'대장포인트',values:[{name:'전년',value:ps.daejangPt,color:'#d1d5db'},{name:'당기',value:cs.daejangPt,color:'#8b5cf6'}]},
-        {label:'대장쿠폰',values:[{name:'전년',value:ps.daejangCp,color:'#d1d5db'},{name:'당기',value:cs.daejangCp,color:'#f59e0b'}]},
-        {label:'간편결제',values:[{name:'전년',value:ps.easyPay,color:'#d1d5db'},{name:'당기',value:cs.easyPay,color:'#06b6d4'}]}];
-
-    h+='<div class="sl-grid2">'+slPie(ptAll,'포인트 사용 구성 (전체 비율)')+slPie(ptExcl,'포인트 구성 (식대/복지 제외)')+'</div>';
-    h+=slBar(ptExclBar,'대장포인트 / 대장쿠폰 / 간편결제 (전년 비교)');
+    var ptPie=[
+        {name:'식대포인트',value:cs.sikPt,color:'#4a90d9'},
+        {name:'복지포인트',value:cs.bokPt,color:'#8b5cf6'},
+        {name:'대장포인트',value:cs.daejangPt,color:'#22c55e'},
+        {name:'간편결제',value:cs.easyPay,color:'#06b6d4'},
+        {name:'대장쿠폰',value:cs.daejangCp,color:'#f59e0b'}];
+    var ptBar=[
+        {label:'식대포인트',values:[{name:'전년',value:ps.sikPt,color:'#d1d5db'},{name:'당기',value:cs.sikPt,color:'#4a90d9'}]},
+        {label:'복지포인트',values:[{name:'전년',value:ps.bokPt,color:'#d1d5db'},{name:'당기',value:cs.bokPt,color:'#8b5cf6'}]},
+        {label:'대장포인트',values:[{name:'전년',value:ps.daejangPt,color:'#d1d5db'},{name:'당기',value:cs.daejangPt,color:'#22c55e'}]},
+        {label:'간편결제',values:[{name:'전년',value:ps.easyPay,color:'#d1d5db'},{name:'당기',value:cs.easyPay,color:'#06b6d4'}]},
+        {label:'대장쿠폰',values:[{name:'전년',value:ps.daejangCp,color:'#d1d5db'},{name:'당기',value:cs.daejangCp,color:'#f59e0b'}]}];
+    h+='<div class="sl-grid4">'+slBar(payBar,'결제방식 건수 (전년 비교)')+slPie(payPie,'결제방식 비율')+slPie(ptPie,'포인트 구성 비율')+slBar(ptBar,'포인트 전년 비교')+'</div>';
 
     /* 거래액 대비 수수료율 분석 */
     h+='<div class="sl-cw"><div class="sl-cw__t">거래액 대비 수수료 분석</div>';
@@ -378,8 +377,11 @@ function slSvc(){
     h+='<table class="sl-t sl-t--s"><thead><tr><th>구분</th><th class="r">당기</th><th class="r">전년</th><th class="r">증감</th><th class="r">증감률</th></tr></thead><tbody>';
     h+=dr('혼자결제',cs.solo,ps.solo)+dr('함께결제',cs.together,ps.together)+dr('정상거래',cs.normal,ps.normal)+dr('취소거래',cs.cancel,ps.cancel)+dr('관리자입력',cs.admin,ps.admin);
     h+='<tr><td colspan="5" style="height:4px;border:none"></td></tr>';
-    h+=dr('식대/복지 포인트',cs.mealPt,ps.mealPt)+dr('대장포인트',cs.daejangPt,ps.daejangPt)+dr('대장쿠폰',cs.daejangCp,ps.daejangCp)+dr('간편결제',cs.easyPay,ps.easyPay)+dr('포인트 사용 합계',cs.ptSum,ps.ptSum);
+    h+=dr('식대포인트',cs.sikPt,ps.sikPt)+dr('복지포인트',cs.bokPt,ps.bokPt)+dr('대장포인트',cs.daejangPt,ps.daejangPt)+dr('간편결제',cs.easyPay,ps.easyPay)+dr('대장쿠폰',cs.daejangCp,ps.daejangCp)+dr('포인트 사용 합계',cs.ptSum,ps.ptSum);
     h+='</tbody></table></div>';
+    $('pSvc').innerHTML=h;
+}
+
     $('pSvc').innerHTML=h;
 }
 
