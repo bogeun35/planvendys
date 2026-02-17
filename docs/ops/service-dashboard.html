@@ -763,18 +763,10 @@ function slGroupArea(rows){
 function slArea(){
     SL._ac=slGroupArea(SL.raw);SL._ap=slGroupArea(SL.prevRaw);
     var totalTx=0;SL._ac.forEach(function(g){totalTx+=g.tx});SL._areaTotalTx=totalTx;
-    // 시도별 데이터맵
-    var sidoMap={};SL._ac.forEach(function(g){sidoMap[g.sido]=g});
-    var maxTx=0;SL._ac.forEach(function(g){if(g.tx>maxTx)maxTx=g.tx});
-    // SVG 지도
-    var h='<div class="sl-grid2"><div class="sl-cw"><div class="sl-cw__t">시/도별 거래액 지도</div>';
-    h+=slKoreaMap(sidoMap,maxTx,totalTx);
-    h+='</div>';
-    // 바차트
+    // 차트
     var cd=SL._ac.slice(0,15).map(function(g,i){return{label:g.sido.replace('특별시','').replace('광역시','').replace('특별자치시','').replace('특별자치도',''),values:[{name:g.sido,value:g.tx,color:SLC[i%SLC.length]}]}});
-    h+=slBar(cd,'시/도별 거래액 (상위 15)',1);
-    h+='</div>';
-    // 2단: 테이블 + 상세
+    var h=slBar(cd,'시/도별 거래액 (상위 15)',1);
+    // 2단
     h+='<div class="sl-grid2">';
     h+='<div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title">시/도별 현황 ('+SL._ac.length+')</span></div><div class="sl-tw" id="slATW"></div></div>';
     h+='<div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title" id="slADT">시/군/구 상세</span></div><div class="sl-det" id="slAD"><div class="sl-det__empty">좌측에서 시/도를 선택하세요</div></div></div>';
@@ -784,63 +776,6 @@ function slArea(){
     if(SL.areaSel)slADet();
 }
 
-/* 한국 시/도 SVG 지도 */
-function slKoreaMap(sidoMap,maxTx,totalTx){
-    var W=560,H=700;
-    var regions=[
-        {id:'서울특별시',  short:'서울',   x:205,y:155,w:28,h:22},
-        {id:'인천광역시',  short:'인천',   x:170,y:165,w:30,h:25},
-        {id:'경기도',      short:'경기',   x:185,y:100,w:90,h:95, path:'M195,100 L265,100 275,130 280,175 275,195 245,200 225,195 215,185 200,190 185,180 180,145 Z'},
-        {id:'강원도',      short:'강원',   x:280,y:70, w:130,h:120,path:'M290,75 L340,70 390,80 410,120 400,170 370,190 310,195 280,175 275,130 Z'},
-        {id:'충청북도',    short:'충북',   x:250,y:210,w:80,h:70, path:'M260,210 L310,205 330,230 325,275 280,280 250,255 Z'},
-        {id:'충청남도',    short:'충남',   x:145,y:220,w:100,h:80, path:'M155,225 L245,215 255,255 240,295 185,300 145,270 Z'},
-        {id:'세종특별자치시',short:'세종', x:235,y:240,w:22,h:18},
-        {id:'대전광역시',  short:'대전',   x:250,y:280,w:28,h:22},
-        {id:'전라북도',    short:'전북',   x:150,y:310,w:95,h:70, path:'M160,310 L240,305 250,340 245,375 185,380 150,350 Z'},
-        {id:'전라남도',    short:'전남',   x:120,y:395,w:130,h:95, path:'M135,395 L235,390 250,430 245,475 195,490 130,475 120,435 Z'},
-        {id:'광주광역시',  short:'광주',   x:170,y:400,w:28,h:22},
-        {id:'경상북도',    short:'경북',   x:305,y:195,w:115,h:110,path:'M320,200 L395,195 420,230 415,295 370,310 320,300 305,255 Z'},
-        {id:'경상남도',    short:'경남',   x:260,y:340,w:110,h:90, path:'M275,345 L365,340 375,385 370,425 310,430 260,410 Z'},
-        {id:'대구광역시',  short:'대구',   x:340,y:295,w:30,h:24},
-        {id:'울산광역시',  short:'울산',   x:380,y:330,w:30,h:24},
-        {id:'부산광역시',  short:'부산',   x:360,y:410,w:30,h:24},
-        {id:'제주특별자치도',short:'제주', x:160,y:540,w:75,h:35, path:'M165,545 L230,540 235,565 170,575 Z'}
-    ];
-    var svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:480px;height:auto;font-family:Noto Sans KR,sans-serif;margin:0 auto;display:block">';
-    // 배경
-    svg+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff" rx="4"/>';
-    regions.forEach(function(rg){
-        var data=sidoMap[rg.id];
-        var tx=data?data.tx:0;
-        var intensity=maxTx?Math.max(0.08,tx/maxTx):0;
-        var r2=Math.round(74+(1-intensity)*(255-74));
-        var g2=Math.round(144+(1-intensity)*(255-144));
-        var b2=Math.round(217+(1-intensity)*(255-217));
-        var fill='rgb('+r2+','+g2+','+b2+')';
-        var sel=SL.areaSel===rg.id;
-        var stroke=sel?'#1a2332':'#94a3b8';var sw=sel?2:0.8;
-        if(rg.path){
-            svg+='<path d="'+rg.path+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" cursor="pointer" onclick="slASel(\''+rg.id+'\')">';
-            svg+='<title>'+rg.short+': '+slS(tx)+' ('+(totalTx?(tx/totalTx*100).toFixed(1):'0')+'%)</title></path>';
-        }else{
-            svg+='<rect x="'+rg.x+'" y="'+rg.y+'" width="'+rg.w+'" height="'+rg.h+'" rx="3" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" cursor="pointer" onclick="slASel(\''+rg.id+'\')">';
-            svg+='<title>'+rg.short+': '+slS(tx)+' ('+(totalTx?(tx/totalTx*100).toFixed(1):'0')+'%)</title></rect>';
-        }
-        // 라벨
-        var lx=rg.path?(rg.x+rg.w/2):(rg.x+rg.w/2);
-        var ly=rg.path?(rg.y+rg.h/2):(rg.y+rg.h/2);
-        svg+='<text x="'+lx+'" y="'+(ly-2)+'" text-anchor="middle" fill="#1a2332" font-size="10" font-weight="600" pointer-events="none">'+rg.short+'</text>';
-        svg+='<text x="'+lx+'" y="'+(ly+10)+'" text-anchor="middle" fill="#4a5568" font-size="8" font-family="JetBrains Mono,monospace" pointer-events="none">'+slS(tx)+'</text>';
-    });
-    // 범례
-    svg+='<defs><linearGradient id="slMapGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#eef4fb"/><stop offset="100%" stop-color="#4a90d9"/></linearGradient></defs>';
-    svg+='<rect x="'+(W-180)+'" y="'+(H-40)+'" width="120" height="8" rx="2" fill="url(#slMapGrad)"/>';
-    svg+='<text x="'+(W-180)+'" y="'+(H-16)+'" fill="#94a3b8" font-size="8">0</text>';
-    svg+='<text x="'+(W-60)+'" y="'+(H-16)+'" fill="#94a3b8" font-size="8" text-anchor="end">'+slS(maxTx)+'</text>';
-    svg+='<text x="'+(W-120)+'" y="'+(H-16)+'" fill="#94a3b8" font-size="8" text-anchor="middle">거래액</text>';
-    svg+='</svg>';
-    return svg;
-}
 
 function slATbl(){
     var totalTx=SL._areaTotalTx||0;
