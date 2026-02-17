@@ -125,7 +125,7 @@ title: 청구-입금 매칭 검증
   </div>
 
   <div class="bm-tolerance">
-    <span>금액 허용 오차</span><input type="number" id="bmTolerance" value="2" min="0" max="100"><span>원</span>
+    <span>금액 허용 오차</span><input type="number" id="bmTolerance" value="0" min="0" max="100"><span>원</span>
     <span style="margin-left:12px">매칭 기준</span>
     <select id="bmMatchMode"><option value="both">JS정규식 + 금액</option><option value="desc">JS정규식만</option><option value="amount">금액만</option></select>
     <button class="bm-btn bm-btn--primary" onclick="bmRunMatch()">매칭 실행</button>
