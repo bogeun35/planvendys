@@ -1,0 +1,544 @@
+<!--
+title: SNS 콘텐츠 미리보기
+meta: 최종 수정: 2026.02.17
+-->
+
+<style>
+/* ===== SNS Preview Dashboard ===== */
+.sp { font-family: 'Noto Sans KR', sans-serif; font-size: 13px; color: #1a2332; display: flex; height: calc(100vh - 120px); gap: 0; }
+
+/* --- 좌측: 게시물 리스트 --- */
+.sp-list { width: 280px; min-width: 280px; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; background: #fff; }
+.sp-list__hd { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px; }
+.sp-list__title { font-size: 14px; font-weight: 700; color: #1a2332; }
+.sp-list__url { display: flex; gap: 6px; align-items: center; }
+.sp-list__url input { flex: 1; height: 28px; padding: 0 8px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 11px; color: #4a5568; font-family: 'JetBrains Mono', monospace; }
+.sp-list__url button { height: 28px; padding: 0 10px; background: #4a90d9; color: #fff; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.sp-list__url button:hover { background: #3a7bc8; }
+.sp-list__status { font-size: 11px; color: #94a3b8; padding: 0 12px 6px; }
+.sp-list__body { flex: 1; overflow-y: auto; }
+.sp-list__empty { padding: 40px 12px; text-align: center; color: #94a3b8; font-size: 12px; line-height: 1.6; }
+
+.sp-item { padding: 8px 12px; border-bottom: 1px solid #f0f4f9; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; transition: background .15s; }
+.sp-item:hover { background: #f8fafd; }
+.sp-item--active { background: #eef4fb !important; border-left: 3px solid #4a90d9; padding-left: 9px; }
+.sp-item__thumb { width: 48px; height: 48px; border-radius: 3px; object-fit: cover; background: #f0f4f9; flex-shrink: 0; }
+.sp-item__thumb--empty { display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 10px; }
+.sp-item__info { flex: 1; min-width: 0; }
+.sp-item__date { font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 2px; }
+.sp-item__title { font-size: 12px; font-weight: 600; color: #1a2332; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-item__desc { font-size: 11px; color: #4a5568; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+
+/* --- 우측: 미리보기 영역 --- */
+.sp-preview { flex: 1; display: flex; flex-direction: column; background: #f0f4f9; overflow: hidden; }
+.sp-preview__tabs { display: flex; background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 16px; gap: 0; flex-shrink: 0; }
+.sp-tab { padding: 8px 16px; font-size: 12px; color: #4a5568; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap; }
+.sp-tab:hover { color: #1a2332; }
+.sp-tab--active { color: #4a90d9; border-bottom-color: #4a90d9; font-weight: 600; }
+.sp-preview__body { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 16px; }
+.sp-preview__empty { display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 13px; height: 100%; }
+
+/* ===== 네이버 블로그 - 홈 피드 ===== */
+.nb-home { width: 100%; max-width: 860px; background: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.nb-home__header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; }
+.nb-home__profile { width: 48px; height: 48px; border-radius: 50%; background: #03c75a; display: flex; align-items: center; justify-content: center; }
+.nb-home__profile-icon { color: #fff; font-weight: 700; font-size: 18px; }
+.nb-home__profile-info {}
+.nb-home__profile-name { font-size: 16px; font-weight: 700; color: #333; }
+.nb-home__profile-desc { font-size: 12px; color: #999; margin-top: 2px; }
+.nb-home__nav { display: flex; border-bottom: 1px solid #f0f0f0; padding: 0 20px; }
+.nb-home__nav-item { padding: 10px 16px; font-size: 13px; color: #333; cursor: default; }
+.nb-home__nav-item--active { color: #03c75a; font-weight: 700; border-bottom: 2px solid #03c75a; }
+.nb-home__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; padding: 16px 20px; }
+.nb-card { border: 1px solid #eee; border-radius: 6px; overflow: hidden; cursor: default; transition: box-shadow .2s; }
+.nb-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+.nb-card__img { width: 100%; aspect-ratio: 16/10; object-fit: cover; background: #f5f5f5; display: block; }
+.nb-card__body { padding: 12px; }
+.nb-card__title { font-size: 14px; font-weight: 700; color: #333; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.nb-card__desc { font-size: 12px; color: #888; line-height: 1.5; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.nb-card__meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 11px; color: #bbb; }
+.nb-card__date { font-family: 'JetBrains Mono', monospace; }
+
+/* ===== 네이버 블로그 - PC 본문 ===== */
+.nb-pc { width: 100%; max-width: 860px; background: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.nb-pc__header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+.nb-pc__category { font-size: 12px; color: #03c75a; margin-bottom: 8px; }
+.nb-pc__title { font-size: 22px; font-weight: 700; color: #333; line-height: 1.4; word-break: keep-all; }
+.nb-pc__meta { display: flex; gap: 12px; align-items: center; margin-top: 10px; font-size: 12px; color: #999; }
+.nb-pc__author { display: flex; align-items: center; gap: 6px; }
+.nb-pc__author-pic { width: 28px; height: 28px; border-radius: 50%; background: #03c75a; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; }
+.nb-pc__divider { color: #ddd; }
+.nb-pc__body { padding: 24px 20px; font-size: 15px; line-height: 1.8; color: #333; font-family: 'Noto Sans KR', sans-serif; word-break: keep-all; }
+.nb-pc__body p { margin: 0 0 16px; }
+.nb-pc__body img { max-width: 100%; border-radius: 4px; margin: 12px 0; }
+.nb-pc__footer { padding: 16px 20px; border-top: 1px solid #f0f0f0; display: flex; gap: 16px; font-size: 12px; color: #999; }
+.nb-pc__footer-item { display: flex; align-items: center; gap: 4px; }
+
+/* ===== 네이버 블로그 - 모바일 본문 ===== */
+.nb-mo-wrap { width: 375px; min-width: 375px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.12); overflow: hidden; position: relative; }
+.nb-mo__statusbar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 12px; font-weight: 600; color: #333; }
+.nb-mo__statusbar-time { font-family: 'JetBrains Mono', monospace; }
+.nb-mo__statusbar-icons { display: flex; gap: 4px; align-items: center; font-size: 11px; }
+.nb-mo__topbar { height: 44px; display: flex; align-items: center; padding: 0 12px; border-bottom: 1px solid #f0f0f0; }
+.nb-mo__topbar-back { font-size: 18px; color: #333; margin-right: 8px; }
+.nb-mo__topbar-title { font-size: 14px; font-weight: 700; color: #333; flex: 1; }
+.nb-mo__topbar-icons { display: flex; gap: 12px; color: #666; font-size: 14px; }
+.nb-mo__body { max-height: 600px; overflow-y: auto; }
+.nb-mo__author { display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
+.nb-mo__author-pic { width: 36px; height: 36px; border-radius: 50%; background: #03c75a; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 13px; }
+.nb-mo__author-info { flex: 1; }
+.nb-mo__author-name { font-size: 13px; font-weight: 700; color: #333; }
+.nb-mo__author-date { font-size: 11px; color: #999; margin-top: 1px; }
+.nb-mo__title { padding: 0 16px 12px; font-size: 18px; font-weight: 700; color: #333; line-height: 1.4; }
+.nb-mo__content { padding: 0 16px 20px; font-size: 14px; line-height: 1.8; color: #333; word-break: keep-all; }
+.nb-mo__content p { margin: 0 0 12px; }
+.nb-mo__content img { width: 100%; border-radius: 0; margin: 8px 0; }
+.nb-mo__reactions { padding: 12px 16px; border-top: 1px solid #f0f0f0; display: flex; gap: 16px; font-size: 12px; color: #999; }
+
+/* ===== 인스타그램 미리보기 ===== */
+.ig-wrap { width: 375px; min-width: 375px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.12); overflow: hidden; }
+.ig__statusbar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 12px; font-weight: 600; color: #333; }
+.ig__statusbar-time { font-family: 'JetBrains Mono', monospace; }
+.ig__topbar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-bottom: 1px solid #efefef; }
+.ig__topbar-logo { font-size: 20px; font-family: 'Georgia', serif; font-style: italic; font-weight: 700; color: #262626; letter-spacing: -0.5px; }
+.ig__topbar-icons { display: flex; gap: 16px; color: #262626; font-size: 16px; }
+.ig__feed { max-height: 600px; overflow-y: auto; }
+.ig__post { border-bottom: 1px solid #efefef; }
+.ig__post-header { display: flex; align-items: center; padding: 10px 12px; gap: 10px; }
+.ig__post-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); display: flex; align-items: center; justify-content: center; }
+.ig__post-avatar-inner { width: 28px; height: 28px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #262626; }
+.ig__post-username { font-size: 13px; font-weight: 600; color: #262626; flex: 1; }
+.ig__post-more { color: #262626; font-size: 16px; cursor: default; }
+.ig__post-img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #fafafa; display: block; }
+.ig__post-actions { display: flex; padding: 8px 12px; gap: 14px; align-items: center; }
+.ig__post-action { font-size: 22px; color: #262626; cursor: default; line-height: 1; }
+.ig__post-action--right { margin-left: auto; }
+.ig__post-likes { padding: 0 12px 4px; font-size: 13px; font-weight: 600; color: #262626; }
+.ig__post-caption { padding: 0 12px 8px; font-size: 13px; color: #262626; line-height: 1.5; }
+.ig__post-caption strong { font-weight: 600; }
+.ig__post-caption-more { color: #8e8e8e; cursor: default; }
+.ig__post-time { padding: 0 12px 12px; font-size: 10px; color: #8e8e8e; text-transform: uppercase; }
+
+/* ===== 설정 패널 ===== */
+.sp-settings { padding: 6px 12px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.sp-settings label { font-size: 11px; color: #4a5568; }
+.sp-settings input[type="text"] { height: 24px; padding: 0 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 11px; width: 120px; }
+.sp-settings select { height: 24px; padding: 0 4px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 11px; }
+
+/* ===== 로딩 ===== */
+.sp-loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: #94a3b8; font-size: 12px; gap: 8px; }
+.sp-spinner { width: 16px; height: 16px; border: 2px solid #e2e8f0; border-top-color: #4a90d9; border-radius: 50%; animation: spSpin .6s linear infinite; }
+@keyframes spSpin { to { transform: rotate(360deg); } }
+
+/* 스크롤바 */
+.sp-list__body::-webkit-scrollbar, .nb-mo__body::-webkit-scrollbar, .ig__feed::-webkit-scrollbar, .sp-preview__body::-webkit-scrollbar { width: 4px; }
+.sp-list__body::-webkit-scrollbar-thumb, .nb-mo__body::-webkit-scrollbar-thumb, .ig__feed::-webkit-scrollbar-thumb, .sp-preview__body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+
+/* 구글시트 안내 */
+.sp-guide { padding: 16px 20px; max-width: 600px; }
+.sp-guide__title { font-size: 14px; font-weight: 700; color: #1a2332; margin-bottom: 12px; }
+.sp-guide__table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; }
+.sp-guide__table th { background: #f8fafd; padding: 6px 10px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600; color: #4a5568; }
+.sp-guide__table td { padding: 6px 10px; border: 1px solid #e2e8f0; color: #4a5568; }
+.sp-guide__table code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: #f0f4f9; padding: 1px 4px; border-radius: 2px; }
+.sp-guide__note { font-size: 11px; color: #94a3b8; line-height: 1.6; margin-top: 8px; }
+.sp-guide__steps { font-size: 12px; color: #4a5568; line-height: 1.8; }
+.sp-guide__steps strong { color: #1a2332; }
+</style>
+
+<div class="sp" id="spRoot">
+  <!-- 좌측 리스트 -->
+  <div class="sp-list">
+    <div class="sp-list__hd">
+      <div class="sp-list__title">SNS 콘텐츠 미리보기</div>
+      <div class="sp-list__url">
+        <input type="text" id="spSheetUrl" placeholder="구글시트 CSV URL 붙여넣기" />
+        <button onclick="spLoad()">불러오기</button>
+      </div>
+    </div>
+    <div class="sp-settings">
+      <label>블로그명</label>
+      <input type="text" id="spBlogName" value="Vendys 공식블로그" onchange="spRender()" />
+      <label>인스타ID</label>
+      <input type="text" id="spInstaId" value="vendys_official" onchange="spRender()" />
+    </div>
+    <div id="spStatus" class="sp-list__status"></div>
+    <div class="sp-list__body" id="spListBody">
+      <div class="sp-list__empty" id="spEmpty">
+        <div class="sp-guide">
+          <div class="sp-guide__title">구글시트 설정 가이드</div>
+          <table class="sp-guide__table">
+            <tr><th>열</th><th>컬럼명</th><th>설명</th><th>예시</th></tr>
+            <tr><td>A</td><td><code>date</code></td><td>게시 날짜</td><td>2026-02-17</td></tr>
+            <tr><td>B</td><td><code>thumbnail</code></td><td>썸네일 이미지 URL</td><td>https://...</td></tr>
+            <tr><td>C</td><td><code>title</code></td><td>게시물 제목</td><td>신규 서비스 출시</td></tr>
+            <tr><td>D</td><td><code>content</code></td><td>본문 내용</td><td>안녕하세요...</td></tr>
+            <tr><td>E</td><td><code>tags</code></td><td>해시태그 (쉼표 구분)</td><td>벤디스,식권대장</td></tr>
+            <tr><td>F</td><td><code>platform</code></td><td>플랫폼 (선택)</td><td>blog,insta</td></tr>
+          </table>
+          <div class="sp-guide__steps">
+            <strong>1.</strong> 구글시트에서 위 컬럼으로 시트 생성<br/>
+            <strong>2.</strong> 파일 > 공유 > 웹에 게시 > CSV 선택 > 게시<br/>
+            <strong>3.</strong> 생성된 CSV URL을 위 입력란에 붙여넣기<br/>
+            <strong>4.</strong> "불러오기" 클릭
+          </div>
+          <div class="sp-guide__note">
+            * content 컬럼에서 줄바꿈은 셀 내 줄바꿈(Alt+Enter) 사용<br/>
+            * thumbnail은 직접 접근 가능한 이미지 URL 필요<br/>
+            * tags, platform은 선택 사항 (비워도 됨)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 우측 미리보기 -->
+  <div class="sp-preview">
+    <div class="sp-preview__tabs" id="spTabs">
+      <div class="sp-tab sp-tab--active" onclick="spSwitchTab('home', this)">Blog 홈피드</div>
+      <div class="sp-tab" onclick="spSwitchTab('pc', this)">Blog PC</div>
+      <div class="sp-tab" onclick="spSwitchTab('mobile', this)">Blog 모바일</div>
+      <div class="sp-tab" onclick="spSwitchTab('insta', this)">Instagram</div>
+    </div>
+    <div class="sp-preview__body" id="spPreviewBody">
+      <div class="sp-preview__empty">구글시트 CSV URL을 입력하고 불러오기를 눌러주세요</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== 전역 상태 ===== */
+var SP = {
+  posts: [],
+  selectedIdx: 0,
+  currentTab: 'home'
+};
+
+/* ===== CSV 파싱 ===== */
+function spParseCSV(text) {
+  var rows = [];
+  var lines = text.split('\n');
+  var headers = [];
+  var inQuote = false;
+  var fields = [];
+  var field = '';
+
+  // 간단한 CSV 파서 (큰따옴표 내 줄바꿈 처리)
+  for (var li = 0; li < lines.length; li++) {
+    var line = lines[li];
+    for (var ci = 0; ci < line.length; ci++) {
+      var ch = line[ci];
+      if (inQuote) {
+        if (ch === '"') {
+          if (ci + 1 < line.length && line[ci + 1] === '"') {
+            field += '"';
+            ci++;
+          } else {
+            inQuote = false;
+          }
+        } else {
+          field += ch;
+        }
+      } else {
+        if (ch === '"') {
+          inQuote = true;
+        } else if (ch === ',') {
+          fields.push(field);
+          field = '';
+        } else {
+          field += ch;
+        }
+      }
+    }
+    if (inQuote) {
+      field += '\n';
+    } else {
+      fields.push(field);
+      field = '';
+      if (headers.length === 0) {
+        headers = fields.map(function(h) { return h.trim().toLowerCase().replace(/\r/g, ''); });
+      } else {
+        var obj = {};
+        headers.forEach(function(h, i) {
+          obj[h] = (fields[i] || '').replace(/\r/g, '').trim();
+        });
+        if (obj.date || obj.title) rows.push(obj);
+      }
+      fields = [];
+    }
+  }
+  return rows;
+}
+
+/* ===== 데이터 로드 ===== */
+async function spLoad() {
+  var url = document.getElementById('spSheetUrl').value.trim();
+  if (!url) {
+    document.getElementById('spStatus').textContent = 'CSV URL을 입력해주세요';
+    return;
+  }
+
+  document.getElementById('spStatus').textContent = '데이터 불러오는 중...';
+  document.getElementById('spStatus').style.color = '#4a90d9';
+
+  try {
+    var resp = await fetch(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var text = await resp.text();
+    var posts = spParseCSV(text);
+
+    if (posts.length === 0) {
+      document.getElementById('spStatus').textContent = '데이터가 없습니다. 컬럼명을 확인해주세요.';
+      document.getElementById('spStatus').style.color = '#e85d5d';
+      return;
+    }
+
+    // 날짜 내림차순 정렬
+    posts.sort(function(a, b) {
+      return (b.date || '').localeCompare(a.date || '');
+    });
+
+    SP.posts = posts;
+    SP.selectedIdx = 0;
+    document.getElementById('spStatus').textContent = posts.length + '개 게시물 로드 완료';
+    document.getElementById('spStatus').style.color = '#22c55e';
+
+    spRenderList();
+    spRender();
+  } catch (err) {
+    document.getElementById('spStatus').textContent = '로드 실패: ' + err.message;
+    document.getElementById('spStatus').style.color = '#e85d5d';
+  }
+}
+
+/* ===== 리스트 렌더링 ===== */
+function spRenderList() {
+  var el = document.getElementById('spListBody');
+  if (SP.posts.length === 0) {
+    el.innerHTML = document.getElementById('spEmpty') ? document.getElementById('spEmpty').outerHTML : '';
+    return;
+  }
+
+  var html = '';
+  SP.posts.forEach(function(p, i) {
+    var active = i === SP.selectedIdx ? ' sp-item--active' : '';
+    var thumbHtml = p.thumbnail
+      ? '<img class="sp-item__thumb" src="' + spEsc(p.thumbnail) + '" onerror="this.outerHTML=\'<div class=sp-item__thumb><div class=sp-item__thumb--empty>No IMG</div></div>\'" />'
+      : '<div class="sp-item__thumb"><div class="sp-item__thumb--empty">No IMG</div></div>';
+    html += '<div class="sp-item' + active + '" onclick="spSelect(' + i + ')">'
+      + thumbHtml
+      + '<div class="sp-item__info">'
+      + '<div class="sp-item__date">' + spEsc(p.date || '') + '</div>'
+      + '<div class="sp-item__title">' + spEsc(p.title || '(제목 없음)') + '</div>'
+      + '<div class="sp-item__desc">' + spEsc((p.content || '').substring(0, 60)) + '</div>'
+      + '</div></div>';
+  });
+  el.innerHTML = html;
+}
+
+function spSelect(idx) {
+  SP.selectedIdx = idx;
+  spRenderList();
+  spRender();
+}
+
+function spSwitchTab(tab, el) {
+  SP.currentTab = tab;
+  var tabs = document.querySelectorAll('.sp-tab');
+  tabs.forEach(function(t) { t.classList.remove('sp-tab--active'); });
+  el.classList.add('sp-tab--active');
+  spRender();
+}
+
+/* ===== 메인 렌더링 ===== */
+function spRender() {
+  var body = document.getElementById('spPreviewBody');
+  if (SP.posts.length === 0) {
+    body.innerHTML = '<div class="sp-preview__empty">구글시트 CSV URL을 입력하고 불러오기를 눌러주세요</div>';
+    return;
+  }
+
+  var blogName = document.getElementById('spBlogName').value || 'Vendys 공식블로그';
+  var instaId = document.getElementById('spInstaId').value || 'vendys_official';
+  var initial = blogName.charAt(0);
+
+  switch (SP.currentTab) {
+    case 'home': body.innerHTML = spRenderBlogHome(blogName, initial); break;
+    case 'pc': body.innerHTML = spRenderBlogPC(blogName, initial); break;
+    case 'mobile': body.innerHTML = spRenderBlogMobile(blogName, initial); break;
+    case 'insta': body.innerHTML = spRenderInsta(instaId); break;
+  }
+}
+
+/* ===== 네이버 블로그 홈 피드 ===== */
+function spRenderBlogHome(blogName, initial) {
+  var cards = '';
+  SP.posts.forEach(function(p, i) {
+    var imgHtml = p.thumbnail
+      ? '<img class="nb-card__img" src="' + spEsc(p.thumbnail) + '" onerror="this.style.background=\'#f5f5f5\';this.alt=\'이미지 로드 실패\'" />'
+      : '<div class="nb-card__img" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:13px;">No Image</div>';
+    cards += '<div class="nb-card" onclick="spSelect(' + i + ')">'
+      + imgHtml
+      + '<div class="nb-card__body">'
+      + '<div class="nb-card__title">' + spEsc(p.title || '') + '</div>'
+      + '<div class="nb-card__desc">' + spEsc((p.content || '').substring(0, 80)) + '</div>'
+      + '<div class="nb-card__meta"><span class="nb-card__date">' + spEsc(p.date || '') + '</span></div>'
+      + '</div></div>';
+  });
+
+  return '<div class="nb-home">'
+    + '<div class="nb-home__header">'
+    + '<div class="nb-home__profile"><span class="nb-home__profile-icon">' + spEsc(initial) + '</span></div>'
+    + '<div class="nb-home__profile-info"><div class="nb-home__profile-name">' + spEsc(blogName) + '</div>'
+    + '<div class="nb-home__profile-desc">' + SP.posts.length + '개 게시물</div></div>'
+    + '</div>'
+    + '<div class="nb-home__nav">'
+    + '<div class="nb-home__nav-item nb-home__nav-item--active">전체글</div>'
+    + '<div class="nb-home__nav-item">인기글</div>'
+    + '</div>'
+    + '<div class="nb-home__grid">' + cards + '</div>'
+    + '</div>';
+}
+
+/* ===== 네이버 블로그 PC 본문 ===== */
+function spRenderBlogPC(blogName, initial) {
+  var p = SP.posts[SP.selectedIdx];
+  if (!p) return '<div class="sp-preview__empty">게시물을 선택해주세요</div>';
+
+  var contentHtml = spContentToHtml(p.content || '', p.thumbnail);
+  var tags = (p.tags || '').split(',').filter(function(t) { return t.trim(); });
+  var tagHtml = tags.map(function(t) { return '<span style="color:#03c75a;margin-right:8px;">#' + spEsc(t.trim()) + '</span>'; }).join('');
+
+  return '<div class="nb-pc">'
+    + '<div class="nb-pc__header">'
+    + '<div class="nb-pc__category">전체 카테고리</div>'
+    + '<div class="nb-pc__title">' + spEsc(p.title || '') + '</div>'
+    + '<div class="nb-pc__meta">'
+    + '<div class="nb-pc__author"><div class="nb-pc__author-pic">' + spEsc(initial) + '</div><span style="font-weight:600;color:#333;">' + spEsc(blogName) + '</span></div>'
+    + '<span class="nb-pc__divider">|</span>'
+    + '<span>' + spFormatDate(p.date) + '</span>'
+    + '</div></div>'
+    + '<div class="nb-pc__body">' + contentHtml + (tagHtml ? '<div style="margin-top:20px;">' + tagHtml + '</div>' : '') + '</div>'
+    + '<div class="nb-pc__footer">'
+    + '<div class="nb-pc__footer-item"><span>&#9825;</span> 공감 0</div>'
+    + '<div class="nb-pc__footer-item"><span>&#128172;</span> 댓글 0</div>'
+    + '</div></div>';
+}
+
+/* ===== 네이버 블로그 모바일 본문 ===== */
+function spRenderBlogMobile(blogName, initial) {
+  var p = SP.posts[SP.selectedIdx];
+  if (!p) return '<div class="sp-preview__empty">게시물을 선택해주세요</div>';
+
+  var contentHtml = spContentToHtml(p.content || '', p.thumbnail);
+
+  return '<div class="nb-mo-wrap">'
+    + '<div class="nb-mo__statusbar"><span class="nb-mo__statusbar-time">9:41</span><span class="nb-mo__statusbar-icons">&#9679;&#9679;&#9679;</span></div>'
+    + '<div class="nb-mo__topbar"><span class="nb-mo__topbar-back">&#8249;</span><span class="nb-mo__topbar-title">' + spEsc(blogName) + '</span><span class="nb-mo__topbar-icons">&#8942;</span></div>'
+    + '<div class="nb-mo__body">'
+    + '<div class="nb-mo__author">'
+    + '<div class="nb-mo__author-pic">' + spEsc(initial) + '</div>'
+    + '<div class="nb-mo__author-info"><div class="nb-mo__author-name">' + spEsc(blogName) + '</div>'
+    + '<div class="nb-mo__author-date">' + spFormatDate(p.date) + '</div></div></div>'
+    + '<div class="nb-mo__title">' + spEsc(p.title || '') + '</div>'
+    + '<div class="nb-mo__content">' + contentHtml + '</div>'
+    + '<div class="nb-mo__reactions">'
+    + '<span>&#9825; 공감</span><span>&#128172; 댓글</span><span>&#8631; 공유</span>'
+    + '</div></div></div>';
+}
+
+/* ===== 인스타그램 피드 ===== */
+function spRenderInsta(instaId) {
+  var p = SP.posts[SP.selectedIdx];
+  if (!p) return '<div class="sp-preview__empty">게시물을 선택해주세요</div>';
+
+  var initial = instaId.charAt(0).toUpperCase();
+  var caption = (p.content || '').replace(/\n/g, ' ').substring(0, 150);
+  var tags = (p.tags || '').split(',').filter(function(t) { return t.trim(); });
+  var tagStr = tags.map(function(t) { return '#' + t.trim(); }).join(' ');
+  var fullCaption = caption + (tagStr ? ' ' + tagStr : '');
+
+  var imgHtml = p.thumbnail
+    ? '<img class="ig__post-img" src="' + spEsc(p.thumbnail) + '" onerror="this.style.background=\'#fafafa\'" />'
+    : '<div class="ig__post-img" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:14px;">No Image</div>';
+
+  var timeAgo = spTimeAgo(p.date);
+
+  return '<div class="ig-wrap">'
+    + '<div class="ig__statusbar"><span class="ig__statusbar-time">9:41</span><span>&#9679;&#9679;&#9679;</span></div>'
+    + '<div class="ig__topbar"><span class="ig__topbar-logo">Instagram</span><span class="ig__topbar-icons">&#9825; &#9993;</span></div>'
+    + '<div class="ig__feed">'
+    + '<div class="ig__post">'
+    + '<div class="ig__post-header">'
+    + '<div class="ig__post-avatar"><div class="ig__post-avatar-inner">' + spEsc(initial) + '</div></div>'
+    + '<span class="ig__post-username">' + spEsc(instaId) + '</span>'
+    + '<span class="ig__post-more">&#8943;</span></div>'
+    + imgHtml
+    + '<div class="ig__post-actions">'
+    + '<span class="ig__post-action">&#9825;</span>'
+    + '<span class="ig__post-action">&#128172;</span>'
+    + '<span class="ig__post-action">&#8631;</span>'
+    + '<span class="ig__post-action ig__post-action--right">&#9734;</span></div>'
+    + '<div class="ig__post-likes">0 likes</div>'
+    + '<div class="ig__post-caption"><strong>' + spEsc(instaId) + '</strong> ' + spEsc(fullCaption) + '</div>'
+    + '<div class="ig__post-time">' + spEsc(timeAgo) + '</div>'
+    + '</div></div></div>';
+}
+
+/* ===== 유틸리티 ===== */
+function spEsc(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function spContentToHtml(content, thumbnail) {
+  var html = '';
+  if (thumbnail) {
+    html += '<img src="' + spEsc(thumbnail) + '" style="max-width:100%;border-radius:4px;" onerror="this.style.display=\'none\'" />';
+  }
+  var paras = content.split('\n').filter(function(l) { return l.trim(); });
+  paras.forEach(function(para) {
+    html += '<p>' + spEsc(para) + '</p>';
+  });
+  return html;
+}
+
+function spFormatDate(dateStr) {
+  if (!dateStr) return '';
+  var parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return parts[0] + '. ' + parseInt(parts[1]) + '. ' + parseInt(parts[2]) + '.';
+  }
+  return dateStr;
+}
+
+function spTimeAgo(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr);
+  var now = new Date();
+  var diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  if (diff <= 0) return 'Today';
+  if (diff === 1) return '1 day ago';
+  if (diff < 7) return diff + ' days ago';
+  if (diff < 30) return Math.floor(diff / 7) + ' weeks ago';
+  return Math.floor(diff / 30) + ' months ago';
+}
+
+/* ===== 데모 데이터 로드 (URL 없을 때) ===== */
+function spLoadDemo() {
+  SP.posts = [
+    {
+      date: '2026-02-17',
+      thumbnail: '',
+      title: '샘플 게시물 - 구글시트를 연결해주세요',
+      content: '이것은 샘플 게시물입니다.\n\n구글시트에 데이터를 작성하고 CSV URL을 입력하면 실제 콘텐츠가 표시됩니다.\n\n좌측 가이드를 참고하여 시트를 만들어주세요.',
+      tags: '샘플,테스트',
+      platform: 'blog,insta'
+    }
+  ];
+  SP.selectedIdx = 0;
+  spRenderList();
+  spRender();
+}
+</script>
