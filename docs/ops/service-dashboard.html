@@ -1,5 +1,6 @@
 <!--
 title: 매출통계 대시보드
+meta: 최종 수정: 2026.02.17
 -->
 
 <style>
@@ -123,7 +124,7 @@ title: 매출통계 대시보드
 </div>
 
 <script>
-var SL={BASE:'/planvendys/data/stats-',cache:{},raw:[],prevRaw:[],mode:'month',qY:2025,qM:0,curTab:'svc',comSort:'txAmt',comDir:'desc',comSel:null,shopSort:'tx',shopDir:'desc',shopSel:null,areaSel:null,_y5:false};
+var SL={BASE:'/planvendys/data/stats-',cache:{},raw:[],prevRaw:[],lastRaw:[],mode:'month',qY:2025,qM:0,curTab:'svc',comSort:'txAmt',comDir:'desc',comSel:null,shopSort:'tx',shopDir:'desc',shopSel:null,areaSel:null,_y5:false};
 var SLC=['#4a90d9','#22c55e','#d49a2a','#e85d5d','#8b5cf6','#06b6d4','#f59e0b','#ec4899','#10b981','#6366f1'];
 
 /* 컬럼명 매핑 (새 구조) */
@@ -199,11 +200,16 @@ async function slFetch(){
     SL.qY=parseInt($('slYear').value);SL.qM=parseInt($('slMonth').value);SL.mode=$('slMode').value;
     slSh(10,'데이터 로딩 중...');
     try{
-        var rows=await slCSV(SL.qY);slSh(40,'전년 데이터...');var prev=await slCSV(SL.qY-1);
+        var rows=await slCSV(SL.qY);slSh(30,'전년 데이터...');var prev=await slCSV(SL.qY-1);
+        /* 전월 데이터 로드 */
+        slSh(50,'전월 데이터...');
+        var lastMD=new Date(SL.qY,SL.qM-1,1);var lastY=lastMD.getFullYear(),lastM=lastMD.getMonth();
+        var lastRows=lastY===SL.qY?rows:await slCSV(lastY);
         if(SL.mode==='month'){
             var ym=SL.qY+'-'+('0'+(SL.qM+1)).slice(-2);SL.raw=rows.filter(function(r){return slYM(R(r,'date'))===ym});
             var pym=(SL.qY-1)+'-'+('0'+(SL.qM+1)).slice(-2);SL.prevRaw=prev.filter(function(r){return slYM(R(r,'date'))===pym});
-        }else{SL.raw=rows;SL.prevRaw=prev}
+            var lym=lastY+'-'+('0'+(lastM+1)).slice(-2);SL.lastRaw=lastRows.filter(function(r){return slYM(R(r,'date'))===lym});
+        }else{SL.raw=rows;SL.prevRaw=prev;SL.lastRaw=[]}
         slSh(80,'렌더링...');slRender();slHd();
         $('slStat').textContent=(SL.mode==='year'?SL.qY+'년':SL.qY+'.'+(SL.qM+1)+'월')+' / '+SL.raw.length.toLocaleString()+'건';
         $('slBody').style.display='block';$('slEmpty').style.display='none';
@@ -381,30 +387,27 @@ function slSvc(){
 function slGC(rows){
     var map={};rows.forEach(function(r){
         var id=String(R(r,'comId'));if(!id)return;
-        if(!map[id])map[id]={id:id,name:R(r,'comName'),group:R(r,'comGroup'),type:R(r,'shopType'),sido:R(r,'comSido'),sigungu:R(r,'comSigungu'),
-            txAmt:0,sales:0,bill:0,settle:0,shopFee:0,orderCnt:0,userCnt:0,txCnt:0,cancelCnt:0,soloCnt:0,tgCnt:0,ptSum:0,mealPt:0,djPt:0,djCp:0,easyPay:0,dlv:0};
-        var g=map[id];
-        g.txAmt+=RN(r,'txAmt');g.sales+=RN(r,'sales');g.bill+=RN(r,'bill');g.settle+=RN(r,'settle');g.shopFee+=RN(r,'shopFee');
+        if(!map[id])map[id]={id:id,name:R(r,'comName'),group:R(r,'comGroup'),sido:R(r,'comSido'),sigungu:R(r,'comSigungu'),
+            txAmt:0,sikTx:0,bokTx:0,bill:0,settle:0,shopFee:0,orderCnt:0,userCnt:0,txCnt:0,cancelCnt:0,soloCnt:0,tgCnt:0,adminCnt:0,ptSum:0,mealPt:0,djPt:0,djCp:0,easyPay:0,dlv:0};
+        var g=map[id];var cat=slCat(String(R(r,'shopType')));
+        var tx=RN(r,'txAmt');g.txAmt+=tx;
+        if(cat==='복지대장')g.bokTx+=tx;else g.sikTx+=tx;
+        g.bill+=RN(r,'bill');g.settle+=RN(r,'settle');g.shopFee+=RN(r,'shopFee');
         g.orderCnt+=RN(r,'orderCnt');g.userCnt+=RN(r,'userCnt');g.txCnt+=RN(r,'normal');g.cancelCnt+=RN(r,'cancel');
-        g.soloCnt+=RN(r,'solo');g.tgCnt+=RN(r,'together');g.ptSum+=RN(r,'ptSum');g.mealPt+=RN(r,'mealPt');
-        g.djPt+=RN(r,'daejangPt');g.djCp+=RN(r,'daejangCp');g.easyPay+=RN(r,'easyPay');g.dlv+=RN(r,'delivery');
+        g.soloCnt+=RN(r,'solo');g.tgCnt+=RN(r,'together');g.adminCnt+=RN(r,'admin');
+        g.ptSum+=RN(r,'ptSum');g.mealPt+=RN(r,'mealPt');g.djPt+=RN(r,'daejangPt');g.djCp+=RN(r,'daejangCp');g.easyPay+=RN(r,'easyPay');g.dlv+=RN(r,'delivery');
     });return Object.values(map);
 }
 
 function slCom(){
-    SL._cc=slGC(SL.raw);SL._cp=slGC(SL.prevRaw);SL.comSel=null;
-    var ct=0,cs2=0,co=0,cu=0,cc=SL._cc.length;SL._cc.forEach(function(g){ct+=g.txAmt;cs2+=g.sales;co+=g.orderCnt;cu+=g.userCnt});
-    var pt=0,ps2=0,po=0,pu=0,pc=SL._cp.length;SL._cp.forEach(function(g){pt+=g.txAmt;ps2+=g.sales;po+=g.orderCnt;pu+=g.userCnt});
-    var h='<div class="sl-cards">'+slCd('거래액',ct,pt,1)+slCd('매출액',cs2,ps2,1)+slCd('주문 수',co,po,0)+slCd('고유 사용자',cu,pu,0)+slCd('고객사 수',cc,pc,0)+'</div>';
-    var so=SL._cc.slice().sort(function(a,b){return b.txAmt-a.txAmt});var tot=ct||1,t5=0,t10=0,t20=0;
-    so.forEach(function(g,i){if(i<5)t5+=g.txAmt;if(i<10)t10+=g.txAmt;if(i<20)t20+=g.txAmt});
-    h+='<div class="sl-cw"><div class="sl-cw__t">상위 고객사 집중도</div><table class="sl-t sl-t--s"><thead><tr><th>구분</th><th class="r">거래액</th><th class="r">비중</th></tr></thead><tbody>';
-    h+='<tr><td>Top 5</td><td class="r">'+slS(t5)+'</td><td class="r">'+(t5/tot*100).toFixed(1)+'%</td></tr>';
-    h+='<tr><td>Top 10</td><td class="r">'+slS(t10)+'</td><td class="r">'+(t10/tot*100).toFixed(1)+'%</td></tr>';
-    h+='<tr><td>Top 20</td><td class="r">'+slS(t20)+'</td><td class="r">'+(t20/tot*100).toFixed(1)+'%</td></tr>';
-    h+='<tr><td>전체 ('+cc+'사)</td><td class="r">'+slS(ct)+'</td><td class="r">100%</td></tr></tbody></table></div>';
-    h+='<div class="sl-grid2"><div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title" id="slCTT">고객사 ('+cc+')</span><div style="display:flex;align-items:center;gap:4px"><input class="sl-search" id="slCSch" placeholder="고객사/그룹/ID 검색..." oninput="slCT()"><button class="sl-copy-btn" id="slCCp" onclick="slCC()">복사</button></div></div><div class="sl-tw" id="slCTW"></div></div>';
-    h+='<div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title">고객사 상세</span></div><div class="sl-det" id="slCD"><div class="sl-det__empty">좌측에서 선택</div></div></div></div>';
+    SL._cc=slGC(SL.raw);SL._cp=slGC(SL.prevRaw);SL._cl=slGC(SL.lastRaw);SL.comSel=null;
+    var ct=0,co=0,cu=0,cSik=0,cBok=0,cc=SL._cc.length;
+    SL._cc.forEach(function(g){ct+=g.txAmt;co+=g.orderCnt;cu+=g.userCnt;cSik+=g.sikTx;cBok+=g.bokTx});
+    var pt=0,po=0,pu=0,pSik=0,pBok=0,pc=SL._cp.length;
+    SL._cp.forEach(function(g){pt+=g.txAmt;po+=g.orderCnt;pu+=g.userCnt;pSik+=g.sikTx;pBok+=g.bokTx});
+    var h='<div class="sl-cards">'+slCd('거래액',ct,pt,1)+slCd('식권대장 거래액',cSik,pSik,1)+slCd('복지대장 거래액',cBok,pBok,1)+slCd('주문 수',co,po,0)+slCd('고유 사용자',cu,pu,0)+slCd('고객사 수',cc,pc,0)+'</div>';
+    h+='<div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title" id="slCTT">고객사 ('+cc+')</span><div style="display:flex;align-items:center;gap:4px"><input class="sl-search" id="slCSch" placeholder="고객사/그룹/ID 검색..." oninput="slCT()"><button class="sl-copy-btn" id="slCCp" onclick="slCC()">복사</button></div></div><div class="sl-tw" id="slCTW"></div></div>';
+    h+='<div class="sl-panel" style="margin-top:8px"><div class="sl-panel__head"><span class="sl-panel__title" id="slCDT">고객사 상세</span></div><div class="sl-det" id="slCD" style="max-height:none"><div class="sl-det__empty">위 테이블에서 고객사를 선택하세요</div></div></div>';
     $('pCom').innerHTML=h;slCT();
 }
 
@@ -415,11 +418,11 @@ function slCT(){
     var data=SL._cc.slice();if(sch)data=data.filter(function(g){return g.name.toLowerCase().indexOf(sch)!==-1||g.group.toLowerCase().indexOf(sch)!==-1||g.id.toLowerCase().indexOf(sch)!==-1});
     var c=SL.comSort,d=SL.comDir==='asc'?1:-1;
     data.sort(function(a,b){var va=a[c],vb=b[c];if(typeof va==='string')return va.localeCompare(vb)*d;return((va||0)-(vb||0))*d});
-    var cols=[{k:'id',l:'고객사 ID',n:0},{k:'name',l:'고객사명',n:0},{k:'group',l:'그룹',n:0},{k:'sido',l:'지역',n:0},{k:'txAmt',l:'거래액(원)',n:1},{k:'sales',l:'매출액(원)',n:1},{k:'orderCnt',l:'주문',n:1},{k:'userCnt',l:'사용자',n:1}];
+    var cols=[{k:'id',l:'고객사 ID',n:0},{k:'name',l:'고객사명',n:0},{k:'group',l:'그룹',n:0},{k:'sido',l:'지역',n:0},{k:'txAmt',l:'거래액(원)',n:1},{k:'sikTx',l:'식권대장(원)',n:1},{k:'bokTx',l:'복지대장(원)',n:1},{k:'orderCnt',l:'주문 수',n:1},{k:'userCnt',l:'사용자 수',n:1},{k:'shopFee',l:'수수료(원)',n:1}];
     var h='<table class="sl-t"><thead><tr>';
     cols.forEach(function(c2){var s=SL.comSort===c2.k,ar=s?(SL.comDir==='asc'?'&#9650;':'&#9660;'):'&#9650;';h+='<th class="'+(c2.n?'r ':'')+(s?'s ':'')+'" onclick="slCSrt(\''+c2.k+'\')">'+c2.l+'<span class="a">'+ar+'</span></th>'});
     h+='</tr></thead><tbody>';
-    data.forEach(function(g){h+='<tr class="'+(SL.comSel===g.id?'sel':'')+'" onclick="slCSel(\''+g.id+'\')"><td class="id" title="'+g.id+'">'+g.id.substring(0,8)+'...</td><td>'+g.name+'</td><td>'+g.group+'</td><td>'+g.sido+'</td><td class="r">'+slN(g.txAmt)+'</td><td class="r">'+slN(g.sales)+'</td><td class="r">'+slN(g.orderCnt)+'</td><td class="r">'+slN(g.userCnt)+'</td></tr>'});
+    data.forEach(function(g){h+='<tr class="'+(SL.comSel===g.id?'sel':'')+'" onclick="slCSel(\''+g.id+'\')"><td class="id" title="'+g.id+'">'+g.id.substring(0,8)+'...</td><td>'+g.name+'</td><td>'+g.group+'</td><td>'+g.sido+'</td><td class="r">'+slN(g.txAmt)+'</td><td class="r">'+slN(g.sikTx)+'</td><td class="r">'+slN(g.bokTx)+'</td><td class="r">'+slN(g.orderCnt)+'</td><td class="r">'+slN(g.userCnt)+'</td><td class="r">'+slN(g.shopFee)+'</td></tr>'});
     h+='</tbody></table>';
     if($('slCTW'))$('slCTW').innerHTML=h;
     if($('slCTT'))$('slCTT').textContent='고객사 ('+data.length+')';
@@ -429,28 +432,52 @@ function slCSel(id){SL.comSel=id;slCT();slCDet()}
 
 function slCDet(){
     var el=$('slCD');if(!el)return;
-    if(!SL.comSel){el.innerHTML='<div class="sl-det__empty">좌측에서 선택</div>';return}
-    var g=SL._cc.find(function(x){return x.id===SL.comSel});if(!g){el.innerHTML='<div class="sl-det__empty">데이터 없음</div>';return}
+    if(!SL.comSel){el.innerHTML='<div class="sl-det__empty">위 테이블에서 고객사를 선택하세요</div>';return}
+    var g=SL._cc.find(function(x){return x.id===SL.comSel});
+    if(!g){el.innerHTML='<div class="sl-det__empty">데이터 없음</div>';return}
     var pg=SL._cp.find(function(x){return x.id===g.id});
-    var h='<div class="sl-det__name">'+g.name+'</div><div class="sl-det__meta">'+g.id+'<br>'+g.group+' / '+g.type+'<br>'+g.sido+' '+g.sigungu+'</div><div class="sl-det__grid">';
-    function di(l,cv,pv,m){var dv=cv-(pv||0),cls=dv>0?'up':dv<0?'down':'flat';h+='<div class="sl-det__item"><div class="sl-det__il">'+l+'</div><div class="sl-det__iv">'+(m?slS(cv):slN(cv))+'</div>'+(pv!==undefined?'<div class="sl-card__chg '+cls+'" style="font-size:9px">전년 '+(m?slS(pv||0):slN(pv||0))+' / '+slPct(cv,pv||0)+'</div>':'')+'</div>'}
-    di('거래액',g.txAmt,pg?pg.txAmt:undefined,1);di('매출액',g.sales,pg?pg.sales:undefined,1);
-    di('청구',g.bill,pg?pg.bill:undefined,1);di('정산',g.settle,pg?pg.settle:undefined,1);
-    di('수수료',g.shopFee,pg?pg.shopFee:undefined,1);di('주문',g.orderCnt,pg?pg.orderCnt:undefined,0);
-    di('사용자',g.userCnt,pg?pg.userCnt:undefined,0);di('배송비',g.dlv,pg?pg.dlv:undefined,1);
-    h+='</div><div class="sl-det__sec">결제</div><table class="sl-mt"><tr><th>구분</th><th class="r">건수</th></tr>';
-    h+='<tr><td>혼자결제</td><td class="r">'+slN(g.soloCnt)+'</td></tr><tr><td>함께결제</td><td class="r">'+slN(g.tgCnt)+'</td></tr><tr><td>취소거래</td><td class="r">'+slN(g.cancelCnt)+'</td></tr></table>';
-    h+='<div class="sl-det__sec">포인트</div><table class="sl-mt"><tr><th>구분</th><th class="r">금액</th></tr>';
-    h+='<tr><td>식대/복지</td><td class="r">'+slN(g.mealPt)+'</td></tr><tr><td>대장포인트</td><td class="r">'+slN(g.djPt)+'</td></tr>';
-    h+='<tr><td>대장쿠폰</td><td class="r">'+slN(g.djCp)+'</td></tr><tr><td>간편결제</td><td class="r">'+slN(g.easyPay)+'</td></tr>';
-    h+='<tr style="font-weight:600"><td>합계</td><td class="r">'+slN(g.ptSum)+'</td></tr></table>';
+    var lg=SL._cl.find(function(x){return x.id===g.id});
+    if($('slCDT'))$('slCDT').textContent=g.name+' 상세';
+    var h='<div class="sl-det__name">'+g.name+'</div><div class="sl-det__meta">'+g.id+' | '+g.group+' | '+g.sido+' '+g.sigungu+'</div>';
+    h+='<table class="sl-t sl-t--s" style="margin:8px 0"><thead><tr><th>구분</th><th class="r">당기</th><th class="r">전월</th><th class="r">전월대비</th><th class="r">전년 동기</th><th class="r">전년대비</th></tr></thead><tbody>';
+    function dr3(label,cur,last,prev){
+        var dL=cur-(last||0),dP=cur-(prev||0);
+        var clsL=dL>0?'up':dL<0?'down':'flat',clsP=dP>0?'up':dP<0?'down':'flat';
+        return'<tr><td>'+label+'</td><td class="r">'+slN(cur)+'</td><td class="r">'+slN(last||0)+'</td><td class="r '+clsL+'">'+slPct(cur,last||0)+'</td><td class="r">'+slN(prev||0)+'</td><td class="r '+clsP+'">'+slPct(cur,prev||0)+'</td></tr>';
+    }
+    h+=dr3('거래액',g.txAmt,lg?lg.txAmt:0,pg?pg.txAmt:0);
+    h+=dr3('식권대장 거래액',g.sikTx,lg?lg.sikTx:0,pg?pg.sikTx:0);
+    h+=dr3('복지대장 거래액',g.bokTx,lg?lg.bokTx:0,pg?pg.bokTx:0);
+    h+=dr3('수수료',g.shopFee,lg?lg.shopFee:0,pg?pg.shopFee:0);
+    h+=dr3('고객사 청구 금액',g.bill,lg?lg.bill:0,pg?pg.bill:0);
+    h+=dr3('제휴점 정산 금액',g.settle,lg?lg.settle:0,pg?pg.settle:0);
+    h+=dr3('주문 수',g.orderCnt,lg?lg.orderCnt:0,pg?pg.orderCnt:0);
+    h+=dr3('고유 사용자 수',g.userCnt,lg?lg.userCnt:0,pg?pg.userCnt:0);
+    h+=dr3('배송비',g.dlv,lg?lg.dlv:0,pg?pg.dlv:0);
+    h+='</tbody></table>';
+    h+='<div class="sl-grid2">';
+    h+='<div><div class="sl-det__sec">결제 방식</div><table class="sl-mt"><thead><tr><th>구분</th><th class="r">당기</th><th class="r">전월</th><th class="r">전년</th></tr></thead><tbody>';
+    function dr3s(l,c,lv,p){return'<tr><td>'+l+'</td><td class="r">'+slN(c)+'</td><td class="r">'+slN(lv)+'</td><td class="r">'+slN(p)+'</td></tr>'}
+    h+=dr3s('혼자결제',g.soloCnt,lg?lg.soloCnt:0,pg?pg.soloCnt:0);
+    h+=dr3s('함께결제',g.tgCnt,lg?lg.tgCnt:0,pg?pg.tgCnt:0);
+    h+=dr3s('관리자입력',g.adminCnt,lg?lg.adminCnt:0,pg?pg.adminCnt:0);
+    h+=dr3s('정상거래',g.txCnt,lg?lg.txCnt:0,pg?pg.txCnt:0);
+    h+=dr3s('취소거래',g.cancelCnt,lg?lg.cancelCnt:0,pg?pg.cancelCnt:0);
+    h+='</tbody></table></div>';
+    h+='<div><div class="sl-det__sec">포인트 사용</div><table class="sl-mt"><thead><tr><th>구분</th><th class="r">당기</th><th class="r">전월</th><th class="r">전년</th></tr></thead><tbody>';
+    h+=dr3s('식대/복지 포인트',g.mealPt,lg?lg.mealPt:0,pg?pg.mealPt:0);
+    h+=dr3s('대장포인트',g.djPt,lg?lg.djPt:0,pg?pg.djPt:0);
+    h+=dr3s('대장쿠폰',g.djCp,lg?lg.djCp:0,pg?pg.djCp:0);
+    h+=dr3s('간편결제',g.easyPay,lg?lg.easyPay:0,pg?pg.easyPay:0);
+    h+='<tr style="font-weight:600">'+dr3s('포인트 합계',g.ptSum,lg?lg.ptSum:0,pg?pg.ptSum:0).replace('<tr>','');
+    h+='</tbody></table></div></div>';
     el.innerHTML=h;
 }
 
 function slCC(){
     var data=SL._cc.slice().sort(function(a,b){var c=SL.comSort,d=SL.comDir==='asc'?1:-1;var va=a[c],vb=b[c];if(typeof va==='string')return va.localeCompare(vb)*d;return((va||0)-(vb||0))*d});
-    var lines=['고객사ID\t고객사명\t그룹\t지역\t거래액\t매출액\t청구\t주문\t사용자'];
-    data.forEach(function(g){lines.push(g.id+'\t'+g.name+'\t'+g.group+'\t'+g.sido+'\t'+g.txAmt+'\t'+g.sales+'\t'+g.bill+'\t'+g.orderCnt+'\t'+g.userCnt)});
+    var lines=['고객사ID\t고객사명\t그룹\t지역\t거래액\t식권대장\t복지대장\t주문 수\t사용자 수\t수수료'];
+    data.forEach(function(g){lines.push(g.id+'\t'+g.name+'\t'+g.group+'\t'+g.sido+'\t'+g.txAmt+'\t'+g.sikTx+'\t'+g.bokTx+'\t'+g.orderCnt+'\t'+g.userCnt+'\t'+g.shopFee)});
     navigator.clipboard.writeText(lines.join('\n')).then(function(){var b=$('slCCp');b.classList.add('copied');b.textContent='완료';setTimeout(function(){b.classList.remove('copied');b.textContent='복사'},1500)});
 }
 
