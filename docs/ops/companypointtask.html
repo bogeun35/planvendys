@@ -1,6 +1,5 @@
 <!--
 title: 식대 지급내역
-meta: 최종 수정: 2026.02.17
 -->
 
 <style>
@@ -402,9 +401,10 @@ async function mpSelectRow(idx) {
                 userName: String(r.userName || ''),
                 userId: String(r.userId || ''),
                 amount: Number(r.amount) || 0,
-                result: String(r.result || ''),
+                result: r.result === null || r.result === undefined ? null : String(r.result),
                 cause: String(r.cause || ''),
                 expireDate: String(r.expireDate || ''),
+                executeDate: String(r.executeDate || ''),
                 taskIdx: String(r.taskIdx || ''),
                 groupType: String(r.groupType || ''),
                 type: String(r.type || '')
@@ -421,10 +421,11 @@ async function mpSelectRow(idx) {
 
 function mpRenderRightSummary() {
     var data = MP.detail;
-    var total = 0, success = 0, fail = 0;
+    var total = 0, success = 0, fail = 0, waiting = 0;
     data.forEach(function(r) {
         total += r.amount;
-        if (r.result === '1' || r.result === 'SUCCESS') success++;
+        if (r.result === null) waiting++;
+        else if (r.result === '1' || r.result === 'SUCCESS') success++;
         else fail++;
     });
     var el = document.getElementById('mpRightSummary');
@@ -434,7 +435,8 @@ function mpRenderRightSummary() {
         '<div class="mp-rsummary__item">총 지급액 <span class="mp-rsummary__val">' + mpS(total) + '</span></div>' +
         '<div class="mp-rsummary__item">인원 <span class="mp-rsummary__val">' + mpN(data.length) + '명</span></div>' +
         '<div class="mp-rsummary__item">성공 <span class="mp-rsummary__val" style="color:#22c55e">' + mpN(success) + '</span></div>' +
-        '<div class="mp-rsummary__item">실패 <span class="mp-rsummary__val" style="color:#e85d5d">' + mpN(fail) + '</span></div>';
+        '<div class="mp-rsummary__item">대기 <span class="mp-rsummary__val" style="color:#d49a2a">' + mpN(waiting) + '</span>' +
+        (fail ? ' / 실패 <span class="mp-rsummary__val" style="color:#e85d5d">' + mpN(fail) + '</span>' : '') + '</div>';
 }
 
 function mpRenderRight() {
@@ -442,16 +444,18 @@ function mpRenderRight() {
     var html = '<table><thead><tr>';
     html += '<th style="width:80px">사용자명</th>';
     html += '<th class="mp-num" style="width:90px">지급액(원)</th>';
-    html += '<th style="width:40px">결과</th>';
+    html += '<th style="width:55px">결과</th>';
     html += '<th style="width:60px">유형</th>';
+    html += '<th style="width:70px">지급시간</th>';
     html += '<th style="width:80px">만료일</th>';
     html += '<th>사유</th>';
     html += '</tr></thead><tbody>';
 
     data.forEach(function(r) {
-        var isSuccess = r.result === '1' || r.result === 'SUCCESS';
-        var resultStyle = isSuccess ? 'color:#22c55e' : 'color:#e85d5d';
-        var resultLabel = isSuccess ? '성공' : '실패';
+        var resultStyle, resultLabel;
+        if (r.result === null) { resultStyle = 'color:#d49a2a'; resultLabel = '대기'; }
+        else if (r.result === '1' || r.result === 'SUCCESS') { resultStyle = 'color:#22c55e'; resultLabel = '성공'; }
+        else { resultStyle = 'color:#e85d5d'; resultLabel = '실패'; }
 
         var typeLabel = '', badgeCls = 'mp-badge ';
         if (r.groupType === 'MEAL' && r.type === 'DAY') { typeLabel = '일일식대'; badgeCls += 'mp-badge--day'; }
@@ -461,12 +465,14 @@ function mpRenderRight() {
         else { typeLabel = r.groupType + '/' + r.type; badgeCls += 'mp-badge--day'; }
 
         var expDate = r.expireDate ? r.expireDate.slice(0, 10) : '-';
+        var execTime = r.executeDate ? r.executeDate.slice(11, 16) : '-';
 
         html += '<tr>';
         html += '<td>' + r.userName + '</td>';
         html += '<td class="mp-num">' + mpN(r.amount) + '</td>';
-        html += '<td style="' + resultStyle + '">' + resultLabel + '</td>';
+        html += '<td style="' + resultStyle + ';font-weight:500">' + resultLabel + '</td>';
         html += '<td><span class="' + badgeCls + '">' + typeLabel + '</span></td>';
+        html += '<td style="font-family:JetBrains Mono,monospace;font-size:11px;text-align:center">' + execTime + '</td>';
         html += '<td style="font-family:JetBrains Mono,monospace;font-size:11px">' + expDate + '</td>';
         html += '<td style="color:#4a5568;font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis">' + (r.cause || '-') + '</td>';
         html += '</tr>';
@@ -489,16 +495,20 @@ function mpCopyLeft(btn) {
 
 function mpCopyRight(btn) {
     if (!MP.detail.length) return;
-    var lines = ['사용자명\t지급액(원)\t결과\t유형\t만료일\t사유'];
+    var lines = ['사용자명\t지급액(원)\t결과\t유형\t지급시간\t만료일\t사유'];
     MP.detail.forEach(function(r) {
-        var isSuccess = r.result === '1' || r.result === 'SUCCESS';
+        var resultLabel;
+        if (r.result === null) resultLabel = '대기';
+        else if (r.result === '1' || r.result === 'SUCCESS') resultLabel = '성공';
+        else resultLabel = '실패';
         var typeLabel = '';
         if (r.groupType === 'MEAL' && r.type === 'DAY') typeLabel = '일일식대';
         else if (r.groupType === 'MEAL' && r.type === 'LONGTERM') typeLabel = '장기식대';
         else if (r.groupType === 'MEAL' && r.type === 'DEMAND') typeLabel = '신청식대';
         else if (r.groupType === 'WELFARE') typeLabel = '복지포인트';
         else typeLabel = r.groupType + '/' + r.type;
-        lines.push(r.userName + '\t' + r.amount + '\t' + (isSuccess ? '성공' : '실패') + '\t' + typeLabel + '\t' + (r.expireDate ? r.expireDate.slice(0, 10) : '') + '\t' + (r.cause || ''));
+        var execTime = r.executeDate ? r.executeDate.slice(11, 16) : '';
+        lines.push(r.userName + '\t' + r.amount + '\t' + resultLabel + '\t' + typeLabel + '\t' + execTime + '\t' + (r.expireDate ? r.expireDate.slice(0, 10) : '') + '\t' + (r.cause || ''));
     });
     navigator.clipboard.writeText(lines.join('\n')).then(function() {
         btn.classList.add('mp-copy--ok'); btn.textContent = '완료';
