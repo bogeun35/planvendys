@@ -1,5 +1,6 @@
 <!--
 title: 식대 지급내역
+meta: 최종 수정: 2026.02.17
 -->
 
 <style>
@@ -19,12 +20,20 @@ title: 식대 지급내역
 .mp-ctrl__sep { width:1px; height:20px; background:#e2e8f0; }
 .mp-ctrl__status { margin-left:auto; font-size:11px; color:#94a3b8; font-family:'JetBrains Mono',monospace; }
 
-/* Loading */
+/* Loading overlay (main) */
 .mp-loading { position:absolute; inset:0; background:rgba(255,255,255,.85); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; border-radius:4px; }
 .mp-loading__bar { width:200px; height:4px; background:#e2e8f0; border-radius:2px; overflow:hidden; }
 .mp-loading__fill { height:100%; background:#4a90d9; border-radius:2px; transition:width .3s; }
 .mp-loading__text { margin-top:8px; font-size:12px; color:#4a5568; }
 .mp-loading--hide { display:none; }
+
+/* Dim overlay (detail loading) */
+.mp-dim { position:absolute; inset:0; background:rgba(0,0,0,.35); z-index:90; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:4px; }
+.mp-dim__box { background:#fff; border-radius:4px; padding:16px 24px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+.mp-dim__text { font-size:13px; color:#1a2332; margin-bottom:10px; }
+.mp-dim__cancel { padding:4px 16px; font-size:12px; border:1px solid #d1d5db; border-radius:3px; background:#fff; color:#4a5568; cursor:pointer; }
+.mp-dim__cancel:hover { border-color:#e85d5d; color:#e85d5d; }
+.mp-dim--hide { display:none; }
 
 /* Summary Cards */
 .mp-summary { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:10px; }
@@ -34,11 +43,12 @@ title: 식대 지급내역
 
 /* 2-Panel Layout */
 .mp-panels { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.mp-panel { border:1px solid #e2e8f0; border-radius:4px; display:flex; flex-direction:column; max-height:calc(100vh - 260px); min-height:400px; }
-.mp-panel__head { padding:6px 10px; background:#f8fafd; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.mp-panel { border:1px solid #e2e8f0; border-radius:4px; display:flex; flex-direction:column; max-height:calc(100vh - 260px); min-height:400px; position:relative; }
+.mp-panel__head { padding:6px 10px; background:#f8fafd; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; gap:6px; flex-shrink:0; flex-wrap:wrap; }
 .mp-panel__title { font-size:12px; font-weight:700; color:#1a2332; }
 .mp-panel__count { font-size:11px; color:#94a3b8; font-family:'JetBrains Mono',monospace; }
-.mp-panel__search { padding:3px 8px; font-size:12px; border:1px solid #d1d5db; border-radius:3px; width:140px; }
+.mp-panel__search { padding:3px 8px; font-size:12px; border:1px solid #d1d5db; border-radius:3px; width:120px; }
+.mp-panel__search::placeholder { color:#94a3b8; }
 .mp-panel__actions { margin-left:auto; display:flex; gap:4px; align-items:center; }
 
 /* Copy button */
@@ -73,10 +83,18 @@ title: 식대 지급내역
 </style>
 
 <div class="mp" id="mpRoot">
-  <!-- Loading -->
+  <!-- Main Loading -->
   <div class="mp-loading mp-loading--hide" id="mpLoading">
     <div class="mp-loading__bar"><div class="mp-loading__fill" id="mpProgress" style="width:0%"></div></div>
     <div class="mp-loading__text" id="mpLoadText">쿼리 실행 중...</div>
+  </div>
+
+  <!-- Dim overlay for detail loading -->
+  <div class="mp-dim mp-dim--hide" id="mpDim">
+    <div class="mp-dim__box">
+      <div class="mp-dim__text" id="mpDimText">상세 조회 중...</div>
+      <button class="mp-dim__cancel" onclick="mpCancelDetail()">취소</button>
+    </div>
   </div>
 
   <!-- Control Bar -->
@@ -112,7 +130,8 @@ title: 식대 지급내역
       <div class="mp-panel__head">
         <span class="mp-panel__title">일자별 고객사</span>
         <span class="mp-panel__count" id="mpLeftCount"></span>
-        <input class="mp-panel__search" id="mpSearch" placeholder="고객사 검색..." oninput="mpRenderLeft()">
+        <input class="mp-panel__search" id="mpSearchName" placeholder="고객사명..." oninput="mpRenderLeft()">
+        <input class="mp-panel__search" id="mpSearchComId" placeholder="고객사ID..." oninput="mpRenderLeft()" style="width:100px;font-family:JetBrains Mono,monospace;font-size:11px">
         <div class="mp-panel__actions">
           <button class="mp-copy" onclick="mpCopyLeft(this)">복사</button>
         </div>
@@ -136,6 +155,8 @@ title: 식대 지급내역
       <div class="mp-panel__head">
         <span class="mp-panel__title" id="mpRightTitle">사용자별 지급내역</span>
         <span class="mp-panel__count" id="mpRightCount"></span>
+        <input class="mp-panel__search" id="mpSearchUser" placeholder="사용자명..." oninput="mpFilterRight()">
+        <input class="mp-panel__search" id="mpSearchUserId" placeholder="사용자ID..." oninput="mpFilterRight()" style="width:100px;font-family:JetBrains Mono,monospace;font-size:11px">
         <div class="mp-panel__actions">
           <button class="mp-copy" onclick="mpCopyRight(this)">복사</button>
         </div>
@@ -156,10 +177,12 @@ var MP = {
     raw: [],
     filtered: [],
     detail: [],
+    detailFiltered: [],
     sortCol: 'executeDate',
     sortDir: 'desc',
     selectedIdx: -1,
-    loading: false
+    loading: false,
+    detailCancelled: false
 };
 
 function mpN(v) {
@@ -185,7 +208,33 @@ function mpShowLoad(show, text, pct) {
     if (pct !== undefined) document.getElementById('mpProgress').style.width = pct + '%';
 }
 
+function mpShowDim(show, text) {
+    var el = document.getElementById('mpDim');
+    el.classList.toggle('mp-dim--hide', !show);
+    if (text) document.getElementById('mpDimText').textContent = text;
+}
+
+function mpCancelDetail() {
+    MP.detailCancelled = true;
+    mpShowDim(false);
+}
+
 async function mpPoll(jobId) {
+    for (var i = 0; i < 120; i++) {
+        if (MP.detailCancelled) throw new Error('취소됨');
+        await new Promise(function(r) { setTimeout(r, 1000); });
+        var d = await mpApi({ action: 'job', jobId: jobId });
+        if (d.job && d.job.status === 3) {
+            var res = await mpApi({ action: 'result', resultId: d.job.query_result_id });
+            return res.query_result.data.rows;
+        }
+        if (d.job && d.job.status === 4) throw new Error('쿼리 실행 실패');
+        mpShowDim(true, '상세 조회 중... (' + (i + 1) + 's)');
+    }
+    throw new Error('쿼리 타임아웃');
+}
+
+async function mpPollMain(jobId) {
     for (var i = 0; i < 120; i++) {
         await new Promise(function(r) { setTimeout(r, 1000); });
         var d = await mpApi({ action: 'job', jobId: jobId });
@@ -248,6 +297,8 @@ async function mpFetch() {
     document.getElementById('mpRightTitle').textContent = '사용자별 지급내역';
     document.getElementById('mpRightCount').textContent = '';
     document.getElementById('mpRightSummary').style.display = 'none';
+    document.getElementById('mpSearchUser').value = '';
+    document.getElementById('mpSearchUserId').value = '';
 
     try {
         var d = await mpApi({ action: 'post', queryId: MP.QID_LIST, startDate: sd, endDate: ed });
@@ -255,7 +306,7 @@ async function mpFetch() {
         if (d.query_result) {
             rows = d.query_result.data.rows;
         } else if (d.job) {
-            rows = await mpPoll(d.job.id);
+            rows = await mpPollMain(d.job.id);
         } else {
             throw new Error('응답 형식 오류');
         }
@@ -313,9 +364,11 @@ function mpRenderSummary() {
 }
 
 function mpApplyFilter() {
-    var search = (document.getElementById('mpSearch').value || '').toLowerCase();
+    var sName = (document.getElementById('mpSearchName').value || '').toLowerCase();
+    var sComId = (document.getElementById('mpSearchComId').value || '').toLowerCase();
     MP.filtered = MP.raw.filter(function(r) {
-        if (search && r.name.toLowerCase().indexOf(search) === -1) return false;
+        if (sName && r.name.toLowerCase().indexOf(sName) === -1) return false;
+        if (sComId && r.comId.toLowerCase().indexOf(sComId) === -1) return false;
         return true;
     });
     mpSortFiltered();
@@ -357,7 +410,7 @@ function mpRenderLeft() {
         var sel = MP.selectedIdx === i;
         html += '<tr class="' + (sel ? 'mp-row--sel' : '') + '" onclick="mpSelectRow(' + i + ')" style="cursor:pointer">';
         html += '<td style="font-family:JetBrains Mono,monospace;font-size:11px">' + r.executeDate + '</td>';
-        html += '<td>' + r.name + '</td>';
+        html += '<td title="' + r.comId + '">' + r.name + '</td>';
         html += '<td class="mp-num">' + (r.mealDay ? mpN(r.mealDay) : '-') + '</td>';
         html += '<td class="mp-num">' + (r.mealLong ? mpN(r.mealLong) : '-') + '</td>';
         html += '<td class="mp-num">' + (r.mealDemand ? mpN(r.mealDemand) : '-') + '</td>';
@@ -374,12 +427,17 @@ async function mpSelectRow(idx) {
     var r = MP.filtered[idx];
     if (!r || !r.taskIdxList) return;
     MP.selectedIdx = idx;
+    MP.detailCancelled = false;
     mpRenderLeft();
 
     document.getElementById('mpRightTitle').textContent = r.name + ' / ' + r.executeDate;
     document.getElementById('mpRightBody').innerHTML = '<div class="mp-empty">상세 조회 중...</div>';
     document.getElementById('mpRightSummary').style.display = 'none';
     document.getElementById('mpRightCount').textContent = '';
+    document.getElementById('mpSearchUser').value = '';
+    document.getElementById('mpSearchUserId').value = '';
+
+    mpShowDim(true, '상세 조회 중...');
 
     try {
         var d = await mpApi({
@@ -387,6 +445,8 @@ async function mpSelectRow(idx) {
             queryId: MP.QID_DETAIL,
             taskIdxList: r.taskIdxList
         });
+        if (MP.detailCancelled) return;
+
         var rows;
         if (d.query_result) {
             rows = d.query_result.data.rows;
@@ -395,6 +455,7 @@ async function mpSelectRow(idx) {
         } else {
             throw new Error('응답 형식 오류');
         }
+        if (MP.detailCancelled) return;
 
         MP.detail = rows.map(function(r) {
             return {
@@ -411,11 +472,15 @@ async function mpSelectRow(idx) {
             };
         });
 
+        mpShowDim(false);
         mpRenderRightSummary();
-        mpRenderRight();
+        mpFilterRight();
         document.getElementById('mpRightCount').textContent = MP.detail.length.toLocaleString() + '명';
     } catch (err) {
-        document.getElementById('mpRightBody').innerHTML = '<div class="mp-empty">조회 실패: ' + err.message + '</div>';
+        mpShowDim(false);
+        if (err.message !== '취소됨') {
+            document.getElementById('mpRightBody').innerHTML = '<div class="mp-empty">조회 실패: ' + err.message + '</div>';
+        }
     }
 }
 
@@ -439,14 +504,25 @@ function mpRenderRightSummary() {
         (fail ? ' / 실패 <span class="mp-rsummary__val" style="color:#e85d5d">' + mpN(fail) + '</span>' : '') + '</div>';
 }
 
+function mpFilterRight() {
+    var sUser = (document.getElementById('mpSearchUser').value || '').toLowerCase();
+    var sUserId = (document.getElementById('mpSearchUserId').value || '').toLowerCase();
+    MP.detailFiltered = MP.detail.filter(function(r) {
+        if (sUser && r.userName.toLowerCase().indexOf(sUser) === -1) return false;
+        if (sUserId && r.userId.toLowerCase().indexOf(sUserId) === -1) return false;
+        return true;
+    });
+    mpRenderRight();
+}
+
 function mpRenderRight() {
-    var data = MP.detail;
+    var data = MP.detailFiltered;
     var html = '<table><thead><tr>';
     html += '<th style="width:80px">사용자명</th>';
     html += '<th class="mp-num" style="width:90px">지급액(원)</th>';
     html += '<th style="width:55px">결과</th>';
     html += '<th style="width:60px">유형</th>';
-    html += '<th style="width:70px">지급시간</th>';
+    html += '<th style="width:75px">지급시간</th>';
     html += '<th style="width:80px">만료일</th>';
     html += '<th>사유</th>';
     html += '</tr></thead><tbody>';
@@ -465,9 +541,9 @@ function mpRenderRight() {
         else { typeLabel = r.groupType + '/' + r.type; badgeCls += 'mp-badge--day'; }
 
         var expDate = r.expireDate ? r.expireDate.slice(0, 10) : '-';
-        var execTime = r.executeDate ? r.executeDate.slice(11, 16) : '-';
+        var execTime = r.executeDate ? r.executeDate.slice(11, 19) : '-';
 
-        html += '<tr>';
+        html += '<tr title="userId: ' + r.userId + '">';
         html += '<td>' + r.userName + '</td>';
         html += '<td class="mp-num">' + mpN(r.amount) + '</td>';
         html += '<td style="' + resultStyle + ';font-weight:500">' + resultLabel + '</td>';
@@ -478,14 +554,18 @@ function mpRenderRight() {
         html += '</tr>';
     });
 
+    if (!data.length) {
+        html += '<tr><td colspan="7" style="text-align:center;padding:20px;color:#94a3b8">데이터 없음</td></tr>';
+    }
+
     html += '</tbody></table>';
     document.getElementById('mpRightBody').innerHTML = html;
 }
 
 function mpCopyLeft(btn) {
-    var lines = ['일자\t고객사\t일일식대(원)\t장기식대(원)\t신청식대(원)\t복지포인트(원)\t총금액(원)\t지급수(건)'];
+    var lines = ['일자\t고객사\t고객사ID\t일일식대(원)\t장기식대(원)\t신청식대(원)\t복지포인트(원)\t총금액(원)\t지급수(건)'];
     MP.filtered.forEach(function(r) {
-        lines.push(r.executeDate + '\t' + r.name + '\t' + r.mealDay + '\t' + r.mealLong + '\t' + r.mealDemand + '\t' + r.welfare + '\t' + r.totalAmount + '\t' + r.userCount);
+        lines.push(r.executeDate + '\t' + r.name + '\t' + r.comId + '\t' + r.mealDay + '\t' + r.mealLong + '\t' + r.mealDemand + '\t' + r.welfare + '\t' + r.totalAmount + '\t' + r.userCount);
     });
     navigator.clipboard.writeText(lines.join('\n')).then(function() {
         btn.classList.add('mp-copy--ok'); btn.textContent = '완료';
@@ -494,9 +574,9 @@ function mpCopyLeft(btn) {
 }
 
 function mpCopyRight(btn) {
-    if (!MP.detail.length) return;
-    var lines = ['사용자명\t지급액(원)\t결과\t유형\t지급시간\t만료일\t사유'];
-    MP.detail.forEach(function(r) {
+    if (!MP.detailFiltered.length) return;
+    var lines = ['사용자명\t사용자ID\t지급액(원)\t결과\t유형\t지급시간\t만료일\t사유'];
+    MP.detailFiltered.forEach(function(r) {
         var resultLabel;
         if (r.result === null) resultLabel = '대기';
         else if (r.result === '1' || r.result === 'SUCCESS') resultLabel = '성공';
@@ -507,8 +587,8 @@ function mpCopyRight(btn) {
         else if (r.groupType === 'MEAL' && r.type === 'DEMAND') typeLabel = '신청식대';
         else if (r.groupType === 'WELFARE') typeLabel = '복지포인트';
         else typeLabel = r.groupType + '/' + r.type;
-        var execTime = r.executeDate ? r.executeDate.slice(11, 16) : '';
-        lines.push(r.userName + '\t' + r.amount + '\t' + resultLabel + '\t' + typeLabel + '\t' + execTime + '\t' + (r.expireDate ? r.expireDate.slice(0, 10) : '') + '\t' + (r.cause || ''));
+        var execTime = r.executeDate ? r.executeDate.slice(11, 19) : '';
+        lines.push(r.userName + '\t' + r.userId + '\t' + r.amount + '\t' + resultLabel + '\t' + typeLabel + '\t' + execTime + '\t' + (r.expireDate ? r.expireDate.slice(0, 10) : '') + '\t' + (r.cause || ''));
     });
     navigator.clipboard.writeText(lines.join('\n')).then(function() {
         btn.classList.add('mp-copy--ok'); btn.textContent = '완료';
