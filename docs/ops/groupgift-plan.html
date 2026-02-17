@@ -1,585 +1,266 @@
 <!--
 title: 단체선물대장 기획 와이어프레임
-meta: 기획용 프로토타입 | 2026.02.17
+meta: 기획용 프로토타입 | 내부관리자 / 고객사 / 매입처 3역할 | 2026.02.17
 -->
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 .gp *{margin:0;padding:0;box-sizing:border-box}
-.gp{
-  font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;background:#fff;
-  display:flex;flex-direction:column;height:calc(100vh - 40px);overflow:hidden;line-height:1.5;position:relative;
-}
-
-/* tabs */
+.gp{font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;background:#fff;display:flex;flex-direction:column;height:calc(100vh - 40px);overflow:hidden;line-height:1.5;position:relative}
+.gp-role{display:flex;border-bottom:2px solid #e2e8f0;flex-shrink:0;background:#f8fafd;padding:0 16px}
+.gp-role__btn{padding:8px 16px;border:none;background:none;color:#94a3b8;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;font-family:'Noto Sans KR',sans-serif;transition:all .12s;white-space:nowrap}
+.gp-role__btn:hover{color:#4a5568}
+.gp-role__btn.r-a.active{color:#4a90d9;border-bottom-color:#4a90d9}
+.gp-role__btn.r-c.active{color:#059669;border-bottom-color:#059669}
+.gp-role__btn.r-s.active{color:#ea580c;border-bottom-color:#ea580c}
+.gp-rb{display:inline-block;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;margin-left:4px;vertical-align:middle}
+.rb-a{background:#eef4fb;color:#4a90d9}.rb-c{background:#ecfdf5;color:#059669}.rb-s{background:#fff7ed;color:#ea580c}
 .gp-tabs{display:flex;border-bottom:1px solid #e2e8f0;flex-shrink:0;background:#fff;padding:0 16px}
-.gp-tab{padding:8px 14px;border:none;background:none;color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;font-family:'Noto Sans KR',sans-serif;transition:all .12s;white-space:nowrap}
-.gp-tab:hover{color:#4a5568}
-.gp-tab.active{color:#4a90d9;border-bottom-color:#4a90d9}
+.gp-tab{padding:7px 14px;border:none;background:none;color:#94a3b8;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;font-family:'Noto Sans KR',sans-serif;transition:all .12s;white-space:nowrap}
+.gp-tab:hover{color:#4a5568}.gp-tab.active{color:#4a90d9;border-bottom-color:#4a90d9}
 .gp-main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
-.gp-pn{display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0}
-.gp-pn.active{display:flex}
-
-/* cards */
-.gp-cards{display:flex;gap:6px;padding:10px 16px 6px;flex-shrink:0;flex-wrap:wrap}
+.gp-rp,.gp-pn{display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0}
+.gp-rp.active,.gp-pn.active{display:flex}
+.gp-sp{display:flex;flex:1;gap:0;min-height:0;overflow:hidden}
+.gp-l{width:380px;min-width:300px;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.gp-r{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.gp-cds{display:flex;gap:6px;padding:10px 16px 6px;flex-shrink:0;flex-wrap:wrap}
 .gp-cd{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:7px 10px;min-width:90px;flex:1}
-.gp-cd__l{font-size:9px;color:#94a3b8;font-weight:600;letter-spacing:.3px;text-transform:uppercase;margin-bottom:1px}
-.gp-cd__v{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
-.gp-cd__s{font-size:9px;color:#94a3b8;margin-top:1px}
-
-/* split layout */
-.gp-split{display:flex;flex:1;gap:0;min-height:0;overflow:hidden}
-.gp-left{width:380px;min-width:300px;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
-.gp-right{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.gp-left--narrow{width:300px;min-width:260px}
-.gp-left--wide{width:420px;min-width:360px}
-
-/* panel header */
+.gp-cd i{font-style:normal;font-size:9px;color:#94a3b8;font-weight:600;letter-spacing:.3px;text-transform:uppercase;display:block;margin-bottom:1px}
+.gp-cd b{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;display:block}
 .gp-ph{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#f8fafd;border-bottom:1px solid #e2e8f0;flex-shrink:0;gap:4px;min-height:34px}
-.gp-ph__t{font-size:11px;font-weight:700;color:#4a5568;white-space:nowrap}
-.gp-ph__r{display:flex;align-items:center;gap:4px}
-
-/* scroll body */
-.gp-sb{flex:1;overflow-y:auto;min-height:0}
-.gp-sb::-webkit-scrollbar{width:5px}.gp-sb::-webkit-scrollbar-track{background:#f8f8f8}.gp-sb::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
-
-/* table */
+.gp-ph span{font-size:11px;font-weight:700;color:#4a5568;white-space:nowrap}
+.gp-sb{flex:1;overflow-y:auto;min-height:0}.gp-sb::-webkit-scrollbar{width:5px}.gp-sb::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
 .gp table{width:100%;border-collapse:collapse;font-size:11px}
 .gp thead{position:sticky;top:0;z-index:2}
 .gp th{background:#f0f4f9;color:#4a5568;font-weight:600;font-size:10px;padding:5px 8px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap}
 .gp td{padding:4px 8px;border-bottom:1px solid #f1f5f9;white-space:nowrap;color:#4a5568}
-.gp tr:hover{background:#f8fafd}
-.gp tr.sel{background:#eef4fb}
-.gp tr.gg-clickable{cursor:pointer}
+.gp tr:hover{background:#f8fafd}.gp tr.s{background:#eef4fb}.gp tr.ck{cursor:pointer}
 .gp .r{text-align:right;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
-.gp .c{text-align:center}
-.gp .b{font-weight:700;color:#1a2332}
-.gp .dim{color:#94a3b8;font-size:10px}
-
-/* inputs */
+.gp .c{text-align:center}.gp .f{font-weight:700;color:#1a2332}.gp .d{color:#94a3b8;font-size:10px}
+.gp .m{font-family:'JetBrains Mono',monospace}
 .gp-inp{padding:4px 8px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#1a2332;background:#fff;outline:none}
 .gp-inp:focus{border-color:#4a90d9;box-shadow:0 0 0 2px rgba(74,144,217,.12)}
-.gp-sel{padding:4px 6px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;background:#fff;color:#1a2332;outline:none}
+.gp-sel{padding:4px 6px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;background:#fff;outline:none}
 .gp-btn{padding:4px 10px;border:1px solid #cbd5e1;border-radius:3px;background:#fff;color:#4a5568;font-size:11px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .12s;white-space:nowrap}
 .gp-btn:hover{background:#eef4fb;color:#4a90d9;border-color:#4a90d9}
-.gp-btn--p{background:#4a90d9;color:#fff;border-color:#4a90d9}
-.gp-btn--p:hover{background:#3a7bc8}
-.gp-btn--sm{padding:2px 8px;font-size:10px}
-.gp-btn--g{background:#22c55e;color:#fff;border-color:#22c55e}
-.gp-btn--d{background:#e85d5d;color:#fff;border-color:#e85d5d}
-
-/* badge */
+.gp-btn.p{background:#4a90d9;color:#fff;border-color:#4a90d9}.gp-btn.p:hover{background:#3a7bc8}
+.gp-btn.sm{padding:2px 8px;font-size:10px}
+.gp-btn.dg{background:#e85d5d;color:#fff;border-color:#e85d5d}
 .gp-bg{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
-.gp-bg--draft{background:#f1f5f9;color:#6b7280}
-.gp-bg--collect{background:#eef4fb;color:#2563eb}
-.gp-bg--closed{background:#fef9ee;color:#d49a2a}
-.gp-bg--ordered{background:#dbeafe;color:#3b82f6}
-.gp-bg--ship{background:#d1fae5;color:#059669}
-.gp-bg--done{background:#ecfdf5;color:#22c55e}
-
-/* status bar */
-.gp-sbar{display:flex;height:5px;border-radius:3px;overflow:hidden;background:#f1f5f9;min-width:60px}
-.gp-sbar div{height:100%}
-
-/* pipeline */
-.gp-pipe{display:flex;gap:2px;padding:8px 16px;align-items:center;flex-shrink:0;border-bottom:1px solid #e2e8f0;background:#f8fafd}
-.gp-pipe__s{flex:1;text-align:center;padding:5px 4px;border-radius:3px;font-size:10px;font-weight:700}
-.gp-pipe__a{color:#d1d5db;font-size:9px;flex-shrink:0}
-
-/* sub tabs */
-.gp-st{display:flex;gap:0;border-bottom:1px solid #e2e8f0;flex-shrink:0;padding:0 10px}
-.gp-st__i{padding:5px 12px;font-size:11px;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;font-weight:500}
-.gp-st__i:hover{color:#4a5568}
-.gp-st__i.active{color:#4a90d9;border-bottom-color:#4a90d9;font-weight:600}
-
-/* detail section */
-.gp-ds{font-size:11px;font-weight:700;color:#4a5568;margin:10px 0 4px;padding-bottom:2px;border-bottom:1px solid #e2e8f0}
+.bg-dr{background:#f1f5f9;color:#6b7280}.bg-co{background:#eef4fb;color:#2563eb}.bg-cl{background:#fef9ee;color:#d49a2a}.bg-or{background:#dbeafe;color:#3b82f6}.bg-sh{background:#d1fae5;color:#059669}.bg-dn{background:#ecfdf5;color:#22c55e}.bg-pd{background:#fff7ed;color:#ea580c}.bg-ap{background:#ecfdf5;color:#22c55e}.bg-rj{background:#fef2f2;color:#e85d5d}
+.gp-pp{display:flex;gap:2px;padding:8px 16px;align-items:center;flex-shrink:0;border-bottom:1px solid #e2e8f0;background:#f8fafd}
+.gp-pp div{flex:1;text-align:center;padding:5px 4px;border-radius:3px;font-size:10px;font-weight:700}
+.gp-pp i{font-style:normal;color:#d1d5db;font-size:9px;flex-shrink:0}
 .gp-dg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px}
 .gp-di{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:6px 8px}
-.gp-di__l{font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase}
-.gp-di__v{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:1px}
-
-/* progress */
-.gp-prog{width:100%;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden}
-.gp-prog__f{height:100%;background:#4a90d9;border-radius:3px}
-
-/* product card */
-.gp-pc{display:flex;gap:8px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:4px;margin-bottom:4px;align-items:center;cursor:pointer;transition:all .1s}
-.gp-pc:hover{border-color:#4a90d9;background:#fafcff}
-.gp-pc.sel{border-color:#4a90d9;background:#eef4fb}
-.gp-pc__img{width:44px;height:44px;background:#f0f4f9;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#94a3b8;flex-shrink:0}
-.gp-pc__info{flex:1;min-width:0}
-.gp-pc__name{font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.gp-pc__price{font-size:11px;font-family:'JetBrains Mono',monospace;color:#4a5568}
-.gp-pc__cat{font-size:9px;color:#94a3b8}
-
-/* filter bar */
+.gp-di i{font-style:normal;font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;display:block}
+.gp-di b{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;display:block;margin-top:1px}
+.gp-ds{font-size:11px;font-weight:700;color:#4a5568;margin:10px 0 4px;padding-bottom:2px;border-bottom:1px solid #e2e8f0}
+.gp-pr{width:100%;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden}.gp-pr div{height:100%;border-radius:3px}
 .gp-fb{display:flex;gap:6px;padding:6px 10px;flex-shrink:0;align-items:center;flex-wrap:wrap;border-bottom:1px solid #e2e8f0}
-
-/* form */
-.gp-form{padding:8px 10px;border:1px solid #e2e8f0;border-radius:4px;background:#f8fafd;margin:6px 0}
+.gp-st{display:flex;gap:0;border-bottom:1px solid #e2e8f0;flex-shrink:0;padding:0 10px}
+.gp-st div{padding:5px 12px;font-size:11px;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;font-weight:500}
+.gp-st div:hover{color:#4a5568}.gp-st div.a{color:#4a90d9;border-bottom-color:#4a90d9;font-weight:600}
+.gp-fm{padding:8px 10px;border:1px solid #e2e8f0;border-radius:4px;background:#f8fafd;margin:6px 0}
 .gp-fg{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
 .gp-fg label{font-size:10px;color:#94a3b8;font-weight:500}
 .gp-fg input,.gp-fg select,.gp-fg textarea{height:28px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;padding:0 6px;font-family:'Noto Sans KR',sans-serif;outline:none}
 .gp-fg textarea{height:50px;padding:4px 6px;resize:vertical}
-.gp-fg input:focus,.gp-fg select:focus,.gp-fg textarea:focus{border-color:#4a90d9}
-.gp-fg--row{flex-direction:row;align-items:center;gap:6px}
-.gp-fg--row label{min-width:50px}
-
-/* footer */
+.gp-pc{display:flex;gap:8px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:4px;margin-bottom:4px;align-items:center;cursor:pointer;transition:all .1s}
+.gp-pc:hover{border-color:#4a90d9;background:#fafcff}.gp-pc.s{border-color:#4a90d9;background:#eef4fb}
+.gp-pc div:first-child{width:44px;height:44px;background:#f0f4f9;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#94a3b8;flex-shrink:0}
+.gp-tk{border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px;background:#f8fafd;margin:0 16px 8px;flex-shrink:0}
 .gp-ft{padding:5px 10px;background:#f8fafd;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-
-/* warn row */
-.gp-warn{background:#fef2f2!important}
-
-/* tracking input */
-.gp-track{border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px;background:#f8fafd;margin:0 16px 8px;flex-shrink:0}
-.gp-track__t{font-size:11px;font-weight:700;color:#4a5568;margin-bottom:4px}
-.gp-track__row{display:flex;gap:6px;align-items:center}
-
-/* empty */
-.gp-empty{color:#94a3b8;text-align:center;padding:40px 16px;font-size:12px}
-
-@media(max-width:900px){.gp-split{flex-direction:column}.gp-left,.gp-left--narrow,.gp-left--wide{width:100%;min-width:0;border-right:none;border-bottom:1px solid #e2e8f0;max-height:40%}}
+.gp-em{color:#94a3b8;text-align:center;padding:40px 16px;font-size:12px}
+.gp-w{background:#fef2f2!important}
+@media(max-width:900px){.gp-sp{flex-direction:column}.gp-l{width:100%!important;min-width:0!important;border-right:none;border-bottom:1px solid #e2e8f0;max-height:40%}}
 </style>
 
 <div class="gp" id="gpRoot">
-  <div class="gp-tabs">
-    <button class="gp-tab active" onclick="gpTab('design',this)">설계</button>
-    <button class="gp-tab" onclick="gpTab('recommend',this)">상품 추천 제안서</button>
-    <button class="gp-tab" onclick="gpTab('result',this)">신청결과</button>
-    <button class="gp-tab" onclick="gpTab('orders',this)">주문현황</button>
-    <button class="gp-tab" onclick="gpTab('total',this)">주문현황 토탈</button>
-    <button class="gp-tab" onclick="gpTab('supplier',this)">매입처 주문현황</button>
-  </div>
-  <div class="gp-main">
-    <div class="gp-pn active" id="gp-design"></div>
-    <div class="gp-pn" id="gp-recommend"></div>
-    <div class="gp-pn" id="gp-result"></div>
-    <div class="gp-pn" id="gp-orders"></div>
-    <div class="gp-pn" id="gp-total"></div>
-    <div class="gp-pn" id="gp-supplier"></div>
-  </div>
+<div class="gp-role">
+<button class="gp-role__btn r-a active" onclick="gpRole('a',this)">내부 관리자 <span class="gp-rb rb-a">Admin</span></button>
+<button class="gp-role__btn r-c" onclick="gpRole('c',this)">고객사 담당자 <span class="gp-rb rb-c">Client</span></button>
+<button class="gp-role__btn r-s" onclick="gpRole('s',this)">매입처 담당자 <span class="gp-rb rb-s">Supplier</span></button>
+</div>
+<div class="gp-main">
+<div class="gp-rp active" id="gp-a"><div class="gp-tabs" id="gt-a"><button class="gp-tab active" onclick="gpS('a','ap',this)">상품 등록/관리</button><button class="gp-tab" onclick="gpS('a','ai',this)">문의/승인 관리</button><button class="gp-tab" onclick="gpS('a','at',this)">전체 주문현황</button></div><div class="gp-pn active" id="ap"></div><div class="gp-pn" id="ai"></div><div class="gp-pn" id="at"></div></div>
+<div class="gp-rp" id="gp-c"><div class="gp-tabs" id="gt-c"><button class="gp-tab active" onclick="gpS('c','cc',this)">상품 카탈로그/요청서</button><button class="gp-tab" onclick="gpS('c','cp',this)">제안서 생성</button><button class="gp-tab" onclick="gpS('c','co',this)">견적/사용자등록/선택</button></div><div class="gp-pn active" id="cc"></div><div class="gp-pn" id="cp"></div><div class="gp-pn" id="co"></div></div>
+<div class="gp-rp" id="gp-s"><div class="gp-tabs" id="gt-s"><button class="gp-tab active" onclick="gpS('s','so',this)">상품별 주문현황</button><button class="gp-tab" onclick="gpS('s','st',this)">주문정보/송장입력</button></div><div class="gp-pn active" id="so"></div><div class="gp-pn" id="st"></div></div>
+</div>
 </div>
 
 <script>
-/* ══════ MOCK DATA ══════ */
-var GP={tab:'design',dSel:null,dSub:'overview',rSel:{},resSub:'recv',oFilter:'',tSel:null,supId:'S001'};
+var CATS=[{n:'식품'},{n:'생활'},{n:'뷰티'},{n:'가전'},{n:'패션'}];
+var PR=[{i:1,c:'P001',n:'한우 선물세트 1호',ct:'식품',p:45000,s:38000,sp:'(주)한우농장',a:1},{i:2,c:'P002',n:'프리미엄 견과세트',ct:'식품',p:39000,s:32000,sp:'(주)견과나라',a:1},{i:3,c:'P003',n:'올리브유 세트',ct:'식품',p:42000,s:35000,sp:'올리브트레이드',a:1},{i:4,c:'P004',n:'프리미엄 샴푸세트',ct:'뷰티',p:35000,s:28000,sp:'뷰티월드',a:1},{i:5,c:'P005',n:'텀블러 세트',ct:'생활',p:25000,s:18000,sp:'리빙플러스',a:1},{i:6,c:'P006',n:'한우 선물세트 2호',ct:'식품',p:65000,s:55000,sp:'(주)한우농장',a:1},{i:7,c:'P007',n:'과일 바구니 세트',ct:'식품',p:55000,s:45000,sp:'과일마을',a:1},{i:8,c:'P008',n:'블루투스 스피커',ct:'가전',p:48000,s:38000,sp:'테크기프트',a:1},{i:9,c:'P009',n:'고급 수건세트',ct:'생활',p:30000,s:22000,sp:'리빙플러스',a:0},{i:10,c:'P010',n:'유기농 꿀 세트',ct:'식품',p:38000,s:30000,sp:'(주)견과나라',a:1},{i:11,c:'P011',n:'핸드크림 세트',ct:'뷰티',p:28000,s:20000,sp:'뷰티월드',a:1},{i:12,c:'P012',n:'무선충전 패드',ct:'가전',p:32000,s:24000,sp:'테크기프트',a:1}];
+var IQ=[{i:1,co:'삼성전자',ct:'김부장',ph:'010-1234-5678',bg:'3~5만원',q:200,ca:'식품',mm:'설선물, 친환경포장',d:'02-10',st:'PENDING'},{i:2,co:'LG에너지솔루션',ct:'박과장',ph:'010-2345-6789',bg:'4~6만원',q:80,ca:'식품,가전',mm:'VIP 별도',d:'02-12',st:'APPROVED'},{i:3,co:'현대자동차',ct:'이대리',ph:'010-3456-7890',bg:'2~3만원',q:500,ca:'생활',mm:'근로자의날',d:'02-14',st:'PENDING'},{i:4,co:'SK하이닉스',ct:'최팀장',ph:'010-4567-8901',bg:'5만원+',q:150,ca:'식품,뷰티',mm:'',d:'02-08',st:'REJECTED'},{i:5,co:'네이버',ct:'정매니저',ph:'010-5678-9012',bg:'3~4만원',q:120,ca:'',mm:'제안서 먼저',d:'02-15',st:'PENDING'}];
+var TP=[{i:1,n:'2026 설',co:'삼성전자',st:'COLLECTING',sh:'01.28',pr:[1,2,3],rc:35,oc:30},{i:2,n:'2026 설',co:'LG에너지솔루션',st:'CLOSED',sh:'01.25',pr:[1,6],rc:12,oc:12},{i:3,n:'근로자의날',co:'현대자동차',st:'DRAFT',sh:'05.01',pr:[],rc:0,oc:0},{i:4,n:'2026 설',co:'SK하이닉스',st:'ORDERED',sh:'01.27',pr:[2,5],rc:18,oc:16},{i:5,n:'2025 추석',co:'삼성전자',st:'COMPLETE',sh:'09.15',pr:[7],rc:15,oc:15},{i:6,n:'2026 설',co:'네이버',st:'SHIPPING',sh:'01.29',pr:[1,8],rc:20,oc:18}];
+var SU=[{id:'S001',n:'(주)한우농장',p:[1,6]},{id:'S002',n:'(주)견과나라',p:[2,10]},{id:'S003',n:'올리브트레이드',p:[3]},{id:'S004',n:'뷰티월드',p:[4,11]},{id:'S005',n:'리빙플러스',p:[5,9]},{id:'S006',n:'과일마을',p:[7]},{id:'S007',n:'테크기프트',p:[8,12]}];
+var RC=[],OD=[];
+(function(){var fn=['김','이','박','최','정','강','조','윤'],ln=['철수','영희','지민','수진','민수','하늘','서연','준호','예린','태현'];var ad=['서울 강남구','서울 서초구','경기 수원시','부산 해운대구','대전 유성구','인천 연수구'];var ri=1,oi=1;TP.forEach(function(t){if(!t.rc)return;for(var j=0;j<t.rc;j++){var nm=fn[~~(Math.random()*fn.length)]+ln[~~(Math.random()*ln.length)];var r={x:ri++,t:t.i,nm:nm,ph:'010-'+String(1e3+~~(Math.random()*9e3))+'-'+String(1e3+~~(Math.random()*9e3)),ad:ad[~~(Math.random()*ad.length)]+' '+~~(Math.random()*200+1),tp:Math.random()>.3?'알림톡':'수기'};RC.push(r);if(j<t.oc&&t.pr.length){var pi=t.pr[~~(Math.random()*t.pr.length)];var ss=t.st==='COMPLETE'?['DELIVERED']:t.st==='SHIPPING'?['SHIPPING','DELIVERED']:t.st==='ORDERED'?['ORDERED','SHIPPING']:['ORDERED'];var s=ss[~~(Math.random()*ss.length)];OD.push({x:oi++,r:r.x,t:t.i,p:pi,q:1,s:s,rn:Math.random()>.7?(fn[~~(Math.random()*fn.length)]+ln[~~(Math.random()*ln.length)]):nm,tk:s==='SHIPPING'||s==='DELIVERED'?'CJ'+String(1e8+~~(Math.random()*9e8)):''});}}})})();
 
-var CATS=[{idx:1,name:'식품'},{idx:2,name:'생활'},{idx:3,name:'뷰티'},{idx:4,name:'가전'},{idx:5,name:'패션'}];
-var PRODS=[
-  {idx:1,name:'한우 선물세트 1호',cat:'식품',price:45000,supply:38000},
-  {idx:2,name:'프리미엄 견과세트',cat:'식품',price:39000,supply:32000},
-  {idx:3,name:'올리브유 세트',cat:'식품',price:42000,supply:35000},
-  {idx:4,name:'프리미엄 샴푸세트',cat:'뷰티',price:35000,supply:28000},
-  {idx:5,name:'텀블러 세트',cat:'생활',price:25000,supply:18000},
-  {idx:6,name:'한우 선물세트 2호',cat:'식품',price:65000,supply:55000},
-  {idx:7,name:'과일 바구니 세트',cat:'식품',price:55000,supply:45000},
-  {idx:8,name:'블루투스 스피커',cat:'가전',price:48000,supply:38000},
-  {idx:9,name:'고급 수건세트',cat:'생활',price:30000,supply:22000},
-  {idx:10,name:'유기농 꿀 세트',cat:'식품',price:38000,supply:30000},
-  {idx:11,name:'핸드크림 세트',cat:'뷰티',price:28000,supply:20000},
-  {idx:12,name:'무선충전 패드',cat:'가전',price:32000,supply:24000}
-];
-var TPLS=[
-  {idx:1,name:'2026 설',co:'삼성전자',st:'COLLECTING',sd:'01.15',ed:'01.25',ship:'01.28',sender:'인사팀'},
-  {idx:2,name:'2026 설',co:'LG에너지솔루션',st:'CLOSED',sd:'01.10',ed:'01.20',ship:'01.25',sender:'총무팀'},
-  {idx:3,name:'근로자의날',co:'현대자동차',st:'DRAFT',sd:'04.20',ed:'04.28',ship:'05.01',sender:'인사팀'},
-  {idx:4,name:'2026 설',co:'SK하이닉스',st:'ORDERED',sd:'01.12',ed:'01.22',ship:'01.27',sender:'복지팀'},
-  {idx:5,name:'2025 추석',co:'삼성전자',st:'COMPLETE',sd:'09.01',ed:'09.10',ship:'09.15',sender:'인사팀'},
-  {idx:6,name:'2026 설',co:'네이버',st:'SHIPPING',sd:'01.14',ed:'01.24',ship:'01.29',sender:'피플팀'}
-];
-var TPR=[
-  {ti:1,pi:1,sp:45000,cp:38000,sort:1,sel:true},{ti:1,pi:2,sp:39000,cp:32000,sort:2,sel:true},{ti:1,pi:3,sp:42000,cp:35000,sort:3,sel:false},
-  {ti:2,pi:1,sp:44000,cp:38000,sort:1,sel:true},{ti:2,pi:6,sp:65000,cp:55000,sort:2,sel:true},
-  {ti:4,pi:2,sp:39000,cp:32000,sort:1,sel:true},{ti:4,pi:5,sp:25000,cp:18000,sort:2,sel:true},
-  {ti:5,pi:7,sp:55000,cp:45000,sort:1,sel:true},{ti:6,pi:1,sp:45000,cp:38000,sort:1,sel:true},{ti:6,pi:8,sp:48000,cp:38000,sort:2,sel:true}
-];
-var SUPS=[{id:'S001',name:'(주)한우농장',pids:[1,6]},{id:'S002',name:'(주)견과나라',pids:[2,10]},{id:'S003',name:'올리브트레이드',pids:[3]},{id:'S004',name:'뷰티월드',pids:[4,11]},{id:'S005',name:'리빙플러스',pids:[5,9]},{id:'S006',name:'과일마을',pids:[7]},{id:'S007',name:'테크기프트',pids:[8,12]}];
+var G={r:'a',s:{a:'ap',c:'cc',s:'so'},ps:null,is:null,ts:null,pp:{},cs:'recv',si:'S001'};
+function _N(v){v=+v||0;if(!v)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
+function _S(v){v=+v||0;var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+Math.round(a/1e4)+'만';return p+a.toLocaleString()}
+function E(id){return document.getElementById(id)}
+function _P(i){return PR.find(function(p){return p.i===i})||{n:'?',p:0,s:0,c:'?',ct:'?',sp:'?'}}
+function _B(s){var m={DRAFT:'bg-dr',COLLECTING:'bg-co',CLOSED:'bg-cl',ORDERED:'bg-or',SHIPPING:'bg-sh',COMPLETE:'bg-dn',DELIVERED:'bg-dn',PENDING:'bg-pd',APPROVED:'bg-ap',REJECTED:'bg-rj'},l={DRAFT:'초안',COLLECTING:'수집중',CLOSED:'마감',ORDERED:'발주',SHIPPING:'배송중',COMPLETE:'완료',DELIVERED:'배송완료',PENDING:'대기',APPROVED:'승인',REJECTED:'반려'};return'<span class="gp-bg '+(m[s]||'bg-dr')+'">'+(l[s]||s)+'</span>'}
 
-var RCVS=[],ORDS=[];
-(function(){
-  var fn=['김','이','박','최','정','강','조','윤','장','임'],ln=['철수','영희','지민','수진','민수','하늘','서연','준호','예린','태현','소영','동현'];
-  var ad=['서울 강남구','서울 서초구','경기 수원시','부산 해운대구','대전 유성구','인천 연수구','경기 성남시','서울 마포구'];
-  var ri=1,oi=1;
-  [1,2,4,5,6].forEach(function(ti){
-    var ps=TPR.filter(function(p){return p.ti===ti});
-    var n=ti===1?35:ti===2?12:ti===4?18:ti===5?15:20;
-    for(var i=0;i<n;i++){
-      var nm=fn[~~(Math.random()*fn.length)]+ln[~~(Math.random()*ln.length)];
-      var r={idx:ri++,ti:ti,name:nm,phone:'010-'+String(1000+~~(Math.random()*9000))+'-'+String(1000+~~(Math.random()*9000)),addr:ad[~~(Math.random()*ad.length)]+' '+~~(Math.random()*200+1),zip:String(10000+~~(Math.random()*90000)),type:Math.random()>.3?'알림톡':'수기'};
-      RCVS.push(r);
-      if(Math.random()>.12){
-        var pr=ps[~~(Math.random()*ps.length)];
-        var sts=ti===5?['DELIVERED','DELIVERED','DELIVERED']:ti===1?['ORDERED','ORDERED','SHIPPING']:['ORDERED','SHIPPING','DELIVERED','DELIVERED'];
-        var s=sts[~~(Math.random()*sts.length)];
-        ORDS.push({idx:oi++,ri:r.idx,ti:ti,pi:pr.pi,qty:1,st:s,recip:Math.random()>.7?(fn[~~(Math.random()*fn.length)]+ln[~~(Math.random()*ln.length)]):nm,track:s==='SHIPPING'||s==='DELIVERED'?'CJ'+String(1e8+~~(Math.random()*9e8)):''});
-      }
-    }
-  });
-})();
+function gpRole(r,el){G.r=r;document.querySelectorAll('.gp-role__btn').forEach(function(b){b.classList.remove('active')});el.classList.add('active');document.querySelectorAll('.gp-rp').forEach(function(p){p.classList.remove('active')});E('gp-'+r).classList.add('active');_R()}
+function gpS(r,s,el){G.s[r]=s;E('gt-'+r).querySelectorAll('.gp-tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');E('gp-'+r).querySelectorAll('.gp-pn').forEach(function(p){p.classList.remove('active')});E(s).classList.add('active');_R()}
+function _R(){var m={a:{ap:rAP,ai:rAI,at:rAT},c:{cc:rCC,cp:rCP,co:rCO},s:{so:rSO,st:rST}};m[G.r][G.s[G.r]]()}
 
-/* ══════ UTILS ══════ */
-function N(v){v=+v||0;if(!v)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
-function S(v){v=+v||0;var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+Math.round(a/1e4)+'만';return p+a.toLocaleString()}
-function $(id){return document.getElementById(id)}
-function P(idx){return PRODS.find(function(p){return p.idx===idx})||{name:'?',price:0,supply:0}}
-function BG(s){var m={DRAFT:'draft',COLLECTING:'collect',CLOSED:'closed',ORDERED:'ordered',SHIPPING:'ship',COMPLETE:'done'};var l={DRAFT:'초안',COLLECTING:'수집중',CLOSED:'마감',ORDERED:'발주',SHIPPING:'배송중',COMPLETE:'완료',DELIVERED:'배송완료'};return'<span class="gp-bg gp-bg--'+(m[s]||'draft')+'">'+(l[s]||s)+'</span>'}
-function TS(ti){
-  var rs=RCVS.filter(function(r){return r.ti===ti}),os=ORDS.filter(function(o){return o.ti===ti});
-  var sa=0,ca=0;os.forEach(function(o){var p=TPR.find(function(t){return t.ti===ti&&t.pi===o.pi});sa+=(p?p.sp:0)*o.qty;ca+=(p?p.cp:0)*o.qty});
-  var sh=os.filter(function(o){return o.st==='SHIPPING'}).length,dl=os.filter(function(o){return o.st==='DELIVERED'}).length;
-  return{rc:rs.length,oc:os.length,no:rs.length-os.length,sa:sa,ca:ca,mg:sa-ca,rate:rs.length?(os.length/rs.length*100):0,sh:sh,dl:dl};
+/* ═══ ADMIN: 상품 등록/관리 ═══ */
+function rAP(){
+  var q=(E('_pq')?E('_pq').value:'').toLowerCase(),ct=E('_pc')?E('_pc').value:'',ac=E('_pa')?E('_pa').value:'';
+  var fl=PR.filter(function(p){if(q&&(p.n+' '+p.c).toLowerCase().indexOf(q)===-1)return false;if(ct&&p.ct!==ct)return false;if(ac==='Y'&&!p.a)return false;if(ac==='N'&&p.a)return false;return true});
+  var h='<div class="gp-sp"><div class="gp-l"><div class="gp-ph"><span>상품 목록 ('+fl.length+')</span><div style="display:flex;gap:4px"><button class="gp-btn sm p" onclick="alert(\'등록\')">+ 신규 등록</button></div></div><div class="gp-fb" style="padding:4px 8px"><input class="gp-inp" placeholder="상품명, 코드..." style="flex:1" id="_pq" oninput="rAP()" value="'+q.replace(/"/g,'&quot;')+'"><select class="gp-sel" id="_pc" onchange="rAP()"><option value="">전체</option>';
+  CATS.forEach(function(c){h+='<option'+(ct===c.n?' selected':'')+'>'+c.n+'</option>'});
+  h+='</select><select class="gp-sel" id="_pa" onchange="rAP()"><option value="">전체</option><option value="Y"'+(ac==='Y'?' selected':'')+'>활성</option><option value="N"'+(ac==='N'?' selected':'')+'>비활성</option></select></div><div class="gp-sb"><table><thead><tr><th style="width:50px">코드</th><th>상품명</th><th>카테고리</th><th class="r">판매가</th><th class="r">매입가</th><th class="c">상태</th></tr></thead><tbody>';
+  fl.forEach(function(p){h+='<tr class="ck'+(G.ps===p.i?' s':'')+'" onclick="G.ps='+p.i+';rAP()"><td class="m d" style="font-size:9px">'+p.c+'</td><td class="f">'+p.n+'</td><td class="d">'+p.ct+'</td><td class="r m" style="font-weight:600">'+_N(p.p)+'</td><td class="r m" style="font-weight:600;color:#ea580c">'+_N(p.s)+'</td><td class="c">'+(p.a?'<span style="color:#22c55e;font-weight:700">ON</span>':'<span class="d">OFF</span>')+'</td></tr>'});
+  h+='</tbody></table></div><div class="gp-ft"><span>'+fl.length+'개</span></div></div>';
+  h+='<div class="gp-r"><div class="gp-ph"><span>상품 상세</span><div style="display:flex;gap:4px"><button class="gp-btn sm">수정</button><button class="gp-btn sm dg">삭제</button></div></div><div class="gp-sb" style="padding:10px">';
+  if(!G.ps)h+='<div class="gp-em">좌측에서 상품을 선택하세요</div>';
+  else{var p=_P(G.ps);h+='<div class="gp-dg"><div class="gp-di"><i>상품코드</i><b style="font-size:12px">'+p.c+'</b></div><div class="gp-di"><i>카테고리</i><b style="font-size:12px;font-family:Noto Sans KR,sans-serif">'+p.ct+'</b></div><div class="gp-di"><i>상태</i><b>'+(p.a?'<span style="color:#22c55e">활성</span>':'<span style="color:#e85d5d">비활성</span>')+'</b></div></div><div class="gp-dg"><div class="gp-di"><i>판매가</i><b style="color:#4a90d9">'+_N(p.p)+'</b></div><div class="gp-di"><i>매입가</i><b style="color:#ea580c">'+_N(p.s)+'</b></div><div class="gp-di"><i>마진율</i><b style="color:#22c55e">'+((p.p-p.s)/p.p*100).toFixed(1)+'%</b></div></div>';
+  h+='<div class="gp-ds">기본 정보</div><div style="display:grid;grid-template-columns:80px 1fr;gap:4px 8px;font-size:11px"><span class="d">상품명</span><span class="f">'+p.n+'</span><span class="d">매입처</span><span>'+p.sp+'</span><span class="d">이미지</span><span class="d">(이미지 영역)</span></div>';
+  h+='<div class="gp-ds">사용 중인 캠페인</div>';var used=TP.filter(function(t){return t.pr.indexOf(p.i)!==-1});if(!used.length)h+='<div class="d" style="padding:6px 0">없음</div>';else{h+='<table><thead><tr><th>캠페인</th><th>고객사</th><th class="c">상태</th></tr></thead><tbody>';used.forEach(function(t){h+='<tr><td>'+t.n+'</td><td>'+t.co+'</td><td class="c">'+_B(t.st)+'</td></tr>'});h+='</tbody></table>';}}
+  h+='</div></div></div>';E('ap').innerHTML=h;
 }
 
-/* ══════ TAB SWITCH ══════ */
-function gpTab(id,el){
-  GP.tab=id;
-  document.querySelectorAll('.gp-tab').forEach(function(t){t.classList.remove('active')});
-  if(el)el.classList.add('active');
-  document.querySelectorAll('.gp-pn').forEach(function(p){p.classList.remove('active')});
-  $('gp-'+id).classList.add('active');
-  ({design:gpDesign,recommend:gpRec,result:gpRes,orders:gpOrd,total:gpTot,supplier:gpSup})[id]();
+/* ═══ ADMIN: 문의/승인 관리 ═══ */
+function rAI(){
+  var pc={PENDING:0,APPROVED:0,REJECTED:0};IQ.forEach(function(q){pc[q.st]++});
+  var sf=E('_if')?E('_if').value:'';
+  var fl=sf?IQ.filter(function(q){return q.st===sf}):IQ;
+  var h='<div class="gp-cds">';[{l:'전체',v:IQ.length},{l:'대기',v:pc.PENDING,c:'#ea580c'},{l:'승인',v:pc.APPROVED,c:'#22c55e'},{l:'반려',v:pc.REJECTED,c:'#e85d5d'}].forEach(function(x){h+='<div class="gp-cd"><i>'+x.l+'</i><b'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'건</b></div>'});h+='</div>';
+  h+='<div class="gp-sp"><div class="gp-l"><div class="gp-ph"><span>문의 목록</span><select class="gp-sel" id="_if" onchange="rAI()"><option value="">전체</option><option value="PENDING"'+(sf==='PENDING'?' selected':'')+'>대기</option><option value="APPROVED"'+(sf==='APPROVED'?' selected':'')+'>승인</option><option value="REJECTED"'+(sf==='REJECTED'?' selected':'')+'>반려</option></select></div><div class="gp-sb"><table><tbody>';
+  fl.forEach(function(q){h+='<tr class="ck'+(q.st==='PENDING'?' gp-w':'')+(G.is===q.i?' s':'')+'" onclick="G.is='+q.i+';rAI()"><td style="padding:6px 10px"><div class="f" style="font-size:12px">'+q.co+'</div><div class="d">'+q.ct+' | '+q.d+'</div></td><td class="c">'+_B(q.st)+'</td><td class="r d">'+q.q+'명 / '+q.bg+'</td></tr>'});
+  h+='</tbody></table></div></div><div class="gp-r"><div class="gp-ph"><span>문의 상세</span></div><div class="gp-sb" style="padding:10px">';
+  if(!G.is)h+='<div class="gp-em">좌측에서 문의를 선택하세요</div>';
+  else{var q=IQ.find(function(x){return x.i===G.is});if(q){h+='<div class="gp-dg"><div class="gp-di"><i>고객사</i><b style="font-family:Noto Sans KR,sans-serif;font-size:13px">'+q.co+'</b></div><div class="gp-di"><i>상태</i><b>'+_B(q.st)+'</b></div><div class="gp-di"><i>접수일</i><b>'+q.d+'</b></div></div>';
+  h+='<div class="gp-ds">문의 정보</div><div style="display:grid;grid-template-columns:80px 1fr;gap:4px 8px;font-size:11px"><span class="d">담당자</span><span class="f">'+q.ct+'</span><span class="d">연락처</span><span class="m" style="font-size:11px">'+q.ph+'</span><span class="d">예산</span><span class="f" style="color:#4a90d9">'+q.bg+'</span><span class="d">인원</span><span class="f">'+q.q+'명</span><span class="d">카테고리</span><span>'+(q.ca||'-')+'</span><span class="d">요청사항</span><span>'+(q.mm||'-')+'</span></div>';
+  if(q.st==='PENDING')h+='<div style="display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid #e2e8f0"><button class="gp-btn p" onclick="alert(\'승인\')">승인 + 제안서 생성</button><button class="gp-btn dg" onclick="alert(\'반려\')">반려</button></div>';
+  if(q.st==='APPROVED')h+='<div class="gp-ds">연결된 제안서</div><div style="padding:4px 0;font-size:11px"><span style="color:#4a90d9;cursor:pointer;text-decoration:underline">제안서 #'+q.i+' 바로가기</span></div>';}}
+  h+='</div></div></div>';E('ai').innerHTML=h;
 }
 
-/* ══════ 1. 설계 탭 ══════ */
-function gpDesign(){
-  var sc={DRAFT:0,COLLECTING:0,CLOSED:0,ORDERED:0,SHIPPING:0,COMPLETE:0};
-  TPLS.forEach(function(t){sc[t.st]++});
-  var pipe=['DRAFT','COLLECTING','CLOSED','ORDERED','SHIPPING','COMPLETE'];
-  var pLbl={DRAFT:'초안',COLLECTING:'수집중',CLOSED:'마감',ORDERED:'발주',SHIPPING:'배송중',COMPLETE:'완료'};
-  var pBg={DRAFT:'#f1f5f9',COLLECTING:'#eef4fb',CLOSED:'#fef9ee',ORDERED:'#dbeafe',SHIPPING:'#d1fae5',COMPLETE:'#ecfdf5'};
-  var pFg={DRAFT:'#6b7280',COLLECTING:'#2563eb',CLOSED:'#d49a2a',ORDERED:'#3b82f6',SHIPPING:'#059669',COMPLETE:'#22c55e'};
-
-  var h='<div class="gp-pipe">';
-  pipe.forEach(function(s,i){
-    if(i)h+='<span class="gp-pipe__a">→</span>';
-    h+='<div class="gp-pipe__s" style="background:'+pBg[s]+';color:'+pFg[s]+'">'+pLbl[s]+' '+sc[s]+'</div>';
-  });
-  h+='</div><div class="gp-split"><div class="gp-left">';
-  h+='<div class="gp-ph"><span class="gp-ph__t">캠페인 ('+TPLS.length+')</span><div class="gp-ph__r"><select class="gp-sel" id="gpDF" onchange="gpDL()"><option value="">전체</option>';
-  pipe.forEach(function(s){h+='<option value="'+s+'">'+pLbl[s]+'</option>'});
-  h+='</select><input class="gp-inp" placeholder="검색..." id="gpDS" oninput="gpDL()" style="width:100px"></div></div>';
-  h+='<div class="gp-sb" id="gpDLW"></div>';
-  h+='</div><div class="gp-right"><div class="gp-ph"><span class="gp-ph__t" id="gpDDT">캠페인 상세</span><button class="gp-btn gp-btn--p gp-btn--sm" onclick="alert(\'새 캠페인\')">+ 새 캠페인</button></div>';
-  h+='<div class="gp-sb" id="gpDDW"><div class="gp-empty">좌측에서 캠페인을 선택하세요</div></div>';
-  h+='</div></div>';
-  $('gp-design').innerHTML=h;gpDL();
+/* ═══ ADMIN: 전체 주문현황 ═══ */
+function rAT(){
+  var tO=OD.length,tS=0,tC=0;OD.forEach(function(o){var p=_P(o.p);tS+=p.p*o.q;tC+=p.s*o.q});
+  var pipe=['DRAFT','COLLECTING','CLOSED','ORDERED','SHIPPING','COMPLETE'],pl={DRAFT:'초안',COLLECTING:'수집중',CLOSED:'마감',ORDERED:'발주',SHIPPING:'배송중',COMPLETE:'완료'},pb={DRAFT:'#f1f5f9',COLLECTING:'#eef4fb',CLOSED:'#fef9ee',ORDERED:'#dbeafe',SHIPPING:'#d1fae5',COMPLETE:'#ecfdf5'},pf={DRAFT:'#6b7280',COLLECTING:'#2563eb',CLOSED:'#d49a2a',ORDERED:'#3b82f6',SHIPPING:'#059669',COMPLETE:'#22c55e'},sc={};TP.forEach(function(t){sc[t.st]=(sc[t.st]||0)+1});
+  var h='<div class="gp-pp">';pipe.forEach(function(s,i){if(i)h+='<i>→</i>';h+='<div style="background:'+pb[s]+';color:'+pf[s]+'">'+pl[s]+' '+(sc[s]||0)+'</div>'});h+='</div>';
+  h+='<div class="gp-cds">';[{l:'캠페인',v:TP.length+'개'},{l:'주문',v:_N(tO)+'건'},{l:'매출',v:_S(tS),c:'#4a90d9'},{l:'매입',v:_S(tC),c:'#ea580c'},{l:'마진',v:_S(tS-tC),c:'#22c55e'}].forEach(function(x){h+='<div class="gp-cd"><i>'+x.l+'</i><b'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</b></div>'});h+='</div>';
+  h+='<div class="gp-sp"><div class="gp-l"><div class="gp-ph"><span>캠페인별</span></div><div class="gp-sb"><table><thead><tr><th>캠페인</th><th>고객사</th><th class="c">상태</th><th class="r">수신</th><th class="r">주문</th><th class="r">매출</th></tr></thead><tbody>';
+  TP.forEach(function(t){var os=OD.filter(function(o){return o.t===t.i}),am=0;os.forEach(function(o){am+=_P(o.p).p*o.q});h+='<tr class="ck'+(G.ts===t.i?' s':'')+'" onclick="G.ts='+t.i+';rAT()"><td class="f">'+t.n+'</td><td>'+t.co+'</td><td class="c">'+_B(t.st)+'</td><td class="r">'+t.rc+'</td><td class="r">'+os.length+'</td><td class="r m" style="font-weight:600;color:#4a90d9">'+_N(am)+'</td></tr>'});
+  h+='</tbody></table></div></div><div class="gp-r"><div class="gp-ph"><span>'+(G.ts?'캠페인 상세':'전체 집계')+'</span><div style="display:flex;gap:4px"><button class="gp-btn sm">발주서 일괄</button><button class="gp-btn sm">엑셀</button></div></div><div class="gp-sb" style="padding:10px">';
+  if(!G.ts){
+    var cA={};OD.forEach(function(o){var t=TP.find(function(x){return x.i===o.t});if(!t)return;cA[t.co]=(cA[t.co]||0)+_P(o.p).p*o.q});var cR=Object.keys(cA).map(function(k){return{n:k,a:cA[k]}}).sort(function(a,b){return b.a-a.a}),mx=cR.length?cR[0].a:1;
+    h+='<div class="gp-ds">고객사별 주문금액</div>';cR.forEach(function(c){h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span class="d" style="width:90px;text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.n+'</span><div style="flex:1;height:14px;background:#f0f4f9;border-radius:2px;overflow:hidden"><div style="width:'+(c.a/mx*100)+'%;height:100%;background:#4a90d9;border-radius:2px"></div></div><span class="d m" style="width:50px;text-align:right">'+_S(c.a)+'</span></div>'});
+    var pA={};OD.forEach(function(o){var p=_P(o.p);pA[p.n]=(pA[p.n]||0)+o.q});var pR=Object.keys(pA).map(function(k){return{n:k,c:pA[k]}}).sort(function(a,b){return b.c-a.c}),pm=pR.length?pR[0].c:1;
+    h+='<div class="gp-ds" style="margin-top:12px">상품별 주문량</div>';pR.forEach(function(p){h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span class="d" style="width:100px;text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.n+'</span><div style="flex:1;height:14px;background:#f0f4f9;border-radius:2px;overflow:hidden"><div style="width:'+(p.c/pm*100)+'%;height:100%;background:#22c55e;border-radius:2px"></div></div><span class="d m" style="width:36px;text-align:right">'+p.c+'</span></div>'});
+    h+='<div class="gp-ds" style="margin-top:12px">매입처별</div><table><thead><tr><th>매입처</th><th class="r">건수</th><th class="r">매입</th></tr></thead><tbody>';SU.forEach(function(s){var c=0,a=0;OD.forEach(function(o){if(s.p.indexOf(o.p)!==-1){c+=o.q;a+=_P(o.p).s*o.q}});if(c)h+='<tr><td class="f">'+s.n+'</td><td class="r">'+_N(c)+'</td><td class="r m" style="font-weight:600;color:#ea580c">'+_N(a)+'</td></tr>'});h+='</tbody></table>';
+  }else{var t=TP.find(function(x){return x.i===G.ts}),os=OD.filter(function(o){return o.t===t.i}),sa=0,ca=0;os.forEach(function(o){sa+=_P(o.p).p*o.q;ca+=_P(o.p).s*o.q});
+  h+='<div class="gp-dg"><div class="gp-di"><i>수신자</i><b>'+t.rc+'명</b></div><div class="gp-di"><i>주문</i><b>'+os.length+'건</b></div><div class="gp-di"><i>매출</i><b style="color:#4a90d9">'+_S(sa)+'</b></div></div>';
+  h+='<table><thead><tr><th>수신자</th><th>받는이</th><th>상품</th><th class="r">금액</th><th class="c">상태</th><th>송장</th></tr></thead><tbody>';os.slice(0,40).forEach(function(o){var rv=RC.find(function(r){return r.x===o.r})||{nm:'?'},pd=_P(o.p);h+='<tr><td>'+rv.nm+'</td><td'+(o.rn!==rv.nm?' class="f" style="color:#4a90d9"':'')+'>'+o.rn+'</td><td>'+pd.n+'</td><td class="r m" style="font-weight:600;color:#4a90d9">'+_N(pd.p*o.q)+'</td><td class="c">'+_B(o.s)+'</td><td class="d m" style="font-size:9px">'+(o.tk||'-')+'</td></tr>'});if(os.length>40)h+='<tr><td colspan="6" class="d c">... 외 '+(os.length-40)+'건</td></tr>';h+='</tbody></table>';}
+  h+='</div></div></div>';E('at').innerHTML=h;
 }
 
-function gpDL(){
-  var f=$('gpDF')?$('gpDF').value:'',q=($('gpDS')?$('gpDS').value:'').toLowerCase();
-  var list=TPLS.filter(function(t){
-    if(f&&t.st!==f)return false;
-    if(q&&(t.co+' '+t.name).toLowerCase().indexOf(q)===-1)return false;
-    return true;
-  });
-  var h='<table><tbody>';
-  list.forEach(function(t){
-    var s=TS(t.idx),sel=GP.dSel===t.idx?'sel':'';
-    h+='<tr class="gg-clickable '+sel+'" onclick="gpDSel('+t.idx+')">';
-    h+='<td style="padding:6px 10px"><div style="font-weight:700;font-size:12px">'+t.name+'</div><div class="dim">'+t.co+' | '+t.sender+'</div></td>';
-    h+='<td class="c">'+BG(t.st)+'</td>';
-    h+='<td class="r" style="font-size:10px"><div class="b">'+s.rc+'명 / '+s.oc+'건</div><div class="dim">'+s.rate.toFixed(0)+'%</div></td></tr>';
-  });
-  h+='</tbody></table>';
-  if($('gpDLW'))$('gpDLW').innerHTML=h;
+/* ═══ CLIENT: 카탈로그/요청서 ═══ */
+function rCC(){
+  var mn=+(E('_cmi')?E('_cmi').value:20000)||0,mx=+(E('_cmx')?E('_cmx').value:60000)||999999,kw=(E('_ckw')?E('_ckw').value:'').toLowerCase();
+  var cts=[];document.querySelectorAll('._ccc').forEach(function(c,i){if(c.checked)cts.push(CATS[i].n)});
+  var fl=PR.filter(function(p){if(!p.a)return false;if(p.p<mn||p.p>mx)return false;if(cts.length&&cts.indexOf(p.ct)===-1)return false;if(kw&&p.n.toLowerCase().indexOf(kw)===-1)return false;return true});
+  var h='<div class="gp-sp"><div class="gp-l" style="width:280px;min-width:240px"><div class="gp-ph"><span>카탈로그 필터</span></div><div class="gp-sb" style="padding:8px 10px">';
+  h+='<div class="gp-fg"><label>예산 범위 (원)</label><div style="display:flex;gap:4px"><input class="gp-inp" type="number" id="_cmi" value="'+mn+'" style="flex:1"><span style="line-height:28px;color:#94a3b8">~</span><input class="gp-inp" type="number" id="_cmx" value="'+(mx===999999?60000:mx)+'" style="flex:1"></div></div>';
+  h+='<div class="gp-fg"><label>카테고리</label>';CATS.forEach(function(c){h+='<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;margin-top:2px"><input type="checkbox" checked class="_ccc"> '+c.n+'</label>'});h+='</div>';
+  h+='<div class="gp-fg"><label>검색</label><input class="gp-inp" placeholder="상품명..." id="_ckw" oninput="rCC()" value="'+kw+'" style="width:100%"></div>';
+  h+='<button class="gp-btn p" style="width:100%;margin-top:8px" onclick="rCC()">검색</button>';
+  h+='<div class="gp-ds" style="margin-top:14px">문의/요청서</div><div class="gp-fg"><label>고객사명</label><input class="gp-inp" placeholder="고객사명" style="width:100%"></div><div class="gp-fg"><label>담당자</label><input class="gp-inp" placeholder="담당자명" style="width:100%"></div><div class="gp-fg"><label>연락처</label><input class="gp-inp" placeholder="010-0000-0000" style="width:100%"></div><div class="gp-fg"><label>인원</label><input class="gp-inp" type="number" placeholder="수량" style="width:100%"></div><div class="gp-fg"><label>요청사항</label><textarea class="gp-inp" style="width:100%;height:50px" placeholder="상세 요청"></textarea></div><button class="gp-btn" style="width:100%">요청서 제출</button>';
+  h+='</div></div><div class="gp-r"><div class="gp-ph"><span>상품 카탈로그 ('+fl.length+')</span></div><div class="gp-sb" style="padding:8px 10px">';
+  fl.forEach(function(p){h+='<div class="gp-pc"><div>IMG</div><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.n+'</div><div style="font-size:11px;font-family:JetBrains Mono,monospace;color:#4a5568">'+_N(p.p)+'원</div><div style="font-size:9px;color:#94a3b8">'+p.ct+' | '+p.sp+'</div></div></div>'});
+  if(!fl.length)h+='<div class="gp-em">조건에 맞는 상품이 없습니다</div>';
+  h+='</div></div></div>';E('cc').innerHTML=h;
 }
 
-function gpDSel(idx){GP.dSel=idx;gpDL();gpDD()}
-function gpDSub(s){GP.dSub=s;gpDD()}
+/* ═══ CLIENT: 제안서 생성 ═══ */
+function rCP(){
+  var q=(E('_ppq')?E('_ppq').value:'').toLowerCase(),ct=E('_ppc')?E('_ppc').value:'';
+  var fl=PR.filter(function(p){if(!p.a)return false;if(q&&p.n.toLowerCase().indexOf(q)===-1)return false;if(ct&&p.ct!==ct)return false;return true});
+  var sp=PR.filter(function(p){return G.pp[p.i]});
+  var h='<div class="gp-sp"><div class="gp-l" style="width:320px;min-width:260px"><div class="gp-ph"><span>상품 선택</span></div><div class="gp-fb" style="padding:4px 8px"><input class="gp-inp" placeholder="검색..." id="_ppq" oninput="rCP()" value="'+q+'" style="flex:1"><select class="gp-sel" id="_ppc" onchange="rCP()"><option value="">전체</option>';
+  CATS.forEach(function(c){h+='<option'+(ct===c.n?' selected':'')+'>'+c.n+'</option>'});
+  h+='</select></div><div class="gp-sb" style="padding:6px 8px">';
+  fl.forEach(function(p){var sel=G.pp[p.i];h+='<div class="gp-pc'+(sel?' s':'')+'" onclick="G.pp['+p.i+']=!G.pp['+p.i+'];rCP()"><div>IMG</div><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.n+'</div><div style="font-size:11px;font-family:JetBrains Mono,monospace;color:#4a5568">'+_N(p.p)+'원</div><div style="font-size:9px;color:#94a3b8">'+p.ct+'</div></div><input type="checkbox"'+(sel?' checked':'')+' style="pointer-events:none;flex-shrink:0"></div>'});
+  h+='</div><div class="gp-ft"><span>선택: <strong class="m">'+sp.length+'</strong>개</span></div></div>';
+  h+='<div class="gp-r"><div class="gp-ph"><span>제안서 미리보기</span><div style="display:flex;gap:4px"><button class="gp-btn sm p">PDF 다운로드</button><button class="gp-btn sm">견적서 생성</button></div></div><div class="gp-sb" style="padding:10px">';
+  if(!sp.length)h+='<div class="gp-em">좌측에서 상품을 선택하면 제안서가 생성됩니다</div>';
+  else{h+='<div style="border:1px solid #e2e8f0;border-radius:4px;padding:12px;background:#fafcff"><div style="font-size:14px;font-weight:800;margin-bottom:4px">단체 선물 제안서</div><div class="d" style="margin-bottom:10px">Vendys 단체선물대장 | '+sp.length+'종</div><table><thead><tr><th>#</th><th>상품명</th><th>카테고리</th><th class="r">단가(원)</th></tr></thead><tbody>';
+  sp.forEach(function(p,i){h+='<tr><td>'+(i+1)+'</td><td class="f">'+p.n+'</td><td class="d">'+p.ct+'</td><td class="r m" style="font-weight:600;color:#4a90d9">'+_N(p.p)+'</td></tr>'});
+  h+='</tbody></table><div style="margin-top:8px;padding-top:6px;border-top:1px solid #e2e8f0;font-size:11px">가격 범위: <strong class="m" style="color:#4a90d9">'+_N(Math.min.apply(null,sp.map(function(p){return p.p})))+' ~ '+_N(Math.max.apply(null,sp.map(function(p){return p.p})))+'</strong>원</div></div>';
+  h+='<div class="gp-ds" style="margin-top:12px">견적 시뮬레이션</div><div style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><span class="d">인원:</span><input class="gp-inp" type="number" value="'+(E('_ppn')?E('_ppn').value:'100')+'" id="_ppn" oninput="rCP()" style="width:80px"><span class="d">명</span></div>';
+  var ppl=+(E('_ppn')?E('_ppn').value:100)||100,gt=0;h+='<table><thead><tr><th>상품명</th><th class="r">단가</th><th class="r">수량</th><th class="r">소계</th></tr></thead><tbody>';sp.forEach(function(p){var sub=p.p*ppl;gt+=sub;h+='<tr><td>'+p.n+'</td><td class="r m">'+_N(p.p)+'</td><td class="r m">'+_N(ppl)+'</td><td class="r m f" style="color:#4a90d9">'+_N(sub)+'</td></tr>'});h+='<tr style="border-top:2px solid #e2e8f0"><td class="f" colspan="3">합계</td><td class="r m f" style="font-size:13px;color:#4a90d9">'+_N(gt)+'</td></tr></tbody></table>';}
+  h+='</div></div></div>';E('cp').innerHTML=h;
+}
 
-function gpDD(){
-  var el=$('gpDDW');if(!el||!GP.dSel)return;
-  var t=TPLS.find(function(x){return x.idx===GP.dSel});if(!t)return;
-  if($('gpDDT'))$('gpDDT').textContent=t.name+' - '+t.co;
-  var s=TS(t.idx),ps=TPR.filter(function(p){return p.ti===t.idx}),rs=RCVS.filter(function(r){return r.ti===t.idx}),os=ORDS.filter(function(o){return o.ti===t.idx});
-
-  var h='<div class="gp-st">';
-  [{k:'overview',l:'개요'},{k:'products',l:'상품 ('+ps.length+')'},{k:'receivers',l:'수신자 ('+rs.length+')'},{k:'ordmgmt',l:'주문/발주 ('+os.length+')'}].forEach(function(x){
-    h+='<div class="gp-st__i'+(GP.dSub===x.k?' active':'')+'" onclick="gpDSub(\''+x.k+'\')">'+x.l+'</div>';
-  });
-  h+='</div><div style="padding:10px;overflow:auto">';
-
-  if(GP.dSub==='overview'){
-    h+='<div class="gp-dg">';
-    h+='<div class="gp-di"><div class="gp-di__l">수신자</div><div class="gp-di__v">'+N(s.rc)+'명</div></div>';
-    h+='<div class="gp-di"><div class="gp-di__l">주문</div><div class="gp-di__v">'+N(s.oc)+'건</div></div>';
-    h+='<div class="gp-di"><div class="gp-di__l">미주문</div><div class="gp-di__v" style="color:#e85d5d">'+N(s.no)+'명</div></div>';
-    h+='<div class="gp-di"><div class="gp-di__l">응답률</div><div class="gp-di__v" style="color:#4a90d9">'+s.rate.toFixed(1)+'%</div></div>';
-    h+='<div class="gp-di"><div class="gp-di__l">주문금액</div><div class="gp-di__v" style="color:#4a90d9">'+S(s.sa)+'</div></div>';
-    h+='<div class="gp-di"><div class="gp-di__l">마진</div><div class="gp-di__v" style="color:#22c55e">'+S(s.mg)+'</div></div>';
-    h+='</div>';
-    h+='<div class="gp-prog" style="margin:4px 0 8px"><div class="gp-prog__f" style="width:'+s.rate+'%"></div></div>';
-    h+='<div class="gp-ds">캠페인 정보</div>';
-    h+='<table><tbody>';
-    h+='<tr><td class="dim" style="width:80px">상태</td><td>'+BG(t.st)+'</td><td class="dim" style="width:80px">출고희망일</td><td class="b">'+t.ship+'</td></tr>';
-    h+='<tr><td class="dim">수집기간</td><td>'+t.sd+' ~ '+t.ed+'</td><td class="dim">발신자</td><td>'+t.sender+'</td></tr>';
-    h+='</tbody></table>';
-
-  }else if(GP.dSub==='products'){
-    h+='<div class="gp-fb" style="border:none;padding:0 0 6px"><button class="gp-btn gp-btn--sm gp-btn--p">+ 상품 추가</button><button class="gp-btn gp-btn--sm">정렬 재정렬</button></div>';
-    h+='<table><thead><tr><th style="width:24px">#</th><th>상품명</th><th>카테고리</th><th class="r">판매가</th><th class="r">매입가</th><th class="r">마진율</th><th class="c">선택</th></tr></thead><tbody>';
-    ps.sort(function(a,b){return a.sort-b.sort}).forEach(function(p){
-      var prod=P(p.pi),mg=p.sp?((p.sp-p.cp)/p.sp*100):0;
-      h+='<tr><td class="c dim">'+p.sort+'</td><td class="b">'+prod.name+'</td><td class="dim">'+prod.cat+'</td><td class="r">'+N(p.sp)+'</td><td class="r">'+N(p.cp)+'</td><td class="r">'+mg.toFixed(1)+'%</td><td class="c">'+(p.sel?'<span style="color:#22c55e;font-weight:700">Y</span>':'N')+'</td></tr>';
-    });
-    h+='</tbody></table>';
-
-  }else if(GP.dSub==='receivers'){
-    h+='<div class="gp-fb" style="border:none;padding:0 0 6px"><button class="gp-btn gp-btn--sm gp-btn--p">+ 수신자 등록</button><button class="gp-btn gp-btn--sm">엑셀 붙여넣기</button><button class="gp-btn gp-btn--sm">알림톡 발송</button></div>';
+/* ═══ CLIENT: 견적/사용자등록/선택 ═══ */
+function rCO(){
+  var t=TP.find(function(t){return t.st==='COLLECTING'})||TP[0];
+  var rs=RC.filter(function(r){return r.t===t.i}),os=OD.filter(function(o){return o.t===t.i}),rate=rs.length?(os.length/rs.length*100):0;
+  var h='<div class="gp-sp"><div class="gp-l" style="width:300px;min-width:240px"><div class="gp-ph"><span>'+t.n+' | '+t.co+'</span></div><div class="gp-sb" style="padding:8px 10px">';
+  h+='<div class="d" style="margin-bottom:6px">마감: '+t.sh+'</div>';
+  h+='<div class="gp-ds">요약</div><div class="gp-dg" style="grid-template-columns:1fr 1fr"><div class="gp-di"><i>수신자</i><b>'+rs.length+'명</b></div><div class="gp-di"><i>주문</i><b>'+os.length+'건</b></div></div>';
+  h+='<div class="gp-pr" style="margin:4px 0"><div style="width:'+rate+'%;background:#4a90d9"></div></div><div class="d" style="margin-bottom:8px">응답률 '+rate.toFixed(1)+'%</div>';
+  h+='<div class="gp-ds">확정 상품</div>';t.pr.forEach(function(pi,i){var pd=_P(pi);h+='<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f1f5f9"><span class="d" style="width:14px">'+(i+1)+'</span><span style="flex:1;font-size:11px">'+pd.n+'</span><span class="m" style="font-size:11px">'+_N(pd.p)+'</span></div>'});
+  h+='<div style="display:flex;gap:4px;margin-top:10px"><button class="gp-btn p" style="flex:1">알림톡 발송</button><button class="gp-btn" style="flex:1">리마인드</button></div></div></div>';
+  h+='<div class="gp-r"><div class="gp-st"><div class="'+(G.cs==='recv'?'a':'')+'" onclick="G.cs=\'recv\';rCO()">사용자 등록</div><div class="'+(G.cs==='sel'?'a':'')+'" onclick="G.cs=\'sel\';rCO()">상품 선택/주문</div><div class="'+(G.cs==='stat'?'a':'')+'" onclick="G.cs=\'stat\';rCO()">주문 현황</div></div><div class="gp-sb" style="padding:8px 10px">';
+  if(G.cs==='recv'){
+    h+='<div class="gp-fm"><div style="display:flex;gap:6px;margin-bottom:4px"><div class="gp-fg" style="flex:1;margin:0"><label>이름</label><input class="gp-inp" placeholder="홍길동" style="width:100%"></div><div class="gp-fg" style="flex:1;margin:0"><label>연락처</label><input class="gp-inp" placeholder="010-0000-0000" style="width:100%"></div><div class="gp-fg" style="flex:1.5;margin:0"><label>주소</label><input class="gp-inp" placeholder="도로명 주소" style="width:100%"></div></div><div style="text-align:right"><button class="gp-btn sm p">+ 추가</button><button class="gp-btn sm" style="margin-left:4px">엑셀 붙여넣기</button></div></div>';
     h+='<table><thead><tr><th>이름</th><th>연락처</th><th>주소</th><th>방식</th><th class="c">주문</th></tr></thead><tbody>';
-    rs.slice(0,40).forEach(function(r){
-      var has=os.find(function(o){return o.ri===r.idx});
-      h+='<tr><td class="b">'+r.name+'</td><td style="font-family:JetBrains Mono,monospace;font-size:10px">'+r.phone+'</td><td class="dim" style="max-width:160px;overflow:hidden;text-overflow:ellipsis">'+r.addr+'</td><td class="dim">'+r.type+'</td><td class="c">'+(has?'<span style="color:#22c55e;font-weight:700">Y</span>':'<span style="color:#e85d5d;font-weight:700">N</span>')+'</td></tr>';
-    });
-    if(rs.length>40)h+='<tr><td colspan="5" class="dim c">... 외 '+(rs.length-40)+'명</td></tr>';
-    h+='</tbody></table>';
-
-  }else if(GP.dSub==='ordmgmt'){
-    h+='<div class="gp-fb" style="border:none;padding:0 0 6px"><button class="gp-btn gp-btn--sm">발주서 생성</button><button class="gp-btn gp-btn--sm">엑셀 다운로드</button></div>';
-    h+='<table><thead><tr><th>수신자</th><th>받는이</th><th>상품</th><th class="r">금액</th><th class="c">상태</th><th>송장</th></tr></thead><tbody>';
-    os.slice(0,40).forEach(function(o){
-      var rv=RCVS.find(function(r){return r.idx===o.ri})||{name:'?'},prod=P(o.pi),pr=TPR.find(function(p){return p.ti===o.ti&&p.pi===o.pi});
-      var diff=o.recip!==rv.name;
-      h+='<tr><td>'+rv.name+'</td><td'+(diff?' style="font-weight:700;color:#4a90d9"':'')+'>'+o.recip+'</td><td>'+prod.name+'</td><td class="r">'+N((pr?pr.sp:0)*o.qty)+'</td><td class="c">'+BG(o.st)+'</td><td class="dim" style="font-family:JetBrains Mono,monospace;font-size:9px">'+(o.track||'-')+'</td></tr>';
-    });
-    if(os.length>40)h+='<tr><td colspan="6" class="dim c">... 외 '+(os.length-40)+'건</td></tr>';
-    h+='</tbody></table>';
-  }
-  h+='</div>';
-  el.innerHTML=h;
-}
-
-/* ══════ 2. 상품 추천 제안서 ══════ */
-function gpRec(){
-  var h='<div class="gp-split"><div class="gp-left--narrow" style="width:280px;min-width:240px;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0">';
-  h+='<div class="gp-ph"><span class="gp-ph__t">추천 조건</span></div><div class="gp-sb" style="padding:8px 10px">';
-  h+='<div class="gp-fg"><label>예산 범위 (원)</label><div style="display:flex;gap:4px"><input class="gp-inp" type="number" id="gpRMin" value="20000" style="flex:1"><span style="line-height:28px;color:#94a3b8">~</span><input class="gp-inp" type="number" id="gpRMax" value="60000" style="flex:1"></div></div>';
-  h+='<div class="gp-fg"><label>인원 수</label><input class="gp-inp" type="number" id="gpRPpl" value="100" style="width:100%"></div>';
-  h+='<div class="gp-fg"><label>카테고리</label>';
-  CATS.forEach(function(c){h+='<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;margin-top:2px"><input type="checkbox" checked class="gpRCat"> '+c.name+'</label>'});
-  h+='</div>';
-  h+='<div class="gp-fg"><label>키워드</label><input class="gp-inp" placeholder="상품명 검색..." id="gpRKw" oninput="gpRF()" style="width:100%"></div>';
-  h+='<div class="gp-fg"><label>매입가 범위</label><div style="display:flex;gap:4px"><input class="gp-inp" type="number" placeholder="최소" id="gpRSMin" style="flex:1"><span style="line-height:28px;color:#94a3b8">~</span><input class="gp-inp" type="number" placeholder="최대" id="gpRSMax" style="flex:1"></div></div>';
-  h+='<button class="gp-btn gp-btn--p" style="width:100%;margin-top:8px" onclick="gpRF()">추천 받기</button>';
-  h+='<div class="gp-ds" style="margin-top:14px">문의하기</div>';
-  h+='<div class="gp-fg"><label>담당자</label><input class="gp-inp" placeholder="담당자명" style="width:100%"></div>';
-  h+='<div class="gp-fg"><label>연락처</label><input class="gp-inp" placeholder="010-0000-0000" style="width:100%"></div>';
-  h+='<div class="gp-fg"><label>요청사항</label><textarea class="gp-inp" style="width:100%;height:50px" placeholder="상세 요청"></textarea></div>';
-  h+='<button class="gp-btn" style="width:100%">문의 전송</button>';
-  h+='</div></div>';
-  h+='<div class="gp-right"><div class="gp-ph"><span class="gp-ph__t" id="gpRT">추천 상품</span><div class="gp-ph__r"><button class="gp-btn gp-btn--sm gp-btn--p">제안서 생성</button><button class="gp-btn gp-btn--sm">견적서 생성</button></div></div>';
-  h+='<div class="gp-sb" style="padding:8px 10px" id="gpRLW"></div>';
-  h+='<div class="gp-ft" id="gpRSum"></div>';
-  h+='</div></div>';
-  $('gp-recommend').innerHTML=h;gpRF();
-}
-function gpRF(){
-  var mn=+(($('gpRMin')||{}).value)||0,mx=+(($('gpRMax')||{}).value)||999999,kw=(($('gpRKw')||{}).value||'').toLowerCase();
-  var smn=+(($('gpRSMin')||{}).value)||0,smx=+(($('gpRSMax')||{}).value)||999999;
-  var ppl=+(($('gpRPpl')||{}).value)||100;
-  var cats=[];document.querySelectorAll('.gpRCat').forEach(function(c,i){if(c.checked)cats.push(CATS[i].name)});
-  var fl=PRODS.filter(function(p){
-    if(p.price<mn||p.price>mx)return false;
-    if(cats.length&&cats.indexOf(p.cat)===-1)return false;
-    if(kw&&p.name.toLowerCase().indexOf(kw)===-1)return false;
-    if(smn&&p.supply<smn)return false;
-    if(smx<999999&&p.supply>smx)return false;
-    return true;
-  });
-  var h='';
-  fl.forEach(function(p){
-    var sel=GP.rSel[p.idx],mg=((p.price-p.supply)/p.price*100).toFixed(1);
-    h+='<div class="gp-pc'+(sel?' sel':'')+'" onclick="gpRT('+p.idx+')"><div class="gp-pc__img">IMG</div><div class="gp-pc__info"><div class="gp-pc__name">'+p.name+'</div><div class="gp-pc__price">'+N(p.price)+'원 <span class="dim">(매입 '+N(p.supply)+' / '+mg+'%)</span></div><div class="gp-pc__cat">'+p.cat+'</div></div><input type="checkbox"'+(sel?' checked':'')+' style="flex-shrink:0;pointer-events:none"></div>';
-  });
-  if(!fl.length)h='<div class="gp-empty">조건에 맞는 상품이 없습니다</div>';
-  if($('gpRLW'))$('gpRLW').innerHTML=h;
-  if($('gpRT'))$('gpRT').textContent='추천 상품 ('+fl.length+')';
-  var sp=PRODS.filter(function(p){return GP.rSel[p.idx]}),te=0;sp.forEach(function(p){te+=p.price*ppl});
-  if($('gpRSum'))$('gpRSum').innerHTML='선택: <strong style="font-family:JetBrains Mono,monospace">'+sp.length+'</strong>개'+(sp.length?' | '+ppl+'명 기준 총 예상: <strong style="font-family:JetBrains Mono,monospace;color:#4a90d9">'+S(te)+'</strong>':'');
-}
-function gpRT(idx){GP.rSel[idx]=!GP.rSel[idx];gpRF()}
-
-/* ══════ 3. 신청결과 ══════ */
-function gpRes(){
-  var tpl=TPLS.find(function(t){return t.st==='COLLECTING'})||TPLS[0];
-  var ps=TPR.filter(function(p){return p.ti===tpl.idx}),rs=RCVS.filter(function(r){return r.ti===tpl.idx}),os=ORDS.filter(function(o){return o.ti===tpl.idx}),s=TS(tpl.idx);
-
-  var h='<div class="gp-split"><div class="gp-left" style="width:320px;min-width:260px">';
-  h+='<div class="gp-ph"><span class="gp-ph__t">'+tpl.name+' | '+tpl.co+'</span></div><div class="gp-sb" style="padding:8px 10px">';
-  h+='<div class="dim" style="margin-bottom:6px">마감일: '+tpl.ed+' | 출고: '+tpl.ship+'</div>';
-  h+='<div class="gp-ds">확정 상품</div>';
-  ps.sort(function(a,b){return a.sort-b.sort}).forEach(function(p,i){
-    var prod=P(p.pi);
-    h+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f1f5f9"><span class="dim" style="width:14px">'+(i+1)+'</span><span style="flex:1;font-size:11px">'+prod.name+'</span><span style="font-family:JetBrains Mono,monospace;font-size:11px">'+N(p.sp)+'</span></div>';
-  });
-  h+='<div class="gp-ds" style="margin-top:10px">요약</div>';
-  h+='<div class="gp-dg" style="grid-template-columns:1fr 1fr">';
-  h+='<div class="gp-di"><div class="gp-di__l">수신자</div><div class="gp-di__v">'+s.rc+'명</div></div>';
-  h+='<div class="gp-di"><div class="gp-di__l">주문완료</div><div class="gp-di__v">'+s.oc+'건</div></div>';
-  h+='<div class="gp-di"><div class="gp-di__l">미주문</div><div class="gp-di__v" style="color:#e85d5d">'+s.no+'명</div></div>';
-  h+='<div class="gp-di"><div class="gp-di__l">예상금액</div><div class="gp-di__v" style="color:#4a90d9">'+S(s.sa)+'</div></div>';
-  h+='</div>';
-  h+='<div class="gp-prog" style="margin:4px 0"><div class="gp-prog__f" style="width:'+s.rate+'%"></div></div>';
-  h+='<div class="dim" style="margin-bottom:8px">응답률 '+s.rate.toFixed(1)+'%</div>';
-  h+='<button class="gp-btn gp-btn--p" style="width:100%">알림톡 발송</button>';
-  h+='<button class="gp-btn" style="width:100%;margin-top:4px">미입력자 리마인드</button>';
-  h+='</div></div>';
-
-  h+='<div class="gp-right">';
-  h+='<div class="gp-st"><div class="gp-st__i'+(GP.resSub==='recv'?' active':'')+'" onclick="GP.resSub=\'recv\';gpRes()">수신자 등록</div><div class="gp-st__i'+(GP.resSub==='ord'?' active':'')+'" onclick="GP.resSub=\'ord\';gpRes()">주문 입력</div></div>';
-  h+='<div class="gp-sb" style="padding:8px 10px">';
-
-  if(GP.resSub==='recv'){
-    h+='<div class="gp-form"><div style="display:flex;gap:8px;margin-bottom:4px"><div class="gp-fg" style="flex:1;margin:0"><label>이름</label><input class="gp-inp" placeholder="홍길동" style="width:100%"></div><div class="gp-fg" style="flex:1;margin:0"><label>연락처</label><input class="gp-inp" placeholder="010-0000-0000" style="width:100%"></div><div class="gp-fg" style="flex:1.5;margin:0"><label>주소</label><input class="gp-inp" placeholder="도로명 주소 검색" style="width:100%"></div></div><div style="text-align:right"><button class="gp-btn gp-btn--sm gp-btn--p">+ 추가</button></div></div>';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 4px"><span class="dim" style="font-weight:700">등록된 수신자 ('+rs.length+'명)</span><input class="gp-inp" placeholder="검색..." style="width:120px"></div>';
-    h+='<table><thead><tr><th>이름</th><th>연락처</th><th>주소</th><th>방식</th><th class="c">주문</th></tr></thead><tbody>';
-    rs.slice(0,30).forEach(function(r){
-      var has=os.find(function(o){return o.ri===r.idx});
-      h+='<tr><td class="b">'+r.name+'</td><td style="font-family:JetBrains Mono,monospace;font-size:10px">'+r.phone+'</td><td class="dim" style="max-width:140px;overflow:hidden;text-overflow:ellipsis">'+r.addr+'</td><td class="dim">'+r.type+'</td><td class="c">'+(has?'<span style="color:#22c55e;font-weight:700">Y</span>':'<span style="color:#e85d5d;font-weight:700">N</span>')+'</td></tr>';
-    });
-    if(rs.length>30)h+='<tr><td colspan="5" class="dim c">... 외 '+(rs.length-30)+'명</td></tr>';
-    h+='</tbody></table>';
+    rs.slice(0,30).forEach(function(r){var has=os.find(function(o){return o.r===r.x});h+='<tr><td class="f">'+r.nm+'</td><td class="m d" style="font-size:10px">'+r.ph+'</td><td class="d" style="max-width:140px;overflow:hidden;text-overflow:ellipsis">'+r.ad+'</td><td class="d">'+r.tp+'</td><td class="c">'+(has?'<span style="color:#22c55e;font-weight:700">Y</span>':'<span style="color:#e85d5d;font-weight:700">N</span>')+'</td></tr>'});
+    if(rs.length>30)h+='<tr><td colspan="5" class="d c">... 외 '+(rs.length-30)+'명</td></tr>';h+='</tbody></table>';
+  }else if(G.cs==='sel'){
+    h+='<div class="d" style="margin-bottom:6px;font-weight:600">수신자별 상품 선택 (알림톡으로 수신자가 직접 선택 가능)</div>';
+    h+='<table><thead><tr><th>수신자</th><th>상품</th><th class="c">수량</th><th>받는이</th><th class="c">상태</th></tr></thead><tbody>';
+    rs.slice(0,30).forEach(function(r){var ord=os.find(function(o){return o.r===r.x});h+='<tr><td class="f">'+r.nm+'</td>';
+    if(ord){var pd=_P(ord.p);h+='<td>'+pd.n+'</td><td class="c">'+ord.q+'</td><td'+(ord.rn!==r.nm?' class="f" style="color:#4a90d9"':'')+'>'+ord.rn+'</td><td class="c">'+_B(ord.s)+'</td>';}
+    else{h+='<td><select class="gp-sel" style="width:120px">';t.pr.forEach(function(pi){h+='<option>'+_P(pi).n+'</option>'});h+='</select></td><td class="c"><input type="number" value="1" style="width:36px;text-align:center;border:1px solid #cbd5e1;border-radius:3px;font-size:11px"></td><td><input class="gp-inp" placeholder="수신자동일" style="width:80px"></td><td class="c d">미주문</td>';}h+='</tr>'});
+    if(rs.length>30)h+='<tr><td colspan="5" class="d c">... 외 '+(rs.length-30)+'명</td></tr>';h+='</tbody></table><div style="text-align:right;margin-top:6px"><button class="gp-btn p">일괄 저장</button></div>';
   }else{
-    h+='<div class="gp-fb" style="border:none;padding:0 0 6px"><button class="gp-btn gp-btn--sm gp-btn--p">일괄 저장</button><button class="gp-btn gp-btn--sm">엑셀 다운로드</button></div>';
-    h+='<table><thead><tr><th>수신자</th><th>상품 선택</th><th class="c">수량</th><th>받는이</th><th class="c">상태</th></tr></thead><tbody>';
-    rs.slice(0,30).forEach(function(r){
-      var ord=os.find(function(o){return o.ri===r.idx});
-      h+='<tr><td class="b">'+r.name+'</td>';
-      if(ord){var prod=P(ord.pi);h+='<td>'+prod.name+'</td><td class="c">'+ord.qty+'</td><td>'+ord.recip+'</td><td class="c">'+BG(ord.st)+'</td>';}
-      else{h+='<td><select class="gp-sel" style="width:120px">';ps.forEach(function(p){h+='<option>'+P(p.pi).name+'</option>'});h+='</select></td><td class="c"><input type="number" value="1" style="width:36px;text-align:center;border:1px solid #cbd5e1;border-radius:3px;font-size:11px"></td><td><input class="gp-inp" value="'+r.name+'" style="width:70px"></td><td class="c dim">미주문</td>';}
-      h+='</tr>';
-    });
-    if(rs.length>30)h+='<tr><td colspan="5" class="dim c">... 외 '+(rs.length-30)+'명</td></tr>';
-    h+='</tbody></table>';
-  }
-  h+='</div></div></div>';
-  $('gp-result').innerHTML=h;
+    var shC=os.filter(function(o){return o.s==='SHIPPING'}).length,dlC=os.filter(function(o){return o.s==='DELIVERED'}).length;
+    h+='<div class="gp-dg"><div class="gp-di"><i>전체</i><b>'+os.length+'건</b></div><div class="gp-di"><i>배송중</i><b style="color:#d49a2a">'+shC+'</b></div><div class="gp-di"><i>배송완료</i><b style="color:#22c55e">'+dlC+'</b></div></div>';
+    h+='<table><thead><tr><th>수신자</th><th>받는이</th><th>상품</th><th class="r">금액</th><th class="c">상태</th><th>송장</th></tr></thead><tbody>';
+    os.forEach(function(o){var rv=RC.find(function(r){return r.x===o.r})||{nm:'?'},pd=_P(o.p);h+='<tr><td>'+rv.nm+'</td><td'+(o.rn!==rv.nm?' class="f" style="color:#4a90d9"':'')+'>'+o.rn+'</td><td>'+pd.n+'</td><td class="r m" style="font-weight:600;color:#4a90d9">'+_N(pd.p*o.q)+'</td><td class="c">'+_B(o.s)+'</td><td class="d m" style="font-size:9px">'+(o.tk||'-')+'</td></tr>'});
+    h+='</tbody></table><div style="text-align:right;margin-top:6px"><button class="gp-btn sm p">견적서 다운로드</button></div>';}
+  h+='</div></div></div>';E('co').innerHTML=h;
 }
 
-/* ══════ 4. 주문현황 (고객사용) ══════ */
-function gpOrd(){
-  var tpl=TPLS.find(function(t){return t.st==='COLLECTING'})||TPLS[0];
-  var os=ORDS.filter(function(o){return o.ti===tpl.idx}),s=TS(tpl.idx);
-  var ps=TPR.filter(function(p){return p.ti===tpl.idx});
-
-  var h='<div class="gp-cards">';
-  [{l:'수신자',v:s.rc+'명'},{l:'주문완료',v:s.oc+'건',c:'#4a90d9'},{l:'배송중',v:s.sh+'건',c:'#d49a2a'},{l:'배송완료',v:s.dl+'건',c:'#22c55e'},{l:'미주문',v:s.no+'명',c:'#e85d5d'},{l:'주문금액',v:S(s.sa),c:'#4a90d9'}].forEach(function(x){
-    h+='<div class="gp-cd"><div class="gp-cd__l">'+x.l+'</div><div class="gp-cd__v"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>';
-  });
-  h+='</div>';
-  h+='<div class="gp-fb"><span class="dim" style="font-weight:700">'+tpl.name+' | '+tpl.co+'</span><select class="gp-sel" id="gpOF" onchange="gpOT('+tpl.idx+')"><option value="">전체 상태</option><option>ORDERED</option><option>SHIPPING</option><option>DELIVERED</option></select><input class="gp-inp" placeholder="수신자/받는이 검색..." id="gpOS" oninput="gpOT('+tpl.idx+')" style="flex:1;max-width:200px"><div style="margin-left:auto"><button class="gp-btn gp-btn--sm gp-btn--p">견적서 다운로드</button><button class="gp-btn gp-btn--sm" style="margin-left:4px">복사</button></div></div>';
-  h+='<div style="flex:1;overflow:auto;margin:0 16px 8px;border:1px solid #e2e8f0;border-radius:4px" id="gpOTW"></div>';
-  h+='<div style="padding:6px 16px 8px;flex-shrink:0"><div class="gp-ds" style="margin:0 0 4px">상품별 요약</div>';
-  var pSum={};os.forEach(function(o){if(!pSum[o.pi])pSum[o.pi]={c:0,a:0};var pr=TPR.find(function(p){return p.ti===tpl.idx&&p.pi===o.pi});pSum[o.pi].c+=o.qty;pSum[o.pi].a+=(pr?pr.sp:0)*o.qty});
-  Object.keys(pSum).forEach(function(pid){var prod=P(+pid),sm=pSum[pid];h+='<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #f1f5f9;font-size:11px"><span>'+prod.name+'</span><span style="font-family:JetBrains Mono,monospace">'+sm.c+'건 / '+N(sm.a)+'원</span></div>'});
-  h+='</div>';
-  $('gp-orders').innerHTML=h;gpOT(tpl.idx);
-}
-function gpOT(ti){
-  var os=ORDS.filter(function(o){return o.ti===ti});
-  var f=$('gpOF')?$('gpOF').value:'',q=($('gpOS')?$('gpOS').value:'').toLowerCase();
-  if(f)os=os.filter(function(o){return o.st===f});
-  if(q)os=os.filter(function(o){var rv=RCVS.find(function(r){return r.idx===o.ri})||{name:''};return rv.name.toLowerCase().indexOf(q)!==-1||o.recip.toLowerCase().indexOf(q)!==-1});
-  var h='<table><thead><tr><th>수신자</th><th>받는이</th><th>상품</th><th class="r">금액</th><th class="c">상태</th><th>송장</th></tr></thead><tbody>';
-  os.forEach(function(o){
-    var rv=RCVS.find(function(r){return r.idx===o.ri})||{name:'?'},prod=P(o.pi),pr=TPR.find(function(p){return p.ti===o.ti&&p.pi===o.pi});
-    var diff=o.recip!==rv.name;
-    h+='<tr><td>'+rv.name+'</td><td'+(diff?' class="b" style="color:#4a90d9"':'')+'>'+o.recip+'</td><td>'+prod.name+'</td><td class="r" style="font-family:JetBrains Mono,monospace;font-weight:600;color:#4a90d9">'+N((pr?pr.sp:0)*o.qty)+'</td><td class="c">'+BG(o.st)+'</td><td class="dim" style="font-family:JetBrains Mono,monospace;font-size:9px">'+(o.track||'-')+'</td></tr>';
-  });
-  if(!os.length)h+='<tr><td colspan="6" class="gp-empty">데이터가 없습니다</td></tr>';
-  h+='</tbody></table>';
-  if($('gpOTW'))$('gpOTW').innerHTML=h;
+/* ═══ SUPPLIER: 상품별 주문현황 ═══ */
+function rSO(){
+  var su=SU.find(function(s){return s.id===G.si})||SU[0],mo=OD.filter(function(o){return su.p.indexOf(o.p)!==-1});
+  var nc=mo.filter(function(o){return o.s==='ORDERED'}).length,sc=mo.filter(function(o){return o.s==='SHIPPING'}).length,dc=mo.filter(function(o){return o.s==='DELIVERED'}).length,ta=0;mo.forEach(function(o){ta+=_P(o.p).s*o.q});
+  var h='<div class="gp-fb"><span class="f" style="font-size:12px">매입처:</span><select class="gp-sel" onchange="G.si=this.value;rSO()">';SU.forEach(function(s){h+='<option value="'+s.id+'"'+(s.id===su.id?' selected':'')+'>'+s.n+'</option>'});h+='</select></div>';
+  h+='<div class="gp-cds">';[{l:'신규주문',v:nc+'건',c:'#e85d5d'},{l:'배송중',v:sc+'건',c:'#d49a2a'},{l:'배송완료',v:dc+'건',c:'#22c55e'},{l:'발주금액',v:_S(ta),c:'#ea580c'}].forEach(function(x){h+='<div class="gp-cd"><i>'+x.l+'</i><b style="color:'+x.c+'">'+x.v+'</b></div>'});h+='</div>';
+  var pm={};mo.forEach(function(o){if(!pm[o.p])pm[o.p]={pd:_P(o.p),t:0,or:0,sh:0,dl:0,a:0};pm[o.p].t+=o.q;if(o.s==='ORDERED')pm[o.p].or+=o.q;if(o.s==='SHIPPING')pm[o.p].sh+=o.q;if(o.s==='DELIVERED')pm[o.p].dl+=o.q;pm[o.p].a+=_P(o.p).s*o.q});
+  h+='<div style="flex:1;overflow:auto;margin:0 16px 10px;border:1px solid #e2e8f0;border-radius:4px"><table><thead><tr><th>코드</th><th>상품명</th><th class="r">전체</th><th class="r">신규</th><th class="r">배송중</th><th class="r">완료</th><th class="r">매입금액</th><th style="min-width:70px">진행</th></tr></thead><tbody>';
+  Object.values(pm).forEach(function(g){var rate=g.t?((g.sh+g.dl)/g.t*100):0;h+='<tr><td class="m d" style="font-size:9px">'+g.pd.c+'</td><td class="f">'+g.pd.n+'</td><td class="r f">'+_N(g.t)+'</td><td class="r" style="color:#e85d5d;font-weight:700">'+(g.or||'-')+'</td><td class="r" style="color:#d49a2a;font-weight:600">'+(g.sh||'-')+'</td><td class="r" style="color:#22c55e;font-weight:600">'+(g.dl||'-')+'</td><td class="r m" style="font-weight:600;color:#ea580c">'+_N(g.a)+'</td><td><div class="gp-pr" style="height:5px"><div style="width:'+rate+'%;background:#22c55e"></div></div><span class="d m" style="font-size:9px">'+rate.toFixed(0)+'%</span></td></tr>'});
+  h+='</tbody></table></div><div class="gp-ft"><span>'+Object.keys(pm).length+'개 상품 / '+mo.length+'건</span><button class="gp-btn sm">발주서 다운로드</button></div>';
+  E('so').innerHTML=h;
 }
 
-/* ══════ 5. 주문현황 토탈 ══════ */
-function gpTot(){
-  var tOrd=ORDS.length,tSa=0,tCa=0;
-  ORDS.forEach(function(o){var pr=TPR.find(function(p){return p.ti===o.ti&&p.pi===o.pi});tSa+=(pr?pr.sp:0)*o.qty;tCa+=(pr?pr.cp:0)*o.qty});
-
-  var h='<div class="gp-cards">';
-  [{l:'캠페인',v:TPLS.length+'개'},{l:'주문',v:N(tOrd)+'건'},{l:'매출',v:S(tSa),c:'#4a90d9'},{l:'매입',v:S(tCa),c:'#ea580c'},{l:'마진',v:S(tSa-tCa),c:'#22c55e'}].forEach(function(x){
-    h+='<div class="gp-cd"><div class="gp-cd__l">'+x.l+'</div><div class="gp-cd__v"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>';
-  });
-  h+='</div>';
-
-  h+='<div class="gp-split"><div class="gp-left">';
-  h+='<div class="gp-ph"><span class="gp-ph__t">캠페인별 현황</span></div><div class="gp-sb">';
-  h+='<table><thead><tr><th>캠페인</th><th>고객사</th><th class="c">상태</th><th class="r">주문</th><th class="r">매출</th></tr></thead><tbody>';
-  TPLS.forEach(function(t){var s=TS(t.idx);h+='<tr class="gg-clickable'+(GP.tSel===t.idx?' sel':'')+'" onclick="gpTSel('+t.idx+')"><td class="b">'+t.name+'</td><td>'+t.co+'</td><td class="c">'+BG(t.st)+'</td><td class="r">'+s.oc+'</td><td class="r" style="font-family:JetBrains Mono,monospace;color:#4a90d9">'+N(s.sa)+'</td></tr>'});
-  h+='</tbody></table></div></div>';
-
-  h+='<div class="gp-right"><div class="gp-ph"><span class="gp-ph__t" id="gpTDT">전체 집계</span><div class="gp-ph__r"><button class="gp-btn gp-btn--sm">발주서 일괄</button><button class="gp-btn gp-btn--sm">엑셀</button></div></div>';
-  h+='<div class="gp-sb" style="padding:10px" id="gpTDW">';
-
-  // Aggregate charts
-  var coA={};ORDS.forEach(function(o){var t=TPLS.find(function(x){return x.idx===o.ti});if(!t)return;var pr=TPR.find(function(p){return p.ti===o.ti&&p.pi===o.pi});coA[t.co]=(coA[t.co]||0)+(pr?pr.sp:0)*o.qty});
-  var coR=Object.keys(coA).map(function(k){return{n:k,a:coA[k]}}).sort(function(a,b){return b.a-a.a});
-  var mx=coR.length?coR[0].a:1;
-  h+='<div class="gp-ds">고객사별 주문금액</div>';
-  coR.forEach(function(c){h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span class="dim" style="width:90px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.n+'</span><div style="flex:1;height:14px;background:#f0f4f9;border-radius:2px;overflow:hidden"><div style="width:'+(c.a/mx*100)+'%;height:100%;background:#4a90d9;border-radius:2px"></div></div><span style="font-size:10px;font-family:JetBrains Mono,monospace;width:50px;text-align:right">'+S(c.a)+'</span></div>'});
-
-  var prA={};ORDS.forEach(function(o){var prod=P(o.pi);prA[prod.name]=(prA[prod.name]||0)+o.qty});
-  var prR=Object.keys(prA).map(function(k){return{n:k,c:prA[k]}}).sort(function(a,b){return b.c-a.c});
-  var pmx=prR.length?prR[0].c:1;
-  h+='<div class="gp-ds" style="margin-top:12px">상품별 주문량</div>';
-  prR.forEach(function(p){h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span class="dim" style="width:100px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.n+'</span><div style="flex:1;height:14px;background:#f0f4f9;border-radius:2px;overflow:hidden"><div style="width:'+(p.c/pmx*100)+'%;height:100%;background:#22c55e;border-radius:2px"></div></div><span style="font-size:10px;font-family:JetBrains Mono,monospace;width:40px;text-align:right">'+p.c+'건</span></div>'});
-
-  h+='<div class="gp-ds" style="margin-top:12px">매입처별 발주</div>';
-  h+='<table><thead><tr><th>매입처</th><th class="r">주문건수</th><th class="r">매입금액</th></tr></thead><tbody>';
-  SUPS.forEach(function(s){var c=0,a=0;ORDS.forEach(function(o){if(s.pids.indexOf(o.pi)!==-1){c+=o.qty;var pr=TPR.find(function(p){return p.ti===o.ti&&p.pi===o.pi});a+=(pr?pr.cp:0)*o.qty}});if(c)h+='<tr><td class="b">'+s.name+'</td><td class="r">'+N(c)+'</td><td class="r" style="font-family:JetBrains Mono,monospace;color:#ea580c">'+N(a)+'</td></tr>'});
-  h+='</tbody></table>';
-
-  h+='</div></div></div>';
-  $('gp-total').innerHTML=h;
-}
-function gpTSel(idx){GP.tSel=idx;gpTot()}
-
-/* ══════ 6. 매입처 주문현황 ══════ */
-function gpSup(){
-  var sup=SUPS.find(function(s){return s.id===GP.supId})||SUPS[0];
-  var supOrds=ORDS.filter(function(o){return sup.pids.indexOf(o.pi)!==-1});
-  var newC=supOrds.filter(function(o){return o.st==='ORDERED'}).length;
-  var shC=supOrds.filter(function(o){return o.st==='SHIPPING'}).length;
-  var dlC=supOrds.filter(function(o){return o.st==='DELIVERED'}).length;
-  var tA=0;supOrds.forEach(function(o){var pr=TPR.find(function(p){return p.ti===o.ti&&p.pi===o.pi});tA+=(pr?pr.cp:0)*o.qty});
-
-  var h='<div class="gp-fb"><span style="font-weight:700;font-size:12px">매입처:</span><select class="gp-sel" id="gpSCh" onchange="GP.supId=this.value;gpSup()">';
-  SUPS.forEach(function(s){h+='<option value="'+s.id+'"'+(s.id===sup.id?' selected':'')+'>'+s.name+'</option>'});
-  h+='</select><div style="margin-left:auto;display:flex;gap:4px"><button class="gp-btn gp-btn--sm gp-btn--p">발주서 다운로드</button><button class="gp-btn gp-btn--sm">엑셀 다운로드</button></div></div>';
-
-  h+='<div class="gp-cards">';
-  [{l:'신규주문',v:newC+'건',c:'#e85d5d'},{l:'배송중',v:shC+'건',c:'#d49a2a'},{l:'배송완료',v:dlC+'건',c:'#22c55e'},{l:'발주금액',v:S(tA),c:'#ea580c'}].forEach(function(x){
-    h+='<div class="gp-cd"><div class="gp-cd__l">'+x.l+'</div><div class="gp-cd__v" style="color:'+x.c+'">'+x.v+'</div></div>';
-  });
-  h+='</div>';
-
-  h+='<div class="gp-fb"><select class="gp-sel" id="gpSF" onchange="gpST()"><option value="">전체 상태</option><option value="ORDERED">신규주문</option><option value="SHIPPING">배송중</option><option value="DELIVERED">배송완료</option></select><input class="gp-inp" placeholder="받는이/상품 검색..." id="gpSS" oninput="gpST()" style="flex:1;max-width:200px"></div>';
-
-  h+='<div style="flex:1;overflow:auto;margin:0 16px 0;border:1px solid #e2e8f0;border-radius:4px" id="gpSTW"></div>';
-
-  h+='<div class="gp-track"><div class="gp-track__t">송장 입력</div><div class="gp-track__row"><select class="gp-sel"><option>CJ대한통운</option><option>한진택배</option><option>롯데택배</option><option>우체국택배</option></select><input class="gp-inp" placeholder="송장번호" style="width:180px"><button class="gp-btn gp-btn--sm gp-btn--p">선택 항목 일괄 입력</button><button class="gp-btn gp-btn--sm">엑셀 송장 업로드</button></div></div>';
-
-  $('gp-supplier').innerHTML=h;gpST();
-}
-function gpST(){
-  var sup=SUPS.find(function(s){return s.id===GP.supId})||SUPS[0];
-  var os=ORDS.filter(function(o){return sup.pids.indexOf(o.pi)!==-1});
-  var f=$('gpSF')?$('gpSF').value:'',q=($('gpSS')?$('gpSS').value:'').toLowerCase();
-  if(f)os=os.filter(function(o){return o.st===f});
-  if(q)os=os.filter(function(o){var prod=P(o.pi);return o.recip.toLowerCase().indexOf(q)!==-1||prod.name.toLowerCase().indexOf(q)!==-1});
-
-  var h='<table><thead><tr><th style="width:24px"><input type="checkbox" onchange="document.querySelectorAll(\'.gpSchk\').forEach(function(c){c.checked=this.checked}.bind(this))"></th><th>캠페인</th><th>상품</th><th>받는이</th><th>주소</th><th>출고희망</th><th class="c">상태</th><th>송장</th></tr></thead><tbody>';
-  os.forEach(function(o){
-    var rv=RCVS.find(function(r){return r.idx===o.ri})||{name:'?',addr:''},tpl=TPLS.find(function(t){return t.idx===o.ti})||{name:'?',co:'?',ship:'-'},prod=P(o.pi);
-    h+='<tr><td><input type="checkbox" class="gpSchk"></td><td class="dim" style="font-size:10px">'+tpl.co+'<br>'+tpl.name+'</td><td>'+prod.name+'</td><td class="b">'+o.recip+'</td><td class="dim" style="max-width:130px;overflow:hidden;text-overflow:ellipsis">'+rv.addr+'</td><td style="font-family:JetBrains Mono,monospace;font-size:10px;color:#e85d5d;font-weight:700">'+tpl.ship+'</td><td class="c">'+BG(o.st)+'</td><td class="dim" style="font-family:JetBrains Mono,monospace;font-size:9px">'+(o.track||'-')+'</td></tr>';
-  });
-  if(!os.length)h+='<tr><td colspan="8" class="gp-empty">데이터가 없습니다</td></tr>';
-  h+='</tbody></table>';
-  if($('gpSTW'))$('gpSTW').innerHTML=h;
+/* ═══ SUPPLIER: 주문정보/송장입력 ═══ */
+function rST(){
+  var su=SU.find(function(s){return s.id===G.si})||SU[0],mo=OD.filter(function(o){return su.p.indexOf(o.p)!==-1});
+  var f=E('_sf')?E('_sf').value:'',q=(E('_sq')?E('_sq').value:'').toLowerCase();
+  var fl=mo.filter(function(o){if(f&&o.s!==f)return false;if(q){var pd=_P(o.p);if((o.rn+' '+pd.n).toLowerCase().indexOf(q)===-1)return false}return true});
+  var h='<div class="gp-fb"><span class="f" style="font-size:12px">'+su.n+'</span><select class="gp-sel" id="_sf" onchange="rST()"><option value="">전체</option><option value="ORDERED"'+(f==='ORDERED'?' selected':'')+'>신규주문</option><option value="SHIPPING"'+(f==='SHIPPING'?' selected':'')+'>배송중</option><option value="DELIVERED"'+(f==='DELIVERED'?' selected':'')+'>배송완료</option></select><input class="gp-inp" placeholder="받는이, 상품..." id="_sq" oninput="rST()" value="'+q+'" style="flex:1;max-width:200px"><div style="margin-left:auto;display:flex;gap:4px"><button class="gp-btn sm p">발주서</button><button class="gp-btn sm">엑셀</button></div></div>';
+  h+='<div style="flex:1;overflow:auto;margin:0 16px;border:1px solid #e2e8f0;border-radius:4px"><table><thead><tr><th style="width:24px"><input type="checkbox" onchange="document.querySelectorAll(\'._sck\').forEach(function(c){c.checked=this.checked}.bind(this))"></th><th>캠페인</th><th>상품</th><th>받는이</th><th>주소</th><th>출고</th><th class="c">상태</th><th>송장</th></tr></thead><tbody>';
+  fl.forEach(function(o){var rv=RC.find(function(r){return r.x===o.r})||{nm:'?',ad:''},tp=TP.find(function(t){return t.i===o.t})||{n:'?',co:'?',sh:'-'},pd=_P(o.p);
+  h+='<tr'+(o.s==='ORDERED'?' class="gp-w"':'')+'>><td><input type="checkbox" class="_sck"></td><td class="d" style="font-size:10px">'+tp.co+'<br>'+tp.n+'</td><td class="f">'+pd.n+'</td><td class="f">'+o.rn+'</td><td class="d" style="max-width:120px;overflow:hidden;text-overflow:ellipsis">'+rv.ad+'</td><td class="m" style="font-size:10px;color:#e85d5d;font-weight:700">'+tp.sh+'</td><td class="c">'+_B(o.s)+'</td><td style="font-size:10px">'+(o.tk?'<span class="d m" style="font-size:9px">'+o.tk+'</span>':'<input class="gp-inp" placeholder="송장번호" style="width:120px;font-size:10px">')+'</td></tr>'});
+  if(!fl.length)h+='<tr><td colspan="8" class="gp-em">데이터가 없습니다</td></tr>';
+  h+='</tbody></table></div>';
+  h+='<div class="gp-tk"><div style="font-size:11px;font-weight:700;color:#4a5568;margin-bottom:4px">일괄 송장 입력</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><select class="gp-sel"><option>CJ대한통운</option><option>한진택배</option><option>롯데택배</option><option>우체국택배</option></select><input class="gp-inp" placeholder="송장번호" style="width:180px"><button class="gp-btn sm p">선택 항목 일괄 적용</button><button class="gp-btn sm">엑셀 송장 업로드</button></div></div>';
+  h+='<div class="gp-ft"><span>'+fl.length+'건 (전체 '+mo.length+'건)</span></div>';
+  E('st').innerHTML=h;
 }
 
-/* ══════ INIT ══════ */
-gpDesign();
+_R();
 </script>
