@@ -136,7 +136,7 @@ var F={
     settleUnit:'정산단위',feeRate:'수수료율',
     solo:'혼자결제',together:'함께결제',normal:'정상거래',cancel:'취소거래',admin:'관리자입력',
     txTotal:'거래 통계 합계',orderCnt:'주문 수',userCnt:'고유 사용자 수',
-    salePrice:'판매가격',mealPt:'식대/복지 포인트',ptUnit:'포인트 단위',
+    salePrice:'판매가격',sales:'판매가격',mealPt:'식대/복지 포인트',ptUnit:'포인트 단위',
     daejangPt:'대장포인트',daejangCp:'대장쿠폰',easyPay:'간편결제',ptSum:'포인트 사용 합계',
     bill:'고객사 청구 금액',settle:'제휴점 정산 금액',shopFee:'제휴점 수수료 금액',
     txAmt:'거래액',delivery:'배송비',
@@ -158,7 +158,7 @@ function slYM(s){if(!s)return'';s=String(s).trim();
     var m2=s.match(/^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})$/);if(m2)return m2[1]+'-'+('0'+m2[2]).slice(-2);
     return''}
 
-(async function(){
+async function slInit(){
     var now=new Date(),y=now.getFullYear(),m=now.getMonth();
     var sy=$('slYear'),sm=$('slMonth');
     for(var i=2020;i<=y;i++){var o=document.createElement('option');o.value=i;o.textContent=i+'년';sy.appendChild(o)}
@@ -168,7 +168,8 @@ function slYM(s){if(!s)return'';s=String(s).trim();
     var defM=m-1,defY=iy;
     if(defM<0){defM=11;defY=iy-1}
     sy.value=defY;sm.value=defM;slFetch();
-})();
+}
+slInit();
 
 function slMC(){SL.mode=$('slMode').value;$('slMonth').style.display=SL.mode==='year'?'none':''}
 
@@ -199,17 +200,17 @@ async function slCSV(year){
 }
 
 async function slFetch(){
-    SL.qY=parseInt($('slYear').value);SL.qM=parseInt($('slMonth').value);SL.mode=$('slMode').value;
+    SL.qY=parseInt($('slYear').value)||2025;SL.qM=parseInt($('slMonth').value)||0;SL.mode=$('slMode').value;
     slSh(10,'데이터 로딩 중...');
     try{
         var rows=await slCSV(SL.qY);slSh(30,'전년 데이터...');var prev=await slCSV(SL.qY-1);
         /* 전월 데이터 로드 */
         slSh(50,'전월 데이터...');
-        var lastMD=new Date(SL.qY,SL.qM-1,1);var lastY=lastMD.getFullYear(),lastM=lastMD.getMonth();
-        var lastRows=lastY===SL.qY?rows:await slCSV(lastY);
         if(SL.mode==='month'){
             var ym=SL.qY+'-'+('0'+(SL.qM+1)).slice(-2);SL.raw=rows.filter(function(r){return slYM(R(r,'date'))===ym});
             var pym=(SL.qY-1)+'-'+('0'+(SL.qM+1)).slice(-2);SL.prevRaw=prev.filter(function(r){return slYM(R(r,'date'))===pym});
+            var lastMD=new Date(SL.qY,SL.qM-1,1);var lastY=lastMD.getFullYear(),lastM=lastMD.getMonth();
+            var lastRows=lastY===SL.qY?rows:await slCSV(lastY);
             var lym=lastY+'-'+('0'+(lastM+1)).slice(-2);SL.lastRaw=lastRows.filter(function(r){return slYM(R(r,'date'))===lym});
         }else{SL.raw=rows;SL.prevRaw=prev;SL.lastRaw=[]}
         slSh(80,'렌더링...');slRender();slHd();
