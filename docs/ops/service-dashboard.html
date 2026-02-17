@@ -1,6 +1,5 @@
 <!--
 title: 매출통계 대시보드
-meta: 최종 수정: 2026.02.17
 -->
 
 <style>
@@ -262,6 +261,32 @@ function slLine(series,labels,title,tall){
 }
 function slCd(l,c,p,m){var d=c-(p||0),cls=d>0?'up':d<0?'down':'flat';return'<div class="sl-card"><div class="sl-card__lbl">'+l+'</div><div class="sl-card__val">'+(m?slS(c):slN(c))+'</div><div class="sl-card__chg '+cls+'">전년 '+(m?slS(p||0):slN(p||0))+' / '+slPct(c,p)+'</div></div>'}
 
+/* SVG 원형 차트 */
+function slPie(items,title){
+    var total=0;items.forEach(function(d){total+=d.value});if(!total)return'';
+    var R=60,CX=70,CY=70,W=140,H=140;
+    var svg='<svg viewBox="0 0 '+(W+160)+' '+H+'" style="width:100%;max-width:360px;height:auto;font-family:Noto Sans KR,sans-serif">';
+    var angle=0;
+    items.forEach(function(d){
+        var pct=d.value/total;var a1=angle;var a2=angle+pct*Math.PI*2;angle=a2;
+        var la=pct>0.5?1:0;
+        var x1=CX+R*Math.sin(a1),y1=CY-R*Math.cos(a1);
+        var x2=CX+R*Math.sin(a2),y2=CY-R*Math.cos(a2);
+        if(pct>0.999){svg+='<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="'+d.color+'"><title>'+d.name+': '+slS(d.value)+' ('+(pct*100).toFixed(1)+'%)</title></circle>'}
+        else{svg+='<path d="M'+CX+','+CY+' L'+x1+','+y1+' A'+R+','+R+' 0 '+la+',1 '+x2+','+y2+' Z" fill="'+d.color+'"><title>'+d.name+': '+slS(d.value)+' ('+(pct*100).toFixed(1)+'%)</title></path>'}
+    });
+    // 범례
+    var ly=8;items.forEach(function(d,i){
+        var pct=(d.value/total*100).toFixed(1);
+        svg+='<rect x="'+(W+10)+'" y="'+ly+'" width="8" height="8" rx="1" fill="'+d.color+'"/>';
+        svg+='<text x="'+(W+22)+'" y="'+(ly+8)+'" fill="#4a5568" font-size="10">'+d.name+'</text>';
+        svg+='<text x="'+(W+140)+'" y="'+(ly+8)+'" fill="#1a2332" font-size="10" text-anchor="end" font-family="JetBrains Mono,monospace">'+pct+'%</text>';
+        ly+=16;
+    });
+    svg+='</svg>';
+    return'<div class="sl-cw"><div class="sl-cw__t">'+title+'</div>'+svg+'</div>';
+}
+
 /* 대분류 매핑 */
 function slCat(type){
     if(!type)return'기타';
@@ -281,26 +306,73 @@ function slSvc(){
     keys.forEach(function(k){cs[k]=0;ps[k]=0});
     function ag(rows,s){rows.forEach(function(r){keys.forEach(function(k){s[k]+=RN(r,k)})})}
     ag(SL.raw,cs);ag(SL.prevRaw,ps);
-    var h='<div class="sl-cards">'+slCd('거래액',cs.txAmt,ps.txAmt,1)+slCd('매출액',cs.sales,ps.sales,1)+slCd('주문 수',cs.orderCnt,ps.orderCnt,0)+slCd('고유 사용자',cs.userCnt,ps.userCnt,0)+slCd('포인트 합계',cs.ptSum,ps.ptSum,1)+slCd('수수료',cs.shopFee,ps.shopFee,1)+'</div>';
-    var pd=[
-        {label:'혼자',values:[{name:'전년',value:ps.solo,color:'#d1d5db'},{name:'당기',value:cs.solo,color:'#4a90d9'}]},
-        {label:'함께',values:[{name:'전년',value:ps.together,color:'#d1d5db'},{name:'당기',value:cs.together,color:'#4a90d9'}]},
-        {label:'정상',values:[{name:'전년',value:ps.normal,color:'#d1d5db'},{name:'당기',value:cs.normal,color:'#4a90d9'}]},
-        {label:'취소',values:[{name:'전년',value:ps.cancel,color:'#d1d5db'},{name:'당기',value:cs.cancel,color:'#e85d5d'}]},
-        {label:'관리자',values:[{name:'전년',value:ps.admin,color:'#d1d5db'},{name:'당기',value:cs.admin,color:'#d49a2a'}]}];
-    var pt2=[
-        {label:'식대/복지',values:[{name:'전년',value:ps.mealPt,color:'#d1d5db'},{name:'당기',value:cs.mealPt,color:'#22c55e'}]},
-        {label:'대장PT',values:[{name:'전년',value:ps.daejangPt,color:'#d1d5db'},{name:'당기',value:cs.daejangPt,color:'#22c55e'}]},
-        {label:'쿠폰',values:[{name:'전년',value:ps.daejangCp,color:'#d1d5db'},{name:'당기',value:cs.daejangCp,color:'#22c55e'}]},
-        {label:'간편결제',values:[{name:'전년',value:ps.easyPay,color:'#d1d5db'},{name:'당기',value:cs.easyPay,color:'#22c55e'}]}];
-    h+='<div class="sl-grid2">'+slBar(pd,'결제방식별 건수')+slBar(pt2,'포인트/결제 구성')+'</div>';
-    h+='<div class="sl-cw"><div class="sl-cw__t">상세 비교</div><table class="sl-t sl-t--s"><thead><tr><th>구분</th><th class="r">당기</th><th class="r">전년</th><th class="r">증감</th><th class="r">증감률</th></tr></thead><tbody>';
+    var feeRate=cs.txAmt?(cs.shopFee/cs.txAmt*100):0;
+    var pFeeRate=ps.txAmt?(ps.shopFee/ps.txAmt*100):0;
+
+    /* 서머리 카드 */
+    var h='<div class="sl-cards">';
+    h+=slCd('거래액',cs.txAmt,ps.txAmt,1);
+    h+=slCd('수수료',cs.shopFee,ps.shopFee,1);
+    h+=slCd('주문 수',cs.orderCnt,ps.orderCnt,0);
+    h+=slCd('고유 사용자',cs.userCnt,ps.userCnt,0);
+    h+=slCd('포인트 사용 합계',cs.ptSum,ps.ptSum,1);
+    h+='<div class="sl-card"><div class="sl-card__lbl">수수료율 (수수료/거래액)</div><div class="sl-card__val">'+feeRate.toFixed(2)+'%</div><div class="sl-card__chg '+(feeRate>pFeeRate?'up':'down')+'">전년 '+pFeeRate.toFixed(2)+'%</div></div>';
+    h+='</div>';
+
+    /* 결제방식: 바 차트 + 원형 */
+    var payBar=[
+        {label:'혼자결제',values:[{name:'전년',value:ps.solo,color:'#d1d5db'},{name:'당기',value:cs.solo,color:'#4a90d9'}]},
+        {label:'함께결제',values:[{name:'전년',value:ps.together,color:'#d1d5db'},{name:'당기',value:cs.together,color:'#4a90d9'}]},
+        {label:'정상거래',values:[{name:'전년',value:ps.normal,color:'#d1d5db'},{name:'당기',value:cs.normal,color:'#4a90d9'}]},
+        {label:'취소거래',values:[{name:'전년',value:ps.cancel,color:'#d1d5db'},{name:'당기',value:cs.cancel,color:'#e85d5d'}]},
+        {label:'관리자입력',values:[{name:'전년',value:ps.admin,color:'#d1d5db'},{name:'당기',value:cs.admin,color:'#d49a2a'}]}];
+    var payPie=[
+        {name:'혼자결제',value:cs.solo,color:'#4a90d9'},
+        {name:'함께결제',value:cs.together,color:'#06b6d4'},
+        {name:'취소거래',value:cs.cancel,color:'#e85d5d'},
+        {name:'관리자입력',value:cs.admin,color:'#d49a2a'}];
+    h+='<div class="sl-grid2">'+slBar(payBar,'결제방식별 건수 (전년 비교)')+slPie(payPie,'결제방식 비율 (당기)')+'</div>';
+
+    /* 포인트: 전체 원형 + 식대/복지 제외 비교 */
+    var ptAll=[
+        {name:'식대/복지 포인트',value:cs.mealPt,color:'#22c55e'},
+        {name:'대장포인트',value:cs.daejangPt,color:'#8b5cf6'},
+        {name:'대장쿠폰',value:cs.daejangCp,color:'#f59e0b'},
+        {name:'간편결제',value:cs.easyPay,color:'#06b6d4'}];
+    // 식대/복지 제외 나머지만 확대
+    var ptExcl=[
+        {name:'대장포인트',value:cs.daejangPt,color:'#8b5cf6'},
+        {name:'대장쿠폰',value:cs.daejangCp,color:'#f59e0b'},
+        {name:'간편결제',value:cs.easyPay,color:'#06b6d4'}];
+    var ptExclBar=[
+        {label:'대장포인트',values:[{name:'전년',value:ps.daejangPt,color:'#d1d5db'},{name:'당기',value:cs.daejangPt,color:'#8b5cf6'}]},
+        {label:'대장쿠폰',values:[{name:'전년',value:ps.daejangCp,color:'#d1d5db'},{name:'당기',value:cs.daejangCp,color:'#f59e0b'}]},
+        {label:'간편결제',values:[{name:'전년',value:ps.easyPay,color:'#d1d5db'},{name:'당기',value:cs.easyPay,color:'#06b6d4'}]}];
+
+    h+='<div class="sl-grid2">'+slPie(ptAll,'포인트 사용 구성 (전체 비율)')+slPie(ptExcl,'포인트 구성 (식대/복지 제외)')+'</div>';
+    h+=slBar(ptExclBar,'대장포인트 / 대장쿠폰 / 간편결제 (전년 비교)');
+
+    /* 거래액 대비 수수료율 분석 */
+    h+='<div class="sl-cw"><div class="sl-cw__t">거래액 대비 수수료 분석</div>';
+    h+='<table class="sl-t sl-t--s"><thead><tr><th>구분</th><th class="r">당기</th><th class="r">전년</th><th class="r">증감</th><th class="r">증감률</th></tr></thead><tbody>';
     function dr(l,c,p){var d=c-p,cls=d>0?'up':d<0?'down':'flat';return'<tr><td>'+l+'</td><td class="r">'+slN(c)+'</td><td class="r">'+slN(p)+'</td><td class="r '+cls+'">'+slD(d)+'</td><td class="r '+cls+'">'+slPct(c,p)+'</td></tr>'}
+    h+=dr('거래액',cs.txAmt,ps.txAmt);
+    h+=dr('고객사 청구 금액',cs.bill,ps.bill);
+    h+=dr('제휴점 정산 금액',cs.settle,ps.settle);
+    h+=dr('제휴점 수수료',cs.shopFee,ps.shopFee);
+    h+='<tr style="font-weight:600"><td>수수료율 (수수료/거래액)</td><td class="r">'+feeRate.toFixed(2)+'%</td><td class="r">'+pFeeRate.toFixed(2)+'%</td>';
+    var rateDiff=feeRate-pFeeRate,rcls=rateDiff>0?'up':rateDiff<0?'down':'flat';
+    h+='<td class="r '+rcls+'">'+(rateDiff>0?'+':'')+rateDiff.toFixed(2)+'%p</td><td class="r"></td></tr>';
+    h+='<tr><td colspan="5" style="height:4px;border:none"></td></tr>';
+    h+=dr('배송비',cs.delivery,ps.delivery);
+    h+='</tbody></table></div>';
+
+    /* 상세 비교 테이블 */
+    h+='<div class="sl-cw"><div class="sl-cw__t">결제/포인트 상세</div>';
+    h+='<table class="sl-t sl-t--s"><thead><tr><th>구분</th><th class="r">당기</th><th class="r">전년</th><th class="r">증감</th><th class="r">증감률</th></tr></thead><tbody>';
     h+=dr('혼자결제',cs.solo,ps.solo)+dr('함께결제',cs.together,ps.together)+dr('정상거래',cs.normal,ps.normal)+dr('취소거래',cs.cancel,ps.cancel)+dr('관리자입력',cs.admin,ps.admin);
     h+='<tr><td colspan="5" style="height:4px;border:none"></td></tr>';
-    h+=dr('식대/복지 포인트',cs.mealPt,ps.mealPt)+dr('대장포인트',cs.daejangPt,ps.daejangPt)+dr('대장쿠폰',cs.daejangCp,ps.daejangCp)+dr('간편결제',cs.easyPay,ps.easyPay)+dr('포인트 합계',cs.ptSum,ps.ptSum);
-    h+='<tr><td colspan="5" style="height:4px;border:none"></td></tr>';
-    h+=dr('거래액',cs.txAmt,ps.txAmt)+dr('매출액',cs.sales,ps.sales)+dr('고객사 청구',cs.bill,ps.bill)+dr('제휴점 정산',cs.settle,ps.settle)+dr('수수료',cs.shopFee,ps.shopFee)+dr('배송비',cs.delivery,ps.delivery);
+    h+=dr('식대/복지 포인트',cs.mealPt,ps.mealPt)+dr('대장포인트',cs.daejangPt,ps.daejangPt)+dr('대장쿠폰',cs.daejangCp,ps.daejangCp)+dr('간편결제',cs.easyPay,ps.easyPay)+dr('포인트 사용 합계',cs.ptSum,ps.ptSum);
     h+='</tbody></table></div>';
     $('pSvc').innerHTML=h;
 }
@@ -367,10 +439,10 @@ function slCDet(){
     di('수수료',g.shopFee,pg?pg.shopFee:undefined,1);di('주문',g.orderCnt,pg?pg.orderCnt:undefined,0);
     di('사용자',g.userCnt,pg?pg.userCnt:undefined,0);di('배송비',g.dlv,pg?pg.dlv:undefined,1);
     h+='</div><div class="sl-det__sec">결제</div><table class="sl-mt"><tr><th>구분</th><th class="r">건수</th></tr>';
-    h+='<tr><td>혼자</td><td class="r">'+slN(g.soloCnt)+'</td></tr><tr><td>함께</td><td class="r">'+slN(g.tgCnt)+'</td></tr><tr><td>취소</td><td class="r">'+slN(g.cancelCnt)+'</td></tr></table>';
+    h+='<tr><td>혼자결제</td><td class="r">'+slN(g.soloCnt)+'</td></tr><tr><td>함께결제</td><td class="r">'+slN(g.tgCnt)+'</td></tr><tr><td>취소거래</td><td class="r">'+slN(g.cancelCnt)+'</td></tr></table>';
     h+='<div class="sl-det__sec">포인트</div><table class="sl-mt"><tr><th>구분</th><th class="r">금액</th></tr>';
-    h+='<tr><td>식대/복지</td><td class="r">'+slN(g.mealPt)+'</td></tr><tr><td>대장PT</td><td class="r">'+slN(g.djPt)+'</td></tr>';
-    h+='<tr><td>쿠폰</td><td class="r">'+slN(g.djCp)+'</td></tr><tr><td>간편결제</td><td class="r">'+slN(g.easyPay)+'</td></tr>';
+    h+='<tr><td>식대/복지</td><td class="r">'+slN(g.mealPt)+'</td></tr><tr><td>대장포인트</td><td class="r">'+slN(g.djPt)+'</td></tr>';
+    h+='<tr><td>대장쿠폰</td><td class="r">'+slN(g.djCp)+'</td></tr><tr><td>간편결제</td><td class="r">'+slN(g.easyPay)+'</td></tr>';
     h+='<tr style="font-weight:600"><td>합계</td><td class="r">'+slN(g.ptSum)+'</td></tr></table>';
     el.innerHTML=h;
 }
