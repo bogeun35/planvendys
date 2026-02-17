@@ -150,7 +150,7 @@ meta: 최종 수정: 2026.02.17
     <div class="sp-list__hd">
       <div class="sp-list__title">SNS 콘텐츠 미리보기</div>
       <div class="sp-list__url">
-        <input type="text" id="spSheetUrl" placeholder="구글시트 CSV URL 붙여넣기" />
+        <input type="text" id="spSheetUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vRVQqKseP4j1lEhhbm0PZBfizEScUerMzeTc57Cnw8QNrw7VBemN6IYcNFtMNEAZORhUrM6ghYq-8PJ/pub?gid=0&single=true&output=csv" />
         <button onclick="spLoad()">불러오기</button>
       </div>
     </div>
@@ -202,7 +202,7 @@ list:'<svg viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="3"/><rect x=
 
 var SB='<div class="phone__sb"><span class="phone__sb-time">9:41</span><span class="phone__sb-icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="6" width="3" height="5" rx="0.5"/><rect x="4" y="4" width="3" height="7" rx="0.5"/><rect x="8" y="2" width="3" height="9" rx="0.5"/><rect x="12" y="0" width="3" height="11" rx="0.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="22" height="10" rx="2" fill="none" stroke="#000" stroke-width="1"/><rect x="22" y="4" width="2" height="4" rx="0.5"/><rect x="2" y="3" width="16" height="6" rx="1"/></svg></span></div>';
 
-function spInit(){SP.posts=DEMO;SP.sel=0;document.getElementById('spStatus').textContent='샘플 '+SP.posts.length+'건 (구글시트 연결 시 교체됨)';document.getElementById('spStatus').style.color='#94a3b8';spList();spRender();}
+function spInit(){spLoad();}
 
 function spCSV(t){var r=[],h=[],iq=false,fs=[],f='',ls=t.split('\n');for(var i=0;i<ls.length;i++){var l=ls[i];for(var j=0;j<l.length;j++){var c=l[j];if(iq){if(c==='"'){if(j+1<l.length&&l[j+1]==='"'){f+='"';j++}else{iq=false}}else{f+=c}}else{if(c==='"'){iq=true}else if(c===','){fs.push(f);f=''}else{f+=c}}}if(iq){f+='\n'}else{fs.push(f);f='';if(!h.length){h=fs.map(function(x){return x.trim().toLowerCase().replace(/\r/g,'')})}else{var o={};h.forEach(function(k,idx){o[k]=(fs[idx]||'').replace(/\r/g,'').trim()});if(o.title)r.push(o)}fs=[]}}return r}
 
