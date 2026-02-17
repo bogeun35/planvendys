@@ -200,21 +200,26 @@ async function mpPoll(jobId) {
     throw new Error('쿼리 타임아웃');
 }
 
+function mpDateStr(d) {
+    var yy = d.getFullYear(), mm = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+    return yy + '-' + mm + '-' + dd;
+}
+
 function mpHot(key, el) {
     var now = new Date(), y = now.getFullYear(), m = now.getMonth();
     var s, e;
     switch (key) {
         case 'today':
-            s = e = now.toISOString().slice(0, 10); break;
+            s = e = mpDateStr(now); break;
         case 'thisMonth':
-            s = new Date(y, m, 1).toISOString().slice(0, 10);
-            e = new Date(y, m + 1, 0).toISOString().slice(0, 10); break;
+            s = mpDateStr(new Date(y, m, 1));
+            e = mpDateStr(new Date(y, m + 1, 0)); break;
         case 'lastMonth':
-            s = new Date(y, m - 1, 1).toISOString().slice(0, 10);
-            e = new Date(y, m, 0).toISOString().slice(0, 10); break;
+            s = mpDateStr(new Date(y, m - 1, 1));
+            e = mpDateStr(new Date(y, m, 0)); break;
         case 'twoMonthsAgo':
-            s = new Date(y, m - 2, 1).toISOString().slice(0, 10);
-            e = new Date(y, m - 1, 0).toISOString().slice(0, 10); break;
+            s = mpDateStr(new Date(y, m - 2, 1));
+            e = mpDateStr(new Date(y, m - 1, 0)); break;
         case 'thisYear':
             s = y + '-01-01'; e = y + '-12-31'; break;
         case 'lastYear':
