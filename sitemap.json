@@ -52,7 +52,17 @@
           "title": "고객영업",
           "icon": "folder",
           "desc": "고객영업 관련 도구",
-          "children": []
+          "children": [
+              {
+              "id": "sns-preview",
+              "title": "SNS 썸네일을 검토합니다.",
+              "icon": "doc",
+              "desc": "SNS 등록전에 테스트용도입니다.",
+              "file": "docs/ops/sns-preview.html"
+            }
+
+            
+          ]
         },
         {
           "id": "finance",
