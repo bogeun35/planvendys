@@ -106,6 +106,13 @@
               "icon": "doc",
               "desc": "복지대장 월별 지급현황 대시보드",
               "file": "docs/ops/welfare-dashboard.html"
+            },
+                        {
+              "id": "companypointtask",
+              "title": "식대 지급현황",
+              "icon": "doc",
+              "desc": "복지대장 월별 지급현황 대시보드",
+              "file": "docs/ops/companypointtask.html"
             }
           ]
         },
