@@ -99,6 +99,21 @@
             }
           ]
         },
+                {
+          "id": "plan",
+          "title": "서비스 기획",
+          "icon": "folder",
+          "desc": "서비스기획 정책",
+          "children": [
+                        {
+              "id": "groupgift-plan",
+              "title": "단체선물대장 정책서",
+              "icon": "doc",
+              "desc": "단체선물대장 서비스에 대한 전체 대시보드",
+              "file": "docs/ops/groupgift-plan.html"
+            }
+          ]
+        },
         {
           "id": "report",
           "title": "리포트",
