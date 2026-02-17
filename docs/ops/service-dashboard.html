@@ -420,11 +420,20 @@ function slCT(){
     var data=SL._cc.slice();if(sch)data=data.filter(function(g){return g.name.toLowerCase().indexOf(sch)!==-1||g.group.toLowerCase().indexOf(sch)!==-1||g.id.toLowerCase().indexOf(sch)!==-1});
     var c=SL.comSort,d=SL.comDir==='asc'?1:-1;
     data.sort(function(a,b){var va=a[c],vb=b[c];if(typeof va==='string')return va.localeCompare(vb)*d;return((va||0)-(vb||0))*d});
+    /* 전년/전월 맵 빌드 */
+    var pMap={},lMap={};SL._cp.forEach(function(g){pMap[g.id]=g});SL._cl.forEach(function(g){lMap[g.id]=g});
     var cols=[{k:'id',l:'고객사 ID',n:0},{k:'name',l:'고객사명',n:0},{k:'group',l:'그룹',n:0},{k:'sido',l:'지역',n:0},{k:'txAmt',l:'거래액(원)',n:1},{k:'sikTx',l:'식권대장(원)',n:1},{k:'bokTx',l:'복지대장(원)',n:1},{k:'orderCnt',l:'주문 수',n:1},{k:'userCnt',l:'사용자 수',n:1},{k:'shopFee',l:'수수료(원)',n:1}];
     var h='<table class="sl-t"><thead><tr>';
     cols.forEach(function(c2){var s=SL.comSort===c2.k,ar=s?(SL.comDir==='asc'?'&#9650;':'&#9660;'):'&#9650;';h+='<th class="'+(c2.n?'r ':'')+(s?'s ':'')+'" onclick="slCSrt(\''+c2.k+'\')">'+c2.l+'<span class="a">'+ar+'</span></th>'});
+    h+='<th class="r" style="font-size:9px">전월대비</th><th class="r" style="font-size:9px">전년대비</th>';
     h+='</tr></thead><tbody>';
-    data.forEach(function(g){h+='<tr class="'+(SL.comSel===g.id?'sel':'')+'" onclick="slCSel(\''+g.id+'\')"><td class="id" title="'+g.id+'">'+g.id.substring(0,8)+'...</td><td>'+g.name+'</td><td>'+g.group+'</td><td>'+g.sido+'</td><td class="r">'+slN(g.txAmt)+'</td><td class="r">'+slN(g.sikTx)+'</td><td class="r">'+slN(g.bokTx)+'</td><td class="r">'+slN(g.orderCnt)+'</td><td class="r">'+slN(g.userCnt)+'</td><td class="r">'+slN(g.shopFee)+'</td></tr>'});
+    data.forEach(function(g){
+        var pg=pMap[g.id],lg=lMap[g.id];
+        var lPct=slPct(g.shopFee,lg?lg.shopFee:0),pPct=slPct(g.shopFee,pg?pg.shopFee:0);
+        var lCls=(g.shopFee-(lg?lg.shopFee:0))>0?'up':(g.shopFee-(lg?lg.shopFee:0))<0?'down':'flat';
+        var pCls=(g.shopFee-(pg?pg.shopFee:0))>0?'up':(g.shopFee-(pg?pg.shopFee:0))<0?'down':'flat';
+        h+='<tr class="'+(SL.comSel===g.id?'sel':'')+'" onclick="slCSel(\''+g.id+'\')"><td class="id" title="'+g.id+'">'+g.id.substring(0,8)+'...</td><td>'+g.name+'</td><td>'+g.group+'</td><td>'+g.sido+'</td><td class="r">'+slN(g.txAmt)+'</td><td class="r">'+slN(g.sikTx)+'</td><td class="r">'+slN(g.bokTx)+'</td><td class="r">'+slN(g.orderCnt)+'</td><td class="r">'+slN(g.userCnt)+'</td><td class="r">'+slN(g.shopFee)+'</td><td class="r '+lCls+'" style="font-size:10px">'+lPct+'</td><td class="r '+pCls+'" style="font-size:10px">'+pPct+'</td></tr>';
+    });
     h+='</tbody></table>';
     if($('slCTW'))$('slCTW').innerHTML=h;
     if($('slCTT'))$('slCTT').textContent='고객사 ('+data.length+')';
