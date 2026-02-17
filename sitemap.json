@@ -55,7 +55,7 @@
           "children": [
               {
               "id": "sns-preview",
-              "title": "SNS 썸네일을 검토합니다.",
+              "title": "SNS 검토",
               "icon": "doc",
               "desc": "SNS 등록전에 테스트용도입니다.",
               "file": "docs/ops/sns-preview.html"
