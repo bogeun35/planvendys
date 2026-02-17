@@ -112,41 +112,60 @@ meta: 최종 수정: 2026.02.17
     <div class="sl-tab" onclick="slTab('shop',this)">제휴점 통계</div>
     <div class="sl-tab" onclick="slTab('fee',this)">수수료 통계</div>
     <div class="sl-tab" onclick="slTab('tx',this)">거래액 통계</div>
+    <div class="sl-tab" onclick="slTab('area',this)">지역별 통계</div>
     <div class="sl-tab" onclick="slTab('y5',this)">최근5년 흐름도</div>
   </div>
   <div id="slBody" style="display:none">
-    <div class="sl-pane active" id="pSvc"></div>
-    <div class="sl-pane" id="pCom"></div>
-    <div class="sl-pane" id="pShop"></div>
-    <div class="sl-pane" id="pFee"></div>
-    <div class="sl-pane" id="pTx"></div>
-    <div class="sl-pane" id="pY5"></div>
+    <div class="sl-pane active" id="pSvc"></div><div class="sl-pane" id="pCom"></div>
+    <div class="sl-pane" id="pShop"></div><div class="sl-pane" id="pFee"></div>
+    <div class="sl-pane" id="pTx"></div><div class="sl-pane" id="pArea"></div><div class="sl-pane" id="pY5"></div>
   </div>
   <div id="slEmpty" style="display:none;text-align:center;padding:60px 0;color:#94a3b8">조회 버튼을 눌러주세요</div>
 </div>
 
 <script>
-var SL={BASE:'/planvendys/data/stats-',cache:{},raw:[],prevRaw:[],mode:'month',qY:2025,qM:0,curTab:'svc',comSort:'txAmount',comDir:'desc',comSel:null,_y5:false};
+var SL={BASE:'/planvendys/data/stats-',cache:{},raw:[],prevRaw:[],mode:'month',qY:2025,qM:0,curTab:'svc',comSort:'txAmt',comDir:'desc',comSel:null,shopSort:'tx',shopDir:'desc',shopSel:null,areaSel:null,_y5:false};
 var SLC=['#4a90d9','#22c55e','#d49a2a','#e85d5d','#8b5cf6','#06b6d4','#f59e0b','#ec4899','#10b981','#6366f1'];
+
+/* 컬럼명 매핑 (새 구조) */
+var F={
+    date:'날짜',comId:'고객사 ID',comName:'고객사명',comGroup:'고객사 그룹',
+    shopId:'제휴점 ID',shopName:'제휴점명',shopGroup:'제휴점 그룹',shopType:'제휴점 유형',
+    settleUnit:'정산단위',feeRate:'수수료율',
+    solo:'혼자결제',together:'함께결제',normal:'정상거래',cancel:'취소거래',admin:'관리자입력',
+    txTotal:'거래 통계 합계',orderCnt:'주문 수',userCnt:'고유 사용자 수',
+    salePrice:'판매가격',mealPt:'식대/복지 포인트',ptUnit:'포인트 단위',
+    daejangPt:'대장포인트',daejangCp:'대장쿠폰',easyPay:'간편결제',ptSum:'포인트 사용 합계',
+    bill:'고객사 청구 금액',settle:'제휴점 정산 금액',shopFee:'제휴점 수수료 금액',
+    txAmt:'거래액',delivery:'배송비',
+    comSido:'고객사 시/도',comSigungu:'고객사 시/군/구',comDong:'고객사 동/면',
+    shopSido:'제휴점 시/도',shopSigungu:'제휴점 시/군/구',shopDong:'제휴점 동/면'
+};
 
 function slN(v){v=Number(v)||0;if(!v)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
 function slS(v){v=Number(v)||0;var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+Math.round(a/1e4)+'만';return p+a.toLocaleString()}
 function slD(v){v=Number(v)||0;if(!v)return'-';return(v>0?'+':'')+slN(v)}
 function slPct(c,p){c=Number(c)||0;p=Number(p)||0;if(!p)return c?'NEW':'-';var r=((c-p)/Math.abs(p)*100).toFixed(1);return(c-p>0?'+':'')+r+'%'}
 function slNum(v){if(v==null||v==='')return 0;return Number(String(v).replace(/,/g,''))||0}
-function slYM(s){if(!s)return'';s=String(s).trim();var m=s.match(/^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})$/);if(m)return m[1]+'-'+('0'+m[2]).slice(-2);var m2=s.match(/^(\d{4})-(\d{2})/);if(m2)return m2[1]+'-'+m2[2];return''}
+function $(id){return document.getElementById(id)}
+function R(r,f){return r[F[f]]||r[f]||''}
+function RN(r,f){return slNum(R(r,f))}
 
-/* 초기화 */
+function slYM(s){if(!s)return'';s=String(s).trim();
+    var m=s.match(/^(\d{4})-(\d{2})/);if(m)return m[1]+'-'+m[2];
+    var m2=s.match(/^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})$/);if(m2)return m2[1]+'-'+('0'+m2[2]).slice(-2);
+    return''}
+
 (async function(){
     var now=new Date(),y=now.getFullYear(),m=now.getMonth();
-    var sy=document.getElementById('slYear'),sm=document.getElementById('slMonth');
+    var sy=$('slYear'),sm=$('slMonth');
     for(var i=2020;i<=y;i++){var o=document.createElement('option');o.value=i;o.textContent=i+'년';sy.appendChild(o)}
     for(var j=0;j<12;j++){var o2=document.createElement('option');o2.value=j;o2.textContent=(j+1)+'월';sm.appendChild(o2)}
     var iy=y;try{var t=await fetch(SL.BASE+y+'.csv',{method:'HEAD'});if(!t.ok)iy=y-1}catch(e){iy=y-1}
     sy.value=iy;sm.value=iy<y?11:m;slFetch();
 })();
 
-function slMC(){SL.mode=document.getElementById('slMode').value;document.getElementById('slMonth').style.display=SL.mode==='year'?'none':''}
+function slMC(){SL.mode=$('slMode').value;$('slMonth').style.display=SL.mode==='year'?'none':''}
 
 function slHot(k,el){
     var now=new Date(),y=now.getFullYear(),m=now.getMonth();
@@ -157,12 +176,12 @@ function slHot(k,el){
         case'2m':var d2=new Date(y,m-2,1);SL.qY=d2.getFullYear();SL.qM=d2.getMonth();break;
         case'ty':SL.qY=y;md='year';break;case'ly':SL.qY=y-1;md='year';break;
     }
-    SL.mode=md;document.getElementById('slMode').value=md;document.getElementById('slYear').value=SL.qY;
-    if(md==='month')document.getElementById('slMonth').value=SL.qM;slMC();slFetch();
+    SL.mode=md;$('slMode').value=md;$('slYear').value=SL.qY;
+    if(md==='month')$('slMonth').value=SL.qM;slMC();slFetch();
 }
 
-function slSh(p,t){document.getElementById('slLoad').classList.remove('hide');document.getElementById('slFill').style.width=p+'%';document.getElementById('slTxt').textContent=t}
-function slHd(){document.getElementById('slLoad').classList.add('hide')}
+function slSh(p,t){$('slLoad').classList.remove('hide');$('slFill').style.width=p+'%';$('slTxt').textContent=t}
+function slHd(){$('slLoad').classList.add('hide')}
 
 async function slCSV(year){
     if(SL.cache[year])return SL.cache[year];
@@ -175,28 +194,27 @@ async function slCSV(year){
 }
 
 async function slFetch(){
-    SL.qY=parseInt(document.getElementById('slYear').value);SL.qM=parseInt(document.getElementById('slMonth').value);SL.mode=document.getElementById('slMode').value;
+    SL.qY=parseInt($('slYear').value);SL.qM=parseInt($('slMonth').value);SL.mode=$('slMode').value;
     slSh(10,'데이터 로딩 중...');
     try{
         var rows=await slCSV(SL.qY);slSh(40,'전년 데이터...');var prev=await slCSV(SL.qY-1);
         if(SL.mode==='month'){
-            var ym=SL.qY+'-'+('0'+(SL.qM+1)).slice(-2);SL.raw=rows.filter(function(r){return slYM(r['날짜'])===ym});
-            var pym=(SL.qY-1)+'-'+('0'+(SL.qM+1)).slice(-2);SL.prevRaw=prev.filter(function(r){return slYM(r['날짜'])===pym});
+            var ym=SL.qY+'-'+('0'+(SL.qM+1)).slice(-2);SL.raw=rows.filter(function(r){return slYM(R(r,'date'))===ym});
+            var pym=(SL.qY-1)+'-'+('0'+(SL.qM+1)).slice(-2);SL.prevRaw=prev.filter(function(r){return slYM(R(r,'date'))===pym});
         }else{SL.raw=rows;SL.prevRaw=prev}
         slSh(80,'렌더링...');slRender();slHd();
-        document.getElementById('slStat').textContent=(SL.mode==='year'?SL.qY+'년':SL.qY+'.'+(SL.qM+1)+'월')+' / '+SL.raw.length.toLocaleString()+'건';
-        document.getElementById('slBody').style.display='block';document.getElementById('slEmpty').style.display='none';
-    }catch(ex){slHd();document.getElementById('slStat').textContent='오류: '+ex.message}
+        $('slStat').textContent=(SL.mode==='year'?SL.qY+'년':SL.qY+'.'+(SL.qM+1)+'월')+' / '+SL.raw.length.toLocaleString()+'건';
+        $('slBody').style.display='block';$('slEmpty').style.display='none';
+    }catch(ex){slHd();$('slStat').textContent='오류: '+ex.message}
 }
 
 function slTab(id,el){
     SL.curTab=id;document.querySelectorAll('.sl-tab').forEach(function(t){t.classList.remove('active')});if(el)el.classList.add('active');
     document.querySelectorAll('.sl-pane').forEach(function(p){p.classList.remove('active')});
-    document.getElementById({svc:'pSvc',com:'pCom',shop:'pShop',fee:'pFee',tx:'pTx',y5:'pY5'}[id]).classList.add('active');
+    $({svc:'pSvc',com:'pCom',shop:'pShop',fee:'pFee',tx:'pTx',area:'pArea',y5:'pY5'}[id]).classList.add('active');
     if(id==='y5'&&!SL._y5){slY5();SL._y5=true}
 }
-
-function slRender(){SL._y5=false;slSvc();slCom();slShop();slFee();slTx();if(SL.curTab==='y5')slY5()}
+function slRender(){SL._y5=false;slSvc();slCom();slShop();slFee();slTx();slArea();if(SL.curTab==='y5')slY5()}
 
 function slBar(data,title,tall){
     var av=[];data.forEach(function(d){d.values.forEach(function(v){av.push(v.value)})});var mx=Math.max.apply(null,av)||1;
@@ -206,192 +224,286 @@ function slBar(data,title,tall){
     if(data.length>0&&data[0].values.length>1){h+='<div class="sl-legend">';data[0].values.forEach(function(v){h+='<span><i style="background:'+v.color+'"></i>'+v.name+'</span>'});h+='</div>'}
     return h+'</div>';
 }
-
 function slCd(l,c,p,m){var d=c-(p||0),cls=d>0?'up':d<0?'down':'flat';return'<div class="sl-card"><div class="sl-card__lbl">'+l+'</div><div class="sl-card__val">'+(m?slS(c):slN(c))+'</div><div class="sl-card__chg '+cls+'">전년 '+(m?slS(p||0):slN(p||0))+' / '+slPct(c,p)+'</div></div>'}
-
 
 /* === 1. 서비스 통계 === */
 function slSvc(){
-    var cs={tx:0,sales:0,order:0,user:0,solo:0,tg:0,cancel:0,normal:0,admin:0,easy:0,meal:0,dj:0,cp:0,pt:0,dlv:0};
-    var ps={tx:0,sales:0,order:0,user:0,solo:0,tg:0,cancel:0,normal:0,admin:0,easy:0,meal:0,dj:0,cp:0,pt:0,dlv:0};
-    function ag(rows,s){rows.forEach(function(r){s.tx+=slNum(r['거래액']);s.sales+=slNum(r['매출액']);s.order+=slNum(r['주문 수']);s.user+=slNum(r['고유 사용자 수']);s.solo+=slNum(r['혼자결제']);s.tg+=slNum(r['함께결제']);s.cancel+=slNum(r['취소거래']);s.normal+=slNum(r['정상거래']);s.admin+=slNum(r['관리자입력']);s.easy+=slNum(r['간편결제']);s.meal+=slNum(r['식대/복지 포인트']);s.dj+=slNum(r['대장포인트']);s.cp+=slNum(r['대장쿠폰']);s.pt+=slNum(r['포인트 사용 합계']);s.dlv+=slNum(r['배송비'])})}
+    var cs={},ps={};
+    var keys=['txAmt','sales','orderCnt','userCnt','solo','together','cancel','normal','admin','easyPay','mealPt','daejangPt','daejangCp','ptSum','delivery','shopFee','bill','settle','salePrice'];
+    keys.forEach(function(k){cs[k]=0;ps[k]=0});
+    function ag(rows,s){rows.forEach(function(r){keys.forEach(function(k){s[k]+=RN(r,k)})})}
     ag(SL.raw,cs);ag(SL.prevRaw,ps);
-    var h='<div class="sl-cards">'+slCd('거래액',cs.tx,ps.tx,1)+slCd('매출액',cs.sales,ps.sales,1)+slCd('주문 수',cs.order,ps.order,0)+slCd('고유 사용자',cs.user,ps.user,0)+slCd('포인트 합계',cs.pt,ps.pt,1)+slCd('배송비',cs.dlv,ps.dlv,1)+'</div>';
-    var pd=[{label:'혼자',values:[{name:'전년',value:ps.solo,color:'#d1d5db'},{name:'당기',value:cs.solo,color:'#4a90d9'}]},{label:'함께',values:[{name:'전년',value:ps.tg,color:'#d1d5db'},{name:'당기',value:cs.tg,color:'#4a90d9'}]},{label:'정상',values:[{name:'전년',value:ps.normal,color:'#d1d5db'},{name:'당기',value:cs.normal,color:'#4a90d9'}]},{label:'취소',values:[{name:'전년',value:ps.cancel,color:'#d1d5db'},{name:'당기',value:cs.cancel,color:'#e85d5d'}]},{label:'관리자',values:[{name:'전년',value:ps.admin,color:'#d1d5db'},{name:'당기',value:cs.admin,color:'#d49a2a'}]}];
-    var pt2=[{label:'식대/복지',values:[{name:'전년',value:ps.meal,color:'#d1d5db'},{name:'당기',value:cs.meal,color:'#22c55e'}]},{label:'대장PT',values:[{name:'전년',value:ps.dj,color:'#d1d5db'},{name:'당기',value:cs.dj,color:'#22c55e'}]},{label:'쿠폰',values:[{name:'전년',value:ps.cp,color:'#d1d5db'},{name:'당기',value:cs.cp,color:'#22c55e'}]},{label:'간편결제',values:[{name:'전년',value:ps.easy,color:'#d1d5db'},{name:'당기',value:cs.easy,color:'#22c55e'}]}];
+    var h='<div class="sl-cards">'+slCd('거래액',cs.txAmt,ps.txAmt,1)+slCd('매출액',cs.sales,ps.sales,1)+slCd('주문 수',cs.orderCnt,ps.orderCnt,0)+slCd('고유 사용자',cs.userCnt,ps.userCnt,0)+slCd('포인트 합계',cs.ptSum,ps.ptSum,1)+slCd('수수료',cs.shopFee,ps.shopFee,1)+'</div>';
+    var pd=[
+        {label:'혼자',values:[{name:'전년',value:ps.solo,color:'#d1d5db'},{name:'당기',value:cs.solo,color:'#4a90d9'}]},
+        {label:'함께',values:[{name:'전년',value:ps.together,color:'#d1d5db'},{name:'당기',value:cs.together,color:'#4a90d9'}]},
+        {label:'정상',values:[{name:'전년',value:ps.normal,color:'#d1d5db'},{name:'당기',value:cs.normal,color:'#4a90d9'}]},
+        {label:'취소',values:[{name:'전년',value:ps.cancel,color:'#d1d5db'},{name:'당기',value:cs.cancel,color:'#e85d5d'}]},
+        {label:'관리자',values:[{name:'전년',value:ps.admin,color:'#d1d5db'},{name:'당기',value:cs.admin,color:'#d49a2a'}]}];
+    var pt2=[
+        {label:'식대/복지',values:[{name:'전년',value:ps.mealPt,color:'#d1d5db'},{name:'당기',value:cs.mealPt,color:'#22c55e'}]},
+        {label:'대장PT',values:[{name:'전년',value:ps.daejangPt,color:'#d1d5db'},{name:'당기',value:cs.daejangPt,color:'#22c55e'}]},
+        {label:'쿠폰',values:[{name:'전년',value:ps.daejangCp,color:'#d1d5db'},{name:'당기',value:cs.daejangCp,color:'#22c55e'}]},
+        {label:'간편결제',values:[{name:'전년',value:ps.easyPay,color:'#d1d5db'},{name:'당기',value:cs.easyPay,color:'#22c55e'}]}];
     h+='<div class="sl-grid2">'+slBar(pd,'결제방식별 건수')+slBar(pt2,'포인트/결제 구성')+'</div>';
     h+='<div class="sl-cw"><div class="sl-cw__t">상세 비교</div><table class="sl-t sl-t--s"><thead><tr><th>구분</th><th class="r">당기</th><th class="r">전년</th><th class="r">증감</th><th class="r">증감률</th></tr></thead><tbody>';
     function dr(l,c,p){var d=c-p,cls=d>0?'up':d<0?'down':'flat';return'<tr><td>'+l+'</td><td class="r">'+slN(c)+'</td><td class="r">'+slN(p)+'</td><td class="r '+cls+'">'+slD(d)+'</td><td class="r '+cls+'">'+slPct(c,p)+'</td></tr>'}
-    h+=dr('혼자결제',cs.solo,ps.solo)+dr('함께결제',cs.tg,ps.tg)+dr('정상거래',cs.normal,ps.normal)+dr('취소거래',cs.cancel,ps.cancel)+dr('관리자입력',cs.admin,ps.admin);
+    h+=dr('혼자결제',cs.solo,ps.solo)+dr('함께결제',cs.together,ps.together)+dr('정상거래',cs.normal,ps.normal)+dr('취소거래',cs.cancel,ps.cancel)+dr('관리자입력',cs.admin,ps.admin);
     h+='<tr><td colspan="5" style="height:4px;border:none"></td></tr>';
-    h+=dr('식대/복지 포인트',cs.meal,ps.meal)+dr('대장포인트',cs.dj,ps.dj)+dr('대장쿠폰',cs.cp,ps.cp)+dr('간편결제',cs.easy,ps.easy)+dr('포인트 합계',cs.pt,ps.pt);
+    h+=dr('식대/복지 포인트',cs.mealPt,ps.mealPt)+dr('대장포인트',cs.daejangPt,ps.daejangPt)+dr('대장쿠폰',cs.daejangCp,ps.daejangCp)+dr('간편결제',cs.easyPay,ps.easyPay)+dr('포인트 합계',cs.ptSum,ps.ptSum);
     h+='<tr><td colspan="5" style="height:4px;border:none"></td></tr>';
-    h+=dr('거래액',cs.tx,ps.tx)+dr('매출액',cs.sales,ps.sales)+dr('배송비',cs.dlv,ps.dlv);
+    h+=dr('거래액',cs.txAmt,ps.txAmt)+dr('매출액',cs.sales,ps.sales)+dr('고객사 청구',cs.bill,ps.bill)+dr('제휴점 정산',cs.settle,ps.settle)+dr('수수료',cs.shopFee,ps.shopFee)+dr('배송비',cs.delivery,ps.delivery);
     h+='</tbody></table></div>';
-    document.getElementById('pSvc').innerHTML=h;
+    $('pSvc').innerHTML=h;
 }
 
 /* === 2. 고객사 통계 === */
 function slGC(rows){
-    var map={};rows.forEach(function(r){var id=String(r['고객사ID']||'');if(!id)return;if(!map[id])map[id]={id:id,name:String(r['고객사명']||''),group:String(r['고객사그룹']||''),type:String(r['제휴점유형']||''),txAmount:0,salesAmount:0,billAmount:0,settleAmount:0,orderCount:0,userCount:0,txCount:0,cancelCount:0,soloCount:0,tgCount:0,ptTotal:0,meal:0,dj:0,cp:0,easy:0,dlv:0};
-    var g=map[id];g.txAmount+=slNum(r['거래액']);g.salesAmount+=slNum(r['매출액']);g.billAmount+=slNum(r['고객사 청구 금액']);g.settleAmount+=slNum(r['제휴점 정산 금액']);g.orderCount+=slNum(r['주문 수']);g.userCount+=slNum(r['고유 사용자 수']);g.txCount+=slNum(r['정상거래']);g.cancelCount+=slNum(r['취소거래']);g.soloCount+=slNum(r['혼자결제']);g.tgCount+=slNum(r['함께결제']);g.ptTotal+=slNum(r['포인트 사용 합계']);g.meal+=slNum(r['식대/복지 포인트']);g.dj+=slNum(r['대장포인트']);g.cp+=slNum(r['대장쿠폰']);g.easy+=slNum(r['간편결제']);g.dlv+=slNum(r['배송비'])});
-    return Object.values(map);
+    var map={};rows.forEach(function(r){
+        var id=String(R(r,'comId'));if(!id)return;
+        if(!map[id])map[id]={id:id,name:R(r,'comName'),group:R(r,'comGroup'),type:R(r,'shopType'),sido:R(r,'comSido'),sigungu:R(r,'comSigungu'),
+            txAmt:0,sales:0,bill:0,settle:0,shopFee:0,orderCnt:0,userCnt:0,txCnt:0,cancelCnt:0,soloCnt:0,tgCnt:0,ptSum:0,mealPt:0,djPt:0,djCp:0,easyPay:0,dlv:0};
+        var g=map[id];
+        g.txAmt+=RN(r,'txAmt');g.sales+=RN(r,'sales');g.bill+=RN(r,'bill');g.settle+=RN(r,'settle');g.shopFee+=RN(r,'shopFee');
+        g.orderCnt+=RN(r,'orderCnt');g.userCnt+=RN(r,'userCnt');g.txCnt+=RN(r,'normal');g.cancelCnt+=RN(r,'cancel');
+        g.soloCnt+=RN(r,'solo');g.tgCnt+=RN(r,'together');g.ptSum+=RN(r,'ptSum');g.mealPt+=RN(r,'mealPt');
+        g.djPt+=RN(r,'daejangPt');g.djCp+=RN(r,'daejangCp');g.easyPay+=RN(r,'easyPay');g.dlv+=RN(r,'delivery');
+    });return Object.values(map);
 }
 
 function slCom(){
     SL._cc=slGC(SL.raw);SL._cp=slGC(SL.prevRaw);SL.comSel=null;
-    var ct=0,cs2=0,co=0,cu=0,cc=SL._cc.length;SL._cc.forEach(function(g){ct+=g.txAmount;cs2+=g.salesAmount;co+=g.orderCount;cu+=g.userCount});
-    var pt=0,ps2=0,po=0,pu=0,pc=SL._cp.length;SL._cp.forEach(function(g){pt+=g.txAmount;ps2+=g.salesAmount;po+=g.orderCount;pu+=g.userCount});
+    var ct=0,cs2=0,co=0,cu=0,cc=SL._cc.length;SL._cc.forEach(function(g){ct+=g.txAmt;cs2+=g.sales;co+=g.orderCnt;cu+=g.userCnt});
+    var pt=0,ps2=0,po=0,pu=0,pc=SL._cp.length;SL._cp.forEach(function(g){pt+=g.txAmt;ps2+=g.sales;po+=g.orderCnt;pu+=g.userCnt});
     var h='<div class="sl-cards">'+slCd('거래액',ct,pt,1)+slCd('매출액',cs2,ps2,1)+slCd('주문 수',co,po,0)+slCd('고유 사용자',cu,pu,0)+slCd('고객사 수',cc,pc,0)+'</div>';
-    var so=SL._cc.slice().sort(function(a,b){return b.txAmount-a.txAmount});var tot=ct||1,t5=0,t10=0,t20=0;
-    so.forEach(function(g,i){if(i<5)t5+=g.txAmount;if(i<10)t10+=g.txAmount;if(i<20)t20+=g.txAmount});
+    var so=SL._cc.slice().sort(function(a,b){return b.txAmt-a.txAmt});var tot=ct||1,t5=0,t10=0,t20=0;
+    so.forEach(function(g,i){if(i<5)t5+=g.txAmt;if(i<10)t10+=g.txAmt;if(i<20)t20+=g.txAmt});
     h+='<div class="sl-cw"><div class="sl-cw__t">상위 고객사 집중도</div><table class="sl-t sl-t--s"><thead><tr><th>구분</th><th class="r">거래액</th><th class="r">비중</th></tr></thead><tbody>';
     h+='<tr><td>Top 5</td><td class="r">'+slS(t5)+'</td><td class="r">'+(t5/tot*100).toFixed(1)+'%</td></tr>';
     h+='<tr><td>Top 10</td><td class="r">'+slS(t10)+'</td><td class="r">'+(t10/tot*100).toFixed(1)+'%</td></tr>';
     h+='<tr><td>Top 20</td><td class="r">'+slS(t20)+'</td><td class="r">'+(t20/tot*100).toFixed(1)+'%</td></tr>';
     h+='<tr><td>전체 ('+cc+'사)</td><td class="r">'+slS(ct)+'</td><td class="r">100%</td></tr></tbody></table></div>';
-    h+='<div class="sl-grid2"><div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title" id="slCTT">고객사 ('+cc+')</span><div style="display:flex;align-items:center;gap:4px"><input class="sl-search" id="slCSch" placeholder="고객사/그룹 검색..." oninput="slCT()"><button class="sl-copy-btn" id="slCCp" onclick="slCC()">복사</button></div></div><div class="sl-tw" id="slCTW"></div></div>';
-    h+='<div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title">고객사 상세</span></div><div class="sl-det" id="slCD"><div class="sl-det__empty">좌측에서 고객사를 선택하세요</div></div></div></div>';
-    document.getElementById('pCom').innerHTML=h;slCT();
+    h+='<div class="sl-grid2"><div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title" id="slCTT">고객사 ('+cc+')</span><div style="display:flex;align-items:center;gap:4px"><input class="sl-search" id="slCSch" placeholder="고객사/그룹/ID 검색..." oninput="slCT()"><button class="sl-copy-btn" id="slCCp" onclick="slCC()">복사</button></div></div><div class="sl-tw" id="slCTW"></div></div>';
+    h+='<div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title">고객사 상세</span></div><div class="sl-det" id="slCD"><div class="sl-det__empty">좌측에서 선택</div></div></div></div>';
+    $('pCom').innerHTML=h;slCT();
 }
 
-function slCS(c){if(SL.comSort===c)SL.comDir=SL.comDir==='desc'?'asc':'desc';else{SL.comSort=c;SL.comDir='desc'}slCT()}
+function slCSrt(c){if(SL.comSort===c)SL.comDir=SL.comDir==='desc'?'asc':'desc';else{SL.comSort=c;SL.comDir='desc'}slCT()}
 
 function slCT(){
-    var sch=(document.getElementById('slCSch')?document.getElementById('slCSch').value:'').toLowerCase();
+    var sch=($('slCSch')?$('slCSch').value:'').toLowerCase();
     var data=SL._cc.slice();if(sch)data=data.filter(function(g){return g.name.toLowerCase().indexOf(sch)!==-1||g.group.toLowerCase().indexOf(sch)!==-1||g.id.toLowerCase().indexOf(sch)!==-1});
-    var c=SL.comSort,d=SL.comDir==='asc'?1:-1;data.sort(function(a,b){var va=a[c],vb=b[c];if(typeof va==='string')return va.localeCompare(vb)*d;return((va||0)-(vb||0))*d});
-    var cols=[{k:'id',l:'고객사ID',n:0},{k:'name',l:'고객사명',n:0},{k:'group',l:'그룹',n:0},{k:'txAmount',l:'거래액(원)',n:1},{k:'salesAmount',l:'매출액(원)',n:1},{k:'billAmount',l:'청구(원)',n:1},{k:'orderCount',l:'주문',n:1},{k:'userCount',l:'사용자',n:1}];
+    var c=SL.comSort,d=SL.comDir==='asc'?1:-1;
+    data.sort(function(a,b){var va=a[c],vb=b[c];if(typeof va==='string')return va.localeCompare(vb)*d;return((va||0)-(vb||0))*d});
+    var cols=[{k:'id',l:'고객사 ID',n:0},{k:'name',l:'고객사명',n:0},{k:'group',l:'그룹',n:0},{k:'sido',l:'지역',n:0},{k:'txAmt',l:'거래액(원)',n:1},{k:'sales',l:'매출액(원)',n:1},{k:'orderCnt',l:'주문',n:1},{k:'userCnt',l:'사용자',n:1}];
     var h='<table class="sl-t"><thead><tr>';
-    cols.forEach(function(c2){var s=SL.comSort===c2.k,ar=s?(SL.comDir==='asc'?'&#9650;':'&#9660;'):'&#9650;';h+='<th class="'+(c2.n?'r ':'')+(s?'s ':'')+'" onclick="slCS(\''+c2.k+'\')">'+c2.l+'<span class="a">'+ar+'</span></th>'});
+    cols.forEach(function(c2){var s=SL.comSort===c2.k,ar=s?(SL.comDir==='asc'?'&#9650;':'&#9660;'):'&#9650;';h+='<th class="'+(c2.n?'r ':'')+(s?'s ':'')+'" onclick="slCSrt(\''+c2.k+'\')">'+c2.l+'<span class="a">'+ar+'</span></th>'});
     h+='</tr></thead><tbody>';
-    data.forEach(function(g){h+='<tr class="'+(SL.comSel===g.id?'sel':'')+'" onclick="slCSel(\''+g.id+'\')"><td class="id" title="'+g.id+'">'+g.id.substring(0,8)+'...</td><td>'+g.name+'</td><td>'+g.group+'</td><td class="r">'+slN(g.txAmount)+'</td><td class="r">'+slN(g.salesAmount)+'</td><td class="r">'+slN(g.billAmount)+'</td><td class="r">'+slN(g.orderCount)+'</td><td class="r">'+slN(g.userCount)+'</td></tr>'});
+    data.forEach(function(g){h+='<tr class="'+(SL.comSel===g.id?'sel':'')+'" onclick="slCSel(\''+g.id+'\')"><td class="id" title="'+g.id+'">'+g.id.substring(0,8)+'...</td><td>'+g.name+'</td><td>'+g.group+'</td><td>'+g.sido+'</td><td class="r">'+slN(g.txAmt)+'</td><td class="r">'+slN(g.sales)+'</td><td class="r">'+slN(g.orderCnt)+'</td><td class="r">'+slN(g.userCnt)+'</td></tr>'});
     h+='</tbody></table>';
-    if(document.getElementById('slCTW'))document.getElementById('slCTW').innerHTML=h;
-    if(document.getElementById('slCTT'))document.getElementById('slCTT').textContent='고객사 ('+data.length+')';
+    if($('slCTW'))$('slCTW').innerHTML=h;
+    if($('slCTT'))$('slCTT').textContent='고객사 ('+data.length+')';
 }
 
 function slCSel(id){SL.comSel=id;slCT();slCDet()}
 
 function slCDet(){
-    var el=document.getElementById('slCD');if(!el)return;
-    if(!SL.comSel){el.innerHTML='<div class="sl-det__empty">좌측에서 고객사를 선택하세요</div>';return}
+    var el=$('slCD');if(!el)return;
+    if(!SL.comSel){el.innerHTML='<div class="sl-det__empty">좌측에서 선택</div>';return}
     var g=SL._cc.find(function(x){return x.id===SL.comSel});if(!g){el.innerHTML='<div class="sl-det__empty">데이터 없음</div>';return}
     var pg=SL._cp.find(function(x){return x.id===g.id});
-    var h='<div class="sl-det__name">'+g.name+'</div><div class="sl-det__meta">'+g.id+'<br>'+g.group+' / '+g.type+'</div><div class="sl-det__grid">';
+    var h='<div class="sl-det__name">'+g.name+'</div><div class="sl-det__meta">'+g.id+'<br>'+g.group+' / '+g.type+'<br>'+g.sido+' '+g.sigungu+'</div><div class="sl-det__grid">';
     function di(l,cv,pv,m){var dv=cv-(pv||0),cls=dv>0?'up':dv<0?'down':'flat';h+='<div class="sl-det__item"><div class="sl-det__il">'+l+'</div><div class="sl-det__iv">'+(m?slS(cv):slN(cv))+'</div>'+(pv!==undefined?'<div class="sl-card__chg '+cls+'" style="font-size:9px">전년 '+(m?slS(pv||0):slN(pv||0))+' / '+slPct(cv,pv||0)+'</div>':'')+'</div>'}
-    di('거래액',g.txAmount,pg?pg.txAmount:undefined,1);di('매출액',g.salesAmount,pg?pg.salesAmount:undefined,1);di('청구',g.billAmount,pg?pg.billAmount:undefined,1);di('정산',g.settleAmount,pg?pg.settleAmount:undefined,1);di('주문',g.orderCount,pg?pg.orderCount:undefined,0);di('사용자',g.userCount,pg?pg.userCount:undefined,0);
-    h+='</div><div class="sl-det__sec">결제</div><table class="sl-mt"><tr><th>구분</th><th class="r">건수</th></tr><tr><td>혼자</td><td class="r">'+slN(g.soloCount)+'</td></tr><tr><td>함께</td><td class="r">'+slN(g.tgCount)+'</td></tr><tr><td>취소</td><td class="r">'+slN(g.cancelCount)+'</td></tr></table>';
-    h+='<div class="sl-det__sec">포인트</div><table class="sl-mt"><tr><th>구분</th><th class="r">금액</th></tr><tr><td>식대/복지</td><td class="r">'+slN(g.meal)+'</td></tr><tr><td>대장PT</td><td class="r">'+slN(g.dj)+'</td></tr><tr><td>쿠폰</td><td class="r">'+slN(g.cp)+'</td></tr><tr><td>간편결제</td><td class="r">'+slN(g.easy)+'</td></tr><tr style="font-weight:600"><td>합계</td><td class="r">'+slN(g.ptTotal)+'</td></tr></table>';
-    if(g.dlv)h+='<div class="sl-det__sec">배송비</div><div style="font-family:JetBrains Mono;font-size:13px;font-weight:600">'+slN(g.dlv)+'원</div>';
+    di('거래액',g.txAmt,pg?pg.txAmt:undefined,1);di('매출액',g.sales,pg?pg.sales:undefined,1);
+    di('청구',g.bill,pg?pg.bill:undefined,1);di('정산',g.settle,pg?pg.settle:undefined,1);
+    di('수수료',g.shopFee,pg?pg.shopFee:undefined,1);di('주문',g.orderCnt,pg?pg.orderCnt:undefined,0);
+    di('사용자',g.userCnt,pg?pg.userCnt:undefined,0);di('배송비',g.dlv,pg?pg.dlv:undefined,1);
+    h+='</div><div class="sl-det__sec">결제</div><table class="sl-mt"><tr><th>구분</th><th class="r">건수</th></tr>';
+    h+='<tr><td>혼자</td><td class="r">'+slN(g.soloCnt)+'</td></tr><tr><td>함께</td><td class="r">'+slN(g.tgCnt)+'</td></tr><tr><td>취소</td><td class="r">'+slN(g.cancelCnt)+'</td></tr></table>';
+    h+='<div class="sl-det__sec">포인트</div><table class="sl-mt"><tr><th>구분</th><th class="r">금액</th></tr>';
+    h+='<tr><td>식대/복지</td><td class="r">'+slN(g.mealPt)+'</td></tr><tr><td>대장PT</td><td class="r">'+slN(g.djPt)+'</td></tr>';
+    h+='<tr><td>쿠폰</td><td class="r">'+slN(g.djCp)+'</td></tr><tr><td>간편결제</td><td class="r">'+slN(g.easyPay)+'</td></tr>';
+    h+='<tr style="font-weight:600"><td>합계</td><td class="r">'+slN(g.ptSum)+'</td></tr></table>';
     el.innerHTML=h;
 }
 
 function slCC(){
     var data=SL._cc.slice().sort(function(a,b){var c=SL.comSort,d=SL.comDir==='asc'?1:-1;var va=a[c],vb=b[c];if(typeof va==='string')return va.localeCompare(vb)*d;return((va||0)-(vb||0))*d});
-    var lines=['고객사ID\t고객사명\t그룹\t거래액\t매출액\t청구\t주문\t사용자'];
-    data.forEach(function(g){lines.push(g.id+'\t'+g.name+'\t'+g.group+'\t'+g.txAmount+'\t'+g.salesAmount+'\t'+g.billAmount+'\t'+g.orderCount+'\t'+g.userCount)});
-    navigator.clipboard.writeText(lines.join('\n')).then(function(){var b=document.getElementById('slCCp');b.classList.add('copied');b.textContent='완료';setTimeout(function(){b.classList.remove('copied');b.textContent='복사'},1500)});
+    var lines=['고객사ID\t고객사명\t그룹\t지역\t거래액\t매출액\t청구\t주문\t사용자'];
+    data.forEach(function(g){lines.push(g.id+'\t'+g.name+'\t'+g.group+'\t'+g.sido+'\t'+g.txAmt+'\t'+g.sales+'\t'+g.bill+'\t'+g.orderCnt+'\t'+g.userCnt)});
+    navigator.clipboard.writeText(lines.join('\n')).then(function(){var b=$('slCCp');b.classList.add('copied');b.textContent='완료';setTimeout(function(){b.classList.remove('copied');b.textContent='복사'},1500)});
 }
 
 /* === 3. 제휴점 통계 === */
 function slShop(){
     var cM={},pM={};
-    function ag(rows,map){rows.forEach(function(r){var t=String(r['제휴점유형']||'기타');if(!map[t])map[t]={type:t,tx:0,sales:0,order:0,user:0,txCnt:0,cancel:0,cids:{}};var g=map[t];g.tx+=slNum(r['거래액']);g.sales+=slNum(r['매출액']);g.order+=slNum(r['주문 수']);g.user+=slNum(r['고유 사용자 수']);g.txCnt+=slNum(r['정상거래']);g.cancel+=slNum(r['취소거래']);g.cids[String(r['고객사ID']||'')]=1})}
+    function ag(rows,map){rows.forEach(function(r){
+        var t=String(R(r,'shopType'))||'기타';
+        if(!map[t])map[t]={type:t,tx:0,sales:0,fee:0,order:0,user:0,txCnt:0,cancel:0,cids:{},sids:{}};
+        var g=map[t];g.tx+=RN(r,'txAmt');g.sales+=RN(r,'sales');g.fee+=RN(r,'shopFee');g.order+=RN(r,'orderCnt');g.user+=RN(r,'userCnt');g.txCnt+=RN(r,'normal');g.cancel+=RN(r,'cancel');
+        g.cids[String(R(r,'comId'))]=1;var sid=String(R(r,'shopId'));if(sid)g.sids[sid]=1;
+    })}
     ag(SL.raw,cM);ag(SL.prevRaw,pM);
     var cur=Object.values(cM).sort(function(a,b){return b.tx-a.tx});var prev=Object.values(pM);
     var total=0;cur.forEach(function(g){total+=g.tx});
     var cd=cur.map(function(g,i){return{label:g.type.length>8?g.type.substring(0,8)+'..':g.type,values:[{name:g.type,value:g.tx,color:SLC[i%SLC.length]}]}});
     var h=slBar(cd,'제휴점 유형별 거래액',1);
-    h+='<div class="sl-cw"><div class="sl-cw__t">제휴점 유형별 상세</div><table class="sl-t sl-t--s"><thead><tr><th>제휴점유형</th><th class="r">거래액</th><th class="r">비중</th><th class="r">매출액</th><th class="r">주문</th><th class="r">사용자</th><th class="r">고객사</th><th class="r">전년거래액</th><th class="r">증감률</th></tr></thead><tbody>';
-    cur.forEach(function(g){var pg=prev.find(function(x){return x.type===g.type});var pv=pg?pg.tx:0;var cls=(g.tx-pv)>0?'up':(g.tx-pv)<0?'down':'flat';
-    h+='<tr><td>'+g.type+'</td><td class="r">'+slN(g.tx)+'</td><td class="r">'+(total?(g.tx/total*100).toFixed(1):'0')+'%</td><td class="r">'+slN(g.sales)+'</td><td class="r">'+slN(g.order)+'</td><td class="r">'+slN(g.user)+'</td><td class="r">'+Object.keys(g.cids).length+'</td><td class="r">'+slN(pv)+'</td><td class="r '+cls+'">'+slPct(g.tx,pv)+'</td></tr>'});
-    h+='</tbody></table></div>';document.getElementById('pShop').innerHTML=h;
+    h+='<div class="sl-cw"><div class="sl-cw__t">제휴점 유형별 상세</div><table class="sl-t sl-t--s"><thead><tr><th>제휴점유형</th><th class="r">거래액</th><th class="r">비중</th><th class="r">매출액</th><th class="r">수수료</th><th class="r">주문</th><th class="r">사용자</th><th class="r">고객사</th><th class="r">제휴점</th><th class="r">전년거래액</th><th class="r">증감률</th></tr></thead><tbody>';
+    cur.forEach(function(g){
+        var pg=prev.find(function(x){return x.type===g.type});var pv=pg?pg.tx:0;var cls=(g.tx-pv)>0?'up':(g.tx-pv)<0?'down':'flat';
+        h+='<tr><td>'+g.type+'</td><td class="r">'+slN(g.tx)+'</td><td class="r">'+(total?(g.tx/total*100).toFixed(1):'0')+'%</td>';
+        h+='<td class="r">'+slN(g.sales)+'</td><td class="r">'+slN(g.fee)+'</td><td class="r">'+slN(g.order)+'</td>';
+        h+='<td class="r">'+slN(g.user)+'</td><td class="r">'+Object.keys(g.cids).length+'</td><td class="r">'+Object.keys(g.sids).length+'</td>';
+        h+='<td class="r">'+slN(pv)+'</td><td class="r '+cls+'">'+slPct(g.tx,pv)+'</td></tr>';
+    });
+    h+='</tbody></table></div>';$('pShop').innerHTML=h;
 }
 
 /* === 4. 수수료 통계 === */
 function slFee(){
-    var cS=0,cT=0,cB=0,cSt=0,pS=0,pT=0,pB=0,pSt=0;
-    SL.raw.forEach(function(r){cS+=slNum(r['매출액']);cT+=slNum(r['거래액']);cB+=slNum(r['고객사 청구 금액']);cSt+=slNum(r['제휴점 정산 금액'])});
-    SL.prevRaw.forEach(function(r){pS+=slNum(r['매출액']);pT+=slNum(r['거래액']);pB+=slNum(r['고객사 청구 금액']);pSt+=slNum(r['제휴점 정산 금액'])});
-    var cF=cB-cSt,pF=pB-pSt,cR=cT?(cS/cT*100):0,pR=pT?(pS/pT*100):0;
-    var h='<div class="sl-cards">'+slCd('매출액(수수료)',cS,pS,1)+slCd('거래액',cT,pT,1)+slCd('청구',cB,pB,1)+slCd('정산',cSt,pSt,1)+slCd('청구-정산',cF,pF,1);
-    h+='<div class="sl-card"><div class="sl-card__lbl">매출/거래 비율</div><div class="sl-card__val">'+cR.toFixed(2)+'%</div><div class="sl-card__chg '+(cR>pR?'up':'down')+'">전년 '+pR.toFixed(2)+'%</div></div></div>';
+    var cS=0,cT=0,cB=0,cSt=0,cF=0,pS=0,pT=0,pB=0,pSt=0,pF=0;
+    SL.raw.forEach(function(r){cS+=RN(r,'sales');cT+=RN(r,'txAmt');cB+=RN(r,'bill');cSt+=RN(r,'settle');cF+=RN(r,'shopFee')});
+    SL.prevRaw.forEach(function(r){pS+=RN(r,'sales');pT+=RN(r,'txAmt');pB+=RN(r,'bill');pSt+=RN(r,'settle');pF+=RN(r,'shopFee')});
+    var cR=cT?(cF/cT*100):0,pR=pT?(pF/pT*100):0;
+    var h='<div class="sl-cards">'+slCd('수수료',cF,pF,1)+slCd('매출액',cS,pS,1)+slCd('거래액',cT,pT,1)+slCd('청구',cB,pB,1)+slCd('정산',cSt,pSt,1);
+    h+='<div class="sl-card"><div class="sl-card__lbl">수수료/거래 비율</div><div class="sl-card__val">'+cR.toFixed(2)+'%</div><div class="sl-card__chg '+(cR>pR?'up':'down')+'">전년 '+pR.toFixed(2)+'%</div></div></div>';
     if(SL.mode==='year'){
         var cByM={},pByM={};
-        SL.raw.forEach(function(r){var ym=slYM(r['날짜']);cByM[ym]=(cByM[ym]||0)+slNum(r['매출액'])});
-        SL.prevRaw.forEach(function(r){var ym=slYM(r['날짜']);pByM[ym]=(pByM[ym]||0)+slNum(r['매출액'])});
+        SL.raw.forEach(function(r){var ym=slYM(R(r,'date'));cByM[ym]=(cByM[ym]||0)+RN(r,'shopFee')});
+        SL.prevRaw.forEach(function(r){var ym=slYM(R(r,'date'));pByM[ym]=(pByM[ym]||0)+RN(r,'shopFee')});
         var ms=[];for(var i=1;i<=12;i++)ms.push(('0'+i).slice(-2));
         var data=ms.map(function(mm){return{label:parseInt(mm)+'월',values:[{name:(SL.qY-1)+'',value:pByM[(SL.qY-1)+'-'+mm]||0,color:'#d1d5db'},{name:SL.qY+'',value:cByM[SL.qY+'-'+mm]||0,color:'#4a90d9'}]}});
-        h+=slBar(data,'월별 매출액 추이',1);
+        h+=slBar(data,'월별 수수료 추이',1);
     }
-    var sMap={};SL.raw.forEach(function(r){var t=String(r['제휴점유형']||'기타');sMap[t]=(sMap[t]||0)+slNum(r['매출액'])});
-    var sArr=Object.keys(sMap).map(function(k){return{type:k,sales:sMap[k]}}).sort(function(a,b){return b.sales-a.sales});
-    h+='<div class="sl-cw"><div class="sl-cw__t">제휴점유형별 매출액</div><table class="sl-t sl-t--s"><thead><tr><th>제휴점유형</th><th class="r">매출액</th><th class="r">비중</th></tr></thead><tbody>';
-    sArr.forEach(function(s){h+='<tr><td>'+s.type+'</td><td class="r">'+slN(s.sales)+'</td><td class="r">'+(cS?(s.sales/cS*100).toFixed(1):'0')+'%</td></tr>'});
-    h+='</tbody></table></div>';document.getElementById('pFee').innerHTML=h;
+    var sMap={};SL.raw.forEach(function(r){var t=String(R(r,'shopType'))||'기타';if(!sMap[t])sMap[t]={fee:0,tx:0};sMap[t].fee+=RN(r,'shopFee');sMap[t].tx+=RN(r,'txAmt')});
+    var sArr=Object.keys(sMap).map(function(k){return{type:k,fee:sMap[k].fee,tx:sMap[k].tx,rate:sMap[k].tx?(sMap[k].fee/sMap[k].tx*100):0}}).sort(function(a,b){return b.fee-a.fee});
+    h+='<div class="sl-cw"><div class="sl-cw__t">제휴점유형별 수수료</div><table class="sl-t sl-t--s"><thead><tr><th>제휴점유형</th><th class="r">수수료</th><th class="r">거래액</th><th class="r">수수료율</th><th class="r">비중</th></tr></thead><tbody>';
+    sArr.forEach(function(s){h+='<tr><td>'+s.type+'</td><td class="r">'+slN(s.fee)+'</td><td class="r">'+slN(s.tx)+'</td><td class="r">'+s.rate.toFixed(2)+'%</td><td class="r">'+(cF?(s.fee/cF*100).toFixed(1):'0')+'%</td></tr>'});
+    h+='</tbody></table></div>';$('pFee').innerHTML=h;
 }
 
 /* === 5. 거래액 통계 === */
 function slTx(){
-    var cT=0,pT=0;SL.raw.forEach(function(r){cT+=slNum(r['거래액'])});SL.prevRaw.forEach(function(r){pT+=slNum(r['거래액'])});
+    var cT=0,pT=0;SL.raw.forEach(function(r){cT+=RN(r,'txAmt')});SL.prevRaw.forEach(function(r){pT+=RN(r,'txAmt')});
     var h='<div class="sl-cards">'+slCd('거래액',cT,pT,1)+slCd('전년 거래액',pT,0,1)+slCd('증감',cT-pT,0,1)+'</div>';
     if(SL.mode==='year'){
         var cByM={},pByM={};
-        SL.raw.forEach(function(r){var ym=slYM(r['날짜']);cByM[ym]=(cByM[ym]||0)+slNum(r['거래액'])});
-        SL.prevRaw.forEach(function(r){var ym=slYM(r['날짜']);pByM[ym]=(pByM[ym]||0)+slNum(r['거래액'])});
+        SL.raw.forEach(function(r){var ym=slYM(R(r,'date'));cByM[ym]=(cByM[ym]||0)+RN(r,'txAmt')});
+        SL.prevRaw.forEach(function(r){var ym=slYM(R(r,'date'));pByM[ym]=(pByM[ym]||0)+RN(r,'txAmt')});
         var ms=[];for(var i=1;i<=12;i++)ms.push(('0'+i).slice(-2));
         var data=ms.map(function(mm){return{label:parseInt(mm)+'월',values:[{name:(SL.qY-1)+'',value:pByM[(SL.qY-1)+'-'+mm]||0,color:'#d1d5db'},{name:SL.qY+'',value:cByM[SL.qY+'-'+mm]||0,color:'#4a90d9'}]}});
         h+=slBar(data,'월별 거래액 추이 (전년 비교)',1);
     }
-    // 피벗
-    var types={};SL.raw.forEach(function(r){types[String(r['제휴점유형']||'기타')]=1});var tArr=Object.keys(types).sort();
+    var types={};SL.raw.forEach(function(r){types[String(R(r,'shopType'))||'기타']=1});var tArr=Object.keys(types).sort();
     h+='<div class="sl-cw"><div class="sl-cw__t">제휴점유형별 거래액</div>';
     if(SL.mode==='year'){
-        var pivot={};SL.raw.forEach(function(r){var ym=slYM(r['날짜']),t=String(r['제휴점유형']||'기타');if(!pivot[ym])pivot[ym]={};pivot[ym][t]=(pivot[ym][t]||0)+slNum(r['거래액'])});
+        var pivot={};SL.raw.forEach(function(r){var ym=slYM(R(r,'date')),t=String(R(r,'shopType'))||'기타';if(!pivot[ym])pivot[ym]={};pivot[ym][t]=(pivot[ym][t]||0)+RN(r,'txAmt')});
         var ms2=[];for(var j=1;j<=12;j++)ms2.push(SL.qY+'-'+('0'+j).slice(-2));
         h+='<div class="sl-pivot-wrap"><table class="sl-pivot"><thead><tr><th>월</th>';
         tArr.forEach(function(t){h+='<th class="r">'+t+'</th>'});h+='<th class="r" style="font-weight:700">합계</th></tr></thead><tbody>';
         var gT=0;ms2.forEach(function(ym){var row=pivot[ym]||{},rT=0;h+='<tr><td>'+ym+'</td>';tArr.forEach(function(t){var v=row[t]||0;rT+=v;h+='<td class="r">'+slN(v)+'</td>'});gT+=rT;h+='<td class="r" style="font-weight:600">'+slN(rT)+'</td></tr>'});
         h+='<tr class="st"><td style="font-weight:700">합계</td>';tArr.forEach(function(t){var tot=0;ms2.forEach(function(ym){tot+=((pivot[ym]||{})[t]||0)});h+='<td class="r">'+slN(tot)+'</td>'});h+='<td class="r" style="font-weight:700">'+slN(gT)+'</td></tr></tbody></table></div>';
     }else{
-        var tMap={};SL.raw.forEach(function(r){var t=String(r['제휴점유형']||'기타');tMap[t]=(tMap[t]||0)+slNum(r['거래액'])});
+        var tMap={};SL.raw.forEach(function(r){var t=String(R(r,'shopType'))||'기타';tMap[t]=(tMap[t]||0)+RN(r,'txAmt')});
         h+='<table class="sl-t sl-t--s"><thead><tr><th>제휴점유형</th><th class="r">거래액</th><th class="r">비중</th></tr></thead><tbody>';
         tArr.forEach(function(t){h+='<tr><td>'+t+'</td><td class="r">'+slN(tMap[t]||0)+'</td><td class="r">'+(cT?((tMap[t]||0)/cT*100).toFixed(1):'0')+'%</td></tr>'});
         h+='</tbody></table>';
     }
-    h+='</div>';document.getElementById('pTx').innerHTML=h;
+    h+='</div>';$('pTx').innerHTML=h;
+}
+
+/* === 6. 지역별 통계 === */
+function slGroupArea(rows){
+    var map={};rows.forEach(function(r){
+        var sido=String(R(r,'comSido'))||'미설정';if(!sido||sido==='undefined')sido='미설정';
+        var sigungu=String(R(r,'comSigungu'))||'';
+        if(!map[sido])map[sido]={sido:sido,tx:0,sales:0,fee:0,order:0,user:0,comIds:{},sub:{}};
+        var g=map[sido];g.tx+=RN(r,'txAmt');g.sales+=RN(r,'sales');g.fee+=RN(r,'shopFee');g.order+=RN(r,'orderCnt');g.user+=RN(r,'userCnt');
+        g.comIds[String(R(r,'comId'))]=1;
+        if(sigungu){
+            if(!g.sub[sigungu])g.sub[sigungu]={sigungu:sigungu,tx:0,sales:0,fee:0,order:0,user:0,comIds:{}};
+            var s=g.sub[sigungu];s.tx+=RN(r,'txAmt');s.sales+=RN(r,'sales');s.fee+=RN(r,'shopFee');s.order+=RN(r,'orderCnt');s.user+=RN(r,'userCnt');s.comIds[String(R(r,'comId'))]=1;
+        }
+    });return Object.values(map).sort(function(a,b){return b.tx-a.tx});
+}
+
+function slArea(){
+    SL._ac=slGroupArea(SL.raw);SL._ap=slGroupArea(SL.prevRaw);SL.areaSel=null;
+    var totalTx=0;SL._ac.forEach(function(g){totalTx+=g.tx});
+    // 차트
+    var cd=SL._ac.slice(0,15).map(function(g,i){return{label:g.sido.replace('특별시','').replace('광역시','').replace('특별자치시','').replace('특별자치도',''),values:[{name:g.sido,value:g.tx,color:SLC[i%SLC.length]}]}});
+    var h=slBar(cd,'시/도별 거래액 (상위 15)',1);
+    // 2단
+    h+='<div class="sl-grid2">';
+    // 좌: 시도 테이블
+    h+='<div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title">시/도별 현황 ('+SL._ac.length+')</span></div><div class="sl-tw" id="slATW">';
+    h+='<table class="sl-t sl-t--s"><thead><tr><th>시/도</th><th class="r">거래액</th><th class="r">비중</th><th class="r">매출액</th><th class="r">수수료</th><th class="r">주문</th><th class="r">고객사</th><th class="r">전년거래액</th><th class="r">증감률</th></tr></thead><tbody>';
+    SL._ac.forEach(function(g){
+        var pg=SL._ap.find(function(x){return x.sido===g.sido});var pv=pg?pg.tx:0;var cls=(g.tx-pv)>0?'up':(g.tx-pv)<0?'down':'flat';
+        var sel=SL.areaSel===g.sido?'sel':'';
+        h+='<tr class="'+sel+'" onclick="slASel(\''+g.sido.replace(/'/g,"\\'")+'\')">';
+        h+='<td>'+g.sido+'</td><td class="r">'+slN(g.tx)+'</td><td class="r">'+(totalTx?(g.tx/totalTx*100).toFixed(1):'0')+'%</td>';
+        h+='<td class="r">'+slN(g.sales)+'</td><td class="r">'+slN(g.fee)+'</td><td class="r">'+slN(g.order)+'</td>';
+        h+='<td class="r">'+Object.keys(g.comIds).length+'</td><td class="r">'+slN(pv)+'</td><td class="r '+cls+'">'+slPct(g.tx,pv)+'</td></tr>';
+    });
+    h+='</tbody></table></div></div>';
+    // 우: 시군구 상세
+    h+='<div class="sl-panel"><div class="sl-panel__head"><span class="sl-panel__title" id="slADT">시/군/구 상세</span></div><div class="sl-det" id="slAD"><div class="sl-det__empty">좌측에서 시/도를 선택하세요</div></div></div>';
+    h+='</div>';
+    $('pArea').innerHTML=h;
+}
+
+function slASel(sido){SL.areaSel=sido;slArea();slADet()}
+
+function slADet(){
+    var el=$('slAD');if(!el)return;
+    if(!SL.areaSel){el.innerHTML='<div class="sl-det__empty">좌측에서 시/도를 선택하세요</div>';return}
+    var g=SL._ac.find(function(x){return x.sido===SL.areaSel});
+    if(!g){el.innerHTML='<div class="sl-det__empty">데이터 없음</div>';return}
+    var pg=SL._ap.find(function(x){return x.sido===SL.areaSel});
+    if($('slADT'))$('slADT').textContent=g.sido+' 상세';
+    var h='<div class="sl-det__name">'+g.sido+'</div>';
+    h+='<div class="sl-det__grid">';
+    function di(l,cv,pv,m){var dv=cv-(pv||0),cls=dv>0?'up':dv<0?'down':'flat';h+='<div class="sl-det__item"><div class="sl-det__il">'+l+'</div><div class="sl-det__iv">'+(m?slS(cv):slN(cv))+'</div>'+(pv!==undefined?'<div class="sl-card__chg '+cls+'" style="font-size:9px">전년 '+(m?slS(pv||0):slN(pv||0))+' / '+slPct(cv,pv||0)+'</div>':'')+'</div>'}
+    di('거래액',g.tx,pg?pg.tx:undefined,1);di('매출액',g.sales,pg?pg.sales:undefined,1);
+    di('수수료',g.fee,pg?pg.fee:undefined,1);di('고객사',Object.keys(g.comIds).length,pg?Object.keys(pg.comIds).length:undefined,0);
+    h+='</div>';
+    // 시군구 테이블
+    var subs=Object.values(g.sub).sort(function(a,b){return b.tx-a.tx});
+    var pSubs=pg?pg.sub:{};
+    h+='<div class="sl-det__sec">시/군/구별 현황 ('+subs.length+')</div>';
+    h+='<table class="sl-mt"><thead><tr><th>시/군/구</th><th class="r">거래액</th><th class="r">매출액</th><th class="r">주문</th><th class="r">고객사</th><th class="r">전년거래액</th><th class="r">증감률</th></tr></thead><tbody>';
+    subs.forEach(function(s){
+        var ps=pSubs[s.sigungu];var pv=ps?ps.tx:0;var cls=(s.tx-pv)>0?'up':(s.tx-pv)<0?'down':'flat';
+        h+='<tr><td>'+s.sigungu+'</td><td class="r">'+slN(s.tx)+'</td><td class="r">'+slN(s.sales)+'</td><td class="r">'+slN(s.order)+'</td><td class="r">'+Object.keys(s.comIds).length+'</td><td class="r">'+slN(pv)+'</td><td class="r '+cls+'">'+slPct(s.tx,pv)+'</td></tr>';
+    });
+    h+='</tbody></table>';
+    el.innerHTML=h;
 }
 
 /* === 6. 최근5년 흐름도 === */
 async function slY5(){
-    var el=document.getElementById('pY5');
-    el.innerHTML='<div style="text-align:center;padding:20px;color:#94a3b8">5년 데이터 로딩 중...</div>';
+    var el=$('pY5');el.innerHTML='<div style="text-align:center;padding:20px;color:#94a3b8">5년 데이터 로딩 중...</div>';
     var now=new Date().getFullYear(),years=[];
     for(var y=now;y>=now-5&&y>=2020;y--)years.push(y);years.reverse();
     var allD={};for(var i=0;i<years.length;i++){try{allD[years[i]]=await slCSV(years[i])}catch(e){allD[years[i]]=[]}}
-    // 연도x월 거래액
-    var pivot={};years.forEach(function(yr){pivot[yr]={};for(var m=1;m<=12;m++)pivot[yr][('0'+m).slice(-2)]=0;(allD[yr]||[]).forEach(function(r){var ym=slYM(r['날짜']),mm=ym.split('-')[1];if(mm)pivot[yr][mm]+=slNum(r['거래액'])})});
+    var pivot={};years.forEach(function(yr){pivot[yr]={};for(var m=1;m<=12;m++)pivot[yr][('0'+m).slice(-2)]=0;(allD[yr]||[]).forEach(function(r){var ym=slYM(R(r,'date')),mm=ym.split('-')[1];if(mm)pivot[yr][mm]+=RN(r,'txAmt')})});
     var ms=[];for(var k=1;k<=12;k++)ms.push(('0'+k).slice(-2));
     var cd=ms.map(function(mm){return{label:parseInt(mm)+'월',values:years.map(function(yr,idx){return{name:yr+'년',value:pivot[yr][mm],color:SLC[idx%SLC.length]}})}});
     var h=slBar(cd,'월별 거래액 추이 (최근 '+years.length+'년)',1);
-    // 피벗 테이블
     h+='<div class="sl-pivot-wrap"><table class="sl-pivot"><thead><tr><th>연도</th>';
     ms.forEach(function(mm){h+='<th class="r">'+parseInt(mm)+'월</th>'});h+='<th class="r" style="font-weight:700">합계</th></tr></thead><tbody>';
     years.forEach(function(yr){var total=0;h+='<tr class="yh"><td style="font-weight:700">'+yr+'</td>';ms.forEach(function(mm){var v=pivot[yr][mm];total+=v;h+='<td class="r">'+slS(v)+'</td>'});h+='<td class="r" style="font-weight:700">'+slS(total)+'</td></tr>'});
     h+='</tbody></table></div>';
-    // 연간합계
     var yt=years.map(function(yr){var t=0;ms.forEach(function(mm){t+=pivot[yr][mm]});return{label:yr+'',values:[{name:'거래액',value:t,color:'#4a90d9'}]}});
     h+=slBar(yt,'연간 거래액 합계',0);
-    // 제휴점유형x연도
-    var tp={};years.forEach(function(yr){(allD[yr]||[]).forEach(function(r){var t=String(r['제휴점유형']||'기타');if(!tp[t])tp[t]={};tp[t][yr]=(tp[t][yr]||0)+slNum(r['거래액'])})});
+    var tp={};years.forEach(function(yr){(allD[yr]||[]).forEach(function(r){var t=String(R(r,'shopType'))||'기타';if(!tp[t])tp[t]={};tp[t][yr]=(tp[t][yr]||0)+RN(r,'txAmt')})});
     var tn=Object.keys(tp).sort();
     h+='<div class="sl-pivot-wrap"><table class="sl-pivot"><thead><tr><th>제휴점유형</th>';
     years.forEach(function(yr){h+='<th class="r">'+yr+'</th>'});h+='</tr></thead><tbody>';
     tn.forEach(function(t){h+='<tr><td>'+t+'</td>';years.forEach(function(yr){h+='<td class="r">'+slS(tp[t][yr]||0)+'</td>'});h+='</tr>'});
     h+='<tr class="st"><td style="font-weight:700">합계</td>';years.forEach(function(yr){var tot=0;tn.forEach(function(t){tot+=(tp[t][yr]||0)});h+='<td class="r" style="font-weight:700">'+slS(tot)+'</td>'});h+='</tr></tbody></table></div>';
-    // 고객사수
-    var cc2=years.map(function(yr){var ids={};(allD[yr]||[]).forEach(function(r){ids[String(r['고객사ID']||'')]=1});return{label:yr+'',values:[{name:'고객사',value:Object.keys(ids).length,color:'#22c55e'}]}});
+    var cc2=years.map(function(yr){var ids={};(allD[yr]||[]).forEach(function(r){ids[String(R(r,'comId'))]=1});return{label:yr+'',values:[{name:'고객사',value:Object.keys(ids).length,color:'#22c55e'}]}});
     h+=slBar(cc2,'연간 고객사 수',0);
     el.innerHTML=h;
 }
