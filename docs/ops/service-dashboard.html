@@ -146,8 +146,8 @@ var F={
 
 function slN(v){v=Number(v)||0;if(!v)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
 function slS(v){v=Number(v)||0;var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+Math.round(a/1e4)+'만';return p+a.toLocaleString()}
-function slD(v){v=Number(v)||0;if(!v)return'-';return(v>0?'+':'')+slN(v)}
-function slPct(c,p){c=Number(c)||0;p=Number(p)||0;if(!p)return c?'NEW':'-';var r=((c-p)/Math.abs(p)*100).toFixed(1);return(c-p>0?'+':'')+r+'%'}
+function slD(v){v=Number(v)||0;if(!v)return'-';var s=(v>0?'+':'')+slN(v);return v<0?'<span class="down">'+s+'</span>':s}
+function slPct(c,p){c=Number(c)||0;p=Number(p)||0;if(!p)return c?'NEW':'-';var d=c-p,r=(d/Math.abs(p)*100).toFixed(1);var s=(d>0?'+':'')+r+'%';return d<0?'<span class="down">'+s+'</span>':s}
 function slNum(v){if(v==null||v==='')return 0;return Number(String(v).replace(/,/g,''))||0}
 function $(id){return document.getElementById(id)}
 function R(r,f){return r[F[f]]||r[f]||''}
@@ -792,52 +792,51 @@ async function slY5(){
     var allD={};for(var i=0;i<years.length;i++){try{allD[years[i]]=await slCSV(years[i])}catch(e){allD[years[i]]=[]}}
     var pivot={};years.forEach(function(yr){pivot[yr]={};for(var m=1;m<=12;m++)pivot[yr][('0'+m).slice(-2)]=0;(allD[yr]||[]).forEach(function(r){var ym=slYM(R(r,'date')),mm=ym.split('-')[1];if(mm)pivot[yr][mm]+=RN(r,'txAmt')})});
     var ms=[];for(var k=1;k<=12;k++)ms.push(('0'+k).slice(-2));
-    // 월별 바 차트
+    // 월별 거래액 바 차트
     var cd=ms.map(function(mm){return{label:parseInt(mm)+'월',values:years.map(function(yr,idx){return{name:yr+'년',value:pivot[yr][mm],color:SLC[idx%SLC.length]}})}});
     var h=slBar(cd,'월별 거래액 추이 (최근 '+years.length+'년)',1);
-    // 피벗 테이블
+    // 피벗 테이블 (slN 사용)
     h+='<div class="sl-pivot-wrap"><table class="sl-pivot"><thead><tr><th>연도</th>';
     ms.forEach(function(mm){h+='<th class="r">'+parseInt(mm)+'월</th>'});h+='<th class="r" style="font-weight:700">합계</th></tr></thead><tbody>';
-    years.forEach(function(yr){var total=0;h+='<tr class="yh"><td style="font-weight:700">'+yr+'</td>';ms.forEach(function(mm){var v=pivot[yr][mm];total+=v;h+='<td class="r">'+slS(v)+'</td>'});h+='<td class="r" style="font-weight:700">'+slS(total)+'</td></tr>'});
+    years.forEach(function(yr){var total=0;h+='<tr class="yh"><td style="font-weight:700">'+yr+'</td>';ms.forEach(function(mm){var v=pivot[yr][mm];total+=v;h+='<td class="r">'+slN(v)+'</td>'});h+='<td class="r" style="font-weight:700">'+slN(total)+'</td></tr>'});
     h+='</tbody></table></div>';
-    // 연간 합계 선그래프
-    var yLabels=years.map(function(yr){return yr+''});
-    var yData=years.map(function(yr){var t=0;ms.forEach(function(mm){t+=pivot[yr][mm]});return t});
-    h+=slLine([{name:'연간 거래액',data:yData,color:'#4a90d9'}],yLabels,'연간 거래액 합계 추이',0);
+    // 2단: 연간 합계 바 + 고객사 수 바
+    var yTotals=years.map(function(yr){var t=0;ms.forEach(function(mm){t+=pivot[yr][mm]});return t});
+    var ytBar=years.map(function(yr,i){return{label:yr+'',values:[{name:'거래액',value:yTotals[i],color:'#4a90d9'}]}});
+    var ccData=years.map(function(yr){var ids={};(allD[yr]||[]).forEach(function(r){ids[String(R(r,'comId'))]=1});return Object.keys(ids).length});
+    var ccBar=years.map(function(yr,i){return{label:yr+'',values:[{name:'고객사',value:ccData[i],color:'#22c55e'}]}});
+    h+='<div class="sl-grid2">'+slBar(ytBar,'연간 거래액 합계',0)+slBar(ccBar,'연간 고객사 수',0)+'</div>';
     // 대분류별 연도 피벗
     var catYr={};years.forEach(function(yr){(allD[yr]||[]).forEach(function(r){
         var cat=slCat(String(R(r,'shopType')));if(!catYr[cat])catYr[cat]={};catYr[cat][yr]=(catYr[cat][yr]||0)+RN(r,'txAmt');
     })});
     var cats=SL_CAT_ORDER.filter(function(c){return catYr[c]});
-    // 대분류별 선그래프
-    var catSeries=cats.map(function(c,i){return{name:c,data:years.map(function(yr){return(catYr[c]||{})[yr]||0}),color:SL_CAT_COLOR[c]||SLC[i%SLC.length]}});
-    h+=slLine(catSeries,yLabels,'대분류별 연간 거래액 추이',1);
-    // 대분류 피벗 테이블
+    // 대분류별 바 차트
+    var catBarData=years.map(function(yr,i){return{label:yr+'',values:cats.map(function(c){return{name:c,value:(catYr[c]||{})[yr]||0,color:SL_CAT_COLOR[c]||SLC[i%SLC.length]}})}});
+    h+=slBar(catBarData,'대분류별 연간 거래액',1);
+    // 대분류 피벗 테이블 (slN)
     h+='<div class="sl-pivot-wrap"><table class="sl-pivot"><thead><tr><th>대분류</th>';
     years.forEach(function(yr){h+='<th class="r">'+yr+'</th>'});h+='</tr></thead><tbody>';
-    cats.forEach(function(c){h+='<tr><td style="color:'+(SL_CAT_COLOR[c]||'#4a5568')+'">'+c+'</td>';years.forEach(function(yr){h+='<td class="r">'+slS((catYr[c]||{})[yr]||0)+'</td>'});h+='</tr>'});
-    h+='<tr class="st"><td style="font-weight:700">합계</td>';years.forEach(function(yr){var tot=0;cats.forEach(function(c){tot+=((catYr[c]||{})[yr]||0)});h+='<td class="r" style="font-weight:700">'+slS(tot)+'</td>'});h+='</tr></tbody></table></div>';
-    // 소분류별 피벗 (대분류 내 그룹핑)
+    cats.forEach(function(c){h+='<tr><td style="color:'+(SL_CAT_COLOR[c]||'#4a5568')+'">'+c+'</td>';years.forEach(function(yr){h+='<td class="r">'+slN((catYr[c]||{})[yr]||0)+'</td>'});h+='</tr>'});
+    h+='<tr class="st"><td style="font-weight:700">합계</td>';years.forEach(function(yr){var tot=0;cats.forEach(function(c){tot+=((catYr[c]||{})[yr]||0)});h+='<td class="r" style="font-weight:700">'+slN(tot)+'</td>'});h+='</tr></tbody></table></div>';
+    // 소분류별 피벗 (대분류 내 그룹핑, slN)
     var typeYr={};years.forEach(function(yr){(allD[yr]||[]).forEach(function(r){var t=String(R(r,'shopType'))||'기타';if(!typeYr[t])typeYr[t]={cat:slCat(t)};typeYr[t][yr]=(typeYr[t][yr]||0)+RN(r,'txAmt')})});
     h+='<div class="sl-pivot-wrap"><table class="sl-pivot"><thead><tr><th>대분류</th><th>제휴점유형</th>';
     years.forEach(function(yr){h+='<th class="r">'+yr+'</th>'});h+='</tr></thead><tbody>';
     SL_CAT_ORDER.forEach(function(cat){
         if(!catYr[cat])return;
         h+='<tr style="background:#eef4fb;font-weight:600"><td style="color:'+(SL_CAT_COLOR[cat]||'#4a5568')+'">'+cat+'</td><td></td>';
-        years.forEach(function(yr){h+='<td class="r">'+slS((catYr[cat]||{})[yr]||0)+'</td>'});h+='</tr>';
+        years.forEach(function(yr){h+='<td class="r">'+slN((catYr[cat]||{})[yr]||0)+'</td>'});h+='</tr>';
         var items=Object.keys(typeYr).filter(function(t){return typeYr[t].cat===cat});
         var posItems=items.filter(function(t){return/^POS\(/i.test(t)});
         var nonPos=items.filter(function(t){return!/^POS\(/i.test(t)}).sort(function(a,b){return(typeYr[b][years[years.length-1]]||0)-(typeYr[a][years[years.length-1]]||0)});
-        nonPos.forEach(function(t){h+='<tr><td></td><td style="padding-left:12px">'+t+'</td>';years.forEach(function(yr){h+='<td class="r">'+slS(typeYr[t][yr]||0)+'</td>'});h+='</tr>'});
+        nonPos.forEach(function(t){h+='<tr><td></td><td style="padding-left:12px">'+t+'</td>';years.forEach(function(yr){h+='<td class="r">'+slN(typeYr[t][yr]||0)+'</td>'});h+='</tr>'});
         if(posItems.length>0){
             h+='<tr style="background:#f8fafd"><td></td><td style="padding-left:12px;font-weight:500">POS ('+posItems.length+'개)</td>';
-            years.forEach(function(yr){var pt=0;posItems.forEach(function(t){pt+=(typeYr[t][yr]||0)});h+='<td class="r">'+slS(pt)+'</td>'});h+='</tr>';
+            years.forEach(function(yr){var pt=0;posItems.forEach(function(t){pt+=(typeYr[t][yr]||0)});h+='<td class="r">'+slN(pt)+'</td>'});h+='</tr>';
         }
     });
     h+='</tbody></table></div>';
-    // 고객사 수 선그래프
-    var ccData=years.map(function(yr){var ids={};(allD[yr]||[]).forEach(function(r){ids[String(R(r,'comId'))]=1});return Object.keys(ids).length});
-    h+=slLine([{name:'고객사 수',data:ccData,color:'#22c55e'}],yLabels,'연간 고객사 수 추이',0);
     el.innerHTML=h;
 }
 </script>
