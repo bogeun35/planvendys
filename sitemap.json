@@ -83,6 +83,13 @@
               "icon": "doc",
               "desc": "이체내역",
               "file": "docs/ops/settlement-transfer.html"
+            },
+                         {
+              "id": "daypoint",
+              "title": "일자별 잔액",
+              "icon": "doc",
+              "desc": "일자별 잔액 내역",
+              "file": "docs/ops/daypoint.html"
             }
             
           ]
