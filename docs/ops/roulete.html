@@ -1,0 +1,373 @@
+<!--
+title: 벤디스 게임투표
+meta: 최종 수정: 2026.02.18
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+.vr *{margin:0;padding:0;box-sizing:border-box}
+.vr{font-family:'Noto Sans KR',sans-serif;color:#1a1a1a;-webkit-font-smoothing:antialiased;line-height:1.4;font-size:14px;user-select:none;-webkit-user-select:none}
+.vr-frame{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 80px);padding:24px 0}
+.vr-device{width:390px;height:844px;background:#fafafa;border-radius:44px;box-shadow:0 24px 80px rgba(0,0,0,.10),0 0 0 1px rgba(0,0,0,.05),inset 0 0 0 1px rgba(255,255,255,.8);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.vr-device::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:32px;background:#1a1a1a;border-radius:16px;z-index:200;pointer-events:none}
+.vr-app{flex:1;overflow:hidden;display:flex;flex-direction:column;margin-top:48px;margin-bottom:4px;position:relative;background:#fafafa}
+@media(max-width:480px){.vr-frame{min-height:auto;padding:0}.vr-device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none}.vr-device::before{display:none}.vr-app{margin-top:0;margin-bottom:0}}
+.vr.vr-embedded .vr-frame{min-height:auto;padding:0}
+.vr.vr-embedded .vr-device{width:100%;height:calc(100vh - 120px);border-radius:0;box-shadow:none}
+.vr.vr-embedded .vr-device::before{display:none}
+.vr.vr-embedded .vr-app{margin-top:0;margin-bottom:0}
+.vr-scr{display:none;flex-direction:column;flex:1;overflow:hidden}.vr-scr.active{display:flex}
+
+/* Home */
+.vr-home{padding:0 20px;display:flex;flex-direction:column;flex:1;overflow:hidden}
+.vr-home-top{padding:28px 0 12px;text-align:center;flex-shrink:0}
+.vr-home-title{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;letter-spacing:.05em}
+.vr-home-sub{font-size:11px;color:#94A3B8;margin-top:2px}
+.vr-home-body{flex:1;overflow-y:auto;padding-bottom:12px}
+.vr-card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 2px 10px rgba(15,23,42,0.04)}
+.vr-card-title{font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.vr-input{width:100%;padding:11px 14px;border:1.5px solid #e2e2e2;border-radius:8px;font-size:14px;font-family:'Noto Sans KR',sans-serif;font-weight:600;color:#1a1a1a;background:#f8f8f8;outline:none;transition:border-color .2s}.vr-input:focus{border-color:#2563EB}.vr-input::placeholder{color:#94A3B8}
+.vr-input-code{text-align:center;font-size:18px;letter-spacing:6px;font-weight:700;text-transform:uppercase}
+.vr-row{display:flex;gap:8px;margin-top:8px}
+.vr-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:13px 16px;border:none;border-radius:10px;font-size:14px;font-family:'Noto Sans KR',sans-serif;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.02em;flex:1}.vr-btn:active{transform:scale(.97)}
+.vr-btn-accent{background:#2563EB;color:#fff}
+.vr-btn-orange{background:#D97706;color:#fff}
+.vr-btn-ghost{background:transparent;border:1.5px solid #e2e2e2;color:#475569;font-size:11px;padding:6px 10px;flex:none;border-radius:7px;font-family:'Noto Sans KR',sans-serif;font-weight:600;cursor:pointer}
+
+/* Room list */
+.vr-rooms-hdr{font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.vr-rooms-refresh{background:none;border:none;color:#2563EB;font-size:11px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+.vr-rl{display:flex;flex-direction:column;gap:5px}
+.vr-ri{padding:10px 12px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;cursor:pointer;transition:all .12s}.vr-ri:active{background:#fafafa;border-color:#93C5FD}
+.vr-ri-top{display:flex;align-items:center;justify-content:space-between}
+.vr-ri-host{font-size:12px;font-weight:700}
+.vr-ri-meta{font-size:10px;color:#94A3B8;margin-top:2px}
+.vr-ri-members{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.vr-ri-members span{font-size:9px;padding:2px 6px;background:#f0f0f0;border-radius:4px;color:#475569;font-weight:600}
+.vr-ri-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:#D1FAE5;color:#059669}
+.vr-ri-join{font-size:10px;font-weight:700;color:#2563EB;padding:5px 12px;border:1.5px solid #2563EB;border-radius:7px;background:transparent;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+.vr-ri-empty{text-align:center;padding:16px;color:#94A3B8;font-size:12px}
+
+/* Topbar */
+.vr-topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#fff;border-bottom:1px solid #f0f0f0;flex-shrink:0;min-height:36px}
+.vr-topbar-l{display:flex;align-items:center;gap:6px}
+.vr-back{background:none;border:none;font-size:16px;cursor:pointer;color:#475569;padding:2px;line-height:1}
+.vr-code-badge{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:#2563EB;padding:3px 10px;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.2);border-radius:6px;cursor:pointer}
+.vr-role{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:1px}
+.vr-role-host{background:rgba(217,119,6,0.1);color:#B45309;border:1px solid rgba(217,119,6,0.25)}
+.vr-role-guest{background:rgba(37,99,235,0.08);color:#1D4ED8;border:1px solid rgba(37,99,235,0.2)}
+.vr-topbar-r{display:flex;gap:4px}
+
+/* Members */
+.vr-mbar{display:flex;align-items:center;gap:6px;padding:6px 10px;flex-shrink:0;overflow-x:auto;background:#fff;border-bottom:1px solid #F1F5F9}
+.vr-mbar-label{font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.vr-mchip{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:14px;font-size:10px;font-weight:600;white-space:nowrap;background:#f8f8f8;color:#475569;border:1px solid #E2E8F0}
+.vr-mchip.host{background:rgba(217,119,6,0.08);color:#B45309;border-color:rgba(217,119,6,0.2)}
+.vr-mdot{width:5px;height:5px;border-radius:50%;background:#059669;flex-shrink:0}
+
+/* Mode bar */
+.vr-modebar{display:flex;gap:4px;padding:6px 10px;flex-shrink:0;background:#f8f8f8;border-bottom:1px solid #E2E8F0}
+.vr-modebtn{flex:1;padding:7px;border:1.5px solid #E2E8F0;border-radius:8px;background:#fff;color:#475569;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;text-align:center;transition:all .15s}
+.vr-modebtn.active{border-color:#2563EB;background:#fafafa;color:#2563EB}
+
+/* Game area */
+.vr-gamearea{flex:1;overflow-y:auto;padding:8px 10px}
+.vr-secbar{display:flex;align-items:center;justify-content:space-between;margin:6px 0}
+.vr-sectitle{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1.5px}
+.vr-vtotal{font-size:12px;color:#94A3B8;font-weight:600}
+.vr-glist{display:flex;flex-direction:column;gap:5px}
+.vr-gi{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#fff;border:2px solid #E2E8F0;border-radius:10px;transition:all .15s;cursor:pointer;position:relative;overflow:hidden}
+.vr-gi:active{background:#f0f0f0}
+.vr-gi.voted{border-color:#2563EB;background:#fafafa;box-shadow:0 0 0 2px rgba(37,99,235,0.1)}
+.vr-gi-name{flex:1;font-weight:600;font-size:13px;color:#94A3B8}.vr-gi.voted .vr-gi-name{color:#1a1a1a;font-weight:700}
+.vr-gi-chk{width:22px;height:22px;border-radius:5px;border:2px solid #D1D5DB;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#f0f0f0;transition:all .12s}
+.vr-gi.voted .vr-gi-chk{background:#2563EB;border-color:#2563EB}
+.vr-gi-chk-icon{display:none}.vr-gi.voted .vr-gi-chk-icon{display:block}
+.vr-gi-cnt{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:#CBD5E1;min-width:28px;text-align:right}
+.vr-gi.voted .vr-gi-cnt{color:#2563EB}
+.vr-gi-bar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#2563EB,#0EA5E9);border-radius:0 2px 0 0;transition:width .5s ease}
+.vr-gi-del{display:none;background:none;border:none;color:#94A3B8;font-size:14px;cursor:pointer;padding:2px 4px;border-radius:4px}.vr-gi-del:hover{color:#DC2626}
+.vr-is-host .vr-gi-del{display:block}
+.vr-gi-voters{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}
+.vr-gi-voter{font-size:8px;padding:1px 5px;background:#DBEAFE;border-radius:3px;color:#2563EB;font-weight:600}
+.vr-anon .vr-gi-cnt,.vr-anon .vr-gi-bar,.vr-anon .vr-gi-voters{visibility:hidden}
+.vr-vact{display:flex;gap:5px;margin-top:6px}
+.vr-vact button{flex:1;padding:6px;border:1px solid #E2E8F0;border-radius:7px;background:#f8f8f8;color:#475569;font-size:11px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .15s}
+.vr-vact button:hover{border-color:#2563EB;color:#2563EB}
+.vr-addrow{display:flex;gap:6px;margin-top:8px}
+.vr-addrow input{flex:1;padding:10px 12px;border:2px dashed #e2e2e2;border-radius:8px;background:transparent;color:#1a1a1a;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:600;outline:none;transition:border .2s}.vr-addrow input:focus{border-color:#2563EB;border-style:solid}.vr-addrow input::placeholder{color:#94A3B8}
+.vr-addrow button{padding:10px 16px;border:none;border-radius:8px;background:#2563EB;color:#fff;font-size:13px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:700}
+.vr-empty{text-align:center;padding:28px;color:#94A3B8;font-size:12px}
+
+/* History */
+.vr-hist{display:none;margin-top:4px;background:#fff;border:1px solid #E2E8F0;border-radius:8px;overflow:hidden;max-height:140px}.vr-hist.show{display:block}
+.vr-hist-hdr{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid #F1F5F9;background:#f8f8f8}
+.vr-hist-title{font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px}
+.vr-hist-clear{font-size:9px;font-weight:600;color:#DC2626;background:none;border:none;cursor:pointer}
+.vr-hist-list{max-height:100px;overflow-y:auto;padding:4px}
+.vr-hist-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .12s}.vr-hist-item:hover{background:#fafafa}
+.vr-hist-item.in-room{color:#94A3B8;cursor:default}.vr-hist-item.in-room:hover{background:transparent}
+.vr-h-status{font-size:9px;font-weight:600;color:#94A3B8;padding:2px 6px;border-radius:3px;background:#f8f8f8}
+.vr-hist-item.in-room .vr-h-status{color:#2563EB;background:rgba(37,99,235,0.08)}
+.vr-h-del{font-size:9px;font-weight:600;color:#DC2626;background:none;border:none;cursor:pointer;padding:1px 4px;margin-left:3px}
+.vr-hist-empty{text-align:center;padding:12px;color:#94A3B8;font-size:11px}
+
+/* Roulette */
+.vr-roulette{padding:8px 10px;flex-shrink:0}
+.vr-roulette-wrap{position:relative;margin:0 auto;width:240px;height:240px}
+.vr-roulette-cv{width:240px;height:240px;border-radius:50%;box-shadow:0 4px 20px rgba(37,99,235,0.08)}
+.vr-roulette-ptr{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:16px solid #2563EB;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.12));z-index:2}
+.vr-roulette-ctr{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:#fff;border:3px solid #CBD5E1;z-index:2}
+.vr-spin{display:block;margin:8px auto 0;padding:11px 40px;border:none;border-radius:50px;background:#2563EB;color:#fff;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,0.15);transition:all .15s}
+.vr-spin:hover{background:#1D4ED8}.vr-spin:disabled{opacity:.4;cursor:not-allowed}
+.vr-viewer-status{text-align:center;color:#94A3B8;font-size:11px;margin-top:6px}
+.vr-anon-cover{text-align:center;padding:16px;color:#94A3B8;font-size:12px;font-weight:600}
+
+/* Result */
+.vr-result{display:none;position:absolute;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(12px);z-index:100;align-items:center;justify-content:center;flex-direction:column}
+.vr-result.show{display:flex}
+.vr-result-card{text-align:center;padding:36px 28px;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);animation:vrPop .4s ease;max-width:300px;width:90%}
+@keyframes vrPop{0%{opacity:0;transform:scale(.85)}100%{opacity:1;transform:scale(1)}}
+.vr-result-label{font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:3px;margin-bottom:6px}
+.vr-result-name{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;color:#2563EB;line-height:1.1}
+.vr-result-votes{color:#475569;font-size:13px;margin-top:6px}
+.vr-result-close{margin-top:14px;padding:9px 28px;border:1px solid #e2e2e2;border-radius:8px;background:#fff;color:#475569;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+.vr-confetti{position:absolute;inset:0;pointer-events:none;z-index:101;overflow:hidden}
+.vr-toast{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:7px 18px;border-radius:14px;font-size:11px;font-weight:600;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}.vr-toast.show{opacity:1}
+</style>
+<div class="vr" id="vrRoot">
+<div class="vr-frame">
+<div class="vr-device">
+<div class="vr-app" id="vrApp">
+  <div class="vr-toast" id="vrToast"></div>
+
+  <!-- HOME -->
+  <div class="vr-scr active" id="vr-scr-home">
+    <div class="vr-home">
+      <div class="vr-home-top">
+        <div class="vr-home-title">GAME VOTE</div>
+        <div class="vr-home-sub">투표하고 돌려서 오늘의 게임을 정하자</div>
+      </div>
+      <div class="vr-home-body">
+        <div class="vr-card">
+          <div class="vr-card-title">닉네임</div>
+          <input class="vr-input" id="vr-nick" placeholder="닉네임 입력" maxlength="12">
+        </div>
+        <div class="vr-card">
+          <div class="vr-row"><button class="vr-btn vr-btn-accent" onclick="vrCreateRoom()">방 만들기</button></div>
+        </div>
+        <div class="vr-card">
+          <div class="vr-card-title">코드로 참여</div>
+          <input class="vr-input vr-input-code" id="vr-join-code" placeholder="6자리 코드" maxlength="6" oninput="this.value=this.value.toUpperCase()">
+          <div class="vr-row"><button class="vr-btn vr-btn-orange" onclick="vrJoinRoom()">참여하기</button></div>
+        </div>
+        <div class="vr-card">
+          <div class="vr-rooms-hdr"><span>열린 방 목록</span><button class="vr-rooms-refresh" onclick="vrRefreshRL()">새로고침</button></div>
+          <div class="vr-rl" id="vr-room-list"><div class="vr-ri-empty">불러오는 중...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOM -->
+  <div class="vr-scr" id="vr-scr-room">
+    <div class="vr-topbar">
+      <div class="vr-topbar-l">
+        <button class="vr-back" onclick="vrLeave()">&#8592;</button>
+        <span class="vr-code-badge" id="vr-g-code" onclick="vrCopyCode()"></span>
+        <span class="vr-role" id="vr-g-role"></span>
+      </div>
+      <div class="vr-topbar-r">
+        <button class="vr-btn-ghost" onclick="vrCopyCode()">코드</button>
+        <button class="vr-btn-ghost" onclick="vrCopyLink()">링크</button>
+      </div>
+    </div>
+    <div class="vr-mbar" id="vr-members"></div>
+    <div class="vr-modebar" id="vr-modebar" style="display:none">
+      <button class="vr-modebtn active" id="vr-mode-public" onclick="vrSetMode('public')">공개 투표</button>
+      <button class="vr-modebtn" id="vr-mode-anon" onclick="vrSetMode('anon')">익명 투표</button>
+    </div>
+    <div class="vr-gamearea" id="vr-gamearea">
+      <div class="vr-secbar">
+        <span class="vr-sectitle">게임 목록 <span style="font-family:'Noto Sans KR';font-weight:500;font-size:9px;color:#94A3B8;letter-spacing:0;text-transform:none;margin-left:4px">복수 선택</span></span>
+        <span class="vr-vtotal" id="vr-vtotal">0표</span>
+      </div>
+      <div class="vr-glist" id="vr-glist"></div>
+      <div class="vr-vact">
+        <button onclick="vrSelectAll()">전체 선택</button>
+        <button onclick="vrDeselectAll()">전체 해제</button>
+      </div>
+      <div class="vr-addrow">
+        <input id="vr-new-game" placeholder="게임 이름 추가..." maxlength="30" onkeydown="if(event.key==='Enter')vrAddGame()" onfocus="vrShowHist()" oninput="vrFilterHist()">
+        <button onclick="vrAddGame()">추가</button>
+      </div>
+      <div class="vr-hist" id="vr-hist">
+        <div class="vr-hist-hdr"><span class="vr-hist-title">내 기록</span><button class="vr-hist-clear" onclick="vrClearHist()">삭제</button></div>
+        <div class="vr-hist-list" id="vr-hist-list"></div>
+      </div>
+
+      <!-- Roulette Host -->
+      <div id="vr-roulette-host" style="display:none">
+        <div class="vr-secbar" style="margin-top:12px"><span class="vr-sectitle">룰렛</span></div>
+        <div class="vr-roulette">
+          <div class="vr-roulette-wrap"><div class="vr-roulette-ptr"></div><canvas class="vr-roulette-cv" id="vr-cv-host" width="480" height="480"></canvas><div class="vr-roulette-ctr"></div></div>
+          <button class="vr-spin" id="vr-spin-btn" onclick="vrSpin()">SPIN</button>
+        </div>
+      </div>
+      <!-- Roulette Guest -->
+      <div id="vr-roulette-guest" style="display:none">
+        <div class="vr-secbar" style="margin-top:12px"><span class="vr-sectitle">룰렛</span></div>
+        <div class="vr-roulette">
+          <div id="vr-anon-cover" class="vr-anon-cover" style="display:none">방장이 돌리기를 누르면 결과가 공개됩니다</div>
+          <div id="vr-guest-wheel">
+            <div class="vr-roulette-wrap"><div class="vr-roulette-ptr"></div><canvas class="vr-roulette-cv" id="vr-cv-guest" width="480" height="480"></canvas><div class="vr-roulette-ctr"></div></div>
+          </div>
+          <div class="vr-viewer-status" id="vr-viewer-status">방장이 룰렛을 돌리면 여기에 표시됩니다</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result overlay -->
+  <div class="vr-result" id="vr-result">
+    <canvas class="vr-confetti" id="vr-confetti"></canvas>
+    <div class="vr-result-card">
+      <div class="vr-result-label">오늘의 게임</div>
+      <div class="vr-result-name" id="vr-result-name"></div>
+      <div class="vr-result-votes" id="vr-result-votes"></div>
+      <button class="vr-result-close" onclick="vrCloseResult()">확인</button>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+  var FB_DB='https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
+  var C={apiKey:"AIzaSyAQE9oQRDUmeX6ZPO2KOcfd1ctBqt6v34w",authDomain:"vendys-b1fea.firebaseapp.com",databaseURL:"https://vendys-b1fea-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"vendys-b1fea",storageBucket:"vendys-b1fea.firebasestorage.app",messagingSenderId:"392583358946",appId:"1:392583358946:web:7a6b0cc2a99ec2e08db1bb"};
+  function go(){if(!firebase.apps.length)firebase.initializeApp(C);else{var a=firebase.apps[0];if(a.options.databaseURL!==C.databaseURL){try{firebase.app('vrApp');}catch(e){firebase.initializeApp(C,'vrApp');}}}window.vrDb=firebase.database(firebase.apps.length>1?firebase.app('vrApp'):undefined);if(typeof vrLoadRL==='function')vrLoadRL();}
+  if(typeof firebase!=='undefined'&&firebase.database)go();else{var s=document.createElement('script');s.src=FB_DB;s.onload=go;document.head.appendChild(s);}
+})();
+</script>
+<script>
+var vrDb=null;
+var vrRoom=null,vrIsHost=false,vrMyNick='',vrListeners=[],vrMembersData={},vrGamesData={},vrMyVotes={};
+var vrSpinAngle=0,vrVoteMode='public',vrRoomMemCache={},vrMemListeners={};
+var NICK_KEY='vr_vendys_nick',HIST_KEY='vr_game_history';
+var WCOLORS=['#2563EB','#D97706','#059669','#7C3AED','#0EA5E9','#DC2626','#6D28D9','#B45309','#0891B2','#4F46E5','#DB2777','#047857'];
+var DB_PREFIX='voterooms',DB_GAMES='votegames',DB_MEMBERS='votemembers';
+
+function vrS(s){return s.replace(/[.#$/\[\]]/g,'_');}
+function vrE(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function vrToast(m){var t=document.getElementById('vrToast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+function vrShowScr(id){document.querySelectorAll('#vrApp .vr-scr').forEach(function(s){s.classList.remove('active');});document.getElementById('vr-scr-'+id).classList.add('active');}
+function vrGetNick(){return localStorage.getItem(NICK_KEY)||'';}
+function vrSaveNick(n){localStorage.setItem(NICK_KEY,n);}
+function vrGenCode(){var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',r='';for(var i=0;i<6;i++)r+=c[Math.floor(Math.random()*c.length)];return r;}
+function vrGetMyNick(){var n=document.getElementById('vr-nick').value.trim();if(!n){vrToast('\uB2C9\uB124\uC784\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694');document.getElementById('vr-nick').focus();}else vrSaveNick(n);return n;}
+
+/* Restore nick */
+(function(){var n=vrGetNick();if(n)document.getElementById('vr-nick').value=n;})();
+/* Embedded detection */
+(function(){function chk(){var el=document.getElementById('vrRoot');if(!el)return;var w=el.parentElement?el.parentElement.offsetWidth:window.innerWidth;if(w<500||window.innerWidth<=768)el.classList.add('vr-embedded');else el.classList.remove('vr-embedded');}chk();window.addEventListener('resize',chk);})();
+/* URL room param */
+(function(){var p=new URLSearchParams(location.search);if(p.get('room'))document.getElementById('vr-join-code').value=p.get('room').toUpperCase();})();
+
+/* History */
+function vrGetHist(){try{return JSON.parse(localStorage.getItem(HIST_KEY))||[];}catch(e){return[];}}
+function vrSaveHist(name){var h=vrGetHist();h=h.filter(function(x){return x.toLowerCase()!==name.toLowerCase();});h.unshift(name);if(h.length>50)h=h.slice(0,50);localStorage.setItem(HIST_KEY,JSON.stringify(h));}
+function vrClearHist(){if(!confirm('\uAE30\uB85D \uC0AD\uC81C?'))return;localStorage.removeItem(HIST_KEY);vrRenderHist();vrToast('\uC0AD\uC81C \uC644\uB8CC');}
+function vrShowHist(){vrRenderHist();document.getElementById('vr-hist').classList.add('show');}
+function vrFilterHist(){vrRenderHist();}
+function vrRenderHist(){var list=document.getElementById('vr-hist-list'),hist=vrGetHist(),kw=(document.getElementById('vr-new-game')?document.getElementById('vr-new-game').value.trim().toLowerCase():'');if(!hist.length){list.innerHTML='<div class="vr-hist-empty">\uC544\uC9C1 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4</div>';return;}var cur=new Set(Object.values(vrGamesData).map(function(g){return g.name.toLowerCase();}));var f=kw?hist.filter(function(h){return h.toLowerCase().includes(kw);}):hist;if(!f.length){list.innerHTML='<div class="vr-hist-empty">\uC77C\uCE58 \uC5C6\uC74C</div>';return;}list.innerHTML=f.map(function(name){var inR=cur.has(name.toLowerCase()),sn=vrE(name.replace(/'/g,"\\'"));return '<div class="vr-hist-item '+(inR?'in-room':'')+'"><span onclick="'+(inR?'':"vrAddFromHist('"+sn+"')")+'" style="flex:1;cursor:'+(inR?'default':'pointer')+'">'+vrE(name)+'</span><span class="vr-h-status">'+(inR?'\uCD94\uAC00\uB428':'\uD074\uB9AD \uCD94\uAC00')+'</span><button class="vr-h-del" onclick="event.stopPropagation();vrDelHist(\''+sn+'\')">\uC0AD\uC81C</button></div>';}).join('');}
+function vrDelHist(name){var h=vrGetHist().filter(function(x){return x!==name;});localStorage.setItem(HIST_KEY,JSON.stringify(h));vrRenderHist();}
+function vrAddFromHist(name){document.getElementById('vr-new-game').value=name;vrAddGame();vrRenderHist();}
+
+/* Room list */
+var vrRLRef=null;
+function vrCleanExp(rooms){var now=Date.now();Object.keys(rooms).forEach(function(code){var r=rooms[code];if(r.expiresAt&&now>r.expiresAt){[DB_PREFIX,DB_GAMES,DB_MEMBERS].forEach(function(p){vrDb.ref(p+'/'+code).remove();});}});}
+function vrLoadRL(){if(vrRLRef)vrRLRef.off();Object.values(vrMemListeners).forEach(function(fn){fn();});vrMemListeners={};vrRLRef=vrDb.ref(DB_PREFIX);vrRLRef.on('value',function(snap){var rooms=snap.val()||{},list=[],now=Date.now();vrCleanExp(rooms);Object.keys(rooms).forEach(function(code){var r=rooms[code];if(r.expiresAt&&now>r.expiresAt)return;list.push({code:code,host:r.host||'?',createdAt:r.createdAt});});list.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0);});vrRenderRL(list);list.forEach(function(r){vrListenRLMem(r.code);});});}
+function vrListenRLMem(code){if(vrMemListeners[code])return;var ref=vrDb.ref(DB_MEMBERS+'/'+code);var cb=ref.on('value',function(snap){vrRoomMemCache[code]=snap.val()||{};vrUpdateRLMem(code);});vrMemListeners[code]=function(){ref.off('value',cb);};}
+function vrUpdateRLMem(code){var el=document.getElementById('vr-rm-'+code);if(!el)return;var m=vrRoomMemCache[code]||{};var names=Object.values(m).map(function(x){return x.nick;});el.innerHTML=names.length?names.map(function(n){return '<span>'+vrE(n)+'</span>';}).join(''):'<span style="color:#94A3B8">\uC544\uC9C1 \uC5C6\uC74C</span>';}
+function vrRefreshRL(){vrLoadRL();vrToast('\uC0C8\uB85C\uACE0\uCE68');}
+function vrRenderRL(list){var el=document.getElementById('vr-room-list');if(!list.length){el.innerHTML='<div class="vr-ri-empty">\uC5F4\uB9B0 \uBC29\uC774 \uC5C6\uC2B5\uB2C8\uB2E4</div>';return;}el.innerHTML=list.map(function(r){return '<div class="vr-ri" onclick="vrQuickJoin(\''+vrE(r.code)+'\')"><div class="vr-ri-top"><div class="vr-ri-host">'+vrE(r.host)+' \uB2D8\uC758 \uBC29 <span class="vr-ri-badge">\uB300\uAE30\uC911</span></div><button class="vr-ri-join" onclick="event.stopPropagation();vrQuickJoin(\''+vrE(r.code)+'\')">\uCC38\uC5EC</button></div><div class="vr-ri-members" id="vr-rm-'+vrE(r.code)+'"></div><div class="vr-ri-meta">\uCF54\uB4DC: '+vrE(r.code)+'</div></div>';}).join('');list.forEach(function(r){vrUpdateRLMem(r.code);});}
+
+/* Dup check & join */
+function vrCheckDup(code,nick,cb){vrDb.ref(DB_MEMBERS+'/'+code).once('value').then(function(snap){var m=snap.val()||{};cb(Object.values(m).some(function(x){return x.nick===nick;}));});}
+function vrQuickJoin(code){var nick=vrGetMyNick();if(!nick)return;vrCheckDup(code,nick,function(dup){if(dup)return vrToast('\uC774\uBBF8 \uAC19\uC740 \uB2C9\uB124\uC784\uC774 \uC788\uC2B5\uB2C8\uB2E4');vrDoJoin(code,nick);});}
+function vrDoJoin(code,nick){vrDb.ref(DB_PREFIX+'/'+code).once('value').then(function(snap){if(!snap.exists())return vrToast('\uC874\uC7AC\uD558\uC9C0 \uC54A\uB294 \uBC29');var d=snap.val();if(d.expiresAt&&Date.now()>d.expiresAt){[DB_PREFIX,DB_GAMES,DB_MEMBERS].forEach(function(p){vrDb.ref(p+'/'+code).remove();});return vrToast('\uB9CC\uB8CC\uB41C \uBC29');}vrRoom={code:code,host:d.host};vrIsHost=(d.host===nick);vrMyNick=nick;vrVoteMode=d.voteMode||'public';vrEnter();});}
+function vrCreateRoom(){var host=vrGetMyNick();if(!host)return;var code=vrGenCode();vrDb.ref(DB_PREFIX+'/'+code).set({host:host,createdAt:Date.now(),expiresAt:Date.now()+30*60*1000,roulette:null,voteMode:'public'}).then(function(){vrRoom={code:code,host:host};vrIsHost=true;vrMyNick=host;vrVoteMode='public';vrEnter();}).catch(function(){vrToast('\uBC29 \uC0DD\uC131 \uC2E4\uD328');});}
+function vrJoinRoom(){var code=document.getElementById('vr-join-code').value.trim().toUpperCase(),nick=vrGetMyNick();if(!nick)return;if(!code||code.length!==6)return vrToast('6\uC790\uB9AC \uCF54\uB4DC');vrCheckDup(code,nick,function(dup){if(dup)return vrToast('\uC774\uBBF8 \uAC19\uC740 \uB2C9\uB124\uC784\uC774 \uC788\uC2B5\uB2C8\uB2E4');vrDoJoin(code,nick);});}
+function vrCopyCode(){if(!vrRoom)return;navigator.clipboard.writeText(vrRoom.code).then(function(){vrToast('\uCF54\uB4DC \uBCF5\uC0AC');});}
+function vrCopyLink(){if(!vrRoom)return;navigator.clipboard.writeText(location.href.split('?')[0]+'?room='+vrRoom.code).then(function(){vrToast('\uB9C1\uD06C \uBCF5\uC0AC');});}
+
+/* Close hist on outside click */
+document.addEventListener('click',function(e){var p=document.getElementById('vr-hist'),inp=document.getElementById('vr-new-game');if(!p||!p.classList.contains('show'))return;var addR=inp?inp.closest('.vr-addrow'):null;if(p.contains(e.target)||(addR&&addR.contains(e.target)))return;p.classList.remove('show');});
+</script>
+<script>
+function vrEnter(){if(vrRLRef){vrRLRef.off();vrRLRef=null;}Object.values(vrMemListeners).forEach(function(fn){fn();});vrMemListeners={};document.getElementById('vr-g-code').textContent=vrRoom.code;var r=document.getElementById('vr-g-role');var ga=document.getElementById('vr-gamearea');if(vrIsHost){r.textContent='HOST';r.className='vr-role vr-role-host';ga.classList.add('vr-is-host');document.getElementById('vr-modebar').style.display='flex';document.getElementById('vr-roulette-host').style.display='block';document.getElementById('vr-roulette-guest').style.display='none';}else{r.textContent='GUEST';r.className='vr-role vr-role-guest';ga.classList.remove('vr-is-host');document.getElementById('vr-modebar').style.display='none';document.getElementById('vr-roulette-host').style.display='none';document.getElementById('vr-roulette-guest').style.display='block';}vrShowScr('room');vrRegPres();vrListenMem();vrListenGames();vrListenRoulette();vrListenRoomEx();vrListenMode();vrUpdateModeUI();}
+function vrLeave(){if(vrIsHost&&!confirm('\uBC29\uC7A5\uC774 \uB098\uAC00\uBA74 \uBC29\uC774 \uC0AD\uC81C\uB429\uB2C8\uB2E4.'))return;if(vrRoom){var c=vrRoom.code;if(vrIsHost){[DB_PREFIX,DB_GAMES,DB_MEMBERS].forEach(function(p){vrDb.ref(p+'/'+c).remove();});}else{vrDb.ref(DB_MEMBERS+'/'+c+'/'+vrS(vrMyNick)).remove();Object.keys(vrGamesData).forEach(function(id){vrDb.ref(DB_GAMES+'/'+c+'/'+id+'/voters/'+vrS(vrMyNick)).remove();});}}vrListeners.forEach(function(fn){fn();});vrListeners=[];vrRoom=null;vrGamesData={};vrMyVotes={};vrMembersData={};vrIsHost=false;vrShowScr('home');vrLoadRL();}
+function vrRegPres(){var c=vrRoom.code,k=vrS(vrMyNick),ref=vrDb.ref(DB_MEMBERS+'/'+c+'/'+k);ref.set({nick:vrMyNick,isHost:vrIsHost,joinedAt:Date.now()});if(vrIsHost){[DB_PREFIX,DB_GAMES,DB_MEMBERS].forEach(function(p){vrDb.ref(p+'/'+c).onDisconnect().remove();});vrListeners.push(function(){[DB_PREFIX,DB_GAMES,DB_MEMBERS].forEach(function(p){vrDb.ref(p+'/'+c).onDisconnect().cancel();});});}else{ref.onDisconnect().remove();vrListeners.push(function(){ref.onDisconnect().cancel();ref.remove();});}}
+function vrListenMem(){var ref=vrDb.ref(DB_MEMBERS+'/'+vrRoom.code);var cb=ref.on('value',function(s){vrMembersData=s.val()||{};vrRenderMem();});vrListeners.push(function(){ref.off('value',cb);});}
+function vrRenderMem(){var b=document.getElementById('vr-members'),e=Object.values(vrMembersData);e.sort(function(a,b){return(b.isHost?1:0)-(a.isHost?1:0);});b.innerHTML='<span class="vr-mbar-label">\uCC38\uC5EC\uC790 '+e.length+'</span>'+e.map(function(m){return '<span class="vr-mchip '+(m.isHost?'host':'')+'"><span class="vr-mdot"></span>'+vrE(m.nick)+'</span>';}).join('');}
+function vrListenRoomEx(){if(vrIsHost)return;var ref=vrDb.ref(DB_PREFIX+'/'+vrRoom.code);var cb=ref.on('value',function(s){if(!s.exists()){vrToast('\uBC29 \uC885\uB8CC');vrListeners.forEach(function(fn){fn();});vrListeners=[];vrRoom=null;vrGamesData={};vrMyVotes={};vrMembersData={};vrIsHost=false;vrShowScr('home');vrLoadRL();}});vrListeners.push(function(){ref.off('value',cb);});}
+
+/* Mode toggle */
+function vrSetMode(m){if(!vrIsHost)return;vrVoteMode=m;vrDb.ref(DB_PREFIX+'/'+vrRoom.code+'/voteMode').set(m);vrUpdateModeUI();}
+function vrListenMode(){var ref=vrDb.ref(DB_PREFIX+'/'+vrRoom.code+'/voteMode');var cb=ref.on('value',function(s){vrVoteMode=s.val()||'public';vrUpdateModeUI();vrRenderGames();vrUpdateGuestWheel();});vrListeners.push(function(){ref.off('value',cb);});}
+function vrUpdateModeUI(){var pub=document.getElementById('vr-mode-public'),ano=document.getElementById('vr-mode-anon');if(pub)pub.classList.toggle('active',vrVoteMode==='public');if(ano)ano.classList.toggle('active',vrVoteMode==='anon');var ga=document.getElementById('vr-gamearea');if(vrVoteMode==='anon'&&!vrIsHost)ga.classList.add('vr-anon');else ga.classList.remove('vr-anon');}
+
+/* Games */
+function vrVC(g){return Object.keys(g.voters||{}).length;}
+function vrVotedGames(){return Object.entries(vrGamesData).filter(function(e){return vrVC(e[1])>0;});}
+function vrListenGames(){var ref=vrDb.ref(DB_GAMES+'/'+vrRoom.code);var cb=ref.on('value',function(s){vrGamesData=s.val()||{};var mk=vrS(vrMyNick);vrMyVotes={};Object.entries(vrGamesData).forEach(function(e){if(e[1].voters&&e[1].voters[mk])vrMyVotes[e[0]]=true;});vrRenderGames();vrDrawWheel('vr-cv-host',0);if(!vrIsHost)vrUpdateGuestWheel();});vrListeners.push(function(){ref.off('value',cb);});}
+function vrRenderGames(){var el=document.getElementById('vr-glist'),entries=Object.entries(vrGamesData);if(!entries.length){el.innerHTML='<div class="vr-empty">\uC544\uC9C1 \uAC8C\uC784\uC774 \uC5C6\uC2B5\uB2C8\uB2E4</div>';document.getElementById('vr-vtotal').textContent='0\uD45C';return;}entries.sort(function(a,b){return(a[1].createdAt||0)-(b[1].createdAt||0);});var maxV=Math.max.apply(null,entries.map(function(e){return vrVC(e[1]);}));if(maxV<1)maxV=1;var totalV=entries.reduce(function(s,e){return s+vrVC(e[1]);},0);document.getElementById('vr-vtotal').textContent=totalV+'\uD45C';
+var isAnon=vrVoteMode==='anon'&&!vrIsHost;
+el.innerHTML=entries.map(function(e){var id=e[0],g=e[1],v=vrVC(g),pct=maxV>0?(v/maxV*100):0,voted=vrMyVotes[id];
+var voterNames='';if(vrVoteMode==='public'&&g.voters){voterNames=Object.keys(g.voters).map(function(k){return '<span class="vr-gi-voter">'+vrE(k.replace(/_/g,'.'))+'</span>';}).join('');}
+return '<div class="vr-gi '+(voted?'voted':'')+'" onclick="vrToggle(\''+id+'\')"><div class="vr-gi-chk"><svg class="vr-gi-chk-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1"><span class="vr-gi-name">'+vrE(g.name)+'</span>'+(voterNames?'<div class="vr-gi-voters">'+voterNames+'</div>':'')+'</div><span class="vr-gi-cnt">'+v+'</span><button class="vr-gi-del" onclick="event.stopPropagation();vrDelGame(\''+id+'\')">&#10005;</button><div class="vr-gi-bar" style="width:'+pct+'%"></div></div>';}).join('');}
+function vrToggle(id){var g=vrGamesData[id];if(!g)return;var ref=vrDb.ref(DB_GAMES+'/'+vrRoom.code+'/'+id+'/voters/'+vrS(vrMyNick));if(vrMyVotes[id])ref.remove();else ref.set(true);}
+function vrDelGame(id){if(!vrIsHost)return;vrDb.ref(DB_GAMES+'/'+vrRoom.code+'/'+id).remove();}
+function vrAddGame(){var inp=document.getElementById('vr-new-game'),name=inp.value.trim();if(!name)return;var dup=Object.values(vrGamesData).find(function(g){return g.name.toLowerCase()===name.toLowerCase();});if(dup){vrToast('\uC774\uBBF8 \uB4F1\uB85D\uB41C \uAC8C\uC784');inp.value='';return;}vrDb.ref(DB_GAMES+'/'+vrRoom.code).push().set({name:name,createdAt:Date.now()});vrSaveHist(name);inp.value='';inp.focus();vrRenderHist();}
+function vrSelectAll(){var mk=vrS(vrMyNick);Object.keys(vrGamesData).forEach(function(id){if(!vrMyVotes[id])vrDb.ref(DB_GAMES+'/'+vrRoom.code+'/'+id+'/voters/'+mk).set(true);});}
+function vrDeselectAll(){var mk=vrS(vrMyNick);Object.keys(vrGamesData).forEach(function(id){if(vrMyVotes[id])vrDb.ref(DB_GAMES+'/'+vrRoom.code+'/'+id+'/voters/'+mk).remove();});}
+</script>
+<script>
+/* Draw roulette wheel */
+function vrDrawWheel(canvasId,angle){var cv=document.getElementById(canvasId);if(!cv)return;var ctx=cv.getContext('2d'),W=cv.width,cx=W/2,cy=W/2,R=W/2-8;ctx.clearRect(0,0,W,W);var voted=vrVotedGames();if(!voted.length){ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle='#F1F5F9';ctx.fill();ctx.strokeStyle='#CBD5E1';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#94A3B8';ctx.font='bold 22px Noto Sans KR';ctx.textAlign='center';ctx.fillText('\uD22C\uD45C\uB41C \uAC8C\uC784 \uC5C6\uC74C',cx,cy);return;}var totalV=voted.reduce(function(s,e){return s+vrVC(e[1]);},0);ctx.save();ctx.translate(cx,cy);ctx.rotate(angle);var startA=0;voted.forEach(function(e,i){var g=e[1],sliceA=(vrVC(g)/totalV)*Math.PI*2;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R,startA,startA+sliceA);ctx.closePath();ctx.fillStyle=WCOLORS[i%WCOLORS.length];ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=2;ctx.stroke();var midA=startA+sliceA/2,lr=R*0.6;ctx.save();ctx.translate(Math.cos(midA)*lr,Math.sin(midA)*lr);ctx.rotate(midA+Math.PI/2);var fs=Math.min(28,Math.max(14,sliceA*R*0.14));ctx.font='bold '+fs+'px Noto Sans KR';ctx.fillStyle='white';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.4)';ctx.shadowBlur=3;var nm=g.name.length>6?g.name.slice(0,5)+'...':g.name;ctx.fillText(nm,0,-5);ctx.font='bold '+Math.round(fs*0.6)+'px Orbitron';ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillText(vrVC(g)+'',0,fs*0.45);ctx.restore();startA+=sliceA;});ctx.restore();}
+
+/* Guest wheel: show or hide based on anon mode */
+function vrUpdateGuestWheel(){if(vrIsHost)return;var cover=document.getElementById('vr-anon-cover'),wheel=document.getElementById('vr-guest-wheel');if(vrVoteMode==='anon'){cover.style.display='block';wheel.style.display='none';}else{cover.style.display='none';wheel.style.display='block';vrDrawWheel('vr-cv-guest',vrSpinAngle);}}
+
+/* Spin */
+function vrSpin(){var voted=vrVotedGames();if(!voted.length)return vrToast('\uD22C\uD45C\uB41C \uAC8C\uC784\uC774 \uC5C6\uC2B5\uB2C8\uB2E4');if(voted.length===1){vrShowResult(voted[0][1].name,vrVC(voted[0][1]));vrDb.ref(DB_PREFIX+'/'+vrRoom.code+'/roulette').set({winner:voted[0][1].name,votes:vrVC(voted[0][1]),timestamp:Date.now()});return;}document.getElementById('vr-spin-btn').disabled=true;var totalV=voted.reduce(function(s,e){return s+vrVC(e[1]);},0);
+/* Weighted random winner */
+var rand=Math.random()*totalV,wIdx=0;for(var i=0;i<voted.length;i++){rand-=vrVC(voted[i][1]);if(rand<=0){wIdx=i;break;}}
+/* Calc target angle */
+var accDeg=0;for(var j=0;j<wIdx;j++)accDeg+=(vrVC(voted[j][1])/totalV)*360;var sliceDeg=(vrVC(voted[wIdx][1])/totalV)*360;var targetDeg=accDeg+sliceDeg*(0.2+Math.random()*0.6);var stopDeg=(targetDeg+90)%360;var totalSpin=360*(6+Math.floor(Math.random()*4))+stopDeg;
+var duration=4000+Math.random()*1500,startTime=performance.now();var startDeg=(vrSpinAngle*180/Math.PI)%360;
+/* Broadcast to Firebase */
+vrDb.ref(DB_PREFIX+'/'+vrRoom.code+'/roulette').set({spinning:true,finalAngleDeg:totalSpin,duration:duration,startTime:Date.now(),winner:voted[wIdx][1].name,votes:vrVC(voted[wIdx][1]),timestamp:Date.now()});
+function animate(now){var elapsed=now-startTime,progress=Math.min(elapsed/duration,1);var eased=1-Math.pow(1-progress,3);var curDeg=startDeg+totalSpin*eased;vrSpinAngle=(curDeg%360)*Math.PI/180;vrDrawWheel('vr-cv-host',vrSpinAngle);if(progress<1)requestAnimationFrame(animate);else{document.getElementById('vr-spin-btn').disabled=false;vrShowResult(voted[wIdx][1].name,vrVC(voted[wIdx][1]));vrDb.ref(DB_PREFIX+'/'+vrRoom.code+'/roulette').update({spinning:false});}}requestAnimationFrame(animate);}
+
+/* Listen roulette from Firebase */
+function vrListenRoulette(){var ref=vrDb.ref(DB_PREFIX+'/'+vrRoom.code+'/roulette');var cb=ref.on('value',function(s){var d=s.val();if(!d)return;if(!vrIsHost&&d.spinning&&d.finalAngleDeg&&d.duration){
+/* Anon mode: now reveal the wheel for guest */
+if(vrVoteMode==='anon'){document.getElementById('vr-anon-cover').style.display='none';document.getElementById('vr-guest-wheel').style.display='block';document.getElementById('vr-gamearea').classList.remove('vr-anon');}
+var remaining=Math.max(d.duration-(Date.now()-d.startTime),500);vrAnimGuest(d.finalAngleDeg,remaining,d.winner,d.votes);document.getElementById('vr-viewer-status').textContent='\uB8F0\uB81B \uB3CC\uC544\uAC00\uB294 \uC911...';}
+if(!vrIsHost&&!d.spinning&&d.winner){document.getElementById('vr-viewer-status').textContent='\uACB0\uACFC: '+d.winner;if(d.timestamp&&Date.now()-d.timestamp<8000)vrShowResult(d.winner,d.votes||0);
+/* After result shown, if anon, re-hide */
+if(vrVoteMode==='anon'){setTimeout(function(){if(vrVoteMode==='anon'&&!vrIsHost){document.getElementById('vr-gamearea').classList.add('vr-anon');vrUpdateGuestWheel();}},5000);}}});vrListeners.push(function(){ref.off('value',cb);});}
+function vrAnimGuest(finalDeg,duration,wName,wVotes){var startTime=performance.now(),startDeg=(vrSpinAngle*180/Math.PI)%360;function animate(now){var elapsed=now-startTime,progress=Math.min(elapsed/duration,1),eased=1-Math.pow(1-progress,3);var curDeg=startDeg+finalDeg*eased;vrSpinAngle=(curDeg%360)*Math.PI/180;vrDrawWheel('vr-cv-guest',vrSpinAngle);if(progress<1)requestAnimationFrame(animate);else vrShowResult(wName,wVotes);}requestAnimationFrame(animate);}
+
+/* Result overlay */
+function vrShowResult(name,votes){document.getElementById('vr-result-name').textContent=name;document.getElementById('vr-result-votes').textContent=votes+'\uD45C\uB85C \uB2F9\uCCA8';document.getElementById('vr-result').classList.add('show');vrConfetti();}
+function vrCloseResult(){document.getElementById('vr-result').classList.remove('show');}
+
+/* Confetti */
+function vrConfetti(){var cv=document.getElementById('vr-confetti'),app=document.getElementById('vrApp');cv.width=app.offsetWidth;cv.height=app.offsetHeight;var ctx=cv.getContext('2d'),ps=[],colors=['#2563EB','#D97706','#059669','#7C3AED','#0EA5E9','#DC2626'];for(var i=0;i<80;i++)ps.push({x:Math.random()*cv.width,y:Math.random()*cv.height-cv.height,w:Math.random()*7+3,h:Math.random()*5+2,color:colors[Math.floor(Math.random()*colors.length)],vx:(Math.random()-0.5)*3,vy:Math.random()*4+2,rot:Math.random()*360,rotS:(Math.random()-0.5)*10,op:1});var frame=0;function draw(){ctx.clearRect(0,0,cv.width,cv.height);var alive=false;ps.forEach(function(p){if(p.op<=0)return;alive=true;p.x+=p.vx;p.y+=p.vy;p.vy+=0.05;p.rot+=p.rotS;if(p.y>cv.height)p.op-=0.02;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.globalAlpha=Math.max(p.op,0);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});frame++;if(alive&&frame<200)requestAnimationFrame(draw);else ctx.clearRect(0,0,cv.width,cv.height);}requestAnimationFrame(draw);}
+
+/* beforeunload cleanup */
+window.addEventListener('beforeunload',function(){if(vrRoom)vrDb.ref(DB_MEMBERS+'/'+vrRoom.code+'/'+vrS(vrMyNick)).remove();});
+</script>
