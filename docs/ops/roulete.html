@@ -1,6 +1,5 @@
 <!--
 title: 오늘 뭐먹지? 투표
-meta: 최종 수정: 2026.02.18
 -->
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
@@ -282,7 +281,7 @@ function vrShowHist(){vrRenderHist();document.getElementById('vr-hist').classLis
 function vrFilterHist(){vrRenderHist();}
 function vrRenderHist(){var list=document.getElementById('vr-hist-list'),hist=vrGetHist(),kw=(document.getElementById('vr-new-game')?document.getElementById('vr-new-game').value.trim().toLowerCase():'');if(!hist.length){list.innerHTML='<div class="vr-hist-empty">\uC544\uC9C1 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4</div>';return;}var cur=new Set(Object.values(vrGamesData).map(function(g){return g.name.toLowerCase();}));var f=kw?hist.filter(function(h){return h.toLowerCase().includes(kw);}):hist;if(!f.length){list.innerHTML='<div class="vr-hist-empty">\uC77C\uCE58 \uC5C6\uC74C</div>';return;}list.innerHTML=f.map(function(name){var inR=cur.has(name.toLowerCase()),sn=vrE(name.replace(/'/g,"\\'"));return '<div class="vr-hist-item '+(inR?'in-room':'')+'"><span onclick="'+(inR?'':"vrAddFromHist('"+sn+"')")+'" style="flex:1;cursor:'+(inR?'default':'pointer')+'">'+vrE(name)+'</span><span class="vr-h-status">'+(inR?'\uCD94\uAC00\uB428':'\uD074\uB9AD \uCD94\uAC00')+'</span><button class="vr-h-del" onclick="event.stopPropagation();vrDelHist(\''+sn+'\')">\uC0AD\uC81C</button></div>';}).join('');}
 function vrDelHist(name){var h=vrGetHist().filter(function(x){return x!==name;});localStorage.setItem(HIST_KEY,JSON.stringify(h));vrRenderHist();}
-function vrAddFromHist(name){document.getElementById('vr-new-game').value=name;vrAddGame();vrRenderHist();}
+function vrAddFromHist(name){document.getElementById('vr-new-game').value=name;vrAddGame();}
 
 /* Room list */
 var vrRLRef=null;
@@ -303,7 +302,7 @@ function vrCopyCode(){if(!vrRoom)return;navigator.clipboard.writeText(vrRoom.cod
 function vrCopyLink(){if(!vrRoom)return;navigator.clipboard.writeText(location.href.split('?')[0]+'?room='+vrRoom.code).then(function(){vrToast('\uB9C1\uD06C \uBCF5\uC0AC');});}
 
 /* Close hist on outside click */
-document.addEventListener('click',function(e){var p=document.getElementById('vr-hist'),inp=document.getElementById('vr-new-game');if(!p||!p.classList.contains('show'))return;var addR=inp?inp.closest('.vr-addrow'):null;if(p.contains(e.target)||(addR&&addR.contains(e.target)))return;p.classList.remove('show');});
+document.addEventListener('click',function(e){var p=document.getElementById('vr-hist'),inp=document.getElementById('vr-new-game');if(!p||!p.classList.contains('show'))return;var addR=inp?inp.closest('.vr-addrow'):null;if(p.contains(e.target)||(addR&&addR.contains(e.target)))return;if(e.target.closest&&e.target.closest('.vr-addrow'))return;p.classList.remove('show');});
 </script>
 <script>
 function vrEnter(){if(vrRLRef){vrRLRef.off();vrRLRef=null;}Object.values(vrMemListeners).forEach(function(fn){fn();});vrMemListeners={};document.getElementById('vr-g-code').textContent=vrRoom.code;var r=document.getElementById('vr-g-role');var ga=document.getElementById('vr-gamearea');if(vrIsHost){r.textContent='HOST';r.className='vr-role vr-role-host';ga.classList.add('vr-is-host');document.getElementById('vr-modebar').style.display='flex';document.getElementById('vr-roulette-host').style.display='block';document.getElementById('vr-roulette-guest').style.display='none';}else{r.textContent='GUEST';r.className='vr-role vr-role-guest';ga.classList.remove('vr-is-host');document.getElementById('vr-modebar').style.display='none';document.getElementById('vr-roulette-host').style.display='none';document.getElementById('vr-roulette-guest').style.display='block';}vrShowScr('room');vrRegPres();vrListenMem();vrListenGames();vrListenRoulette();vrListenRoomEx();vrListenMode();vrUpdateModeUI();}
@@ -329,7 +328,7 @@ var voterNames='';if(vrVoteMode==='public'&&g.voters){voterNames=Object.keys(g.v
 return '<div class="vr-gi '+(voted?'voted':'')+'" onclick="vrToggle(\''+id+'\')"><div class="vr-gi-chk"><svg class="vr-gi-chk-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1"><span class="vr-gi-name">'+vrE(g.name)+'</span>'+(voterNames?'<div class="vr-gi-voters">'+voterNames+'</div>':'')+'</div><span class="vr-gi-cnt">'+v+'</span><button class="vr-gi-del" onclick="event.stopPropagation();vrDelGame(\''+id+'\')">&#10005;</button><div class="vr-gi-bar" style="width:'+pct+'%"></div></div>';}).join('');}
 function vrToggle(id){var g=vrGamesData[id];if(!g)return;var ref=vrDb.ref(DB_GAMES+'/'+vrRoom.code+'/'+id+'/voters/'+vrS(vrMyNick));if(vrMyVotes[id])ref.remove();else ref.set(true);}
 function vrDelGame(id){if(!vrIsHost)return;vrDb.ref(DB_GAMES+'/'+vrRoom.code+'/'+id).remove();}
-function vrAddGame(){var inp=document.getElementById('vr-new-game'),name=inp.value.trim();if(!name)return;var dup=Object.values(vrGamesData).find(function(g){return g.name.toLowerCase()===name.toLowerCase();});if(dup){vrToast('\uC774\uBBF8 \uB4F1\uB85D\uB41C \uBA54\uB274');inp.value='';return;}vrDb.ref(DB_GAMES+'/'+vrRoom.code).push().set({name:name,createdAt:Date.now()});vrSaveHist(name);inp.value='';inp.focus();vrRenderHist();}
+function vrAddGame(){var inp=document.getElementById('vr-new-game'),name=inp.value.trim();if(!name)return;var dup=Object.values(vrGamesData).find(function(g){return g.name.toLowerCase()===name.toLowerCase();});if(dup){vrToast('\uC774\uBBF8 \uB4F1\uB85D\uB41C \uBA54\uB274');inp.value='';inp.focus();return;}vrDb.ref(DB_GAMES+'/'+vrRoom.code).push().set({name:name,createdAt:Date.now()});vrSaveHist(name);inp.value='';inp.focus();setTimeout(function(){vrRenderHist();document.getElementById('vr-hist').classList.add('show');},50);}
 function vrSelectAll(){var mk=vrS(vrMyNick);Object.keys(vrGamesData).forEach(function(id){if(!vrMyVotes[id])vrDb.ref(DB_GAMES+'/'+vrRoom.code+'/'+id+'/voters/'+mk).set(true);});}
 function vrDeselectAll(){var mk=vrS(vrMyNick);Object.keys(vrGamesData).forEach(function(id){if(vrMyVotes[id])vrDb.ref(DB_GAMES+'/'+vrRoom.code+'/'+id+'/voters/'+mk).remove();});}
 </script>
