@@ -27,11 +27,14 @@ meta: 최종 수정: 2026.02.19
 
 .sl-twrap{flex:1;min-height:0;overflow:auto}
 .sl-table{width:100%;border-collapse:collapse}
-.sl-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:left;cursor:pointer;white-space:nowrap;z-index:1}
-.sl-table th:first-child{text-align:center;width:36px}
+.sl-table{table-layout:fixed}
+.sl-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:left;cursor:pointer;white-space:nowrap;z-index:1;overflow:hidden;text-overflow:ellipsis;position:relative}
+.sl-table th:first-child{text-align:center}
 .sl-table th:hover{background:#e2e8f0}
 .sl-table th .sl-sort{font-size:9px;margin-left:2px;color:#94a3b8}
-.sl-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;white-space:nowrap}
+.sl-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.sl-resizer:hover,.sl-resizer.sl-resizing{background:#4a90d9;opacity:0.4}
+.sl-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sl-table td:first-child{text-align:center;color:#94a3b8}
 .sl-table tr:hover{background:#f8fafd}
 .sl-recent{color:#22c55e;font-weight:600}
@@ -73,11 +76,11 @@ meta: 최종 수정: 2026.02.19
     <table class="sl-table" id="slTable" style="display:none">
       <thead><tr>
         <th style="cursor:default;width:36px">No</th>
-        <th onclick="slSort('sid')" style="min-width:290px">sid<span class="sl-sort" id="slSortsid"></span></th>
-        <th onclick="slSort('name')" style="min-width:140px">매장명<span class="sl-sort" id="slSortname"></span></th>
-        <th onclick="slSort('roadAddress')" style="min-width:200px">주소<span class="sl-sort" id="slSortroadAddress"></span></th>
-        <th onclick="slSort('category')" style="min-width:80px">카테고리<span class="sl-sort" id="slSortcategory"></span></th>
-        <th onclick="slSort('latestSikdaeTradingDate')" style="min-width:90px">최근거래일<span class="sl-sort" id="slSortlatestSikdaeTradingDate"></span></th>
+        <th onclick="slSort('sid')" style="width:290px">sid<span class="sl-sort" id="slSortsid"></span><div class="sl-resizer" onmousedown="slResizeStart(event)"></div></th>
+        <th onclick="slSort('name')" style="width:140px">매장명<span class="sl-sort" id="slSortname"></span><div class="sl-resizer" onmousedown="slResizeStart(event)"></div></th>
+        <th onclick="slSort('roadAddress')" style="width:300px">주소<span class="sl-sort" id="slSortroadAddress"></span><div class="sl-resizer" onmousedown="slResizeStart(event)"></div></th>
+        <th onclick="slSort('category')" style="width:80px">카테고리<span class="sl-sort" id="slSortcategory"></span><div class="sl-resizer" onmousedown="slResizeStart(event)"></div></th>
+        <th onclick="slSort('latestSikdaeTradingDate')" style="width:100px">최근거래일<span class="sl-sort" id="slSortlatestSikdaeTradingDate"></span></th>
       </tr></thead>
       <tbody id="slTbody"></tbody>
     </table>
@@ -274,4 +277,32 @@ function slExcel(){
 }
 
 function slEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ── Column Resize ── */
+var slResizeState={th:null,startX:0,startW:0};
+function slResizeStart(e){
+  e.stopPropagation();e.preventDefault();
+  var th=e.target.parentElement;
+  slResizeState.th=th;
+  slResizeState.startX=e.clientX;
+  slResizeState.startW=th.offsetWidth;
+  e.target.classList.add('sl-resizing');
+  document.addEventListener('mousemove',slResizeMove);
+  document.addEventListener('mouseup',slResizeEnd);
+}
+function slResizeMove(e){
+  if(!slResizeState.th)return;
+  var diff=e.clientX-slResizeState.startX;
+  var newW=Math.max(40,slResizeState.startW+diff);
+  slResizeState.th.style.width=newW+'px';
+}
+function slResizeEnd(){
+  if(slResizeState.th){
+    var resizer=slResizeState.th.querySelector('.sl-resizer');
+    if(resizer)resizer.classList.remove('sl-resizing');
+  }
+  slResizeState.th=null;
+  document.removeEventListener('mousemove',slResizeMove);
+  document.removeEventListener('mouseup',slResizeEnd);
+}
 </script>
