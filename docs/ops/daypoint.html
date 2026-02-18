@@ -1,0 +1,545 @@
+<!--
+title: 일자별 잔여식대
+meta: 최종 수정: 2026.02.18
+-->
+
+<style>
+.dp{font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;position:relative}
+.dp *{box-sizing:border-box}
+.dp-ctrl{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e2e8f0;flex-wrap:wrap}
+.dp-ctrl label{font-size:11px;color:#94a3b8}
+.dp-ctrl input[type=date]{border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:12px;font-family:'Noto Sans KR',sans-serif}
+.dp-ctrl .dp-btn{padding:4px 12px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#4a5568}
+.dp-ctrl .dp-btn:hover{background:#f0f4f9}
+.dp-ctrl .dp-btn--primary{background:#4a90d9;color:#fff;border-color:#4a90d9}
+.dp-ctrl .dp-btn--primary:hover{background:#3a7bc8}
+.dp-ctrl .dp-btn--active{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
+.dp-ctrl .dp-sep{width:1px;height:20px;background:#e2e8f0}
+.dp-status{margin-left:auto;font-size:11px;color:#94a3b8}
+
+.dp-summary{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 0}
+.dp-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px}
+.dp-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
+.dp-card__value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a2332}
+
+.dp-body{display:flex;gap:0;border:1px solid #e2e8f0;border-radius:4px;margin-top:8px;height:calc(100vh - 260px);min-height:400px}
+.dp-left{flex:1;min-width:0;border-right:1px solid #e2e8f0;display:flex;flex-direction:column}
+.dp-right{width:380px;display:flex;flex-direction:column;flex-shrink:0}
+
+.dp-tbar{display:flex;align-items:center;gap:6px;padding:6px 8px;border-bottom:1px solid #e2e8f0;background:#f8fafd}
+.dp-tbar input[type=text]{flex:1;border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
+.dp-tbar .dp-btn{padding:3px 8px;font-size:11px}
+.dp-copy-ok{color:#22c55e;font-size:11px;display:none}
+
+.dp-twrap{flex:1;overflow:auto}
+.dp-table{width:100%;border-collapse:collapse}
+.dp-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:right;cursor:pointer;white-space:nowrap;z-index:1}
+.dp-table th:first-child,.dp-table th:nth-child(2){text-align:left}
+.dp-table th:hover{background:#e2e8f0}
+.dp-table th .dp-sort{font-size:9px;margin-left:2px;color:#94a3b8}
+.dp-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.dp-table td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:11px;max-width:50px;overflow:hidden;text-overflow:ellipsis}
+.dp-table td:nth-child(2){text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.dp-table tr:hover{background:#f8fafd}
+.dp-table tr.dp-row--sel{background:#eef4fb}
+.dp-table .dp-neg{color:#e85d5d}
+.dp-table .dp-pos{color:#22c55e}
+
+.dp-detail{display:flex;flex-direction:column;height:100%}
+.dp-detail__header{padding:8px 10px;border-bottom:1px solid #e2e8f0;background:#f8fafd}
+.dp-detail__title{font-size:13px;font-weight:700;color:#1a2332}
+.dp-detail__sub{font-size:11px;color:#94a3b8;margin-top:2px}
+.dp-detail__body{flex:1;overflow:auto;padding:8px 10px}
+.dp-detail__empty{display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:12px}
+
+.dp-dtable{width:100%;border-collapse:collapse;margin-bottom:12px}
+.dp-dtable th{background:#f0f4f9;padding:3px 6px;font-size:10px;font-weight:600;color:#4a5568;text-align:right;border-bottom:1px solid #d1d5db}
+.dp-dtable th:first-child{text-align:left}
+.dp-dtable td{padding:3px 6px;font-size:11px;text-align:right;font-family:'JetBrains Mono',monospace;border-bottom:1px solid #f0f4f9}
+.dp-dtable td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif}
+.dp-dtable .dp-neg{color:#e85d5d}
+.dp-dtable .dp-pos{color:#22c55e}
+
+.dp-chart-wrap{margin-top:8px;height:160px;position:relative}
+
+.dp-loading{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.85);display:none;align-items:center;justify-content:center;z-index:10;flex-direction:column;gap:8px}
+.dp-loading.dp-show{display:flex}
+.dp-loading__bar{width:200px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}
+.dp-loading__fill{height:100%;background:#4a90d9;border-radius:2px;width:0%;transition:width 0.3s}
+.dp-loading__text{font-size:11px;color:#4a5568}
+
+.dp-cnt{font-size:11px;color:#94a3b8;padding:0 8px}
+</style>
+
+<div class="dp" id="dpRoot">
+  <!-- Controls -->
+  <div class="dp-ctrl">
+    <label>시작일</label>
+    <input type="date" id="dpStart" min="2026-02-17">
+    <label>종료일</label>
+    <input type="date" id="dpEnd" min="2026-02-17">
+    <button class="dp-btn dp-btn--primary" onclick="dpFetch()">조회</button>
+    <div class="dp-sep"></div>
+    <button class="dp-btn" onclick="dpHot('today',this)">오늘</button>
+    <button class="dp-btn" onclick="dpHot('yesterday',this)">어제</button>
+    <button class="dp-btn" onclick="dpHot('thisWeek',this)">이번주</button>
+    <button class="dp-btn" onclick="dpHot('lastWeek',this)">지난주</button>
+    <button class="dp-btn" onclick="dpHot('thisMonth',this)">이번달</button>
+    <button class="dp-btn" onclick="dpHot('lastMonth',this)">지난달</button>
+    <span class="dp-status" id="dpStatus"></span>
+  </div>
+
+  <!-- Summary -->
+  <div class="dp-summary" id="dpSummary">
+    <div class="dp-card"><div class="dp-card__label">조회 고객사</div><div class="dp-card__value" id="dpSumCom">-</div></div>
+    <div class="dp-card"><div class="dp-card__label">총합 잔여</div><div class="dp-card__value" id="dpSumTotal">-</div></div>
+    <div class="dp-card"><div class="dp-card__label">일일식대</div><div class="dp-card__value" id="dpSumDaily">-</div></div>
+    <div class="dp-card"><div class="dp-card__label">장기식대</div><div class="dp-card__value" id="dpSumLong">-</div></div>
+    <div class="dp-card"><div class="dp-card__label">무제한식대</div><div class="dp-card__value" id="dpSumUnlimited">-</div></div>
+    <div class="dp-card"><div class="dp-card__label">복지포인트</div><div class="dp-card__value" id="dpSumWelfare">-</div></div>
+  </div>
+
+  <!-- Body: Table + Detail -->
+  <div class="dp-body">
+    <!-- Left: Table -->
+    <div class="dp-left">
+      <div class="dp-tbar">
+        <input type="text" id="dpSearch" placeholder="고객사명 검색" oninput="dpFilter()">
+        <span class="dp-cnt" id="dpCnt"></span>
+        <button class="dp-btn" onclick="dpCopy()">복사</button>
+        <span class="dp-copy-ok" id="dpCopyOk">복사됨</span>
+      </div>
+      <div class="dp-twrap">
+        <table class="dp-table" id="dpTable">
+          <thead>
+            <tr>
+              <th onclick="dpSort('comName')" style="min-width:50px">No<span class="dp-sort" id="dpSortcomName"></span></th>
+              <th onclick="dpSort('comName')" style="min-width:100px">고객사명<span class="dp-sort" id="dpSortcomName2"></span></th>
+              <th onclick="dpSort('daily')">일일식대(원)<span class="dp-sort" id="dpSortdaily"></span></th>
+              <th onclick="dpSort('longTerm')">장기식대(원)<span class="dp-sort" id="dpSortlongTerm"></span></th>
+              <th onclick="dpSort('unlimited')">무제한식대(원)<span class="dp-sort" id="dpSortunlimited"></span></th>
+              <th onclick="dpSort('request')">신청식대(원)<span class="dp-sort" id="dpSortrequest"></span></th>
+              <th onclick="dpSort('welfare')">복지포인트(원)<span class="dp-sort" id="dpSortwelfare"></span></th>
+              <th onclick="dpSort('total')">총합(원)<span class="dp-sort" id="dpSorttotal"></span></th>
+            </tr>
+          </thead>
+          <tbody id="dpTbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Right: Detail -->
+    <div class="dp-right">
+      <div class="dp-detail" id="dpDetail">
+        <div class="dp-detail__empty">고객사를 선택하세요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="dp-loading" id="dpLoading">
+    <div class="dp-loading__bar"><div class="dp-loading__fill" id="dpLoadFill"></div></div>
+    <div class="dp-loading__text" id="dpLoadText">데이터 조회 중...</div>
+  </div>
+</div>
+
+<script>
+var DP = {
+  PROXY: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
+  MIN_DATE: '2026-02-17',
+  raw: [],
+  latest: {},      // 최신 날짜 기준 고객사별 데이터
+  filtered: [],
+  sortCol: 'total',
+  sortDir: 'desc',
+  selComId: null,
+  dates: [],       // 조회 기간 내 날짜 목록
+  byCompany: {}    // comId -> { dates: { '2026-02-17': row, ... } }
+};
+
+/* ── API ── */
+function dpApi(p) {
+  var qs = Object.keys(p).map(function(k){ return k+'='+encodeURIComponent(p[k]); }).join('&');
+  return fetch(DP.PROXY + '?' + qs, { redirect:'follow' }).then(function(r){ return r.json(); });
+}
+
+/* ── Format ── */
+function dpN(v) {
+  if (v === 0) return '0';
+  return (v < 0 ? '-' : '') + Math.abs(v).toLocaleString();
+}
+function dpS(v) {
+  var p = v < 0 ? '-' : '', a = Math.abs(v);
+  if (a >= 1e8) return p + (a/1e8).toFixed(1) + '억';
+  if (a >= 1e4) return p + (a/1e4).toFixed(0) + '만';
+  return p + a.toLocaleString();
+}
+function dpD(v) {
+  if (v === 0) return '-';
+  return (v > 0 ? '+' : '') + dpN(v);
+}
+
+/* ── Date helpers ── */
+function dpFmt(d) { return d.toISOString().slice(0,10); }
+
+function dpHot(key, el) {
+  var now = new Date(), y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+  var s, e;
+  switch(key) {
+    case 'today': s = e = dpFmt(now); break;
+    case 'yesterday': var yd = new Date(y,m,d-1); s = e = dpFmt(yd); break;
+    case 'thisWeek':
+      var dow = now.getDay() || 7;
+      s = dpFmt(new Date(y,m,d-dow+1)); e = dpFmt(new Date(y,m,d-dow+7)); break;
+    case 'lastWeek':
+      var dow2 = now.getDay() || 7;
+      s = dpFmt(new Date(y,m,d-dow2-6)); e = dpFmt(new Date(y,m,d-dow2)); break;
+    case 'thisMonth': s = y+'-'+String(m+1).padStart(2,'0')+'-01'; e = dpFmt(new Date(y,m+1,0)); break;
+    case 'lastMonth': s = y+'-'+String(m).padStart(2,'0')+'-01'; e = dpFmt(new Date(y,m,0)); break;
+  }
+  if (s < DP.MIN_DATE) s = DP.MIN_DATE;
+  document.getElementById('dpStart').value = s;
+  document.getElementById('dpEnd').value = e;
+  document.querySelectorAll('.dp-ctrl .dp-btn:not(.dp-btn--primary)').forEach(function(b){ b.classList.remove('dp-btn--active'); });
+  if (el) el.classList.add('dp-btn--active');
+  dpFetch();
+}
+
+/* ── Loading ── */
+function dpLoad(show, pct, txt) {
+  var el = document.getElementById('dpLoading');
+  if (show) { el.classList.add('dp-show'); } else { el.classList.remove('dp-show'); }
+  if (pct !== undefined) document.getElementById('dpLoadFill').style.width = pct + '%';
+  if (txt) document.getElementById('dpLoadText').textContent = txt;
+}
+
+/* ── Fetch ── */
+async function dpFetch() {
+  var sd = document.getElementById('dpStart').value;
+  var ed = document.getElementById('dpEnd').value;
+  if (!sd || !ed) { alert('날짜를 선택하세요'); return; }
+  if (sd < DP.MIN_DATE) sd = DP.MIN_DATE;
+
+  dpLoad(true, 10, '데이터 조회 중...');
+  document.getElementById('dpStatus').textContent = '조회 중...';
+
+  try {
+    var d = await dpApi({ action:'daypoint', startDate:sd, endDate:ed });
+    dpLoad(true, 70, '데이터 처리 중...');
+
+    if (d.error) { alert('API 오류: ' + d.error); dpLoad(false); return; }
+
+    DP.raw = d.rows || [];
+    dpProcess();
+    dpLoad(true, 90, '렌더링 중...');
+    dpRenderSummary();
+    dpRenderTable();
+    document.getElementById('dpStatus').textContent = DP.raw.length.toLocaleString() + '건 조회 (' + sd + ' ~ ' + ed + ')';
+    dpLoad(false);
+  } catch(err) {
+    alert('통신 오류: ' + err.message);
+    dpLoad(false);
+  }
+}
+
+/* ── Process ── */
+function dpProcess() {
+  var byComp = {};
+  var dateSet = {};
+
+  DP.raw.forEach(function(r) {
+    var cid = String(r.comId || '');
+    var dt = String(r.date || '');
+    dateSet[dt] = true;
+
+    if (!byComp[cid]) {
+      byComp[cid] = { comId: cid, comName: String(r.comName || ''), dates: {} };
+    }
+    byComp[cid].dates[dt] = {
+      daily: Number(r.daily) || 0,
+      longTerm: Number(r.longTerm) || 0,
+      unlimited: Number(r.unlimited) || 0,
+      request: Number(r.request) || 0,
+      welfare: Number(r.welfare) || 0,
+      total: Number(r.total) || 0
+    };
+  });
+
+  DP.byCompany = byComp;
+  DP.dates = Object.keys(dateSet).sort();
+
+  // 최신 날짜 기준 고객사별 데이터 (테이블 표시용)
+  var latestDate = DP.dates[DP.dates.length - 1] || '';
+  var latestList = [];
+  Object.keys(byComp).forEach(function(cid) {
+    var c = byComp[cid];
+    var d = c.dates[latestDate] || { daily:0, longTerm:0, unlimited:0, request:0, welfare:0, total:0 };
+    latestList.push({
+      comId: cid,
+      comName: c.comName,
+      daily: d.daily,
+      longTerm: d.longTerm,
+      unlimited: d.unlimited,
+      request: d.request,
+      welfare: d.welfare,
+      total: d.total
+    });
+  });
+
+  DP.latest = latestList;
+  DP.filtered = latestList.slice();
+  DP.selComId = null;
+}
+
+/* ── Summary ── */
+function dpRenderSummary() {
+  var f = DP.filtered;
+  var sumD=0, sumL=0, sumU=0, sumW=0, sumT=0;
+  f.forEach(function(r){
+    sumD += r.daily; sumL += r.longTerm; sumU += r.unlimited; sumW += r.welfare; sumT += r.total;
+  });
+  document.getElementById('dpSumCom').textContent = f.length.toLocaleString() + '개';
+  document.getElementById('dpSumTotal').textContent = dpS(sumT);
+  document.getElementById('dpSumDaily').textContent = dpS(sumD);
+  document.getElementById('dpSumLong').textContent = dpS(sumL);
+  document.getElementById('dpSumUnlimited').textContent = dpS(sumU);
+  document.getElementById('dpSumWelfare').textContent = dpS(sumW);
+}
+
+/* ── Sort ── */
+function dpSort(col) {
+  if (DP.sortCol === col) {
+    DP.sortDir = DP.sortDir === 'desc' ? 'asc' : 'desc';
+  } else {
+    DP.sortCol = col;
+    DP.sortDir = (col === 'comName') ? 'asc' : 'desc';
+  }
+  dpRenderTable();
+}
+
+/* ── Filter ── */
+function dpFilter() {
+  var q = document.getElementById('dpSearch').value.trim().toLowerCase();
+  if (!q) {
+    DP.filtered = DP.latest.slice();
+  } else {
+    DP.filtered = DP.latest.filter(function(r){ return r.comName.toLowerCase().indexOf(q) !== -1; });
+  }
+  dpRenderSummary();
+  dpRenderTable();
+}
+
+/* ── Render Table ── */
+function dpRenderTable() {
+  var f = DP.filtered.slice();
+  var col = DP.sortCol, dir = DP.sortDir;
+
+  f.sort(function(a,b) {
+    var va = a[col], vb = b[col];
+    if (typeof va === 'string') {
+      return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    }
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+
+  // Sort indicators
+  document.querySelectorAll('.dp-table .dp-sort').forEach(function(s){ s.textContent = ''; });
+  var si = document.getElementById('dpSort' + col);
+  if (si) si.textContent = dir === 'asc' ? ' ▲' : ' ▼';
+
+  var html = '';
+  f.forEach(function(r, idx) {
+    var sel = r.comId === DP.selComId ? ' dp-row--sel' : '';
+    html += '<tr class="' + sel + '" onclick="dpSelect(\'' + r.comId.replace(/'/g,"\\'") + '\')" style="cursor:pointer">';
+    html += '<td>' + (idx+1) + '</td>';
+    html += '<td title="' + r.comName + '">' + r.comName + '</td>';
+    html += '<td>' + dpN(r.daily) + '</td>';
+    html += '<td>' + dpN(r.longTerm) + '</td>';
+    html += '<td class="' + (r.unlimited < 0 ? 'dp-neg' : '') + '">' + dpN(r.unlimited) + '</td>';
+    html += '<td class="' + (r.request < 0 ? 'dp-neg' : '') + '">' + dpN(r.request) + '</td>';
+    html += '<td>' + dpN(r.welfare) + '</td>';
+    html += '<td style="font-weight:600">' + dpN(r.total) + '</td>';
+    html += '</tr>';
+  });
+
+  document.getElementById('dpTbody').innerHTML = html;
+  document.getElementById('dpCnt').textContent = f.length + '개';
+}
+
+/* ── Select Company ── */
+function dpSelect(comId) {
+  DP.selComId = comId;
+  dpRenderTable();
+  dpRenderDetail();
+}
+
+/* ── Render Detail ── */
+function dpRenderDetail() {
+  var cid = DP.selComId;
+  var el = document.getElementById('dpDetail');
+  if (!cid || !DP.byCompany[cid]) {
+    el.innerHTML = '<div class="dp-detail__empty">고객사를 선택하세요</div>';
+    return;
+  }
+
+  var c = DP.byCompany[cid];
+  var dates = DP.dates;
+
+  // 날짜별 데이터 테이블
+  var rows = '';
+  var prev = null;
+  dates.forEach(function(dt) {
+    var d = c.dates[dt];
+    if (!d) return;
+    var diff = '';
+    if (prev !== null) {
+      var ch = d.total - prev;
+      var cls = ch > 0 ? 'dp-pos' : ch < 0 ? 'dp-neg' : '';
+      diff = '<span class="' + cls + '">' + dpD(ch) + '</span>';
+    }
+    rows += '<tr>';
+    rows += '<td>' + dt + '</td>';
+    rows += '<td>' + dpN(d.daily) + '</td>';
+    rows += '<td>' + dpN(d.longTerm) + '</td>';
+    rows += '<td class="' + (d.unlimited<0?'dp-neg':'') + '">' + dpN(d.unlimited) + '</td>';
+    rows += '<td class="' + (d.request<0?'dp-neg':'') + '">' + dpN(d.request) + '</td>';
+    rows += '<td>' + dpN(d.welfare) + '</td>';
+    rows += '<td style="font-weight:600">' + dpN(d.total) + '</td>';
+    rows += '<td>' + diff + '</td>';
+    rows += '</tr>';
+    prev = d.total;
+  });
+
+  var latestDate = dates[dates.length-1] || '';
+  var latestData = c.dates[latestDate] || {};
+
+  var h = '';
+  h += '<div class="dp-detail__header">';
+  h += '<div class="dp-detail__title">' + c.comName + '</div>';
+  h += '<div class="dp-detail__sub">comId: ' + cid + '</div>';
+  h += '</div>';
+  h += '<div class="dp-detail__body">';
+
+  // 최신 요약
+  h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">';
+  var items = [
+    ['일일식대', latestData.daily||0], ['장기식대', latestData.longTerm||0], ['무제한식대', latestData.unlimited||0],
+    ['신청식대', latestData.request||0], ['복지포인트', latestData.welfare||0], ['총합', latestData.total||0]
+  ];
+  items.forEach(function(it) {
+    h += '<div style="background:#f8fafd;border:1px solid #e2e8f0;border-radius:3px;padding:5px 7px">';
+    h += '<div style="font-size:10px;color:#94a3b8">' + it[0] + '</div>';
+    h += '<div style="font-size:13px;font-weight:700;font-family:JetBrains Mono,monospace">' + dpS(it[1]) + '</div>';
+    h += '</div>';
+  });
+  h += '</div>';
+
+  // 날짜별 테이블
+  if (dates.length > 1) {
+    h += '<div style="font-size:11px;font-weight:600;color:#4a5568;margin-bottom:4px">날짜별 추이 (' + dates.length + '일)</div>';
+  }
+  h += '<table class="dp-dtable">';
+  h += '<thead><tr><th>날짜</th><th>일일</th><th>장기</th><th>무제한</th><th>신청</th><th>복지</th><th>총합</th><th>변동</th></tr></thead>';
+  h += '<tbody>' + rows + '</tbody>';
+  h += '</table>';
+
+  // 차트 (날짜가 2개 이상일 때)
+  if (dates.length >= 2) {
+    h += '<div class="dp-chart-wrap"><canvas id="dpChart"></canvas></div>';
+  }
+
+  h += '</div>';
+  el.innerHTML = h;
+
+  // Chart.js 렌더
+  if (dates.length >= 2 && typeof Chart !== 'undefined') {
+    dpRenderChart(c, dates);
+  }
+}
+
+function dpRenderChart(company, dates) {
+  var labels = dates.map(function(d){ return d.slice(5); }); // MM-DD
+  var totals = dates.map(function(d){ var r = company.dates[d]; return r ? r.total : 0; });
+
+  var canvas = document.getElementById('dpChart');
+  if (!canvas) return;
+
+  new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '총합',
+        data: totals,
+        borderColor: '#4a90d9',
+        backgroundColor: 'rgba(74,144,217,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: '#4a90d9',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return dpN(ctx.parsed.y) + '원'; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: {
+          grid: { color: '#f0f4f9' },
+          ticks: {
+            font: { size: 10, family: 'JetBrains Mono' },
+            callback: function(v) { return dpS(v); }
+          }
+        }
+      }
+    }
+  });
+}
+
+/* ── Copy ── */
+function dpCopy() {
+  var f = DP.filtered.slice();
+  var col = DP.sortCol, dir = DP.sortDir;
+  f.sort(function(a,b) {
+    var va = a[col], vb = b[col];
+    if (typeof va === 'string') return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+    return dir==='asc'?va-vb:vb-va;
+  });
+
+  var lines = ['No\t고객사명\t일일식대\t장기식대\t무제한식대\t신청식대\t복지포인트\t총합'];
+  f.forEach(function(r,i) {
+    lines.push((i+1)+'\t'+r.comName+'\t'+r.daily+'\t'+r.longTerm+'\t'+r.unlimited+'\t'+r.request+'\t'+r.welfare+'\t'+r.total);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){
+    var ok = document.getElementById('dpCopyOk');
+    ok.style.display = 'inline';
+    setTimeout(function(){ ok.style.display = 'none'; }, 1500);
+  });
+}
+
+/* ── Init ── */
+(function dpInit() {
+  // Chart.js 로드
+  if (typeof Chart === 'undefined') {
+    var sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+    document.head.appendChild(sc);
+  }
+
+  // 기본값: 오늘
+  var today = dpFmt(new Date());
+  if (today < DP.MIN_DATE) today = DP.MIN_DATE;
+  document.getElementById('dpStart').value = DP.MIN_DATE;
+  document.getElementById('dpEnd').value = today;
+
+  setTimeout(function(){ dpFetch(); }, 0);
+})();
+</script>
