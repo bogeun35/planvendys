@@ -143,7 +143,8 @@ raw.forEach(function(r) {
 
 ### 스크롤 정책 (필수)
 - **페이지 레벨 스크롤 금지** — 대시보드 루트에서 브라우저 스크롤이 발생하면 안 됨
-- 루트 컨테이너: `height:calc(100vh - 40px);overflow:hidden` (40px = GNB 높이)
+- **높이 계산 주의**: index.html의 헤더(GNB) + 브레드크럼 = **약 80px** 차지
+- 루트 컨테이너: `height:calc(100vh - 80px);overflow:hidden` (80px = 헤더 + 브레드크럼)
 - 테이블 영역만 내부 스크롤: flex 레이아웃 + `min-height:0` + `overflow:auto`
 - 컨트롤 바, 서머리 카드, 탭 헤더 등은 `flex-shrink:0`으로 고정
 - 테이블 래퍼가 남은 공간을 `flex:1;min-height:0`으로 차지하고 내부 스크롤
@@ -151,7 +152,7 @@ raw.forEach(function(r) {
 ```css
 /* 스크롤 정책 구현 패턴 */
 #xxRoot {
-    height: calc(100vh - 40px);
+    height: calc(100vh - 80px);        /* 80px = index.html 헤더 + 브레드크럼 */
     overflow: hidden;
     display: flex;
     flex-direction: column;
