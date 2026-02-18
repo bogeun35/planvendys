@@ -118,6 +118,29 @@ meta: 최종 수정: 2026.02.18
 .wm-slide-table table{font-size:10px;table-layout:auto}
 .wm-slide-table th{padding:4px 6px;font-size:9px}
 .wm-slide-table td{padding:3px 6px}
+
+/* stats tab */
+.wm-st-ctrl{display:flex;align-items:center;gap:6px;padding:8px 16px;border-bottom:1px solid #e2e8f0;flex-shrink:0;background:#f8fafd;flex-wrap:wrap}
+.wm-st-body{flex:1;overflow:auto;min-height:0;padding:8px 16px}
+.wm-st-cards{display:flex;gap:6px;margin-bottom:8px}
+.wm-st-cards .wm-card{flex:1;min-width:0}
+.wm-st-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.wm-st-panel{border:1px solid #e2e8f0;border-radius:4px;background:#fff;padding:10px;overflow:hidden}
+.wm-st-panel__title{font-size:11px;font-weight:600;color:#4a5568;margin-bottom:8px}
+.wm-st-panel__sub{font-size:10px;color:#94a3b8;margin-top:4px}
+.wm-st-bars{display:flex;align-items:flex-end;gap:1px;height:120px;border-bottom:1px solid #e2e8f0}
+.wm-st-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
+.wm-st-bar-fill{width:100%;border-radius:2px 2px 0 0;min-height:1px;background:#4a90d9;transition:height .3s}
+.wm-st-bar-fill.cancel{background:#e85d5d}
+.wm-st-bar-label{font-size:8px;color:#94a3b8;font-family:'JetBrains Mono',monospace;padding-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center}
+.wm-st-hbar{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:10px}
+.wm-st-hbar .lbl{width:80px;color:#4a5568;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wm-st-hbar .bar{height:14px;border-radius:2px;background:#4a90d9;min-width:2px;transition:width .3s}
+.wm-st-hbar .val{color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:10px;flex-shrink:0;white-space:nowrap}
+.wm-st-table-wrap{border:1px solid #e2e8f0;border-radius:4px;overflow:hidden;background:#fff}
+.wm-st-table-wrap .wm-grid__scroll{max-height:300px}
+.wm-st-table-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#f8fafd;border-bottom:1px solid #e2e8f0}
+.wm-st-table-header span{font-size:11px;font-weight:600;color:#4a5568}
 </style>
 
 <div class="wm" id="wmRoot">
@@ -130,6 +153,7 @@ meta: 최종 수정: 2026.02.18
     <div class="wm-tabs">
         <button class="wm-tab active" onclick="wmSwitchTab('unique',this)">주문별 조회</button>
         <button class="wm-tab" onclick="wmSwitchTab('all',this)">전체 이력</button>
+        <button class="wm-tab" onclick="wmSwitchTab('stats',this)">주문 통계</button>
     </div>
 
     <!-- TAB1: 주문별 조회 (default) -->
@@ -194,6 +218,42 @@ meta: 최종 수정: 2026.02.18
             <div class="wm-grid__scroll" id="wmScroll"><table><thead id="wmThead"></thead><tbody id="wmTbody"></tbody></table></div>
         </div>
         <div class="wm-footer" id="wmInfo">-</div>
+    </div>
+
+    <!-- TAB3: 주문 통계 -->
+    <div class="wm-panel" id="wmPanelStats">
+        <div class="wm-st-ctrl">
+            <label style="font-weight:600;color:#4a5568;white-space:nowrap">기간</label>
+            <input type="date" id="wmStSD" class="wm-ctrl" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;font-family:'JetBrains Mono',monospace;color:#1a2332;background:#fff;outline:none">
+            <span style="color:#94a3b8;font-size:11px">~</span>
+            <input type="date" id="wmStED" class="wm-ctrl" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;font-family:'JetBrains Mono',monospace;color:#1a2332;background:#fff;outline:none">
+            <button class="wm-ctrl-btn primary" onclick="wmStFilter()">조회</button>
+            <div class="wm-ctrl-sep"></div>
+            <button class="wm-ctrl-btn" onclick="wmStHot('thisMonth',this)">이번달</button>
+            <button class="wm-ctrl-btn" onclick="wmStHot('lastMonth',this)">지난달</button>
+            <button class="wm-ctrl-btn" onclick="wmStHot('twoMonthsAgo',this)">지지난달</button>
+            <button class="wm-ctrl-btn" onclick="wmStHot('thisYear',this)">올해</button>
+            <div class="wm-ctrl-status" id="wmStStatus"></div>
+        </div>
+        <div class="wm-st-body" id="wmStBody">
+            <div class="wm-st-cards">
+                <div class="wm-card"><div class="wm-card__label">총 주문</div><div class="wm-card__value wm-c-default" id="wmStTotal">-</div></div>
+                <div class="wm-card"><div class="wm-card__label">주문완료</div><div class="wm-card__value wm-c-blue" id="wmStDone">-</div></div>
+                <div class="wm-card"><div class="wm-card__label">취소</div><div class="wm-card__value wm-c-red" id="wmStCancel">-</div></div>
+                <div class="wm-card"><div class="wm-card__label">부분취소</div><div class="wm-card__value wm-c-orange" id="wmStPartial">-</div></div>
+                <div class="wm-card"><div class="wm-card__label">복지포인트</div><div class="wm-card__value wm-c-blue" id="wmStWelfare">-</div></div>
+                <div class="wm-card"><div class="wm-card__label">대장포인트</div><div class="wm-card__value wm-c-default" id="wmStCaptain">-</div></div>
+            </div>
+            <div class="wm-st-grid">
+                <div class="wm-st-panel"><div class="wm-st-panel__title">일자별 주문 추이</div><div id="wmStDaily" class="wm-st-bars"></div><div class="wm-st-panel__sub" id="wmStDailySub"></div></div>
+                <div class="wm-st-panel"><div class="wm-st-panel__title">월별 주문 추이</div><div id="wmStMonthly" class="wm-st-bars"></div><div class="wm-st-panel__sub" id="wmStMonthlySub"></div></div>
+                <div class="wm-st-panel"><div class="wm-st-panel__title">고객사 TOP 10</div><div id="wmStTop10"></div></div>
+            </div>
+            <div class="wm-st-table-wrap">
+                <div class="wm-st-table-header"><span>고객사별 상세</span><button class="wm-copy-btn" onclick="wmStCopy(this)">클립보드 복사</button></div>
+                <div class="wm-grid__scroll" id="wmStTableScroll"><table><thead id="wmStThead"></thead><tbody id="wmStTbody"></tbody></table></div>
+            </div>
+        </div>
     </div>
 
     <!-- slide sidebar -->
@@ -297,6 +357,11 @@ function wmProcess(rows){
     wmBuildUq();
     wmBH('wmThead',WM.cols,WM.sortCol,WM.sortDir,'wmSortBy');
     wmFilter();wmUqFilter();
+    wmStBuild();
+    var stnow=new Date(),sty=stnow.getFullYear(),stm=stnow.getMonth();
+    document.getElementById('wmStSD').value=wmDS(new Date(sty,stm,1));
+    document.getElementById('wmStED').value=wmDS(new Date(sty,stm+1,0));
+    wmStFilter();
     wmShowLoading(false);
     wmSS('wmStatusText',WM.raw.length.toLocaleString()+'건 조회 완료');
 }
@@ -496,8 +561,181 @@ function wmUqHot(key,el){
     el.parentElement.querySelectorAll('.wm-ctrl-btn:not(.primary)').forEach(function(b){b.classList.remove('active')});el.classList.add('active');wmUqFilter();
 }
 
+/* == TAB3: 주문 통계 == */
+var WMST = {daily:[], monthly:[], company:[], compFiltered:[], compSortCol:'totalAmount', compSortDir:'desc'};
+var wmStCols = [
+    {key:'comname', label:'고객사', w:'120px'},
+    {key:'orderCount', label:'주문수', cls:'wm-num', w:'70px'},
+    {key:'doneCount', label:'주문완료', cls:'wm-num', w:'70px'},
+    {key:'cancelCount', label:'취소', cls:'wm-num', w:'60px'},
+    {key:'partialCount', label:'부분취소', cls:'wm-num', w:'70px'},
+    {key:'totalWelfare', label:'복지pt', cls:'wm-num', w:'90px'},
+    {key:'totalCaptain', label:'대장pt', cls:'wm-num', w:'90px'},
+    {key:'totalAmount', label:'합계', cls:'wm-num', w:'90px'},
+    {key:'userCount', label:'주문자수', cls:'wm-num', w:'70px'},
+    {key:'avgPerUser', label:'인당평균', cls:'wm-num', w:'90px'}
+];
+
+function wmStBuild(){
+    var dMap={},mMap={},cMap={};
+    WM.uqGrouped.forEach(function(g){
+        var fd=String(g.Firstdate||'');
+        var day=fd.substring(0,10);
+        var mon=fd.substring(0,7);
+        var cn=g.comname||'(미정)';
+        var amt=g.복지포인트+g.대장포인트;
+        /* daily */
+        if(day.length>=10){
+            if(!dMap[day])dMap[day]={date:day,orderCount:0,doneCount:0,cancelCount:0,partialCount:0,totalWelfare:0,totalCaptain:0};
+            var d=dMap[day];d.orderCount++;d.totalWelfare+=g.복지포인트;d.totalCaptain+=g.대장포인트;
+            if(g.lastStatus==='주문완료')d.doneCount++;else if(g.lastStatus==='취소')d.cancelCount++;else if(g.lastStatus==='부분취소')d.partialCount++;
+        }
+        /* monthly */
+        if(mon.length>=7){
+            if(!mMap[mon])mMap[mon]={month:mon,orderCount:0,doneCount:0,cancelCount:0,partialCount:0,totalWelfare:0,totalCaptain:0};
+            var m=mMap[mon];m.orderCount++;m.totalWelfare+=g.복지포인트;m.totalCaptain+=g.대장포인트;
+            if(g.lastStatus==='주문완료')m.doneCount++;else if(g.lastStatus==='취소')m.cancelCount++;else if(g.lastStatus==='부분취소')m.partialCount++;
+        }
+        /* company */
+        if(!cMap[cn])cMap[cn]={comname:cn,comid:g.comid,orderCount:0,doneCount:0,cancelCount:0,partialCount:0,totalWelfare:0,totalCaptain:0,totalAmount:0,users:{}};
+        var c=cMap[cn];c.orderCount++;c.totalWelfare+=g.복지포인트;c.totalCaptain+=g.대장포인트;c.totalAmount+=amt;
+        if(g.uid)c.users[g.uid]=1;
+        if(g.lastStatus==='주문완료')c.doneCount++;else if(g.lastStatus==='취소')c.cancelCount++;else if(g.lastStatus==='부분취소')c.partialCount++;
+    });
+    WMST.daily=Object.keys(dMap).map(function(k){return dMap[k]}).sort(function(a,b){return a.date<b.date?-1:1});
+    WMST.monthly=Object.keys(mMap).map(function(k){return mMap[k]}).sort(function(a,b){return a.month<b.month?-1:1});
+    WMST.company=Object.keys(cMap).map(function(k){var o=cMap[k];o.userCount=Object.keys(o.users).length;o.avgPerUser=o.userCount>0?Math.round(o.totalAmount/o.userCount):0;return o});
+}
+
+function wmStFilter(){
+    var sd=document.getElementById('wmStSD').value,ed=document.getElementById('wmStED').value;
+    /* filter daily */
+    var fd=WMST.daily;
+    if(sd)fd=fd.filter(function(d){return d.date>=sd});
+    if(ed)fd=fd.filter(function(d){return d.date<=ed});
+    /* filter monthly */
+    var fm=WMST.monthly;
+    var sdm=sd?sd.substring(0,7):'';var edm=ed?ed.substring(0,7):'';
+    if(sdm)fm=fm.filter(function(m){return m.month>=sdm});
+    if(edm)fm=fm.filter(function(m){return m.month<=edm});
+    /* filter company - need to rebuild from uqGrouped within date range */
+    var cMap={};
+    WM.uqGrouped.forEach(function(g){
+        var fd2=String(g.Firstdate||'').substring(0,10);
+        if(sd&&fd2<sd)return;if(ed&&fd2>ed)return;
+        var cn=g.comname||'(미정)';var amt=g.복지포인트+g.대장포인트;
+        if(!cMap[cn])cMap[cn]={comname:cn,comid:g.comid,orderCount:0,doneCount:0,cancelCount:0,partialCount:0,totalWelfare:0,totalCaptain:0,totalAmount:0,users:{}};
+        var c=cMap[cn];c.orderCount++;c.totalWelfare+=g.복지포인트;c.totalCaptain+=g.대장포인트;c.totalAmount+=amt;
+        if(g.uid)c.users[g.uid]=1;
+        if(g.lastStatus==='주문완료')c.doneCount++;else if(g.lastStatus==='취소')c.cancelCount++;else if(g.lastStatus==='부분취소')c.partialCount++;
+    });
+    WMST.compFiltered=Object.keys(cMap).map(function(k){var o=cMap[k];o.userCount=Object.keys(o.users).length;o.avgPerUser=o.userCount>0?Math.round(o.totalAmount/o.userCount):0;return o});
+    wmSA(WMST.compFiltered,WMST.compSortCol,WMST.compSortDir);
+    wmStCards(fd,fm,WMST.compFiltered);
+    wmStCharts(fd,fm,WMST.compFiltered);
+    wmStTable();
+    var total=WMST.compFiltered.reduce(function(s,c){return s+c.orderCount},0);
+    wmSS('wmStStatus',total.toLocaleString()+'건');
+}
+
+function wmStCards(daily,monthly,comp){
+    var tot=0,dn=0,cn=0,pn=0,ws=0,cs=0;
+    comp.forEach(function(c){tot+=c.orderCount;dn+=c.doneCount;cn+=c.cancelCount;pn+=c.partialCount;ws+=c.totalWelfare;cs+=c.totalCaptain});
+    document.getElementById('wmStTotal').textContent=tot.toLocaleString()+'건';
+    document.getElementById('wmStDone').textContent=dn.toLocaleString()+'건';
+    document.getElementById('wmStCancel').textContent=cn.toLocaleString()+'건';
+    document.getElementById('wmStPartial').textContent=pn.toLocaleString()+'건';
+    document.getElementById('wmStWelfare').textContent=wmStShort(ws);
+    document.getElementById('wmStCaptain').textContent=wmStShort(cs);
+}
+
+function wmStShort(v){
+    var p=v<0?'-':'',a=Math.abs(v);
+    if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';
+    if(a>=1e4)return p+(a/1e4).toFixed(0)+'만';
+    return p+a.toLocaleString();
+}
+
+function wmStCharts(daily,monthly,comp){
+    /* daily bar chart */
+    var dEl=document.getElementById('wmStDaily');
+    if(!daily.length){dEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;width:100%;color:#94a3b8;font-size:11px">데이터 없음</div>';document.getElementById('wmStDailySub').textContent='';
+    }else{
+        var maxD=Math.max.apply(null,daily.map(function(d){return d.orderCount}))||1;
+        var h='';
+        daily.forEach(function(d){
+            var pct=Math.round(d.orderCount/maxD*100);
+            h+='<div class="wm-st-bar-col"><div class="wm-st-bar-fill" style="height:'+pct+'%" title="'+d.date+': '+d.orderCount+'건"></div><div class="wm-st-bar-label">'+d.date.substring(5)+'</div></div>';
+        });
+        dEl.innerHTML=h;
+        var avg=Math.round(daily.reduce(function(s,d){return s+d.orderCount},0)/daily.length);
+        var maxDay=daily.reduce(function(a,b){return a.orderCount>b.orderCount?a:b});
+        document.getElementById('wmStDailySub').textContent='일평균 '+avg+'건 / 최고 '+maxDay.date.substring(5)+' ('+maxDay.orderCount+'건)';
+    }
+    /* monthly bar chart */
+    var mEl=document.getElementById('wmStMonthly');
+    if(!monthly.length){mEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;width:100%;color:#94a3b8;font-size:11px">데이터 없음</div>';document.getElementById('wmStMonthlySub').textContent='';
+    }else{
+        var maxM=Math.max.apply(null,monthly.map(function(m){return m.orderCount}))||1;
+        var mh='';
+        monthly.forEach(function(m){
+            var pct=Math.round(m.orderCount/maxM*100);
+            mh+='<div class="wm-st-bar-col"><div class="wm-st-bar-fill" style="height:'+pct+'%" title="'+m.month+': '+m.orderCount+'건"></div><div class="wm-st-bar-label">'+m.month.substring(2)+'</div></div>';
+        });
+        mEl.innerHTML=mh;
+        var totalM=monthly.reduce(function(s,m){return s+m.orderCount},0);
+        var avgM=Math.round(totalM/monthly.length);
+        document.getElementById('wmStMonthlySub').textContent='월평균 '+avgM+'건 / 총 '+monthly.length+'개월';
+    }
+    /* company top 10 horizontal bars */
+    var t10El=document.getElementById('wmStTop10');
+    var sorted=comp.slice().sort(function(a,b){return b.totalAmount-a.totalAmount}).slice(0,10);
+    if(!sorted.length){t10El.innerHTML='<div style="color:#94a3b8;font-size:11px;text-align:center;padding:20px">데이터 없음</div>';return}
+    var maxC=sorted[0].totalAmount||1;
+    var th='';
+    sorted.forEach(function(c){
+        var pct=Math.round(c.totalAmount/maxC*100);
+        th+='<div class="wm-st-hbar"><div class="lbl" title="'+wmE(c.comname)+'">'+wmE(c.comname)+'</div><div class="bar" style="width:'+pct+'%;max-width:calc(100% - 180px)"></div><div class="val">'+wmStShort(c.totalAmount)+'</div></div>';
+    });
+    t10El.innerHTML=th;
+}
+
+function wmStTable(){
+    wmBH('wmStThead',wmStCols,WMST.compSortCol,WMST.compSortDir,'wmStSortBy');
+    var d=WMST.compFiltered,h='';
+    d.forEach(function(c){
+        h+='<tr>';
+        wmStCols.forEach(function(col){
+            var v=c[col.key];
+            if(col.cls==='wm-num')h+='<td class="wm-num">'+wmF(Number(v)||0)+'</td>';
+            else h+='<td title="'+wmE(String(v||''))+'">'+wmE(String(v||''))+'</td>';
+        });
+        h+='</tr>';
+    });
+    if(!d.length)h='<tr><td colspan="'+wmStCols.length+'" style="text-align:center;padding:40px;color:#94a3b8">데이터가 없습니다</td></tr>';
+    document.getElementById('wmStTbody').innerHTML=h;
+}
+
+function wmStSortBy(c){if(WMST.compSortCol===c)WMST.compSortDir=WMST.compSortDir==='asc'?'desc':'asc';else{WMST.compSortCol=c;WMST.compSortDir='desc'}wmSA(WMST.compFiltered,WMST.compSortCol,WMST.compSortDir);wmStTable()}
+
+function wmStCopy(btn){
+    var hd=wmStCols.map(function(c){return c.label}).join('\t');
+    var ls=WMST.compFiltered.map(function(c){return wmStCols.map(function(col){var v=c[col.key];return col.cls==='wm-num'?Number(v)||0:String(v||'')}).join('\t')});
+    navigator.clipboard.writeText(hd+'\n'+ls.join('\n')).then(function(){btn.textContent='복사됨';btn.classList.add('copied');setTimeout(function(){btn.textContent='클립보드 복사';btn.classList.remove('copied')},1500)});
+}
+
+function wmStHot(key,el){
+    var now=new Date(),y=now.getFullYear(),m=now.getMonth(),s,e;
+    if(key==='thisMonth'){s=new Date(y,m,1);e=new Date(y,m+1,0)}
+    else if(key==='lastMonth'){s=new Date(y,m-1,1);e=new Date(y,m,0)}
+    else if(key==='twoMonthsAgo'){s=new Date(y,m-2,1);e=new Date(y,m-1,0)}
+    else if(key==='thisYear'){s=new Date(y,0,1);e=new Date(y,11,31)}
+    document.getElementById('wmStSD').value=wmDS(s);document.getElementById('wmStED').value=wmDS(e);
+    var btns=el.parentElement.querySelectorAll('.wm-ctrl-btn:not(.primary)');btns.forEach(function(b){b.classList.remove('active')});el.classList.add('active');wmStFilter();
+}
+
 /* utils */
-function wmSwitchTab(t,el){document.querySelectorAll('.wm-tab').forEach(function(x){x.classList.remove('active')});el.classList.add('active');document.getElementById('wmPanelAll').classList.toggle('active',t==='all');document.getElementById('wmPanelUnique').classList.toggle('active',t==='unique')}
+function wmSwitchTab(t,el){document.querySelectorAll('.wm-tab').forEach(function(x){x.classList.remove('active')});el.classList.add('active');document.getElementById('wmPanelAll').classList.toggle('active',t==='all');document.getElementById('wmPanelUnique').classList.toggle('active',t==='unique');document.getElementById('wmPanelStats').classList.toggle('active',t==='stats')}
 function wmBH(id,cols,sc,sd,fn){var h='<tr>';cols.forEach(function(c){var cl=sc===c.key?(sd==='asc'?' sorted-asc':' sorted-desc'):'';var st=c.w?' style="width:'+c.w+'"':'';h+='<th class="'+cl+'"'+st+' onclick="'+fn+"('"+c.key+"')"+'">'+(c.label)+'</th>'});h+='</tr>';document.getElementById(id).innerHTML=h}
 function wmSA(a,c,d){a.sort(function(x,y){var va=x[c],vb=y[c];if(typeof va==='number'&&typeof vb==='number')return d==='asc'?va-vb:vb-va;va=String(va||'');vb=String(vb||'');return d==='asc'?va.localeCompare(vb):vb.localeCompare(va)})}
 function wmF(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
