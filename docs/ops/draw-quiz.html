@@ -398,12 +398,38 @@ meta: 최종 수정: 2026.02.18
 </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+(function(){
+  var FB_DB_URL='https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
+  var FB_CONFIG={apiKey:"AIzaSyAQE9oQRDUmeX6ZPO2KOcfd1ctBqt6v34w",authDomain:"vendys-b1fea.firebaseapp.com",databaseURL:"https://vendys-b1fea-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"vendys-b1fea",storageBucket:"vendys-b1fea.firebasestorage.app",messagingSenderId:"392583358946",appId:"1:392583358946:web:7a6b0cc2a99ec2e08db1bb"};
+
+  function initFQ(){
+    if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    else{
+      // DB URL이 다르면 secondary app 사용
+      var app=firebase.apps[0];
+      if(app.options.databaseURL!==FB_CONFIG.databaseURL){
+        try{firebase.app('fqApp');}catch(e){firebase.initializeApp(FB_CONFIG,'fqApp');}
+      }
+    }
+    window.fqDb=firebase.database(firebase.apps.length>1?firebase.app('fqApp'):undefined);
+    if(typeof fqLoadWords==='function') fqLoadWords();
+    if(typeof fqListenRL==='function') fqListenRL();
+  }
+
+  // database 모듈이 이미 있으면 바로 init, 없으면 동적 로드
+  if(typeof firebase!=='undefined'&&firebase.database){initFQ();}
+  else{
+    var s=document.createElement('script');
+    s.src=FB_DB_URL;
+    s.onload=function(){initFQ();};
+    document.head.appendChild(s);
+  }
+})();
+</script>
 <script>
 
-(function(){if(!firebase.apps.length){firebase.initializeApp({apiKey:"AIzaSyAQE9oQRDUmeX6ZPO2KOcfd1ctBqt6v34w",authDomain:"vendys-b1fea.firebaseapp.com",databaseURL:"https://vendys-b1fea-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"vendys-b1fea",storageBucket:"vendys-b1fea.firebasestorage.app",messagingSenderId:"392583358946",appId:"1:392583358946:web:7a6b0cc2a99ec2e08db1bb"});}})();
-var fqDb=firebase.database();
+var fqDb=null;
 
 var fqRoom=null,fqIsHost=false,fqMyNick='',fqListeners=[],fqMembersData={};
 var fqGameState=null,fqScoresData={},fqWordBank={},fqAllWords=[];
@@ -440,7 +466,6 @@ function fqCopyCode(){if(!fqRoom)return;navigator.clipboard.writeText(fqRoom.cod
 function fqCopyLink(){if(!fqRoom)return;var u=window.location.href.split('?')[0]+'?room='+fqRoom.code;navigator.clipboard.writeText(u).then(function(){fqToast('\uB9C1\uD06C\uAC00 \uBCF5\uC0AC\uB418\uC5C8\uC2B5\uB2C8\uB2E4');});}
 
 function fqLoadWords(){fqDb.ref('foodwords').on('value',function(snap){fqWordBank=snap.val()||{};fqAllWords=[];Object.values(fqWordBank).forEach(function(cat){if(Array.isArray(cat))fqAllWords.push.apply(fqAllWords,cat);});if(!Object.keys(fqWordBank).length){fqDb.ref('foodwords').set(DEFAULT_WORDS);}});}
-fqLoadWords();
 function fqSeedWords(){if(!confirm('\uAE30\uBCF8 \uC81C\uC2DC\uC5B4\uB85C \uCD08\uAE30\uD654\uD569\uB2C8\uB2E4.'))return;fqDb.ref('foodwords').set(DEFAULT_WORDS).then(function(){fqToast('\uCD08\uAE30\uD654 \uC644\uB8CC');fqRenderWM();});}
 function fqRandWords(n){var p=fqAllWords.slice(),r=[];while(r.length<n&&p.length){var i=Math.floor(Math.random()*p.length);r.push(p.splice(i,1)[0]);}return r;}
 
@@ -450,7 +475,6 @@ function fqListenRL(){if(fqRoomListRef)fqRoomListRef.off();fqRoomListRef=fqDb.re
 function fqRefreshRooms(){fqListenRL();fqToast('\uC0C8\uB85C\uACE0\uCE68 \uC644\uB8CC');}
 function fqRenderRL(list){var el=document.getElementById('fq-room-list');if(!list.length){el.innerHTML='<div class="fq-room-empty">\uC5F4\uB9B0 \uBC29\uC774 \uC5C6\uC2B5\uB2C8\uB2E4</div>';return;}el.innerHTML=list.map(function(r){var st=r.game&&r.game.status&&r.game.status!=='idle';var b=st?'<span class="fq-room-badge fq-room-playing">\uAC8C\uC784\uC911</span>':'<span class="fq-room-badge fq-room-waiting">\uB300\uAE30\uC911</span>';return '<div class="fq-room-item" onclick="fqQuickJoin(\''+fqEsc(r.code)+'\')"><div><div class="fq-room-host">'+fqEsc(r.host)+' \uB2D8\uC758 \uBC29 '+b+'</div><div class="fq-room-meta">\uCF54\uB4DC: '+fqEsc(r.code)+'</div></div><button class="fq-room-join" onclick="event.stopPropagation();fqQuickJoin(\''+fqEsc(r.code)+'\')">\uCC38\uC5EC</button></div>';}).join('');}
 function fqQuickJoin(code){var nick=document.getElementById('fq-host-nick').value.trim()||document.getElementById('fq-join-nick').value.trim();if(!nick){fqToast('\uB2C9\uB124\uC784\uC744 \uBA3C\uC800 \uC785\uB825\uD574\uC8FC\uC138\uC694');document.getElementById('fq-host-nick').focus();return;}fqSaveNick(nick);fqDb.ref('foodrooms/'+code).once('value').then(function(snap){if(!snap.exists())return fqToast('\uC874\uC7AC\uD558\uC9C0 \uC54A\uB294 \uBC29');var d=snap.val();if(d.expiresAt&&Date.now()>d.expiresAt){['foodrooms','foodchat','foodcanvas','foodmembers'].forEach(function(p){fqDb.ref(p+'/'+code).remove();});return fqToast('\uB9CC\uB8CC\uB41C \uBC29');}fqRoom={code:code,host:d.host};fqIsHost=(d.host===nick);fqMyNick=nick;fqEnter();});}
-fqListenRL();
 
 function fqCreateRoom(){var host=document.getElementById('fq-host-nick').value.trim();if(!host)return fqToast('\uB2C9\uB124\uC784\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694');fqSaveNick(host);var code=fqGenCode();fqDb.ref('foodrooms/'+code).set({host:host,createdAt:Date.now(),expiresAt:Date.now()+30*60*1000,game:null,scores:{}}).then(function(){fqRoom={code:code,host:host};fqIsHost=true;fqMyNick=host;fqEnter();}).catch(function(){fqToast('\uBC29 \uC0DD\uC131 \uC2E4\uD328');});}
 function fqJoinRoom(){var code=document.getElementById('fq-join-code').value.trim().toUpperCase(),nick=document.getElementById('fq-join-nick').value.trim();if(!code||code.length!==6)return fqToast('6\uC790\uB9AC \uCF54\uB4DC\uB97C \uC785\uB825\uD574\uC8FC\uC138\uC694');if(!nick)return fqToast('\uB2C9\uB124\uC784\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694');fqSaveNick(nick);fqDb.ref('foodrooms/'+code).once('value').then(function(snap){if(!snap.exists())return fqToast('\uC874\uC7AC\uD558\uC9C0 \uC54A\uB294 \uBC29');var d=snap.val();if(d.expiresAt&&Date.now()>d.expiresAt){['foodrooms','foodchat','foodcanvas','foodmembers'].forEach(function(p){fqDb.ref(p+'/'+code).remove();});return fqToast('\uB9CC\uB8CC\uB41C \uBC29');}fqRoom={code:code,host:d.host};fqIsHost=(d.host===nick);fqMyNick=nick;fqEnter();}).catch(function(){fqToast('\uC785\uC7A5 \uC2E4\uD328');});}
