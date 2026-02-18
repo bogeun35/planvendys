@@ -176,7 +176,7 @@ function dpApi(p) {
 function dpN(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString();}
 function dpS(v){var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+(a/1e4).toFixed(0)+'만';return p+a.toLocaleString();}
 function dpD(v){if(v===0)return'-';return(v>0?'+':'')+dpN(v);}
-function dpFmt(d){return d.toISOString().slice(0,10);}
+function dpFmt(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 function dpHot(key,el){
   var now=new Date(),y=now.getFullYear(),m=now.getMonth(),d=now.getDate(),s,e;
