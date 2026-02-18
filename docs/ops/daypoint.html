@@ -18,7 +18,7 @@ meta: 최종 수정: 2026.02.18
 .dp-status{margin-left:auto;font-size:11px;color:#94a3b8}
 .dp-hint{font-size:10px;color:#94a3b8;font-style:italic;margin-left:4px}
 
-.dp-summary{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 0}
+.dp-summary{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:10px 0}
 .dp-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px}
 .dp-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
 .dp-card__value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a2332}
@@ -105,6 +105,7 @@ meta: 최종 수정: 2026.02.18
     <div class="dp-card"><div class="dp-card__label">일일식대</div><div class="dp-card__value" id="dpSumDaily">-</div></div>
     <div class="dp-card"><div class="dp-card__label">장기식대</div><div class="dp-card__value" id="dpSumLong">-</div></div>
     <div class="dp-card"><div class="dp-card__label">무제한식대</div><div class="dp-card__value" id="dpSumUnlimited">-</div></div>
+    <div class="dp-card"><div class="dp-card__label">신청식대</div><div class="dp-card__value" id="dpSumRequest">-</div></div>
     <div class="dp-card"><div class="dp-card__label">복지포인트</div><div class="dp-card__value" id="dpSumWelfare">-</div></div>
   </div>
   <div class="dp-tbar">
@@ -241,14 +242,15 @@ function dpProcess(){
 }
 
 function dpRenderSummary(){
-  var f=DP.filtered,sD=0,sL=0,sU=0,sW=0,sT=0;
-  f.forEach(function(r){sD+=r.daily;sL+=r.longTerm;sU+=r.unlimited;sW+=r.welfare;sT+=r.total;});
+  var f=DP.filtered,sD=0,sL=0,sU=0,sR=0,sW=0,sT=0;
+  f.forEach(function(r){sD+=r.daily;sL+=r.longTerm;sU+=r.unlimited;sR+=r.request;sW+=r.welfare;sT+=r.total;});
   document.getElementById('dpSumCom').textContent=f.length.toLocaleString()+'개';
-  document.getElementById('dpSumTotal').textContent=dpS(sT);
-  document.getElementById('dpSumDaily').textContent=dpS(sD);
-  document.getElementById('dpSumLong').textContent=dpS(sL);
-  document.getElementById('dpSumUnlimited').textContent=dpS(sU);
-  document.getElementById('dpSumWelfare').textContent=dpS(sW);
+  document.getElementById('dpSumTotal').textContent=dpN(sT);
+  document.getElementById('dpSumDaily').textContent=dpN(sD);
+  document.getElementById('dpSumLong').textContent=dpN(sL);
+  document.getElementById('dpSumUnlimited').textContent=dpN(sU);
+  document.getElementById('dpSumRequest').textContent=dpN(sR);
+  document.getElementById('dpSumWelfare').textContent=dpN(sW);
 }
 
 function dpSort(col){
