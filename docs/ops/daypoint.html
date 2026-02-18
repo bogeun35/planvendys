@@ -352,7 +352,7 @@ function dpRenderDetailContent(dates,dateMap){
   var ld=dates[dates.length-1]||'',lv=dateMap[ld]||{};
   var h='<div class="dp-panel__cards">';
   [['일일식대',lv.daily||0],['장기식대',lv.longTerm||0],['무제한식대',lv.unlimited||0],['신청식대',lv.request||0],['복지포인트',lv.welfare||0],['총합',lv.total||0]].forEach(function(it){
-    h+='<div class="dp-pcard"><div class="dp-pcard__label">'+it[0]+'</div><div class="dp-pcard__value">'+dpS(it[1])+'</div></div>';
+    h+='<div class="dp-pcard"><div class="dp-pcard__label">'+it[0]+'</div><div class="dp-pcard__value">'+dpN(it[1])+'</div></div>';
   });
   h+='</div>';
   if(dates.length>0){
@@ -394,7 +394,7 @@ function dpCopy(){
 (function dpInit(){
   if(typeof Chart==='undefined'){var sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';document.head.appendChild(sc);}
   var today=dpFmt(new Date());if(today<DP.MIN_DATE)today=DP.MIN_DATE;
-  document.getElementById('dpStart').value=DP.MIN_DATE;
+  document.getElementById('dpStart').value=today;
   document.getElementById('dpEnd').value=today;
   setTimeout(function(){dpFetch();},0);
 })();
