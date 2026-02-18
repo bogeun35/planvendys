@@ -141,6 +141,30 @@ raw.forEach(function(r) {
 
 ## UI/UX 패턴
 
+### 스크롤 정책 (필수)
+- **페이지 레벨 스크롤 금지** — 대시보드 루트에서 브라우저 스크롤이 발생하면 안 됨
+- 루트 컨테이너: `height:calc(100vh - 40px);overflow:hidden` (40px = GNB 높이)
+- 테이블 영역만 내부 스크롤: flex 레이아웃 + `min-height:0` + `overflow:auto`
+- 컨트롤 바, 서머리 카드, 탭 헤더 등은 `flex-shrink:0`으로 고정
+- 테이블 래퍼가 남은 공간을 `flex:1;min-height:0`으로 차지하고 내부 스크롤
+
+```css
+/* 스크롤 정책 구현 패턴 */
+#xxRoot {
+    height: calc(100vh - 40px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.xx-controls { flex-shrink: 0; }      /* 고정 영역 */
+.xx-table-wrap {
+    flex: 1;
+    min-height: 0;                     /* flex 자식 축소 허용 */
+    overflow: auto;                    /* 테이블 내부 스크롤 */
+}
+.xx-footer { flex-shrink: 0; }        /* 페이지네이션 등 고정 */
+```
+
 ### 디자인 시스템 (PROJECT_PROMPT.md 준수)
 - 컬러: 흰색 기반, 액센트 #4a90d9, 텍스트 #1a2332/#4a5568/#94a3b8
 - 폰트: Noto Sans KR 12-13px, 코드/숫자 JetBrains Mono
@@ -251,4 +275,5 @@ function xxHot(key, el) {
 
 | 대시보드 | 파일 | 접두사 | Redash QID | 설명 |
 |---------|------|-------|-----------|------|
-| 복지대장 지급현황 | welfare-dashboard.html | wf | 1339 | 고객사별 복지 지급 현황, 전년 비교, 인사이트
+| 복지대장 지급현황 | welfare-dashboard.html | wf | 1339 | 고객사별 복지 지급 현황, 전년 비교, 인사이트 |
+| 복지대장몰 주문현황 | welfare-mall-order.html | wm | 1195 | 주문/취소 이력, 주문별 조회, 수정이력 |

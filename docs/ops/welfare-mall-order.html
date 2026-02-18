@@ -4,27 +4,16 @@ meta: 최종 수정: 2026.02.18
 -->
 
 <style>
-/* ── reset ── */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 .wm *{margin:0;padding:0;box-sizing:border-box}
-
-/* ── root ── */
 .wm{
-    font-family:'Noto Sans KR',sans-serif;
-    font-size:12px;
-    color:#1a2332;
-    background:#fff;
-    display:flex;flex-direction:column;
-    height:calc(100vh - 40px);
-    overflow:hidden;
-    line-height:1.5;
-    position:relative;
+    font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;background:#fff;
+    display:flex;flex-direction:column;height:calc(100vh - 40px);overflow:hidden;line-height:1.5;position:relative;
 }
 
-/* ── loading ── */
-.wm-loading{
-    position:absolute;inset:0;background:rgba(255,255,255,.92);z-index:50;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-}
+/* loading */
+.wm-loading{position:absolute;inset:0;background:rgba(255,255,255,.92);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
 .wm-loading.hidden{display:none}
 .wm-spinner{width:24px;height:24px;border:3px solid #e2e8f0;border-top-color:#4a90d9;border-radius:50%;animation:wm-spin .5s linear infinite}
 @keyframes wm-spin{to{transform:rotate(360deg)}}
@@ -32,483 +21,512 @@ meta: 최종 수정: 2026.02.18
 .wm-loading__bar{width:200px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}
 .wm-loading__fill{height:100%;background:#4a90d9;border-radius:2px;width:0;transition:width .3s}
 
-/* ── control bar ── */
-.wm-ctrl{
-    display:flex;align-items:center;gap:6px;
-    padding:10px 16px;
-    border-bottom:1px solid #e2e8f0;
-    flex-shrink:0;
-    background:#f8fafd;
-    flex-wrap:wrap;
-}
-.wm-ctrl input[type="text"],.wm-ctrl select{
-    padding:4px 8px;border:1px solid #cbd5e1;border-radius:3px;
-    font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#1a2332;
-    background:#fff;outline:none;
-}
-.wm-ctrl input[type="text"]:focus,.wm-ctrl select:focus{border-color:#4a90d9;box-shadow:0 0 0 2px rgba(74,144,217,.15)}
+/* tabs */
+.wm-tabs{display:flex;border-bottom:1px solid #e2e8f0;flex-shrink:0;background:#fff;padding:0 16px}
+.wm-tab{padding:8px 16px;border:none;background:none;color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;font-family:'Noto Sans KR',sans-serif;transition:all .12s}
+.wm-tab:hover{color:#4a5568}
+.wm-tab.active{color:#4a90d9;border-bottom-color:#4a90d9}
+
+/* ctrl */
+.wm-ctrl{display:flex;align-items:center;gap:6px;padding:8px 16px;border-bottom:1px solid #e2e8f0;flex-shrink:0;background:#f8fafd;flex-wrap:wrap}
+.wm-ctrl input[type="text"],.wm-ctrl input[type="date"],.wm-ctrl select{padding:4px 8px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#1a2332;background:#fff;outline:none}
+.wm-ctrl input:focus,.wm-ctrl select:focus{border-color:#4a90d9;box-shadow:0 0 0 2px rgba(74,144,217,.15)}
 .wm-ctrl input[type="text"]{width:200px}
+.wm-ctrl input[type="date"]{font-family:'JetBrains Mono',monospace;font-size:11px}
 .wm-ctrl select{min-width:90px}
-.wm-ctrl-btn{
-    padding:4px 10px;border:1px solid #cbd5e1;border-radius:3px;
-    background:#fff;color:#4a5568;font-size:11px;font-family:'Noto Sans KR',sans-serif;
-    cursor:pointer;transition:all .12s;white-space:nowrap;
-}
+.wm-ctrl-btn{padding:4px 10px;border:1px solid #cbd5e1;border-radius:3px;background:#fff;color:#4a5568;font-size:11px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .12s;white-space:nowrap}
 .wm-ctrl-btn:hover{background:#eef4fb;color:#4a90d9;border-color:#4a90d9}
+.wm-ctrl-btn.active{background:#4a90d9;color:#fff;border-color:#4a90d9}
 .wm-ctrl-btn.primary{background:#4a90d9;color:#fff;border-color:#4a90d9}
 .wm-ctrl-btn.primary:hover{background:#3a7bc8}
 .wm-ctrl-sep{width:1px;height:20px;background:#e2e8f0;margin:0 2px}
 .wm-ctrl-status{margin-left:auto;font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace}
 
-/* ── summary cards ── */
-.wm-cards{
-    display:flex;gap:8px;padding:10px 16px 6px;flex-shrink:0;overflow-x:auto;
-}
-.wm-card{
-    background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;
-    padding:8px 12px;min-width:90px;flex:1;
-}
-.wm-card__label{font-size:10px;color:#94a3b8;font-weight:600;letter-spacing:.3px;margin-bottom:2px}
-.wm-card__value{font-size:15px;font-weight:800;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+/* cards */
+.wm-cards{display:flex;gap:6px;padding:8px 16px 4px;flex-shrink:0;overflow-x:auto}
+.wm-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:6px 10px;min-width:80px;flex:1}
+.wm-card__label{font-size:10px;color:#94a3b8;font-weight:600;letter-spacing:.3px;margin-bottom:1px}
+.wm-card__value{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
 .wm-card__sub{font-size:10px;color:#94a3b8;margin-top:1px}
-.wm-c-default{color:#1a2332}
-.wm-c-blue{color:#4a90d9}
-.wm-c-green{color:#22c55e}
-.wm-c-red{color:#e85d5d}
-.wm-c-orange{color:#ea580c}
+.wm-c-default{color:#1a2332}.wm-c-blue{color:#4a90d9}.wm-c-green{color:#22c55e}.wm-c-red{color:#e85d5d}.wm-c-orange{color:#ea580c}
 
-/* ── grid ── */
-.wm-grid{
-    flex:1;margin:0 16px 10px;border:1px solid #e2e8f0;border-radius:4px;
-    overflow:hidden;display:flex;flex-direction:column;background:#fff;min-height:0;
-}
+/* panels */
+.wm-panel{display:none;flex:1;overflow:hidden;flex-direction:column;min-height:0}
+.wm-panel.active{display:flex}
+
+/* grid */
+.wm-grid{flex:1;margin:0 16px;border:1px solid #e2e8f0;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;background:#fff;min-height:0}
 .wm-grid__scroll{flex:1;overflow:auto;min-height:0}
 .wm-grid__scroll::-webkit-scrollbar{width:5px;height:5px}
 .wm-grid__scroll::-webkit-scrollbar-track{background:#f1f5f9}
 .wm-grid__scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
 
-/* ── table ── */
+/* table */
 .wm table{width:100%;border-collapse:collapse;font-size:11px}
 .wm thead{position:sticky;top:0;z-index:2}
-.wm th{
-    background:#f0f4f9;color:#4a5568;font-weight:600;font-size:10px;letter-spacing:.3px;
-    padding:6px 10px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;
-    cursor:pointer;user-select:none;
-}
+.wm th{background:#f0f4f9;color:#4a5568;font-weight:600;font-size:10px;letter-spacing:.3px;padding:5px 8px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;cursor:pointer;user-select:none}
 .wm th:hover{background:#e6ecf3}
 .wm th.sorted-asc::after{content:' \25B2';font-size:8px}
 .wm th.sorted-desc::after{content:' \25BC';font-size:8px}
-.wm td{padding:5px 10px;color:#4a5568;white-space:nowrap}
+.wm td{padding:4px 8px;color:#4a5568;white-space:nowrap;font-size:11px}
 .wm td.wm-num{text-align:right;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:600;color:#1a2332}
-.wm td.wm-amt{text-align:right;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:600;color:#4a90d9}
+.wm td.wm-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:#64748b}
 .wm tbody tr{border-bottom:1px solid #f1f5f9;transition:background .08s}
 .wm tbody tr:hover{background:#f8fafd}
+.wm tbody tr.wm-clickable{cursor:pointer}
+.wm tbody tr.wm-clickable:hover{background:#eef4fb}
 
-/* ── status badge ── */
-.wm-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+/* badge */
+.wm-badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600}
 .wm-b-done{background:#ecfdf5;color:#22c55e}
 .wm-b-cancel{background:#fef2f2;color:#e85d5d}
 .wm-b-partial{background:#fef9ee;color:#d49a2a}
+.wm-b-edit{background:#eef4fb;color:#4a90d9;font-size:9px;margin-left:4px;cursor:pointer}
 
-/* ── highlight: accumulated point row ── */
+/* accum highlight */
 .wm-accum-bg{background:#fef2f2!important}
 .wm-accum-bg:hover{background:#fde8e8!important}
 
-/* ── footer ── */
-.wm-footer{
-    padding:6px 10px;background:#f8fafd;border-top:1px solid #e2e8f0;
-    font-size:11px;color:#94a3b8;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
-}
+/* footer */
+.wm-footer{padding:5px 16px;background:#f8fafd;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .wm-pager{display:flex;align-items:center;gap:4px}
-.wm-pager button{
-    padding:3px 8px;border:1px solid #cbd5e1;background:#fff;border-radius:3px;
-    cursor:pointer;font-size:10px;color:#4a5568;font-family:'Noto Sans KR',sans-serif;
-}
+.wm-pager button{padding:3px 8px;border:1px solid #cbd5e1;background:#fff;border-radius:3px;cursor:pointer;font-size:10px;color:#4a5568;font-family:'Noto Sans KR',sans-serif}
 .wm-pager button:hover:not(:disabled){background:#eef4fb;color:#4a90d9;border-color:#4a90d9}
 .wm-pager button:disabled{opacity:.35;cursor:default}
 .wm-pager span{font-weight:600;color:#1a2332;font-family:'JetBrains Mono',monospace;font-size:11px}
 
-/* ── copy btn ── */
-.wm-copy-btn{
-    padding:3px 8px;border:1px solid #cbd5e1;background:#fff;border-radius:3px;
-    font-size:10px;color:#4a5568;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .15s;
-}
+/* copy btn */
+.wm-copy-btn{padding:3px 8px;border:1px solid #cbd5e1;background:#fff;border-radius:3px;font-size:10px;color:#4a5568;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .15s}
 .wm-copy-btn:hover{background:#eef4fb;color:#4a90d9;border-color:#4a90d9}
 .wm-copy-btn.copied{background:#ecfdf5;color:#22c55e;border-color:#22c55e}
 
-/* ── remark column ── */
-.wm-remark{font-size:10px;color:#94a3b8}
+/* split layout */
+.wm-split{display:flex;flex:1;gap:0;min-height:0;overflow:hidden;padding:0 16px}
+.wm-split-left{flex:1;display:flex;flex-direction:column;min-height:0;border:1px solid #e2e8f0;border-radius:4px;overflow:hidden}
+.wm-split-right{width:400px;display:flex;flex-direction:column;border:1px solid #e2e8f0;border-radius:4px;overflow:hidden;margin-left:10px}
+.wm-detail-head{padding:6px 10px;background:#f8fafd;border-bottom:1px solid #e2e8f0;font-weight:600;color:#4a5568;font-size:11px}
+.wm-detail-body{flex:1;overflow-y:auto;padding:8px 10px}
+.wm-detail-body::-webkit-scrollbar{width:5px}
+.wm-detail-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+.wm-detail-info{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px}
+.wm-detail-item{background:#f8fafd;border:1px solid #e2e8f0;border-radius:3px;padding:5px 8px}
+.wm-detail-item__label{font-size:9px;color:#94a3b8;font-weight:600}
+.wm-detail-item__value{font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:1px}
+.wm-detail-section{font-size:11px;font-weight:700;color:#4a5568;margin:8px 0 4px;letter-spacing:.3px}
+.wm-detail-table{border:1px solid #e2e8f0;border-radius:3px;overflow:auto;max-height:320px}
+.wm-detail-table table{font-size:10px}
+.wm-detail-table th{padding:4px 6px;font-size:9px}
+.wm-detail-table td{padding:3px 6px}
 
-@media(max-width:768px){
-    .wm-cards{padding:6px 10px}.wm-grid{margin:0 10px 6px}
-    .wm-card{min-width:70px;padding:6px 8px}.wm-card__value{font-size:12px}
-    .wm-ctrl{padding:6px 10px}
-}
+.wm-remark{font-size:10px;color:#94a3b8}
+.wm-unique-row{cursor:pointer}
+.wm-unique-row:hover{background:#eef4fb!important}
+.wm-unique-row.selected{background:#eef4fb!important}
+
+/* overlay panel (for tab1 history view) */
+.wm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.15);z-index:999;display:none}
+.wm-overlay.open{display:block}
+.wm-slide{position:fixed;top:0;right:0;bottom:0;width:500px;max-width:90vw;background:#fff;border-left:1px solid #e2e8f0;box-shadow:-4px 0 16px rgba(0,0,0,.08);z-index:1000;transform:translateX(100%);transition:transform .2s ease;display:flex;flex-direction:column}
+.wm-slide.open{transform:translateX(0)}
+.wm-slide__header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.wm-slide__header h3{font-size:13px;font-weight:700}
+.wm-slide__close{width:24px;height:24px;border:1px solid #e2e8f0;background:#fff;border-radius:3px;color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px}
+.wm-slide__close:hover{background:#fef2f2;color:#e85d5d;border-color:#e85d5d}
+.wm-slide__body{flex:1;overflow-y:auto;padding:12px 14px}
+
+@media(max-width:768px){.wm-split-right{display:none!important}.wm-ctrl{padding:6px 10px}.wm-cards{padding:4px 10px}}
 </style>
 
 <div class="wm" id="wmRoot">
-    <!-- loading -->
     <div class="wm-loading" id="wmLoading">
         <div class="wm-spinner"></div>
         <div class="wm-loading__text" id="wmLoadingText">Redash 쿼리 실행 중...</div>
         <div class="wm-loading__bar"><div class="wm-loading__fill" id="wmLoadingFill"></div></div>
     </div>
 
-    <!-- control bar -->
-    <div class="wm-ctrl">
-        <input type="text" id="wmSearch" placeholder="고객사 / 상품명 / 주문자 검색" oninput="wmFilter()">
-        <select id="wmStatus" onchange="wmFilter()">
-            <option value="">전체 상태</option>
-            <option value="주문완료">주문완료</option>
-            <option value="취소">취소</option>
-            <option value="부분취소">부분취소</option>
-        </select>
-        <div class="wm-ctrl-sep"></div>
-        <button class="wm-copy-btn" onclick="wmCopy(this)">클립보드 복사</button>
-        <div class="wm-ctrl-status" id="wmStatus2"></div>
+    <div class="wm-tabs">
+        <button class="wm-tab active" onclick="wmSwitchTab('all',this)">전체 이력</button>
+        <button class="wm-tab" onclick="wmSwitchTab('unique',this)">주문별 조회</button>
     </div>
 
-    <!-- summary cards -->
-    <div class="wm-cards" id="wmCards">
-        <div class="wm-card"><div class="wm-card__label">총 주문</div><div class="wm-card__value wm-c-default" id="wmTotal">-</div></div>
-        <div class="wm-card"><div class="wm-card__label">주문완료</div><div class="wm-card__value wm-c-blue" id="wmDone">-</div></div>
-        <div class="wm-card"><div class="wm-card__label">취소</div><div class="wm-card__value wm-c-red" id="wmCancel">-</div></div>
-        <div class="wm-card"><div class="wm-card__label">부분취소</div><div class="wm-card__value wm-c-orange" id="wmPartial">-</div></div>
-        <div class="wm-card"><div class="wm-card__label">복지포인트 합계</div><div class="wm-card__value wm-c-blue" id="wmWelfareSum">-</div></div>
-        <div class="wm-card"><div class="wm-card__label">대장포인트 합계</div><div class="wm-card__value wm-c-default" id="wmCaptainSum">-</div></div>
-        <div class="wm-card"><div class="wm-card__label">적립금 사용</div><div class="wm-card__value wm-c-red" id="wmAccumSum">-</div><div class="wm-card__sub" id="wmAccumCnt"></div></div>
-    </div>
-
-    <!-- grid -->
-    <div class="wm-grid">
-        <div class="wm-grid__scroll" id="wmScroll">
-            <table id="wmTable">
-                <thead id="wmThead"></thead>
-                <tbody id="wmTbody"></tbody>
-            </table>
+    <!-- TAB1: 전체 이력 -->
+    <div class="wm-panel active" id="wmPanelAll">
+        <div class="wm-ctrl">
+            <input type="text" id="wmSearch" placeholder="고객사 / 상품명 / 주문자 / CID 검색" oninput="wmFilter()">
+            <select id="wmStatusSel" onchange="wmFilter()">
+                <option value="">전체 상태</option>
+                <option value="주문완료">주문완료</option>
+                <option value="취소">취소</option>
+                <option value="부분취소">부분취소</option>
+            </select>
+            <div class="wm-ctrl-sep"></div>
+            <button class="wm-copy-btn" onclick="wmCopy(this)">클립보드 복사</button>
+            <div class="wm-ctrl-status" id="wmStatusText"></div>
+        </div>
+        <div class="wm-cards">
+            <div class="wm-card"><div class="wm-card__label">총 이력</div><div class="wm-card__value wm-c-default" id="wmTotal">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">주문완료</div><div class="wm-card__value wm-c-blue" id="wmDone">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">취소</div><div class="wm-card__value wm-c-red" id="wmCancel">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">부분취소</div><div class="wm-card__value wm-c-orange" id="wmPartial">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">복지포인트</div><div class="wm-card__value wm-c-blue" id="wmWelfareSum">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">대장포인트</div><div class="wm-card__value wm-c-default" id="wmCaptainSum">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">적립금 사용</div><div class="wm-card__value wm-c-red" id="wmAccumSum">-</div><div class="wm-card__sub" id="wmAccumCnt"></div></div>
+        </div>
+        <div class="wm-grid">
+            <div class="wm-grid__scroll" id="wmScroll"><table><thead id="wmThead"></thead><tbody id="wmTbody"></tbody></table></div>
+        </div>
+        <div class="wm-footer">
+            <div id="wmInfo">-</div>
+            <div class="wm-pager"><button onclick="wmPage(-1)" id="wmPrev" disabled>&lt; 이전</button><span id="wmPageNum">1</span><button onclick="wmPage(1)" id="wmNext" disabled>다음 &gt;</button></div>
         </div>
     </div>
 
-    <!-- footer -->
-    <div class="wm-footer">
-        <div id="wmInfo">-</div>
-        <div class="wm-pager">
-            <button onclick="wmPage(-1)" id="wmPrev" disabled>&lt; 이전</button>
-            <span id="wmPageNum">1</span>
-            <button onclick="wmPage(1)" id="wmNext" disabled>다음 &gt;</button>
+    <!-- TAB2: 주문별 조회 -->
+    <div class="wm-panel" id="wmPanelUnique">
+        <div class="wm-ctrl">
+            <label style="font-weight:600;color:#4a5568;white-space:nowrap">기간</label>
+            <input type="date" id="wmUqSD"><span style="color:#94a3b8;font-size:11px">~</span><input type="date" id="wmUqED">
+            <button class="wm-ctrl-btn primary" onclick="wmUqFilter()">조회</button>
+            <div class="wm-ctrl-sep"></div>
+            <button class="wm-ctrl-btn" onclick="wmUqHot('thisMonth',this)">이번달</button>
+            <button class="wm-ctrl-btn" onclick="wmUqHot('lastMonth',this)">지난달</button>
+            <button class="wm-ctrl-btn" onclick="wmUqHot('twoMonthsAgo',this)">지지난달</button>
+            <div class="wm-ctrl-sep"></div>
+            <input type="text" id="wmUqSearch" placeholder="검색" oninput="wmUqFilter()" style="width:150px">
+            <button class="wm-copy-btn" onclick="wmUqCopy(this)">클립보드 복사</button>
+            <div class="wm-ctrl-status" id="wmUqStatus"></div>
         </div>
+        <div class="wm-cards">
+            <div class="wm-card"><div class="wm-card__label">고유 주문</div><div class="wm-card__value wm-c-default" id="wmUqTotal">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">주문완료</div><div class="wm-card__value wm-c-blue" id="wmUqDone">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">취소</div><div class="wm-card__value wm-c-red" id="wmUqCancel">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">부분취소</div><div class="wm-card__value wm-c-orange" id="wmUqPartial">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">복지포인트</div><div class="wm-card__value wm-c-blue" id="wmUqWelfare">-</div></div>
+            <div class="wm-card"><div class="wm-card__label">대장포인트</div><div class="wm-card__value wm-c-default" id="wmUqCaptain">-</div></div>
+        </div>
+        <div class="wm-split">
+            <div class="wm-split-left">
+                <div class="wm-grid__scroll" id="wmUqScroll"><table><thead id="wmUqThead"></thead><tbody id="wmUqTbody"></tbody></table></div>
+            </div>
+            <div class="wm-split-right" id="wmUqDetail">
+                <div class="wm-detail-head" id="wmUqDetailHead">주문 상세</div>
+                <div class="wm-detail-body" id="wmUqDetailBody"><div style="text-align:center;padding:40px;color:#94a3b8">좌측에서 주문을 선택하세요</div></div>
+            </div>
+        </div>
+        <div class="wm-footer">
+            <div id="wmUqInfo">-</div>
+            <div class="wm-pager"><button onclick="wmUqPage(-1)" id="wmUqPrev" disabled>&lt; 이전</button><span id="wmUqPageNum">1</span><button onclick="wmUqPage(1)" id="wmUqNext" disabled>다음 &gt;</button></div>
+        </div>
+    </div>
+
+    <!-- slide panel for tab1 history -->
+    <div class="wm-overlay" id="wmOverlay" onclick="wmCloseSlide()"></div>
+    <div class="wm-slide" id="wmSlide">
+        <div class="wm-slide__header"><h3 id="wmSlideTitle">수정 이력</h3><button class="wm-slide__close" onclick="wmCloseSlide()">X</button></div>
+        <div class="wm-slide__body" id="wmSlideBody"></div>
     </div>
 </div>
 
 <script>
-/* ================================================================
-   복지대장몰 주문현황 (wm prefix)
-   Redash QID: 1195 / 파라미터 없음
-   ================================================================ */
-
 var WM = {
     PROXY: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
-    QID: 1195,
-    raw: [],
-    filtered: [],
-    sortCol: 'historyidx',
-    sortDir: 'desc',
-    page: 0,
-    PAGE_SIZE: 100,
-    columns: [
-        {key:'historyidx', label:'이력IDX', cls:'wm-num', w:'70px'},
-        {key:'idx', label:'주문IDX', cls:'wm-num', w:'70px'},
-        {key:'comname', label:'고객사', cls:'', w:''},
-        {key:'username', label:'주문자', cls:'', w:''},
-        {key:'주문상품명', label:'상품명', cls:'', w:''},
+    QID: 1195, raw: [], filtered: [], sortCol: 'historyidx', sortDir: 'desc', page: 0, PS: 100,
+    idxMap: {}, /* idx -> [rows] for history lookup */
+    uqGrouped: [], uqFiltered: [], uqSortCol: 'idx', uqSortDir: 'desc', uqPage: 0, uqSelected: null,
+    cols: [
+        {key:'historyidx', label:'이력IDX', cls:'wm-num', w:'65px'},
+        {key:'idx', label:'주문IDX', cls:'wm-num', w:'65px'},
+        {key:'couponId', label:'CID', cls:'wm-id'},
+        {key:'comname', label:'고객사'},
+        {key:'username', label:'주문자'},
+        {key:'주문상품명', label:'상품명'},
         {key:'상태', label:'상태', cls:'col-c', w:'80px', badge:true},
-        {key:'Firstdate', label:'주문일시', cls:'', w:'120px'},
-        {key:'logdate', label:'로그일시', cls:'', w:'120px'},
-        {key:'복지포인트', label:'복지포인트', cls:'wm-num', w:'90px'},
-        {key:'대장포인트', label:'대장포인트', cls:'wm-num', w:'90px'},
-        {key:'잔여금액', label:'잔여금액', cls:'wm-num', w:'80px'},
-        {key:'firstpoint', label:'최초결제', cls:'wm-num', w:'80px'},
-        {key:'복지포인트LOG', label:'복지pt LOG', cls:'wm-num', w:'90px'},
-        {key:'대장포인트LOG', label:'대장pt LOG', cls:'wm-num', w:'90px'},
-        {key:'대장포인트적립LOG', label:'적립금', cls:'wm-num', w:'80px', accum:true},
-        {key:'대장포인트충전LOG', label:'충전금', cls:'wm-num', w:'80px'},
-        {key:'비고', label:'비고', cls:'wm-remark', w:'160px'}
+        {key:'Firstdate', label:'주문일시', w:'120px'},
+        {key:'logdate', label:'로그일시', w:'120px'},
+        {key:'복지포인트', label:'복지포인트', cls:'wm-num', w:'85px'},
+        {key:'대장포인트', label:'대장포인트', cls:'wm-num', w:'85px'},
+        {key:'잔여금액', label:'잔여금액', cls:'wm-num', w:'75px'},
+        {key:'firstpoint', label:'최초결제', cls:'wm-num', w:'75px'},
+        {key:'복지포인트LOG', label:'복지pt LOG', cls:'wm-num', w:'85px'},
+        {key:'대장포인트LOG', label:'대장pt LOG', cls:'wm-num', w:'85px'},
+        {key:'대장포인트적립LOG', label:'적립금', cls:'wm-num', w:'75px'},
+        {key:'대장포인트충전LOG', label:'충전금', cls:'wm-num', w:'75px'},
+        {key:'비고', label:'비고', cls:'wm-remark', w:'150px'}
+    ],
+    uqCols: [
+        {key:'idx', label:'주문IDX', cls:'wm-num', w:'65px'},
+        {key:'couponId', label:'CID', cls:'wm-id'},
+        {key:'comname', label:'고객사'},
+        {key:'username', label:'주문자'},
+        {key:'주문상품명', label:'상품명'},
+        {key:'lastStatus', label:'최종상태', cls:'col-c', w:'80px', badge:true},
+        {key:'Firstdate', label:'주문일시', w:'120px'},
+        {key:'복지포인트', label:'복지포인트', cls:'wm-num', w:'85px'},
+        {key:'대장포인트', label:'대장포인트', cls:'wm-num', w:'85px'},
+        {key:'firstpoint', label:'최초결제', cls:'wm-num', w:'75px'},
+        {key:'logCount', label:'이력', cls:'wm-num', w:'40px'}
     ]
 };
 
-/* ── API ── */
-function wmApi(p) {
-    var qs = Object.keys(p).map(function(k){ return k + '=' + encodeURIComponent(p[k]); }).join('&');
-    return fetch(WM.PROXY + '?' + qs, {redirect:'follow'}).then(function(r){ return r.json(); });
-}
+function wmApi(p){var qs=Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k])}).join('&');return fetch(WM.PROXY+'?'+qs,{redirect:'follow'}).then(function(r){return r.json()})}
 
-/* ── 페이지 진입 시 자동 조회 ── */
-(async function wmInit(){
-    wmShowLoading(true, 'Redash 쿼리 실행 중...', 10);
-    try {
-        var d = await wmApi({action:'post', queryId:WM.QID});
-        if (d.query_result) {
-            wmProcess(d.query_result.data.rows);
-        } else if (d.job) {
-            await wmPoll(d.job.id);
-        } else {
-            wmSetStatus('응답 오류', true);
-            wmShowLoading(false);
-        }
-    } catch(e) {
-        wmSetStatus('네트워크 오류: ' + e.message, true);
-        wmShowLoading(false);
-    }
+/* init */
+(async function(){
+    wmShowLoading(true,'Redash 쿼리 실행 중...',10);
+    var now=new Date(),y=now.getFullYear(),m=now.getMonth();
+    document.getElementById('wmUqSD').value=wmDS(new Date(y,m,1));
+    document.getElementById('wmUqED').value=wmDS(new Date(y,m+1,0));
+    try{
+        var d=await wmApi({action:'post',queryId:WM.QID});
+        if(d.query_result)wmProcess(d.query_result.data.rows);
+        else if(d.job)await wmPoll(d.job.id);
+        else{wmSS('wmStatusText','응답 오류',1);wmShowLoading(false)}
+    }catch(e){wmSS('wmStatusText','오류: '+e.message,1);wmShowLoading(false)}
 })();
 
-/* ── 폴링 ── */
-async function wmPoll(jid) {
-    var max = 120, cnt = 0;
-    while (cnt < max) {
-        cnt++;
-        wmShowLoading(true, '데이터 대기 중... (' + cnt + '/' + max + ')', Math.min(10 + cnt * 0.7, 90));
-        await new Promise(function(r){ setTimeout(r, 1500); });
-        try {
-            var d = await wmApi({action:'job', jobId:jid});
-            if (d.job && d.job.status === 3) {
-                wmShowLoading(true, '결과 조회 중...', 92);
-                var rd = await wmApi({action:'result', resultId:d.job.query_result_id});
-                wmProcess(rd.query_result.data.rows);
-                return;
-            }
-            if (d.job && d.job.status === 4) {
-                wmSetStatus('쿼리 실패', true);
-                wmShowLoading(false);
-                return;
-            }
-        } catch(e) { /* retry */ }
+async function wmPoll(jid){
+    for(var i=0;i<120;i++){
+        wmShowLoading(true,'대기 중... ('+(i+1)+'/120)',Math.min(10+i*.7,90));
+        await new Promise(function(r){setTimeout(r,1500)});
+        try{
+            var d=await wmApi({action:'job',jobId:jid});
+            if(d.job&&d.job.status===3){wmShowLoading(true,'결과 조회 중...',92);var rd=await wmApi({action:'result',resultId:d.job.query_result_id});wmProcess(rd.query_result.data.rows);return}
+            if(d.job&&d.job.status===4){wmSS('wmStatusText','쿼리 실패',1);wmShowLoading(false);return}
+        }catch(e){}
     }
-    wmSetStatus('타임아웃', true);
-    wmShowLoading(false);
+    wmSS('wmStatusText','타임아웃',1);wmShowLoading(false);
 }
 
-/* ── 데이터 처리 ── */
-function wmProcess(rows) {
-    wmShowLoading(true, '데이터 처리 중...', 95);
-    WM.raw = rows.map(function(r){
-        return {
-            historyidx: Number(r.historyidx)||0,
-            idx: Number(r.idx)||0,
-            couponId: String(r.couponId||''),
-            주문상품명: String(r['주문상품명']||r.주문상품명||''),
-            복지포인트: Number(r['복지포인트']||r.복지포인트)||0,
-            대장포인트: Number(r['대장포인트']||r.대장포인트)||0,
-            잔여금액: Number(r['잔여금액']||r.잔여금액)||0,
-            Firstdate: String(r.Firstdate||r.firstdate||''),
-            firstpoint: Number(r.firstpoint)||0,
-            uid: String(r.uid||''),
-            username: String(r.username||''),
-            comid: String(r.comid||''),
-            comname: String(r.comname||''),
-            logdate: String(r.logdate||''),
-            '대장포인트LOG': Number(r['대장포인트LOG']||r['대장포인트log'])||0,
-            '복지포인트LOG': Number(r['복지포인트LOG']||r['복지포인트log'])||0,
-            상태: String(r['상태']||r.상태||''),
-            비고: String(r['비고']||r.비고||''),
-            '대장포인트적립LOG': Number(r['대장포인트적립LOG']||r['대장포인트적립log'])||0,
-            '대장포인트충전LOG': Number(r['대장포인트충전LOG']||r['대장포인트충전log'])||0
-        };
+function wmProcess(rows){
+    wmShowLoading(true,'데이터 처리 중...',95);
+    WM.raw=rows.map(function(r){return{
+        historyidx:Number(r.historyidx)||0, idx:Number(r.idx)||0,
+        couponId:String(r.couponId||r.couponid||''),
+        주문상품명:String(r['주문상품명']||''),
+        복지포인트:Number(r['복지포인트'])||0, 대장포인트:Number(r['대장포인트'])||0,
+        잔여금액:Number(r['잔여금액'])||0,
+        Firstdate:String(r.Firstdate||r.firstdate||''),
+        firstpoint:Number(r.firstpoint)||0,
+        uid:String(r.uid||''), username:String(r.username||''),
+        comid:String(r.comid||''), comname:String(r.comname||''),
+        logdate:String(r.logdate||''),
+        '대장포인트LOG':Number(r['대장포인트LOG']||r['대장포인트log'])||0,
+        '복지포인트LOG':Number(r['복지포인트LOG']||r['복지포인트log'])||0,
+        상태:String(r['상태']||''), 비고:String(r['비고']||''),
+        '대장포인트적립LOG':Number(r['대장포인트적립LOG']||r['대장포인트적립log'])||0,
+        '대장포인트충전LOG':Number(r['대장포인트충전LOG']||r['대장포인트충전log'])||0
+    }});
+    /* build idx map */
+    WM.idxMap={};
+    WM.raw.forEach(function(r){if(!WM.idxMap[r.idx])WM.idxMap[r.idx]=[];WM.idxMap[r.idx].push(r)});
+    wmBuildUq();
+    WM.page=0;
+    wmBH('wmThead',WM.cols,WM.sortCol,WM.sortDir,'wmSortBy');
+    wmFilter();wmUqFilter();
+    wmShowLoading(false);
+    wmSS('wmStatusText',WM.raw.length.toLocaleString()+'건 조회 완료');
+}
+
+function wmBuildUq(){
+    var map={};
+    WM.raw.forEach(function(r){
+        var k=r.idx;
+        if(!map[k])map[k]={idx:r.idx,couponId:r.couponId,comname:r.comname,comid:r.comid,username:r.username,uid:r.uid,주문상품명:r.주문상품명,복지포인트:r.복지포인트,대장포인트:r.대장포인트,잔여금액:r.잔여금액,Firstdate:r.Firstdate,firstpoint:r.firstpoint,lastStatus:r.상태,logCount:0,_mh:0};
+        var g=map[k];g.logCount++;
+        if(r.historyidx>g._mh){g._mh=r.historyidx;g.lastStatus=r.상태}
     });
-    WM.page = 0;
-    wmBuildHead();
-    wmFilter();
-    wmShowLoading(false);
-    wmSetStatus(WM.raw.length.toLocaleString() + '건 조회 완료');
+    WM.uqGrouped=Object.keys(map).map(function(k){return map[k]});
 }
 
-/* ── 필터 ── */
-function wmFilter() {
-    var q = (document.getElementById('wmSearch').value||'').toLowerCase().trim();
-    var st = document.getElementById('wmStatus').value;
-    WM.filtered = WM.raw.filter(function(r){
-        if (st && r.상태 !== st) return false;
-        if (q) {
-            var t = (r.comname + ' ' + r.username + ' ' + r.주문상품명 + ' ' + r.couponId).toLowerCase();
-            if (t.indexOf(q) === -1) return false;
-        }
+/* ── TAB1 ── */
+function wmFilter(){
+    var q=(document.getElementById('wmSearch').value||'').toLowerCase().trim();
+    var st=document.getElementById('wmStatusSel').value;
+    WM.filtered=WM.raw.filter(function(r){
+        if(st&&r.상태!==st)return false;
+        if(q){var t=(r.comname+' '+r.username+' '+r.주문상품명+' '+r.couponId).toLowerCase();if(t.indexOf(q)===-1)return false}
         return true;
     });
-    wmSort();
-    WM.page = 0;
-    wmRenderCards();
-    wmRender();
+    wmSA(WM.filtered,WM.sortCol,WM.sortDir);WM.page=0;wmRC();wmR();
 }
-
-/* ── 정렬 ── */
-function wmSort() {
-    var col = WM.sortCol, dir = WM.sortDir;
-    WM.filtered.sort(function(a,b){
-        var va = a[col], vb = b[col];
-        if (typeof va === 'number' && typeof vb === 'number') return dir === 'asc' ? va - vb : vb - va;
-        va = String(va||''); vb = String(vb||'');
-        return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+function wmSortBy(c){if(WM.sortCol===c)WM.sortDir=WM.sortDir==='asc'?'desc':'asc';else{WM.sortCol=c;WM.sortDir='desc'}wmSA(WM.filtered,WM.sortCol,WM.sortDir);WM.page=0;wmBH('wmThead',WM.cols,WM.sortCol,WM.sortDir,'wmSortBy');wmR()}
+function wmRC(){
+    var d=WM.filtered,dn=0,cn=0,pn=0,ws=0,cs=0,as=0,ac=0;
+    d.forEach(function(r){if(r.상태==='주문완료')dn++;else if(r.상태==='취소')cn++;else if(r.상태==='부분취소')pn++;ws+=r['복지포인트LOG'];cs+=r['대장포인트LOG'];if(r['대장포인트적립LOG']>0){as+=r['대장포인트적립LOG'];ac++}});
+    document.getElementById('wmTotal').textContent=d.length.toLocaleString()+'건';
+    document.getElementById('wmDone').textContent=dn.toLocaleString()+'건';
+    document.getElementById('wmCancel').textContent=cn.toLocaleString()+'건';
+    document.getElementById('wmPartial').textContent=pn.toLocaleString()+'건';
+    document.getElementById('wmWelfareSum').textContent=wmF(ws);
+    document.getElementById('wmCaptainSum').textContent=wmF(cs);
+    document.getElementById('wmAccumSum').textContent=wmF(as);
+    document.getElementById('wmAccumCnt').textContent=ac>0?ac.toLocaleString()+'건':'';
+}
+function wmR(){
+    var d=WM.filtered,s=WM.page*WM.PS,e=Math.min(s+WM.PS,d.length),sl=d.slice(s,e),h='';
+    sl.forEach(function(r){
+        var acc=r['대장포인트적립LOG']>0;
+        var hasHist=WM.idxMap[r.idx]&&WM.idxMap[r.idx].length>1;
+        h+='<tr class="'+(acc?'wm-accum-bg':'')+(hasHist?' wm-clickable':'')+'"'+(hasHist?' onclick="wmShowHist('+r.idx+')"':'')+'>';
+        WM.cols.forEach(function(c){
+            var v=r[c.key];
+            if(c.badge){
+                var bc=v==='취소'?'wm-b-cancel':v==='부분취소'?'wm-b-partial':'wm-b-done';
+                h+='<td class="col-c"><span class="wm-badge '+bc+'">'+wmE(v)+'</span>';
+                if(hasHist)h+='<span class="wm-badge wm-b-edit">수정이력</span>';
+                h+='</td>';
+            }else if(c.cls==='wm-num'){var nv=Number(v)||0;h+='<td class="wm-num"'+(nv<0?' style="color:#e85d5d"':'')+'>'+wmF(nv)+'</td>'}
+            else if(c.cls==='wm-id')h+='<td class="wm-id">'+wmE(String(v||''))+'</td>';
+            else if(c.cls==='wm-remark')h+='<td class="wm-remark">'+wmE(String(v||''))+'</td>';
+            else h+='<td>'+wmE(String(v||''))+'</td>';
+        });h+='</tr>';
     });
+    if(!sl.length)h='<tr><td colspan="'+WM.cols.length+'" style="text-align:center;padding:40px;color:#94a3b8">데이터가 없습니다</td></tr>';
+    document.getElementById('wmTbody').innerHTML=h;
+    document.getElementById('wmInfo').textContent='필터: '+d.length.toLocaleString()+'건 / 전체: '+WM.raw.length.toLocaleString()+'건';
+    var tp=Math.ceil(d.length/WM.PS)||1;
+    document.getElementById('wmPageNum').textContent=(WM.page+1)+' / '+tp;
+    document.getElementById('wmPrev').disabled=WM.page<=0;
+    document.getElementById('wmNext').disabled=e>=d.length;
+    document.getElementById('wmScroll').scrollTop=0;
+}
+function wmPage(dir){WM.page=Math.max(0,Math.min(Math.ceil(WM.filtered.length/WM.PS)-1,WM.page+dir));wmR()}
+function wmCopy(btn){
+    var hd=WM.cols.map(function(c){return c.label}).join('\t');
+    var ls=WM.filtered.map(function(r){return WM.cols.map(function(c){var v=r[c.key];return c.cls==='wm-num'?Number(v)||0:String(v||'')}).join('\t')});
+    navigator.clipboard.writeText(hd+'\n'+ls.join('\n')).then(function(){btn.textContent='복사됨';btn.classList.add('copied');setTimeout(function(){btn.textContent='클립보드 복사';btn.classList.remove('copied')},1500)});
 }
 
-function wmSortBy(col) {
-    if (WM.sortCol === col) {
-        WM.sortDir = WM.sortDir === 'asc' ? 'desc' : 'asc';
-    } else {
-        WM.sortCol = col;
-        WM.sortDir = 'desc';
-    }
-    wmSort();
-    WM.page = 0;
-    wmBuildHead();
-    wmRender();
-}
-
-/* ── 헤더 빌드 ── */
-function wmBuildHead() {
-    var h = '<tr>';
-    WM.columns.forEach(function(c){
-        var cls = '';
-        if (WM.sortCol === c.key) cls = WM.sortDir === 'asc' ? ' sorted-asc' : ' sorted-desc';
-        var style = c.w ? 'style="width:'+c.w+'"' : '';
-        h += '<th class="'+cls+'" '+style+' onclick="wmSortBy(\''+c.key+'\')">'+c.label+'</th>';
+/* history slide panel */
+function wmShowHist(idx){
+    var rows=WM.idxMap[idx];if(!rows||rows.length<2)return;
+    var first=rows[0];
+    document.getElementById('wmSlideTitle').textContent='주문 #'+idx+' 수정이력 ('+rows.length+'건)';
+    var h='<div class="wm-detail-info">';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">고객사</div><div class="wm-detail-item__value" style="font-size:11px;font-family:\'Noto Sans KR\',sans-serif">'+wmE(first.comname)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">주문자</div><div class="wm-detail-item__value" style="font-size:11px;font-family:\'Noto Sans KR\',sans-serif">'+wmE(first.username)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">상품명</div><div class="wm-detail-item__value" style="font-size:10px;font-family:\'Noto Sans KR\',sans-serif">'+wmE(first.주문상품명)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">CID</div><div class="wm-detail-item__value" style="font-size:9px">'+wmE(first.couponId)+'</div></div>';
+    h+='</div>';
+    h+='<div class="wm-detail-table"><table><thead><tr><th>이력IDX</th><th>로그일시</th><th>상태</th><th>복지pt</th><th>대장pt</th><th>적립금</th><th>충전금</th><th>비고</th></tr></thead><tbody>';
+    rows.slice().sort(function(a,b){return b.historyidx-a.historyidx}).forEach(function(r){
+        var acc=r['대장포인트적립LOG']>0;
+        h+='<tr'+(acc?' class="wm-accum-bg"':'')+'>';
+        h+='<td class="wm-num">'+r.historyidx+'</td>';
+        h+='<td>'+wmE(r.logdate)+'</td>';
+        var bc=r.상태==='취소'?'wm-b-cancel':r.상태==='부분취소'?'wm-b-partial':'wm-b-done';
+        h+='<td class="col-c"><span class="wm-badge '+bc+'">'+wmE(r.상태)+'</span></td>';
+        h+='<td class="wm-num">'+wmF(r['복지포인트LOG'])+'</td>';
+        h+='<td class="wm-num">'+wmF(r['대장포인트LOG'])+'</td>';
+        h+='<td class="wm-num"'+(acc?' style="color:#e85d5d;font-weight:700"':'')+'>'+wmF(r['대장포인트적립LOG'])+'</td>';
+        h+='<td class="wm-num">'+wmF(r['대장포인트충전LOG'])+'</td>';
+        h+='<td class="wm-remark">'+wmE(r.비고||'')+'</td></tr>';
     });
-    h += '</tr>';
-    document.getElementById('wmThead').innerHTML = h;
+    h+='</tbody></table></div>';
+    document.getElementById('wmSlideBody').innerHTML=h;
+    document.getElementById('wmOverlay').classList.add('open');
+    document.getElementById('wmSlide').classList.add('open');
 }
+function wmCloseSlide(){document.getElementById('wmOverlay').classList.remove('open');document.getElementById('wmSlide').classList.remove('open')}
 
-/* ── 서머리 카드 ── */
-function wmRenderCards() {
-    var data = WM.filtered;
-    var total = data.length;
-    var done = 0, cancel = 0, partial = 0;
-    var welfareSum = 0, captainSum = 0, accumSum = 0, accumCnt = 0;
-
-    data.forEach(function(r){
-        if (r.상태 === '주문완료') done++;
-        else if (r.상태 === '취소') cancel++;
-        else if (r.상태 === '부분취소') partial++;
-
-        welfareSum += r['복지포인트LOG'];
-        captainSum += r['대장포인트LOG'];
-        if (r['대장포인트적립LOG'] > 0) {
-            accumSum += r['대장포인트적립LOG'];
-            accumCnt++;
-        }
+/* ── TAB2: 주문별 ── */
+function wmUqFilter(){
+    var sd=document.getElementById('wmUqSD').value,ed=document.getElementById('wmUqED').value;
+    var q=(document.getElementById('wmUqSearch').value||'').toLowerCase().trim();
+    WM.uqFiltered=WM.uqGrouped.filter(function(g){
+        if(sd&&g.Firstdate<sd)return false;
+        if(ed&&g.Firstdate>ed+'\xff')return false;
+        if(q){var t=(g.comname+' '+g.username+' '+g.주문상품명+' '+g.couponId).toLowerCase();if(t.indexOf(q)===-1)return false}
+        return true;
     });
-
-    document.getElementById('wmTotal').textContent = total.toLocaleString() + '건';
-    document.getElementById('wmDone').textContent = done.toLocaleString() + '건';
-    document.getElementById('wmCancel').textContent = cancel.toLocaleString() + '건';
-    document.getElementById('wmPartial').textContent = partial.toLocaleString() + '건';
-    document.getElementById('wmWelfareSum').textContent = wmFmt(welfareSum);
-    document.getElementById('wmCaptainSum').textContent = wmFmt(captainSum);
-    document.getElementById('wmAccumSum').textContent = wmFmt(accumSum);
-    document.getElementById('wmAccumCnt').textContent = accumCnt > 0 ? accumCnt.toLocaleString() + '건' : '';
+    wmSA(WM.uqFiltered,WM.uqSortCol,WM.uqSortDir);WM.uqPage=0;WM.uqSelected=null;
+    wmBH('wmUqThead',WM.uqCols,WM.uqSortCol,WM.uqSortDir,'wmUqSortBy');
+    wmURC();wmUR();wmURD();wmSS('wmUqStatus',WM.uqFiltered.length.toLocaleString()+'건');
 }
-
-/* ── 테이블 렌더 ── */
-function wmRender() {
-    var data = WM.filtered;
-    var start = WM.page * WM.PAGE_SIZE;
-    var end = Math.min(start + WM.PAGE_SIZE, data.length);
-    var slice = data.slice(start, end);
-
-    var html = '';
-    slice.forEach(function(r){
-        var hasAccum = r['대장포인트적립LOG'] > 0;
-        html += '<tr class="' + (hasAccum ? 'wm-accum-bg' : '') + '">';
-        WM.columns.forEach(function(c){
-            var v = r[c.key];
-            if (c.badge) {
-                var bc = 'wm-b-done';
-                if (v === '취소') bc = 'wm-b-cancel';
-                else if (v === '부분취소') bc = 'wm-b-partial';
-                html += '<td class="col-c"><span class="wm-badge '+bc+'">'+wmEsc(v)+'</span></td>';
-            } else if (c.cls === 'wm-num' || c.cls === 'wm-amt') {
-                var nv = Number(v)||0;
-                var neg = nv < 0 ? ' style="color:#e85d5d"' : '';
-                html += '<td class="'+c.cls+'"'+neg+'>'+wmFmt(nv)+'</td>';
-            } else if (c.cls === 'wm-remark') {
-                html += '<td class="'+c.cls+'">'+wmEsc(String(v||''))+'</td>';
-            } else {
-                html += '<td>'+wmEsc(String(v||''))+'</td>';
-            }
-        });
-        html += '</tr>';
+function wmUqSortBy(c){if(WM.uqSortCol===c)WM.uqSortDir=WM.uqSortDir==='asc'?'desc':'asc';else{WM.uqSortCol=c;WM.uqSortDir='desc'}wmSA(WM.uqFiltered,WM.uqSortCol,WM.uqSortDir);WM.uqPage=0;wmBH('wmUqThead',WM.uqCols,WM.uqSortCol,WM.uqSortDir,'wmUqSortBy');wmUR()}
+function wmURC(){
+    var d=WM.uqFiltered,dn=0,cn=0,pn=0,ws=0,cs=0;
+    d.forEach(function(g){if(g.lastStatus==='주문완료')dn++;else if(g.lastStatus==='취소')cn++;else if(g.lastStatus==='부분취소')pn++;ws+=g.복지포인트;cs+=g.대장포인트});
+    document.getElementById('wmUqTotal').textContent=d.length.toLocaleString()+'건';
+    document.getElementById('wmUqDone').textContent=dn.toLocaleString()+'건';
+    document.getElementById('wmUqCancel').textContent=cn.toLocaleString()+'건';
+    document.getElementById('wmUqPartial').textContent=pn.toLocaleString()+'건';
+    document.getElementById('wmUqWelfare').textContent=wmF(ws);
+    document.getElementById('wmUqCaptain').textContent=wmF(cs);
+}
+function wmUR(){
+    var d=WM.uqFiltered,s=WM.uqPage*WM.PS,e=Math.min(s+WM.PS,d.length),sl=d.slice(s,e),h='';
+    sl.forEach(function(g){
+        h+='<tr class="wm-unique-row'+(WM.uqSelected===g.idx?' selected':'')+'" onclick="wmUqSel('+g.idx+')">';
+        WM.uqCols.forEach(function(c){
+            var v=g[c.key];
+            if(c.badge){var bc=v==='취소'?'wm-b-cancel':v==='부분취소'?'wm-b-partial':'wm-b-done';h+='<td class="col-c"><span class="wm-badge '+bc+'">'+wmE(v)+'</span></td>'}
+            else if(c.cls==='wm-num')h+='<td class="wm-num">'+wmF(Number(v)||0)+'</td>';
+            else if(c.cls==='wm-id')h+='<td class="wm-id">'+wmE(String(v||''))+'</td>';
+            else h+='<td>'+wmE(String(v||''))+'</td>';
+        });h+='</tr>';
     });
-
-    if (slice.length === 0) {
-        html = '<tr><td colspan="'+WM.columns.length+'" style="text-align:center;padding:40px;color:#94a3b8">데이터가 없습니다</td></tr>';
-    }
-
-    document.getElementById('wmTbody').innerHTML = html;
-    document.getElementById('wmInfo').textContent = '필터: ' + data.length.toLocaleString() + '건 / 전체: ' + WM.raw.length.toLocaleString() + '건';
-
-    var totalPages = Math.ceil(data.length / WM.PAGE_SIZE) || 1;
-    document.getElementById('wmPageNum').textContent = (WM.page + 1) + ' / ' + totalPages;
-    document.getElementById('wmPrev').disabled = WM.page <= 0;
-    document.getElementById('wmNext').disabled = end >= data.length;
-
-    document.getElementById('wmScroll').scrollTop = 0;
+    if(!sl.length)h='<tr><td colspan="'+WM.uqCols.length+'" style="text-align:center;padding:40px;color:#94a3b8">데이터가 없습니다</td></tr>';
+    document.getElementById('wmUqTbody').innerHTML=h;
+    document.getElementById('wmUqInfo').textContent='필터: '+d.length.toLocaleString()+'건 / 전체: '+WM.uqGrouped.length.toLocaleString()+'건';
+    var tp=Math.ceil(d.length/WM.PS)||1;
+    document.getElementById('wmUqPageNum').textContent=(WM.uqPage+1)+' / '+tp;
+    document.getElementById('wmUqPrev').disabled=WM.uqPage<=0;
+    document.getElementById('wmUqNext').disabled=e>=d.length;
 }
-
-/* ── 페이지네이션 ── */
-function wmPage(dir) {
-    var maxPage = Math.ceil(WM.filtered.length / WM.PAGE_SIZE) - 1;
-    WM.page = Math.max(0, Math.min(maxPage, WM.page + dir));
-    wmRender();
-}
-
-/* ── 클립보드 복사 ── */
-function wmCopy(btn) {
-    var header = WM.columns.map(function(c){ return c.label; }).join('\t');
-    var lines = WM.filtered.map(function(r){
-        return WM.columns.map(function(c){
-            var v = r[c.key];
-            if (c.cls === 'wm-num' || c.cls === 'wm-amt') return Number(v)||0;
-            return String(v||'');
-        }).join('\t');
+function wmUqPage(dir){WM.uqPage=Math.max(0,Math.min(Math.ceil(WM.uqFiltered.length/WM.PS)-1,WM.uqPage+dir));wmUR()}
+function wmUqSel(idx){WM.uqSelected=idx;wmUR();wmURD()}
+function wmURD(){
+    var body=document.getElementById('wmUqDetailBody'),head=document.getElementById('wmUqDetailHead');
+    if(!WM.uqSelected){body.innerHTML='<div style="text-align:center;padding:40px;color:#94a3b8">좌측에서 주문을 선택하세요</div>';return}
+    var g=null;WM.uqGrouped.forEach(function(x){if(x.idx===WM.uqSelected)g=x});if(!g)return;
+    var rows=WM.idxMap[g.idx]||[];
+    head.textContent='#'+g.idx+' '+g.주문상품명;
+    var h='<div class="wm-detail-info">';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">고객사</div><div class="wm-detail-item__value" style="font-size:11px;font-family:\'Noto Sans KR\',sans-serif">'+wmE(g.comname)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">주문자</div><div class="wm-detail-item__value" style="font-size:11px;font-family:\'Noto Sans KR\',sans-serif">'+wmE(g.username)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">CID</div><div class="wm-detail-item__value" style="font-size:9px">'+wmE(g.couponId)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">주문일시</div><div class="wm-detail-item__value" style="font-size:10px">'+wmE(g.Firstdate)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">복지포인트</div><div class="wm-detail-item__value" style="color:#4a90d9">'+wmF(g.복지포인트)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">대장포인트</div><div class="wm-detail-item__value">'+wmF(g.대장포인트)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">최초결제</div><div class="wm-detail-item__value">'+wmF(g.firstpoint)+'</div></div>';
+    h+='<div class="wm-detail-item"><div class="wm-detail-item__label">잔여금액</div><div class="wm-detail-item__value">'+wmF(g.잔여금액)+'</div></div>';
+    h+='</div>';
+    h+='<div class="wm-detail-section">변경이력 ('+rows.length+'건)</div>';
+    h+='<div class="wm-detail-table"><table><thead><tr><th>이력IDX</th><th>로그일시</th><th>상태</th><th>복지pt</th><th>대장pt</th><th>적립금</th><th>비고</th></tr></thead><tbody>';
+    rows.slice().sort(function(a,b){return b.historyidx-a.historyidx}).forEach(function(r){
+        var acc=r['대장포인트적립LOG']>0;
+        h+='<tr'+(acc?' class="wm-accum-bg"':'')+'><td class="wm-num">'+r.historyidx+'</td><td>'+wmE(r.logdate)+'</td>';
+        var bc=r.상태==='취소'?'wm-b-cancel':r.상태==='부분취소'?'wm-b-partial':'wm-b-done';
+        h+='<td class="col-c"><span class="wm-badge '+bc+'">'+wmE(r.상태)+'</span></td>';
+        h+='<td class="wm-num">'+wmF(r['복지포인트LOG'])+'</td><td class="wm-num">'+wmF(r['대장포인트LOG'])+'</td>';
+        h+='<td class="wm-num"'+(acc?' style="color:#e85d5d;font-weight:700"':'')+'>'+wmF(r['대장포인트적립LOG'])+'</td>';
+        h+='<td class="wm-remark">'+wmE(r.비고||'')+'</td></tr>';
     });
-    var text = header + '\n' + lines.join('\n');
-    navigator.clipboard.writeText(text).then(function(){
-        btn.textContent = '복사됨';
-        btn.classList.add('copied');
-        setTimeout(function(){ btn.textContent = '클립보드 복사'; btn.classList.remove('copied'); }, 1500);
-    });
+    h+='</tbody></table></div>';body.innerHTML=h;
+}
+function wmUqCopy(btn){
+    var hd=WM.uqCols.map(function(c){return c.label}).join('\t');
+    var ls=WM.uqFiltered.map(function(g){return WM.uqCols.map(function(c){var v=g[c.key];return c.cls==='wm-num'?Number(v)||0:String(v||'')}).join('\t')});
+    navigator.clipboard.writeText(hd+'\n'+ls.join('\n')).then(function(){btn.textContent='복사됨';btn.classList.add('copied');setTimeout(function(){btn.textContent='클립보드 복사';btn.classList.remove('copied')},1500)});
+}
+function wmUqHot(key,el){
+    var now=new Date(),y=now.getFullYear(),m=now.getMonth(),s,e;
+    if(key==='thisMonth'){s=new Date(y,m,1);e=new Date(y,m+1,0)}
+    else if(key==='lastMonth'){s=new Date(y,m-1,1);e=new Date(y,m,0)}
+    else{s=new Date(y,m-2,1);e=new Date(y,m-1,0)}
+    document.getElementById('wmUqSD').value=wmDS(s);document.getElementById('wmUqED').value=wmDS(e);
+    el.parentElement.querySelectorAll('.wm-ctrl-btn:not(.primary)').forEach(function(b){b.classList.remove('active')});el.classList.add('active');wmUqFilter();
 }
 
-/* ── 유틸 ── */
-function wmFmt(v) {
-    if (v === 0) return '0';
-    return (v < 0 ? '-' : '') + Math.abs(v).toLocaleString();
-}
-
-function wmFmtShort(v) {
-    var p = v < 0 ? '-' : '', a = Math.abs(v);
-    if (a >= 1e8) return p + (a / 1e8).toFixed(1) + '억';
-    if (a >= 1e4) return p + Math.round(a / 1e4).toLocaleString() + '만';
-    return p + a.toLocaleString();
-}
-
-function wmEsc(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-/* ── 로딩 ── */
-function wmShowLoading(show, text, pct) {
-    var el = document.getElementById('wmLoading');
-    if (show) {
-        el.classList.remove('hidden');
-        if (text) document.getElementById('wmLoadingText').textContent = text;
-        if (pct !== undefined) document.getElementById('wmLoadingFill').style.width = pct + '%';
-    } else {
-        el.classList.add('hidden');
-    }
-}
-
-function wmSetStatus(msg, isErr) {
-    var el = document.getElementById('wmStatus2');
-    el.textContent = msg;
-    el.style.color = isErr ? '#e85d5d' : '#94a3b8';
-}
+/* utils */
+function wmSwitchTab(t,el){document.querySelectorAll('.wm-tab').forEach(function(x){x.classList.remove('active')});el.classList.add('active');document.getElementById('wmPanelAll').classList.toggle('active',t==='all');document.getElementById('wmPanelUnique').classList.toggle('active',t==='unique')}
+function wmBH(id,cols,sc,sd,fn){var h='<tr>';cols.forEach(function(c){var cl=sc===c.key?(sd==='asc'?' sorted-asc':' sorted-desc'):'';var st=c.w?' style="width:'+c.w+'"':'';h+='<th class="'+cl+'"'+st+' onclick="'+fn+"('"+c.key+"')"+'">'+(c.label)+'</th>'});h+='</tr>';document.getElementById(id).innerHTML=h}
+function wmSA(a,c,d){a.sort(function(x,y){var va=x[c],vb=y[c];if(typeof va==='number'&&typeof vb==='number')return d==='asc'?va-vb:vb-va;va=String(va||'');vb=String(vb||'');return d==='asc'?va.localeCompare(vb):vb.localeCompare(va)})}
+function wmF(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
+function wmE(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function wmDS(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function wmShowLoading(show,text,pct){var el=document.getElementById('wmLoading');if(show){el.classList.remove('hidden');if(text)document.getElementById('wmLoadingText').textContent=text;if(pct!==undefined)document.getElementById('wmLoadingFill').style.width=pct+'%'}else el.classList.add('hidden')}
+function wmSS(id,msg,err){var el=document.getElementById(id);if(el){el.textContent=msg;el.style.color=err?'#e85d5d':'#94a3b8'}}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')wmCloseSlide()});
 </script>
