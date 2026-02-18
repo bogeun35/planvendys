@@ -44,6 +44,11 @@
     .gnb-tab.active{color:var(--accent);background:var(--accent-dim);font-weight:500}
     .gnb-right{display:flex;align-items:center;gap:12px}
 
+    /* Hamburger button - hidden on desktop */
+    .gnb-hamburger{display:none;width:28px;height:28px;border:none;background:none;cursor:pointer;padding:4px;border-radius:4px;color:var(--text-secondary);transition:all .1s;flex-shrink:0}
+    .gnb-hamburger:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+    .gnb-hamburger svg{width:20px;height:20px}
+
     .search-box{position:relative;width:220px}
     .search-input{width:100%;padding:6px 10px 6px 30px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:5px;color:var(--text-primary);font-size:12px;font-family:inherit;outline:none;transition:all .15s}
     .search-input::placeholder{color:var(--text-muted)}
@@ -76,9 +81,18 @@
     .main-layout{display:none;margin-top:var(--gnb-h);height:calc(100vh - var(--gnb-h))}
     .main-layout.active{display:grid;grid-template-columns:var(--lnb-w) 1fr}
 
+    /* LNB backdrop overlay for mobile */
+    .lnb-backdrop{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,35,50,.3);z-index:150}
+    .lnb-backdrop.open{display:block}
+
     .lnb{background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;height:calc(100vh - var(--gnb-h));overflow:hidden}
     .lnb-header{padding:8px 10px 6px;border-bottom:1px solid var(--border-subtle);flex-shrink:0}
     .lnb-section-title{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)}
+    /* Mobile tabs inside LNB */
+    .lnb-mobile-tabs{display:none;padding:6px 8px;border-bottom:1px solid var(--border-subtle);gap:4px;flex-shrink:0;flex-wrap:wrap}
+    .lnb-mobile-tab{padding:3px 8px;border-radius:3px;font-size:11px;color:var(--text-muted);cursor:pointer;transition:all .1s;border:1px solid transparent}
+    .lnb-mobile-tab:hover{color:var(--text-secondary);background:var(--bg-tertiary)}
+    .lnb-mobile-tab.active{color:var(--accent);background:var(--accent-dim);border-color:var(--accent-border);font-weight:500}
     .lnb-tree{flex:1;overflow-y:auto;padding:4px 4px}
     .lnb-tree::-webkit-scrollbar{width:3px}
     .lnb-tree::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -130,11 +144,11 @@
     .child-page-card-title{font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:2px}
     .child-page-card-desc{font-size:11px;color:var(--text-muted);line-height:1.4}
 
-    /* ═══ GUIDE BUTTON ═══ */
+    /* Guide Button */
     .guide-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-muted);font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
     .guide-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
 
-    /* ═══ GUIDE MODAL ═══ */
+    /* Guide Modal */
     .guide-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,35,50,.35);z-index:500;align-items:center;justify-content:center}
     .guide-overlay.open{display:flex}
     .guide-modal{background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;width:min(720px,90vw);max-height:80vh;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.12)}
@@ -161,6 +175,66 @@
     .guide-modal-body hr{border:none;border-top:1px solid var(--border);margin:10px 0}
     .guide-modal-loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--text-muted);font-size:12px;gap:8px}
     .guide-modal-loading .spinner{width:14px;height:14px}
+
+    /* ═══ MOBILE RESPONSIVE ═══ */
+    @media (max-width: 768px) {
+      :root { --gnb-h: 44px; }
+
+      /* GNB: show hamburger, hide tabs/sep/search-kbd, shrink search */
+      .gnb-hamburger { display:flex }
+      .gnb-sep, .gnb-tabs, .search-kbd { display:none }
+      .gnb-left { gap:8px }
+      .gnb-brand { font-size:11px; letter-spacing:1.5px }
+      .search-box { width:140px }
+      .search-input { padding:5px 8px 5px 28px; font-size:11px }
+      .search-icon { left:7px; width:13px; height:13px }
+      .gnb-username { display:none }
+      .gnb-right { gap:8px }
+      .gnb { padding:0 8px }
+
+      /* Search results on mobile - full width */
+      .search-results { left:-60px; right:-40px; min-width:280px }
+
+      /* Main layout: single column, no LNB grid col */
+      .main-layout.active { grid-template-columns:1fr }
+
+      /* LNB: off-canvas drawer */
+      .lnb {
+        position:fixed; top:var(--gnb-h); left:0; bottom:0;
+        width:260px; z-index:160;
+        transform:translateX(-100%);
+        transition:transform .2s ease;
+        box-shadow:none;
+      }
+      .lnb.mobile-open {
+        transform:translateX(0);
+        box-shadow:4px 0 16px rgba(0,0,0,.08);
+      }
+      /* Show mobile tabs inside LNB */
+      .lnb-mobile-tabs { display:flex }
+      /* Larger touch targets for tree items */
+      .tree-row { padding:6px 8px; font-size:13px }
+
+      /* Content area: full width, less padding */
+      .content-area { padding:10px 12px 16px }
+
+      /* Hide breadcrumb on mobile */
+      .breadcrumb { display:none }
+
+      /* Doc title smaller */
+      .doc-title { font-size:17px }
+      .doc-meta { margin-bottom:8px; padding-bottom:6px }
+
+      /* Child page cards: 2 columns */
+      .child-pages { grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:4px }
+      .child-page-card { padding:8px 10px }
+      .child-page-card-title { font-size:11px }
+      .child-page-card-desc { font-size:10px }
+
+      /* Guide modal: nearly full screen */
+      .guide-modal { width:95vw; max-height:85vh; border-radius:4px }
+      .guide-modal-body { padding:12px 14px }
+    }
   </style>
 </head>
 <body>
@@ -181,6 +255,13 @@
 
   <header class="gnb" id="gnb">
     <div class="gnb-left">
+      <button class="gnb-hamburger" id="hamburgerBtn" onclick="toggleMobileLnb()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
       <div class="gnb-brand">Vendys Docs</div>
       <div class="gnb-sep"></div>
       <div class="gnb-tabs" id="gnbTabs"></div>
@@ -203,15 +284,19 @@
     </div>
   </header>
 
+  <!-- LNB backdrop for mobile -->
+  <div class="lnb-backdrop" id="lnbBackdrop" onclick="closeMobileLnb()"></div>
+
   <div class="main-layout" id="mainLayout">
-    <aside class="lnb">
+    <aside class="lnb" id="lnbAside">
       <div class="lnb-header"><div class="lnb-section-title" id="lnbTitle">문서</div></div>
+      <div class="lnb-mobile-tabs" id="lnbMobileTabs"></div>
       <div class="lnb-tree" id="lnbTree"></div>
     </aside>
     <main class="content-area" id="contentArea"></main>
   </div>
 
-  <!-- ═══ GUIDE MODAL ═══ -->
+  <!-- Guide Modal -->
   <div class="guide-overlay" id="guideOverlay" onclick="if(event.target===this)closeGuide()">
     <div class="guide-modal">
       <div class="guide-modal-header">
@@ -242,6 +327,24 @@ const expandedNodes = new Set();
 const pageCache = {};
 const guideCache = {};
 const searchIndex = [];
+let mobileLnbOpen = false;
+
+// ═══ MOBILE LNB ═══
+function isMobile() { return window.innerWidth <= 768; }
+
+function toggleMobileLnb() {
+  mobileLnbOpen ? closeMobileLnb() : openMobileLnb();
+}
+function openMobileLnb() {
+  mobileLnbOpen = true;
+  document.getElementById('lnbAside').classList.add('mobile-open');
+  document.getElementById('lnbBackdrop').classList.add('open');
+}
+function closeMobileLnb() {
+  mobileLnbOpen = false;
+  document.getElementById('lnbAside').classList.remove('mobile-open');
+  document.getElementById('lnbBackdrop').classList.remove('open');
+}
 
 // ═══ AUTH ═══
 function signIn() {
@@ -294,7 +397,7 @@ function parseMd(md) {
   function flushTable() {
     if (!inTable) return;
     var hdr = tableRows[0];
-    var body = tableRows.slice(2); // skip separator row
+    var body = tableRows.slice(2);
     var out = '<table><thead><tr>';
     hdr.forEach(function(c) { out += '<th>' + inlineMd(c.trim()) + '</th>'; });
     out += '</tr></thead><tbody>';
@@ -310,23 +413,16 @@ function parseMd(md) {
   }
 
   function inlineMd(s) {
-    // code spans first (to avoid processing inside them)
     s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-    // bold + italic
     s = s.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-    // bold
     s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    // italic
     s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    // links
     s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--accent)">$1</a>');
     return s;
   }
 
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i];
-
-    // code block toggle
     if (line.match(/^```/)) {
       if (!inCode) {
         flushList(); flushTable();
@@ -339,8 +435,6 @@ function parseMd(md) {
       continue;
     }
     if (inCode) { codeLines.push(line); continue; }
-
-    // table detection
     if (line.match(/^\|(.+)\|$/)) {
       flushList();
       var cells = line.slice(1, -1).split('|');
@@ -350,46 +444,29 @@ function parseMd(md) {
     } else if (inTable) {
       flushTable();
     }
-
-    // blank line
     if (line.trim() === '') { flushList(); continue; }
-
-    // headings
     var hm = line.match(/^(#{1,3})\s+(.+)/);
     if (hm) { flushList(); html.push('<h' + hm[1].length + '>' + inlineMd(hm[2]) + '</h' + hm[1].length + '>'); continue; }
-
-    // hr
     if (line.match(/^---+$/)) { flushList(); html.push('<hr>'); continue; }
-
-    // blockquote
     if (line.match(/^>\s?/)) { flushList(); html.push('<blockquote>' + inlineMd(line.replace(/^>\s?/, '')) + '</blockquote>'); continue; }
-
-    // unordered list
     var ulm = line.match(/^[\s]*[-*]\s+(.+)/);
     if (ulm) {
       if (!inList || listType !== 'ul') { flushList(); html.push('<ul>'); inList = true; listType = 'ul'; }
       html.push('<li>' + inlineMd(ulm[1]) + '</li>');
       continue;
     }
-
-    // ordered list
     var olm = line.match(/^[\s]*\d+\.\s+(.+)/);
     if (olm) {
       if (!inList || listType !== 'ol') { flushList(); html.push('<ol>'); inList = true; listType = 'ol'; }
       html.push('<li>' + inlineMd(olm[1]) + '</li>');
       continue;
     }
-
-    // paragraph
     flushList();
     html.push('<p>' + inlineMd(line) + '</p>');
   }
-
-  // flush remaining
   if (inCode) html.push('<pre><code>' + codeLines.join('\n').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</code></pre>');
   flushList();
   flushTable();
-
   return html.join('\n');
 }
 
@@ -400,7 +477,6 @@ async function openGuide(guideFile, title) {
   document.getElementById('guideModalTitle').textContent = title + ' 가이드';
   overlay.classList.add('open');
   body.innerHTML = '<div class="guide-modal-loading"><div class="spinner"></div> 로딩 중...</div>';
-
   try {
     var md;
     if (guideCache[guideFile]) {
@@ -416,7 +492,6 @@ async function openGuide(guideFile, title) {
     body.innerHTML = '<p style="color:var(--danger);font-size:12px">가이드 문서를 불러올 수 없습니다: ' + guideFile + '</p>';
   }
 }
-
 function closeGuide() {
   document.getElementById('guideOverlay').classList.remove('open');
 }
@@ -429,8 +504,8 @@ async function loadSitemap() {
     SECTIONS = data.sections;
     buildSearchIndex(SECTIONS);
     renderGnbTabs();
+    renderMobileTabs();
 
-    // hash에서 복원
     var hash = window.location.hash.replace('#', '');
     if (hash) {
       var parts = hash.split('/');
@@ -439,6 +514,7 @@ async function loadSitemap() {
       if (tabIdx >= 0 && tabIdx < SECTIONS.length) {
         currentTab = tabIdx;
         renderGnbTabs();
+        renderMobileTabs();
         document.getElementById("lnbTitle").textContent = SECTIONS[tabIdx].tab;
         renderTree();
         if (pageId && findInAll(pageId)) {
@@ -463,12 +539,10 @@ async function loadSitemap() {
 async function loadPageContent(page) {
   if (!page.file) return page.body || "";
   if (pageCache[page.id]) return pageCache[page.id];
-
   try {
     const res = await fetch(page.file + '?t=' + Date.now());
     if (!res.ok) throw new Error(res.status);
     let html = await res.text();
-
     const metaMatch = html.match(/<!--\s*([\s\S]*?)-->/);
     if (metaMatch) {
       const metaBlock = metaMatch[1];
@@ -476,7 +550,6 @@ async function loadPageContent(page) {
       if (metaLine) page._meta = metaLine[1].trim();
       html = html.replace(metaMatch[0], '').trim();
     }
-
     pageCache[page.id] = html;
     return html;
   } catch (e) {
@@ -484,7 +557,7 @@ async function loadPageContent(page) {
   }
 }
 
-// ═══ SCRIPT EXECUTOR (innerHTML로 삽입된 script 실행) ═══
+// ═══ SCRIPT EXECUTOR ═══
 function executeScripts(container) {
   var scripts = container.querySelectorAll('script');
   for (var i = 0; i < scripts.length; i++) {
@@ -509,25 +582,31 @@ function buildSearchIndex(sections) {
 function indexPages(pages, trail) {
   for (const p of pages) {
     searchIndex.push({
-      id: p.id,
-      title: p.title,
-      desc: p.desc || "",
+      id: p.id, title: p.title, desc: p.desc || "",
       path: [...trail, p.title].join(" > "),
     });
     if (p.children) indexPages(p.children, [...trail, p.title]);
   }
 }
 
-// ═══ GNB ═══
+// ═══ GNB TABS ═══
 function renderGnbTabs() {
   document.getElementById("gnbTabs").innerHTML = SECTIONS.map((s, i) =>
     '<div class="gnb-tab' + (i===currentTab?' active':'') + '" onclick="switchTab(' + i + ')">' + s.tab + '</div>'
   ).join("");
 }
 
+// ═══ MOBILE TABS (inside LNB) ═══
+function renderMobileTabs() {
+  document.getElementById("lnbMobileTabs").innerHTML = SECTIONS.map((s, i) =>
+    '<div class="lnb-mobile-tab' + (i===currentTab?' active':'') + '" onclick="switchTab(' + i + ')">' + s.tab + '</div>'
+  ).join("");
+}
+
 function switchTab(idx) {
   currentTab = idx;
   renderGnbTabs();
+  renderMobileTabs();
   document.getElementById("lnbTitle").textContent = SECTIONS[idx].tab;
   renderTree();
   const first = SECTIONS[idx].pages[0];
@@ -550,7 +629,7 @@ function treeNode(page) {
   const exp = expandedNodes.has(page.id);
   const act = currentPageId === page.id;
   return '<div>' +
-    '<div class="tree-row' + (act?' active':'') + '" onclick="navigateTo(\'' + page.id + '\')">' +
+    '<div class="tree-row' + (act?' active':'') + '" onclick="onTreeClick(\'' + page.id + '\')">' +
       '<span class="tree-toggle ' + (has?(exp?'expanded':''):'hidden') + '" onclick="event.stopPropagation();toggleNode(\'' + page.id + '\')">' +
         '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l10 7-10 7z"/></svg>' +
       '</span>' +
@@ -561,6 +640,12 @@ function treeNode(page) {
   '</div>';
 }
 function toggleNode(id){expandedNodes.has(id)?expandedNodes.delete(id):expandedNodes.add(id);renderTree()}
+
+// Tree click: navigate + close LNB on mobile
+function onTreeClick(id) {
+  navigateTo(id);
+  if (isMobile()) closeMobileLnb();
+}
 
 // ═══ FIND / PATH ═══
 function findPage(id,pages){for(const p of pages){if(p.id===id)return p;if(p.children){const f=findPage(id,p.children);if(f)return f}}return null}
@@ -577,7 +662,6 @@ async function navigateTo(id) {
   path.forEach(p => expandedNodes.add(p.id));
   renderTree();
 
-  // URL hash에 현재 상태 저장
   window.location.hash = currentTab + '/' + id;
 
   const el = document.getElementById("contentArea");
@@ -601,7 +685,6 @@ async function navigateTo(id) {
     ).join("") + '</div>';
   }
 
-  // guide 버튼: page에 guide 필드가 있으면 ? 버튼 표시
   var guideBtn = '';
   if (page.guide) {
     guideBtn = '<button class="guide-btn" onclick="openGuide(\'' + page.guide + '\',\'' + page.title.replace(/'/g,"\\'") + '\')" title="페이지 가이드">?</button>';
@@ -613,10 +696,8 @@ async function navigateTo(id) {
     '<div class="doc-body">' + body + childHtml + '</div>';
   el.scrollTop = 0;
 
-  // innerHTML로 삽입된 script 태그 실행
   executeScripts(el);
 
-  // 검색 인덱스에 본문 추가
   const idx = searchIndex.find(x => x.id === id);
   if (idx && !idx.text) idx.text = body.replace(/<[^>]*>/g, " ");
 }
@@ -657,8 +738,9 @@ searchInput.addEventListener("input", () => {
 
 function searchGo(id) {
   searchInput.value = ""; searchResults.classList.remove("open");
-  for (let i=0;i<SECTIONS.length;i++){if(findPage(id,SECTIONS[i].pages)){currentTab=i;renderGnbTabs();document.getElementById("lnbTitle").textContent=SECTIONS[i].tab;renderTree();break}}
+  for (let i=0;i<SECTIONS.length;i++){if(findPage(id,SECTIONS[i].pages)){currentTab=i;renderGnbTabs();renderMobileTabs();document.getElementById("lnbTitle").textContent=SECTIONS[i].tab;renderTree();break}}
   navigateTo(id);
+  if (isMobile()) closeMobileLnb();
 }
 
 document.addEventListener("click", e => {
@@ -670,6 +752,7 @@ document.addEventListener("keydown", e => {
   if(e.key==="Escape"){
     searchInput.blur();searchResults.classList.remove("open");
     closeGuide();
+    if (mobileLnbOpen) closeMobileLnb();
   }
 });
 function toggleUserMenu(){document.getElementById("userMenu").classList.toggle("open")}
