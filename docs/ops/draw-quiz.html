@@ -1,1 +1,534 @@
+<!--
+title: 오늘 뭐먹지? 그림퀴즈
+meta: 최종 수정: 2026.02.18
+-->
 
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap');
+.fq *{margin:0;padding:0;box-sizing:border-box}
+.fq{font-family:'Noto Sans KR',sans-serif;color:#1a1a1a;-webkit-font-smoothing:antialiased;line-height:1.4;font-size:14px;user-select:none;-webkit-user-select:none}
+
+/* Phone Frame */
+.fq-frame{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 80px);padding:24px 0}
+.fq-device{width:390px;height:844px;background:#fafafa;border-radius:44px;box-shadow:0 24px 80px rgba(0,0,0,.10),0 0 0 1px rgba(0,0,0,.05),inset 0 0 0 1px rgba(255,255,255,.8);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.fq-device::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:32px;background:#1a1a1a;border-radius:16px;z-index:200;pointer-events:none}
+.fq-app{flex:1;overflow:hidden;display:flex;flex-direction:column;margin-top:48px;margin-bottom:4px;position:relative;background:#fafafa}
+@media(max-width:480px){
+  .fq-frame{min-height:auto;padding:0}
+  .fq-device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none}
+  .fq-device::before{display:none}
+  .fq-app{margin-top:0;margin-bottom:0}
+}
+
+/* Screens */
+.fq-scr{display:none;flex-direction:column;flex:1;overflow:hidden}
+.fq-scr.active{display:flex}
+
+/* Home */
+.fq-home{padding:0 20px;display:flex;flex-direction:column;flex:1;overflow:hidden}
+.fq-home-top{padding:20px 0 10px;text-align:center;flex-shrink:0}
+.fq-home-icon{font-size:36px;margin-bottom:2px}
+.fq-home-title{font-size:20px;font-weight:900;letter-spacing:-.5px}
+.fq-home-sub{font-size:11px;color:#94a3b8;font-weight:500;margin-top:1px}
+.fq-home-body{flex:1;overflow-y:auto;padding-bottom:12px}
+
+/* Card */
+.fq-card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:14px;margin-bottom:10px}
+.fq-card-title{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.fq-input{width:100%;padding:10px 12px;border:1.5px solid #e2e2e2;border-radius:10px;font-size:14px;font-family:inherit;font-weight:600;color:#1a1a1a;background:#f8f8f8;outline:none;transition:border-color .15s}
+.fq-input:focus{border-color:#3b82f6}
+.fq-input::placeholder{color:#c0c0c0;font-weight:500}
+.fq-input-code{text-transform:uppercase;letter-spacing:.15em;font-weight:700;text-align:center;font-size:16px}
+.fq-row{display:flex;gap:8px;margin-top:8px}
+
+/* Buttons */
+.fq-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border:none;border-radius:10px;font-size:13px;font-family:inherit;font-weight:700;cursor:pointer;transition:all .12s;flex:1}
+.fq-btn:active{transform:scale(.97)}
+.fq-btn-primary{background:#3b82f6;color:#fff}
+.fq-btn-orange{background:#f59e0b;color:#fff}
+.fq-btn-ghost{background:transparent;border:1.5px solid #e2e2e2;color:#64748b;font-size:11px;padding:6px 10px;flex:none;border-radius:7px;font-family:inherit;font-weight:600;cursor:pointer}
+.fq-btn-sm{padding:7px 12px;font-size:11px;border-radius:7px}
+.fq-btn-green{background:#10b981;color:#fff;border:none;font-family:inherit;font-weight:700;cursor:pointer}
+.fq-btn-red{background:#ef4444;color:#fff;border:none;font-family:inherit;font-weight:700;cursor:pointer}
+
+/* Room list */
+.fq-rooms-title{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.fq-rooms-refresh{background:none;border:none;color:#3b82f6;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+.fq-room-list{display:flex;flex-direction:column;gap:5px}
+.fq-room-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;cursor:pointer;transition:all .12s}
+.fq-room-item:active{background:#f0f7ff;border-color:#93c5fd}
+.fq-room-host{font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px}
+.fq-room-meta{font-size:10px;color:#94a3b8;font-weight:500;margin-top:1px}
+.fq-room-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px}
+.fq-room-playing{background:#fef3c7;color:#d97706}
+.fq-room-waiting{background:#d1fae5;color:#059669}
+.fq-room-join{font-size:10px;font-weight:700;color:#3b82f6;padding:5px 12px;border:1.5px solid #3b82f6;border-radius:7px;background:transparent;cursor:pointer;font-family:inherit}
+.fq-room-empty{text-align:center;padding:16px;color:#c0c0c0;font-size:12px;font-weight:500}
+
+/* Game topbar */
+.fq-topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#fff;border-bottom:1px solid #f0f0f0;flex-shrink:0;min-height:36px}
+.fq-topbar-left{display:flex;align-items:center;gap:6px}
+.fq-back{background:none;border:none;font-size:16px;cursor:pointer;color:#64748b;padding:2px;line-height:1}
+.fq-room-code{font-size:12px;font-weight:800;letter-spacing:.1em}
+.fq-role-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px}
+.fq-role-host{background:#fef3c7;color:#d97706}
+.fq-role-guest{background:#dbeafe;color:#3b82f6}
+.fq-topbar-right{display:flex;gap:4px}
+
+/* Scores */
+.fq-scores{display:flex;flex-wrap:wrap;gap:3px;padding:4px 10px;flex-shrink:0}
+.fq-score-chip{display:flex;align-items:center;gap:3px;padding:3px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:6px;font-size:10px;font-weight:600;transition:all .15s}
+.fq-score-nick{color:#64748b}
+.fq-score-pts{font-weight:800;color:#3b82f6}
+.fq-score-chip.drawing{border-color:#3b82f6;background:#eff6ff}
+.fq-score-chip.top{border-color:#f59e0b;background:#fffbeb}
+.fq-score-chip.top .fq-score-pts{color:#f59e0b}
+.fq-score-rank{font-size:8px;color:#c0c0c0;margin-right:1px}
+
+/* Members */
+.fq-members{display:flex;flex-wrap:wrap;gap:3px;padding:3px 10px;flex-shrink:0}
+.fq-member{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:#f0f0f0;color:#64748b;display:flex;align-items:center;gap:3px}
+.fq-member-dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+.fq-member.host{background:#fef3c7;color:#d97706}
+
+/* Controls */
+.fq-controls{display:flex;gap:4px;padding:4px 10px;flex-shrink:0;flex-wrap:wrap}
+.fq-ctrl{padding:6px 12px;border:1px solid #e2e2e2;border-radius:7px;background:#fff;color:#64748b;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+.fq-ctrl:active{transform:scale(.96)}
+.fq-ctrl-start{background:#10b981;color:#fff;border-color:#10b981}
+.fq-ctrl-skip{background:#f59e0b;color:#fff;border-color:#f59e0b}
+.fq-ctrl-end{background:#ef4444;color:#fff;border-color:#ef4444}
+.fq-ctrl-words{background:#7c3aed;color:#fff;border-color:#7c3aed}
+
+/* Round bar */
+.fq-round-bar{display:flex;align-items:center;justify-content:space-between;padding:4px 10px;flex-shrink:0;font-size:10px;font-weight:700;color:#94a3b8}
+.fq-round-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px;background:#dbeafe;color:#3b82f6}
+
+/* Canvas */
+.fq-canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;position:relative;background:#fff;margin:0 8px;border-radius:10px;border:1px solid #e8e8e8}
+.fq-canvas-header{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.fq-canvas-status{font-size:10px;font-weight:700;color:#94a3b8}
+.fq-timer{font-size:11px;font-weight:800;padding:2px 8px;border-radius:4px;background:#f0f0f0;color:#64748b}
+.fq-timer.warning{background:#fef2f2;color:#ef4444;animation:fqP .5s ease-in-out infinite}
+@keyframes fqP{50%{transform:scale(1.06)}}
+.fq-canvas-wrap{position:relative;flex:1;min-height:0;background:#fff}
+.fq-canvas-wrap canvas{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
+.fq-waiting{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fafafa;z-index:5}
+.fq-waiting-icon{font-size:32px;margin-bottom:6px}
+.fq-waiting-text{font-size:13px;font-weight:700;color:#64748b;text-align:center;line-height:1.5}
+.fq-waiting-sub{font-size:11px;color:#c0c0c0;margin-top:3px}
+
+/* Toolbar */
+.fq-toolbar{display:flex;flex-direction:column;gap:3px;padding:5px 8px;border-top:1px solid #f0f0f0;flex-shrink:0}
+.fq-toolbar-row{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+.fq-tool-btn{width:28px;height:28px;border:1.5px solid #e2e2e2;border-radius:6px;background:#f8f8f8;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .12s}
+.fq-tool-btn:active{transform:scale(.92)}
+.fq-tool-btn.active{border-color:#3b82f6;background:#eff6ff}
+.fq-color-btn{width:20px;height:20px;border-radius:50%;border:2px solid #e2e2e2;cursor:pointer;transition:all .12s;flex-shrink:0}
+.fq-color-btn.active{border-color:#1a1a1a;box-shadow:0 0 0 2px #dbeafe;transform:scale(1.15)}
+.fq-color-picker{width:20px;height:20px;border:2px solid #e2e2e2;border-radius:50%;padding:0;cursor:pointer;background:none;-webkit-appearance:none;appearance:none;overflow:hidden;flex-shrink:0}
+.fq-color-picker::-webkit-color-swatch-wrapper{padding:0}
+.fq-color-picker::-webkit-color-swatch{border:none;border-radius:50%}
+.fq-size-range{width:46px;accent-color:#3b82f6}
+
+/* Word display */
+.fq-word-display{text-align:center;padding:6px 10px;border-top:1px solid #f0f0f0;flex-shrink:0}
+.fq-word-label{font-size:9px;color:#c0c0c0;font-weight:600}
+.fq-word-text{font-size:16px;font-weight:900;color:#3b82f6;margin-top:1px;letter-spacing:.05em}
+.fq-word-hint{font-size:14px;font-weight:700;color:#c0c0c0;margin-top:1px;letter-spacing:.15em}
+
+/* Chat */
+.fq-chat{display:flex;flex-direction:column;max-height:150px;border-top:1px solid #e8e8e8;flex-shrink:0;background:#fff;margin:0 8px 4px;border-radius:0 0 10px 10px;overflow:hidden}
+.fq-chat-toggle{display:flex;align-items:center;justify-content:center;padding:4px;cursor:pointer;font-size:10px;font-weight:700;color:#94a3b8;gap:5px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.fq-chat-arrow{transition:transform .2s;font-size:9px}
+.fq-chat.collapsed .fq-chat-arrow{transform:rotate(180deg)}
+.fq-chat.collapsed .fq-chat-msgs,.fq-chat.collapsed .fq-chat-input-row{display:none}
+.fq-chat.collapsed{max-height:26px}
+.fq-chat-badge{display:inline-block;min-width:14px;height:14px;line-height:14px;border-radius:7px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;text-align:center;margin-left:3px}
+.fq-chat-msgs{flex:1;overflow-y:auto;padding:4px 8px;display:flex;flex-direction:column;gap:2px;min-height:0;max-height:80px}
+.fq-chat-msg{font-size:11px;padding:2px 7px;border-radius:5px;max-width:90%;word-break:break-word}
+.fq-chat-msg.system{background:#f0f0f0;color:#94a3b8;font-weight:600;text-align:center;align-self:center;font-size:10px}
+.fq-chat-msg.correct{background:#d1fae5;color:#059669;font-weight:700;text-align:center;align-self:center;font-size:10px}
+.fq-chat-msg.user{background:#f0f0f0}
+.fq-chat-msg .nick{font-weight:700;color:#3b82f6;margin-right:3px}
+.fq-chat-input-row{display:flex;gap:5px;padding:5px 7px;border-top:1px solid #f0f0f0;flex-shrink:0}
+.fq-chat-input{flex:1;padding:7px 10px;border:1.5px solid #e2e2e2;border-radius:7px;font-size:12px;font-family:inherit;font-weight:600;outline:none;color:#1a1a1a}
+.fq-chat-input:focus{border-color:#3b82f6}
+.fq-chat-send{padding:7px 12px;background:#3b82f6;color:#fff;border:none;border-radius:7px;font-weight:700;cursor:pointer;font-family:inherit;font-size:11px}
+
+/* Overlays */
+.fq-ov-correct{position:absolute;inset:0;background:rgba(16,185,129,.92);display:none;align-items:center;justify-content:center;z-index:50;flex-direction:column;gap:6px;border-radius:10px}
+.fq-ov-correct.show{display:flex}
+.fq-ov-correct .big{font-size:18px;font-weight:900;color:#fff}
+.fq-ov-correct .sub{font-size:13px;color:rgba(255,255,255,.8);font-weight:600}
+.fq-ov-gameover{position:absolute;inset:0;background:rgba(15,23,42,.92);display:none;align-items:center;justify-content:center;z-index:60;flex-direction:column;gap:10px;backdrop-filter:blur(4px);border-radius:10px}
+.fq-ov-gameover.show{display:flex}
+.fq-go-title{font-size:16px;font-weight:900;color:#fff}
+.fq-go-list{display:flex;flex-direction:column;gap:5px;min-width:200px}
+.fq-go-item{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:rgba(255,255,255,.08);border-radius:7px;color:#fff;font-weight:600;font-size:12px}
+.fq-go-item.first{background:rgba(245,158,11,.3);border:1px solid rgba(245,158,11,.5)}
+.fq-go-pts{font-weight:900;font-size:13px}
+.fq-go-close{margin-top:6px;padding:8px 22px;background:#fff;color:#1a1a1a;border:none;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
+
+/* Modal */
+.fq-modal{position:absolute;inset:0;background:rgba(15,23,42,.4);display:none;align-items:center;justify-content:center;z-index:70;backdrop-filter:blur(4px)}
+.fq-modal.show{display:flex}
+.fq-modal-box{background:#fff;border-radius:14px;padding:18px;width:calc(100% - 28px);max-width:320px;max-height:80%;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.12)}
+.fq-modal-title{font-size:14px;font-weight:800;text-align:center;margin-bottom:10px}
+.fq-modal-close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:16px;cursor:pointer;color:#c0c0c0;line-height:1}
+.fq-word-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.fq-word-chip{padding:7px 12px;background:#f0f0f0;border:1px solid #e2e2e2;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all .12s;font-family:inherit}
+.fq-word-chip:active{background:#dbeafe;border-color:#93c5fd;color:#3b82f6}
+.fq-round-opts{display:flex;gap:5px;justify-content:center;margin:8px 0}
+.fq-round-opt{padding:8px 14px;border:2px solid #e2e2e2;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;background:#f8f8f8;color:#64748b;transition:all .12s;font-family:inherit}
+.fq-round-opt.active{border-color:#3b82f6;background:#3b82f6;color:#fff}
+
+/* Word manager */
+.fq-cat-tabs{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
+.fq-cat-tab{padding:4px 10px;border:1px solid #e2e2e2;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;background:#f8f8f8;color:#64748b;font-family:inherit}
+.fq-cat-tab.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.fq-cat-count{font-size:9px;opacity:.7;margin-left:2px}
+.fq-word-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;min-height:24px;max-height:100px;overflow-y:auto}
+.fq-word-tag{display:flex;align-items:center;gap:2px;padding:2px 7px;background:#f0f0f0;border:1px solid #e2e2e2;border-radius:4px;font-size:10px;font-weight:600}
+.fq-word-del{background:none;border:none;color:#ef4444;cursor:pointer;font-size:9px;font-weight:700;padding:0 1px}
+.fq-add-row{display:flex;gap:4px;margin-top:6px}
+.fq-add-row input{flex:1;padding:6px 8px;border:1.5px solid #e2e2e2;border-radius:5px;font-size:11px;font-family:inherit;font-weight:600;outline:none}
+.fq-add-row input:focus{border-color:#3b82f6}
+.fq-word-stats{font-size:10px;color:#c0c0c0;margin-bottom:6px;text-align:center}
+
+/* Toast */
+.fq-toast{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:7px 18px;border-radius:14px;font-size:11px;font-weight:600;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+.fq-toast.show{opacity:1}
+
+/* Streak */
+.fq-streak{display:inline-block;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:6px;margin-left:3px;animation:fqSP .3s ease}
+@keyframes fqSP{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+</style>
+
+
+<div class="fq" id="fqRoot">
+<div class="fq-frame">
+<div class="fq-device">
+<div class="fq-app" id="fqApp">
+  <div class="fq-toast" id="fqToast"></div>
+
+  <!-- HOME -->
+  <div class="fq-scr active" id="scr-home">
+    <div class="fq-home">
+      <div class="fq-home-top">
+        <div class="fq-home-icon">🍛</div>
+        <div class="fq-home-title">오늘 뭐먹지?</div>
+        <div class="fq-home-sub">그려서 맞추는 음식 퀴즈</div>
+      </div>
+      <div class="fq-home-body">
+        <div class="fq-card">
+          <div class="fq-card-title">방 만들기</div>
+          <input class="fq-input" id="fq-host-nick" placeholder="닉네임" maxlength="10">
+          <div class="fq-row"><button class="fq-btn fq-btn-primary" onclick="fqCreateRoom()">방 만들기</button></div>
+        </div>
+        <div class="fq-card">
+          <div class="fq-card-title">코드로 참여</div>
+          <input class="fq-input fq-input-code" id="fq-join-code" placeholder="6자리 코드" maxlength="6">
+          <input class="fq-input" id="fq-join-nick" placeholder="닉네임" maxlength="10" style="margin-top:6px">
+          <div class="fq-row"><button class="fq-btn fq-btn-orange" onclick="fqJoinRoom()">참여하기</button></div>
+        </div>
+        <div class="fq-card">
+          <div class="fq-rooms-title">
+            <span>열린 방 목록</span>
+            <button class="fq-rooms-refresh" onclick="fqRefreshRooms()">새로고침</button>
+          </div>
+          <div class="fq-room-list" id="fq-room-list">
+            <div class="fq-room-empty">방 목록을 불러오는 중...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="fq-scr fq-game" id="scr-game">
+    <div class="fq-topbar">
+      <div class="fq-topbar-left">
+        <button class="fq-back" onclick="fqLeaveRoom()">←</button>
+        <span class="fq-room-code" id="fq-g-code"></span>
+        <span class="fq-role-badge" id="fq-g-role"></span>
+      </div>
+      <div class="fq-topbar-right">
+        <button class="fq-btn-ghost" onclick="fqCopyCode()">코드</button>
+        <button class="fq-btn-ghost" onclick="fqCopyLink()">링크</button>
+      </div>
+    </div>
+    <div class="fq-round-bar" id="fq-round-bar" style="display:none">
+      <span id="fq-round-label">라운드</span>
+      <span class="fq-round-badge" id="fq-round-badge">0 / 0</span>
+    </div>
+    <div class="fq-scores" id="fq-scoreboard"></div>
+    <div class="fq-members" id="fq-members"></div>
+    <div class="fq-controls" id="fq-host-controls" style="display:none">
+      <button class="fq-ctrl fq-ctrl-start" id="fq-btn-start" onclick="fqOnStartClick()">게임 시작</button>
+      <button class="fq-ctrl fq-ctrl-skip" id="fq-btn-skip" onclick="fqSkipRound()" style="display:none">스킭</button>
+      <button class="fq-ctrl fq-ctrl-words" onclick="fqOpenWordMgr()">제시어</button>
+      <button class="fq-ctrl fq-ctrl-end" id="fq-btn-end" onclick="fqEndGame()" style="display:none">종료</button>
+    </div>
+    <div class="fq-canvas-area" id="fq-canvas-area">
+      <div class="fq-canvas-header">
+        <span class="fq-canvas-status" id="fq-canvas-status">대기 중</span>
+        <span class="fq-timer" id="fq-timer">--</span>
+      </div>
+      <div class="fq-canvas-wrap" id="fq-canvas-wrap">
+        <canvas id="fq-canvas" width="800" height="600"></canvas>
+        <div class="fq-waiting" id="fq-waiting">
+          <div class="fq-waiting-icon">🍛</div>
+          <div class="fq-waiting-text">방장이 게임을 시작하면<br>음식 그림퀴즈가 시작됩니다</div>
+          <div class="fq-waiting-sub" id="fq-waiting-sub"></div>
+        </div>
+        <div class="fq-ov-correct" id="fq-ov-correct">
+          <div class="big" id="fq-correct-who"></div>
+          <div class="sub" id="fq-correct-word"></div>
+        </div>
+        <div class="fq-ov-gameover" id="fq-ov-gameover">
+          <div class="fq-go-title">게임 종료</div>
+          <div class="fq-go-list" id="fq-go-list"></div>
+          <button class="fq-go-close" onclick="fqCloseGO()">확인</button>
+        </div>
+      </div>
+      <div class="fq-toolbar" id="fq-toolbar" style="display:none">
+        <div class="fq-toolbar-row">
+          <button class="fq-tool-btn active" data-tool="pen" onclick="fqSetTool('pen',this)">✎</button>
+          <button class="fq-tool-btn" data-tool="line" onclick="fqSetTool('line',this)">╱</button>
+          <button class="fq-tool-btn" data-tool="rect" onclick="fqSetTool('rect',this)">□</button>
+          <button class="fq-tool-btn" data-tool="circle" onclick="fqSetTool('circle',this)">○</button>
+          <button class="fq-tool-btn" data-tool="eraser" onclick="fqSetTool('eraser',this)">␡</button>
+          <button class="fq-tool-btn" data-tool="fill" onclick="fqSetTool('fill',this)">◼</button>
+          <button class="fq-tool-btn" onclick="fqUndo()">↶</button>
+          <button class="fq-tool-btn" onclick="fqClearCanvas()">🗑</button>
+          <input type="range" class="fq-size-range" min="2" max="20" value="4" oninput="fqBrushSize=this.value">
+        </div>
+        <div class="fq-toolbar-row">
+          <div class="fq-color-btn active" style="background:#0F172A" onclick="fqSetColor('#0F172A',this)"></div>
+          <div class="fq-color-btn" style="background:#64748B" onclick="fqSetColor('#64748B',this)"></div>
+          <div class="fq-color-btn" style="background:#DC2626" onclick="fqSetColor('#DC2626',this)"></div>
+          <div class="fq-color-btn" style="background:#F97316" onclick="fqSetColor('#F97316',this)"></div>
+          <div class="fq-color-btn" style="background:#EAB308" onclick="fqSetColor('#EAB308',this)"></div>
+          <div class="fq-color-btn" style="background:#22C55E" onclick="fqSetColor('#22C55E',this)"></div>
+          <div class="fq-color-btn" style="background:#059669" onclick="fqSetColor('#059669',this)"></div>
+          <div class="fq-color-btn" style="background:#06B6D4" onclick="fqSetColor('#06B6D4',this)"></div>
+          <div class="fq-color-btn" style="background:#2563EB" onclick="fqSetColor('#2563EB',this)"></div>
+          <div class="fq-color-btn" style="background:#7C3AED" onclick="fqSetColor('#7C3AED',this)"></div>
+          <div class="fq-color-btn" style="background:#EC4899" onclick="fqSetColor('#EC4899',this)"></div>
+          <div class="fq-color-btn" style="background:#A16207" onclick="fqSetColor('#A16207',this)"></div>
+          <div class="fq-color-btn" style="background:#FFFFFF;border-color:#ccc" onclick="fqSetColor('#FFFFFF',this)"></div>
+          <input type="color" class="fq-color-picker" id="fq-color-picker" value="#0F172A" oninput="fqSetColorPicker(this.value)">
+        </div>
+      </div>
+      <div class="fq-word-display" id="fq-word-display" style="display:none"></div>
+    </div>
+    <div class="fq-chat" id="fq-chat-panel">
+      <div class="fq-chat-toggle" onclick="fqToggleChat()">
+        <span class="fq-chat-arrow" id="fq-chat-arrow">▼</span>
+        <span>채팅</span>
+        <span class="fq-chat-badge" id="fq-chat-badge" style="display:none">0</span>
+      </div>
+      <div class="fq-chat-msgs" id="fq-chat-msgs"></div>
+      <div class="fq-chat-input-row">
+        <input class="fq-chat-input" id="fq-chat-input" placeholder="정답 입력..." maxlength="30" onkeydown="if(event.key==='Enter')fqSendChat()">
+        <button class="fq-chat-send" onclick="fqSendChat()">전송</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div class="fq-modal" id="fq-modal-round">
+    <div class="fq-modal-box" style="max-width:280px">
+      <div class="fq-modal-title">게임 설정</div>
+      <div style="font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:4px">총 라운드</div>
+      <div class="fq-round-opts" id="fq-round-opts">
+        <div class="fq-round-opt" onclick="fqPickRound(5,this)">5</div>
+        <div class="fq-round-opt active" onclick="fqPickRound(10,this)">10</div>
+        <div class="fq-round-opt" onclick="fqPickRound(15,this)">15</div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:4px">제한 시간</div>
+      <div class="fq-round-opts" id="fq-time-opts">
+        <div class="fq-round-opt active" onclick="fqPickTime(60,this)">60s</div>
+        <div class="fq-round-opt" onclick="fqPickTime(90,this)">90s</div>
+        <div class="fq-round-opt" onclick="fqPickTime(120,this)">120s</div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:4px">출제 방식</div>
+      <div class="fq-round-opts" id="fq-drawer-opts">
+        <div class="fq-round-opt active" onclick="fqPickDrawer('winner',this)">정답자</div>
+        <div class="fq-round-opt" onclick="fqPickDrawer('sequential',this)">순서대로</div>
+      </div>
+      <div class="fq-row" style="margin-top:10px"><button class="fq-btn fq-btn-primary" onclick="fqConfirmStart()" style="flex:1">게임 시작</button></div>
+    </div>
+  </div>
+  <div class="fq-modal" id="fq-modal-word">
+    <div class="fq-modal-box">
+      <div class="fq-modal-title">제시어를 선택하세요</div>
+      <div class="fq-word-chips" id="fq-word-suggestions"></div>
+      <div style="text-align:center;color:#c0c0c0;font-size:10px;margin-top:8px">또는 직접 입력</div>
+      <input class="fq-input" id="fq-word-input" placeholder="직접 입력..." maxlength="20" style="margin-top:5px" onkeydown="if(event.key==='Enter')fqSubmitWord()">
+      <div class="fq-row" style="margin-top:8px"><button class="fq-btn fq-btn-primary" onclick="fqSubmitWord()" style="flex:1">시작</button></div>
+    </div>
+  </div>
+  <div class="fq-modal" id="fq-modal-wordmgr">
+    <div class="fq-modal-box" style="max-width:340px">
+      <button class="fq-modal-close" onclick="fqCloseWordMgr()">✕</button>
+      <div class="fq-modal-title">제시어 관리</div>
+      <div class="fq-word-stats" id="fq-word-stats"></div>
+      <div class="fq-cat-tabs" id="fq-cat-tabs"></div>
+      <div class="fq-word-tags" id="fq-word-tags"></div>
+      <div class="fq-add-row">
+        <input id="fq-add-word" placeholder="제시어 추가..." maxlength="20" onkeydown="if(event.key==='Enter')fqAddWord()">
+        <button class="fq-btn fq-btn-green fq-btn-sm" onclick="fqAddWord()">추가</button>
+      </div>
+      <div class="fq-add-row" style="margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0">
+        <input id="fq-add-cat" placeholder="새 카테고리..." maxlength="10" onkeydown="if(event.key==='Enter')fqAddCat()">
+        <button class="fq-btn fq-btn-primary fq-btn-sm" onclick="fqAddCat()">추가</button>
+        <button class="fq-btn fq-btn-red fq-btn-sm" onclick="fqDelCat()">삭제</button>
+      </div>
+      <div style="margin-top:8px;text-align:center">
+        <button class="fq-btn fq-btn-orange fq-btn-sm" onclick="fqSeedWords()">기본 제시어 초기화</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+
+(function(){if(!firebase.apps.length){firebase.initializeApp({apiKey:"AIzaSyAQE9oQRDUmeX6ZPO2KOcfd1ctBqt6v34w",authDomain:"vendys-b1fea.firebaseapp.com",databaseURL:"https://vendys-b1fea-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"vendys-b1fea",storageBucket:"vendys-b1fea.firebasestorage.app",messagingSenderId:"392583358946",appId:"1:392583358946:web:7a6b0cc2a99ec2e08db1bb"});}})();
+var fqDb=firebase.database();
+
+var fqRoom=null,fqIsHost=false,fqMyNick='',fqListeners=[],fqMembersData={};
+var fqGameState=null,fqScoresData={},fqWordBank={},fqAllWords=[];
+var fqDrawCtx=null,fqDrawing=false,fqLastX=0,fqLastY=0;
+var fqCurrentTool='pen',fqBrushColor='#0F172A',fqBrushSize=4;
+var fqStrokeBuf=[],fqStrokeTimer=null,fqTimerInterval=null;
+var fqSelectedCat='',fqTotalRounds=10,fqDrawerMode='winner',fqRoundTime=60;
+var fqShapeStartX=0,fqShapeStartY=0,fqCanvasSnap=null,fqShiftHeld=false;
+var fqUndoKeys=[],fqCanvasData={},fqCanvasKeyOrder=[];
+var fqStreakMap={},fqHintStage=0,fqCachedPartial='',fqHintRound=0;
+var fqUnreadChat=0;
+var SHAPE_TOOLS=['line','rect','circle'];
+var AUTO_NEXT=3000,NICK_KEY='fq_vendys_nick';
+
+var DEFAULT_WORDS={"한식 밥류": ["비빔밥", "김치볶음밥", "돌솥비빔밥", "오므라이스", "제육덮밥", "카레라이스", "하이라이스", "김치찌개", "된장찌개", "순두부찌개", "부대찌개", "감자탕", "설렁탕", "갈비탕", "삼계탕", "육개장", "콩나물국밥", "뼈해장국", "소머리국밥", "순대국밥", "해물탕", "아귀탕", "매운탕", "대구탕", "추어탕", "곰탕", "잔치국수", "비빔국수", "칼국수", "수제비", "떡국", "떡만둣국", "열무냉면", "물냉면", "비빔냉면", "밀면", "콩국수", "쌈밥", "보쌈", "족발"], "한식 반찬류": ["김치", "깍두기", "총각김치", "동치미", "갓김치", "잡채", "불고기", "갈비찜", "제육볶음", "닭갈비", "떡갈비", "장조림", "시금치나물", "콩나물무침", "도토리묵", "감자조림", "어묵볶음", "멸치볶음", "고등어조림", "두부조림", "계란찜", "계란말이", "김치전", "파전", "해물파전", "감자전", "빈대떡", "녹두전", "동그랑땡", "탕수육", "수육", "편육", "산적", "갈비", "LA갈비", "양념갈비"], "분식": ["떡볶이", "라볶이", "치즈떡볶이", "로제떡볶이", "김밥", "참치김밥", "치즈김밥", "충무김밥", "꼬마김밥", "누드김밥", "순대", "찐만두", "군만두", "물만두", "잔치국수", "쫄면", "라면", "짜파게티", "너구리", "신라면", "비빔면", "불닭볶음면", "컵라면", "어묵", "오뎅", "핫도그", "모짜렐라핫도그", "감자핫도그", "토스트", "계란토스트", "햄치즈토스트", "호떡", "붕어빵", "국화빵", "타코야끼", "꽈배기", "소떡소떡", "떡꼬치", "어묵꼬치", "치즈볼", "감자튀김", "닭꼬치", "달걀빵", "왕만두", "물떡", "치즈스틱"], "중식": ["짜장면", "짬뽕", "볶음밥", "유니짜장", "간짜장", "쟁반짜장", "삼선짜장", "울면", "기스면", "마파두부", "깐풍기", "깐풍새우", "마라탕", "마라샹궈", "훠궈", "팔보채", "동파육", "깐쇼새우", "류산슬", "라조기", "양장피", "탕수육", "꿔바로우", "멘보샤", "춘권", "군만두", "딤섬", "샤오롱바오", "하가우", "차슈", "베이징덕", "볶음면", "우육면", "단단면", "계란볶음밥", "새우볶음밥", "해물누룽지탕", "잡탕밥"], "일식": ["초밥", "회덮밥", "참치회", "연어회", "광어회", "우동", "소바", "돈코츠라멘", "미소라멘", "쇼유라멘", "돈까스", "치즈돈까스", "카레돈까스", "가츠동", "규동", "오야코동", "텐동", "장어덮밥", "타코야키", "오코노미야키", "야키소바", "에비후라이", "가라아게", "데리야키치킨", "스키야키", "샤부샤부", "타마고야키", "고로케", "카레우동", "나베", "모찌", "다이후쿠", "타이야키", "도라야키", "멜론빵", "카스테라"], "양식": ["스테이크", "파스타", "까르보나라", "토마토파스타", "알리오올리오", "봉골레", "크림파스타", "로제파스타", "라자냐", "뇨끼", "리조또", "해물리조또", "버섯리조또", "피자", "마르게리타", "페퍼로니피자", "하와이안피자", "고르곤졸라피자", "햄버거", "치즈버거", "더블버거", "베이컨버거", "감자튀김", "양파링", "치킨너겟", "바비큐립", "미트볼", "그라탕", "퀘사디아", "부리또", "타코", "나초", "시저샐러드", "카프레제", "미네스트로네", "클램차우더", "프렌치토스트", "오믈렛", "에그베네딕트"], "치킨": ["후라이드치킨", "양념치킨", "간장치킨", "마늘치킨", "파닭", "깐풍치킨", "허니콤보", "반반치킨", "순살치킨", "뿌링클", "고추바사삭", "레드콤보", "황금올리브", "치킨무", "치즈볼", "웨지감자", "블랙치킨", "스노윙치킨", "핫크리스피", "윙봉", "닭다리", "닭날개", "치킨텐더", "크리스피치킨", "소이갈릭", "로스트치킨", "닭강정", "양념닭강정", "허니버터치킨", "마라치킨"], "디저트": ["케이크", "치즈케이크", "초콜릿케이크", "딸기케이크", "당근케이크", "티라미수", "마카롱", "에클레어", "크로와상", "크로플", "와플", "팬케이크", "수플레", "푸딩", "타르트", "에그타르트", "파이", "애플파이", "크림브뤼레", "빙수", "팥빙수", "망고빙수", "인절미빙수", "젤라토", "아이스크림", "소프트아이스크림", "아포가토", "찹쌀떡", "약과", "양갱", "카스테라", "쿠키", "브라우니", "머핀", "스콘", "도넛", "츄러스", "경단", "호두파이"], "음료": ["아메리카노", "카페라떼", "카푸치노", "바닐라라떼", "카라멜마키아토", "모카", "에스프레소", "콜드브루", "아이스티", "레몬에이드", "자몽에이드", "복숭아아이스티", "말차라떼", "고구마라떼", "밀크티", "타로밀크티", "버블티", "흑당라떼", "스무디", "딸기스무디", "망고스무디", "식혜", "수정과", "매실차", "유자차", "생강차", "녹차", "히비스커스", "루이보스차", "오렌지주스"], "동남아": ["쌀국수", "분짜", "반미", "팟타이", "똠양꿍", "솜탐", "카오팟", "망고밥", "그린커리", "레드커리", "마살라", "나시고렝", "미고렝", "사테이", "짜조", "월남쌈", "반쎄오", "팟씨유", "카오소이", "카오만까이", "뿌팟퐁커리", "태국밀크티", "코코넛밀크", "볶음쌀국수", "고이꾸온", "라끄사", "로띠", "바인미", "렌당", "냥캣", "사테", "테이크아웃커리", "망고빙수"], "해산물": ["회", "광어회", "우럭회", "참치회", "연어회", "전복", "굴", "소라", "조개구이", "가리비", "홍합찜", "랍스터", "킹크랩", "대게", "꽃게", "간장게장", "양념게장", "새우구이", "새우튀김", "오징어볶음", "쭈꾸미볶음", "낙지볶음", "문어숙회", "해물찜", "아구찜", "전복죽", "미역국", "해물탕", "간장새우", "랍스터구이", "장어구이", "바지락칼국수", "해물짬뽕"], "고기": ["삼겹살", "목살", "항정살", "가브리살", "차돌박이", "꽃등심", "안심스테이크", "등심스테이크", "티본스테이크", "소갈비", "돼지갈비", "양갈비", "양꼬치", "곱창", "대창", "막창", "소혀", "육회", "닭갈비", "오리구이", "오리훈제", "불고기", "LA갈비", "수비드스테이크", "로스트비프", "갈비찜", "보쌈", "족발", "편육", "육사시미", "스페어립", "떡심", "우삼겹", "한우등심"], "빵류": ["식빵", "바게트", "크로와상", "베이글", "소보로빵", "단팥빵", "크림빵", "카레빵", "마늘빵", "치아바타", "포카치아", "브리오슈", "호밀빵", "통밀빵", "소시지빵", "모닝빵", "호두빵", "옥수수빵", "밤빵", "초코빵", "찹쌀빵", "감자빵", "치즈빵", "프레첼", "난", "또띠아", "잉글리쉬머핀", "스콘", "피자빵", "양파빵"], "세계음식": ["타코", "부리또", "퀘사디아", "나초", "팔라펠", "후무스", "케밥", "샤와르마", "피타", "무사카", "파에야", "가스파초", "크로켓", "피시앤칩스", "로스트비프", "셰퍼드파이", "반미", "딤섬", "탄두리치킨", "사모사", "갈릭브레드", "브루스케타", "리소토", "폴렌타", "갈릭슈림프", "하와이안포케", "아히포케", "감바스", "빠넬라", "추로스", "보르시치", "닭티카마살라", "무스", "라따뚜이", "갈비안", "리솔레", "엠파나다", "칠리콘카르네"]};
+
+function fqSanitize(s){return s.replace(/[.#$/\[\]]/g,'_');}
+function fqEsc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function fqToast(m){var t=document.getElementById('fqToast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+function fqShowScr(id){document.querySelectorAll('#fqApp .fq-scr').forEach(function(s){s.classList.remove('active');});document.getElementById('scr-'+id).classList.add('active');}
+function fqGetNick(){return localStorage.getItem(NICK_KEY)||'';}
+function fqSaveNick(n){localStorage.setItem(NICK_KEY,n);}
+function fqGenCode(){var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',r='';for(var i=0;i<6;i++)r+=c[Math.floor(Math.random()*c.length)];return r;}
+function fqMakeHint(w){return w.split('').map(function(){return '_';}).join(' ');}
+var CHOSUNG=['\u3131','\u3132','\u3134','\u3137','\u3138','\u3139','\u3141','\u3142','\u3143','\u3145','\u3146','\u3147','\u3148','\u3149','\u314A','\u314B','\u314C','\u314D','\u314E'];
+function fqGetCho(ch){var c=ch.charCodeAt(0)-0xAC00;if(c<0||c>11171)return '_';return CHOSUNG[Math.floor(c/588)];}
+function fqChoHint(w){return w.split('').map(function(ch){var c=ch.charCodeAt(0);if(c>=0xAC00&&c<=0xD7A3)return fqGetCho(ch);if(/[a-zA-Z0-9]/.test(ch))return ch[0].toUpperCase();return '_';}).join(' ');}
+function fqPartHint(w){var a=w.split(''),n=Math.max(1,Math.floor(a.length/3)),idx=new Set();idx.add(0);while(idx.size<n)idx.add(Math.floor(Math.random()*a.length));return a.map(function(ch,i){if(idx.has(i))return ch;var c=ch.charCodeAt(0);if(c>=0xAC00&&c<=0xD7A3)return fqGetCho(ch);if(/[a-zA-Z0-9]/.test(ch))return ch[0].toUpperCase();return '_';}).join(' ');}
+function fqLocalSys(msg){var c=document.getElementById('fq-chat-msgs'),d=document.createElement('div');d.className='fq-chat-msg system';d.textContent=msg;c.appendChild(d);c.scrollTop=c.scrollHeight;}
+function fqUpdateHint(){if(!fqGameState||fqGameState.status!=='drawing'||fqGameState.drawer===fqMyNick)return;var w=fqGameState.word||'',el=Math.floor((Date.now()-fqGameState.startedAt)/1000),rem=Math.max(fqGetRT()-el,0),ns=0;if(rem<=10)ns=2;else if(rem<=30)ns=1;if(fqHintRound!==fqGameState.round){fqHintRound=fqGameState.round;fqHintStage=0;fqCachedPartial='';}if(ns!==fqHintStage){fqHintStage=ns;if(fqHintStage===1)fqLocalSys('\uCD08\uC131 \uD78C\uD2B8\uAC00 \uACF5\uAC1C\uB418\uC5C8\uC2B5\uB2C8\uB2E4');if(fqHintStage===2){if(!fqCachedPartial)fqCachedPartial=fqPartHint(w);fqLocalSys('\uCD94\uAC00 \uD78C\uD2B8\uAC00 \uACF5\uAC1C\uB418\uC5C8\uC2B5\uB2C8\uB2E4');}}var wd=document.getElementById('fq-word-display');if(fqHintStage===0)wd.innerHTML='<div class="fq-word-label">\uD78C\uD2B8 ('+w.length+'\uAE00\uC790)</div><div class="fq-word-hint">'+fqMakeHint(w)+'</div>';else if(fqHintStage===1)wd.innerHTML='<div class="fq-word-label">\uCD08\uC131 \uD78C\uD2B8</div><div class="fq-word-hint">'+fqChoHint(w)+'</div>';else wd.innerHTML='<div class="fq-word-label">\uCD94\uAC00 \uD78C\uD2B8</div><div class="fq-word-hint">'+fqCachedPartial+'</div>';}
+(function(){var n=fqGetNick();if(n){document.getElementById('fq-host-nick').value=n;document.getElementById('fq-join-nick').value=n;}})();
+
+function fqCopyCode(){if(!fqRoom)return;navigator.clipboard.writeText(fqRoom.code).then(function(){fqToast('\uCF54\uB4DC\uAC00 \uBCF5\uC0AC\uB418\uC5C8\uC2B5\uB2C8\uB2E4');});}
+function fqCopyLink(){if(!fqRoom)return;var u=window.location.href.split('?')[0]+'?room='+fqRoom.code;navigator.clipboard.writeText(u).then(function(){fqToast('\uB9C1\uD06C\uAC00 \uBCF5\uC0AC\uB418\uC5C8\uC2B5\uB2C8\uB2E4');});}
+
+function fqLoadWords(){fqDb.ref('foodwords').on('value',function(snap){fqWordBank=snap.val()||{};fqAllWords=[];Object.values(fqWordBank).forEach(function(cat){if(Array.isArray(cat))fqAllWords.push.apply(fqAllWords,cat);});if(!Object.keys(fqWordBank).length){fqDb.ref('foodwords').set(DEFAULT_WORDS);}});}
+fqLoadWords();
+function fqSeedWords(){if(!confirm('\uAE30\uBCF8 \uC81C\uC2DC\uC5B4\uB85C \uCD08\uAE30\uD654\uD569\uB2C8\uB2E4.'))return;fqDb.ref('foodwords').set(DEFAULT_WORDS).then(function(){fqToast('\uCD08\uAE30\uD654 \uC644\uB8CC');fqRenderWM();});}
+function fqRandWords(n){var p=fqAllWords.slice(),r=[];while(r.length<n&&p.length){var i=Math.floor(Math.random()*p.length);r.push(p.splice(i,1)[0]);}return r;}
+
+var fqRoomListRef=null;
+function fqCleanExpired(rooms){var now=Date.now(),cleaned=0;Object.keys(rooms).forEach(function(code){var r=rooms[code];if(r.expiresAt&&now>r.expiresAt){['foodrooms','foodchat','foodcanvas','foodmembers'].forEach(function(p){fqDb.ref(p+'/'+code).remove();});cleaned++;}});if(cleaned)console.log('[fq] cleaned '+cleaned+' expired rooms');}
+function fqListenRL(){if(fqRoomListRef)fqRoomListRef.off();fqRoomListRef=fqDb.ref('foodrooms');fqRoomListRef.on('value',function(snap){var rooms=snap.val()||{},list=[],now=Date.now();fqCleanExpired(rooms);Object.keys(rooms).forEach(function(code){var r=rooms[code];if(r.expiresAt&&now>r.expiresAt)return;list.push({code:code,host:r.host||'?',game:r.game,createdAt:r.createdAt});});list.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0);});fqRenderRL(list);});}
+function fqRefreshRooms(){fqListenRL();fqToast('\uC0C8\uB85C\uACE0\uCE68 \uC644\uB8CC');}
+function fqRenderRL(list){var el=document.getElementById('fq-room-list');if(!list.length){el.innerHTML='<div class="fq-room-empty">\uC5F4\uB9B0 \uBC29\uC774 \uC5C6\uC2B5\uB2C8\uB2E4</div>';return;}el.innerHTML=list.map(function(r){var st=r.game&&r.game.status&&r.game.status!=='idle';var b=st?'<span class="fq-room-badge fq-room-playing">\uAC8C\uC784\uC911</span>':'<span class="fq-room-badge fq-room-waiting">\uB300\uAE30\uC911</span>';return '<div class="fq-room-item" onclick="fqQuickJoin(\''+fqEsc(r.code)+'\')"><div><div class="fq-room-host">'+fqEsc(r.host)+' \uB2D8\uC758 \uBC29 '+b+'</div><div class="fq-room-meta">\uCF54\uB4DC: '+fqEsc(r.code)+'</div></div><button class="fq-room-join" onclick="event.stopPropagation();fqQuickJoin(\''+fqEsc(r.code)+'\')">\uCC38\uC5EC</button></div>';}).join('');}
+function fqQuickJoin(code){var nick=document.getElementById('fq-host-nick').value.trim()||document.getElementById('fq-join-nick').value.trim();if(!nick){fqToast('\uB2C9\uB124\uC784\uC744 \uBA3C\uC800 \uC785\uB825\uD574\uC8FC\uC138\uC694');document.getElementById('fq-host-nick').focus();return;}fqSaveNick(nick);fqDb.ref('foodrooms/'+code).once('value').then(function(snap){if(!snap.exists())return fqToast('\uC874\uC7AC\uD558\uC9C0 \uC54A\uB294 \uBC29');var d=snap.val();if(d.expiresAt&&Date.now()>d.expiresAt){['foodrooms','foodchat','foodcanvas','foodmembers'].forEach(function(p){fqDb.ref(p+'/'+code).remove();});return fqToast('\uB9CC\uB8CC\uB41C \uBC29');}fqRoom={code:code,host:d.host};fqIsHost=(d.host===nick);fqMyNick=nick;fqEnter();});}
+fqListenRL();
+
+function fqCreateRoom(){var host=document.getElementById('fq-host-nick').value.trim();if(!host)return fqToast('\uB2C9\uB124\uC784\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694');fqSaveNick(host);var code=fqGenCode();fqDb.ref('foodrooms/'+code).set({host:host,createdAt:Date.now(),expiresAt:Date.now()+30*60*1000,game:null,scores:{}}).then(function(){fqRoom={code:code,host:host};fqIsHost=true;fqMyNick=host;fqEnter();}).catch(function(){fqToast('\uBC29 \uC0DD\uC131 \uC2E4\uD328');});}
+function fqJoinRoom(){var code=document.getElementById('fq-join-code').value.trim().toUpperCase(),nick=document.getElementById('fq-join-nick').value.trim();if(!code||code.length!==6)return fqToast('6\uC790\uB9AC \uCF54\uB4DC\uB97C \uC785\uB825\uD574\uC8FC\uC138\uC694');if(!nick)return fqToast('\uB2C9\uB124\uC784\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694');fqSaveNick(nick);fqDb.ref('foodrooms/'+code).once('value').then(function(snap){if(!snap.exists())return fqToast('\uC874\uC7AC\uD558\uC9C0 \uC54A\uB294 \uBC29');var d=snap.val();if(d.expiresAt&&Date.now()>d.expiresAt){['foodrooms','foodchat','foodcanvas','foodmembers'].forEach(function(p){fqDb.ref(p+'/'+code).remove();});return fqToast('\uB9CC\uB8CC\uB41C \uBC29');}fqRoom={code:code,host:d.host};fqIsHost=(d.host===nick);fqMyNick=nick;fqEnter();}).catch(function(){fqToast('\uC785\uC7A5 \uC2E4\uD328');});}
+(function(){var p=new URLSearchParams(window.location.search);if(p.get('room'))document.getElementById('fq-join-code').value=p.get('room');})();
+
+function fqEnter(){if(fqRoomListRef){fqRoomListRef.off();fqRoomListRef=null;}document.getElementById('fq-g-code').textContent=fqRoom.code;var r=document.getElementById('fq-g-role');if(fqIsHost){r.textContent='\uBC29\uC7A5';r.className='fq-role-badge fq-role-host';document.getElementById('fq-host-controls').style.display='flex';}else{r.textContent='\uCC38\uC5EC\uC790';r.className='fq-role-badge fq-role-guest';document.getElementById('fq-host-controls').style.display='none';}fqShowScr('game');fqInitCanvas();fqRegPres();fqListenMem();fqListenGame();fqListenScores();fqListenCanvas();fqListenChat();fqListenRoomEx();fqAddSys(fqMyNick+' \uB2D8\uC774 \uC785\uC7A5\uD588\uC2B5\uB2C8\uB2E4');}
+function fqLeaveRoom(){if(fqIsHost&&!confirm('\uBC29\uC7A5\uC774 \uB098\uAC00\uBA74 \uBC29\uC774 \uC0AD\uC81C\uB429\uB2C8\uB2E4.'))return;if(fqRoom){var c=fqRoom.code;if(fqIsHost){['foodrooms','foodchat','foodcanvas','foodmembers'].forEach(function(p){fqDb.ref(p+'/'+c).remove();});}else fqDb.ref('foodmembers/'+c+'/'+fqSanitize(fqMyNick)).remove();}fqListeners.forEach(function(fn){fn();});fqListeners=[];if(fqTimerInterval)clearInterval(fqTimerInterval);fqRoom=null;fqGameState=null;fqScoresData={};fqMembersData={};fqIsHost=false;fqShowScr('home');fqListenRL();}
+
+function fqRegPres(){var c=fqRoom.code,k=fqSanitize(fqMyNick),ref=fqDb.ref('foodmembers/'+c+'/'+k);ref.set({nick:fqMyNick,isHost:fqIsHost,joinedAt:Date.now()});if(fqIsHost){['foodrooms','foodchat','foodcanvas','foodmembers'].forEach(function(p){fqDb.ref(p+'/'+c).onDisconnect().remove();});fqListeners.push(function(){['foodrooms','foodchat','foodcanvas','foodmembers'].forEach(function(p){fqDb.ref(p+'/'+c).onDisconnect().cancel();});});}else{ref.onDisconnect().remove();fqListeners.push(function(){ref.onDisconnect().cancel();ref.remove();});}}
+function fqListenMem(){var ref=fqDb.ref('foodmembers/'+fqRoom.code),init=false;var c1=ref.on('value',function(s){fqMembersData=s.val()||{};fqRenderMem();fqRenderSB();if(!init)init=true;});var c2=ref.on('child_added',function(s){if(!init)return;var d=s.val();if(d&&d.nick&&d.nick!==fqMyNick)fqAddSys(d.nick+' \uB2D8\uC774 \uC785\uC7A5\uD588\uC2B5\uB2C8\uB2E4');});var c3=ref.on('child_removed',function(s){var d=s.val();if(d&&d.nick)fqAddSys(d.nick+' \uB2D8\uC774 \uD1F4\uC7A5\uD588\uC2B5\uB2C8\uB2E4');});fqListeners.push(function(){ref.off('value',c1);ref.off('child_added',c2);ref.off('child_removed',c3);});}
+function fqRenderMem(){var b=document.getElementById('fq-members'),e=Object.values(fqMembersData);e.sort(function(a,b){return(b.isHost?1:0)-(a.isHost?1:0);});b.innerHTML=e.map(function(m){return '<span class="fq-member '+(m.isHost?'host':'')+'"><span class="fq-member-dot"></span>'+fqEsc(m.nick)+'</span>';}).join('');}
+function fqListenRoomEx(){if(fqIsHost)return;var ref=fqDb.ref('foodrooms/'+fqRoom.code);var cb=ref.on('value',function(s){if(!s.exists()){fqToast('\uBC29\uC774 \uC885\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4');fqListeners.forEach(function(fn){fn();});fqListeners=[];if(fqTimerInterval)clearInterval(fqTimerInterval);fqRoom=null;fqGameState=null;fqScoresData={};fqMembersData={};fqIsHost=false;fqShowScr('home');fqListenRL();}});fqListeners.push(function(){ref.off('value',cb);});}
+
+function fqListenScores(){var ref=fqDb.ref('foodrooms/'+fqRoom.code+'/scores');var cb=ref.on('value',function(s){fqScoresData=s.val()||{};fqRenderSB();});fqListeners.push(function(){ref.off('value',cb);});}
+function fqRenderSB(){var b=document.getElementById('fq-scoreboard'),m=Object.values(fqMembersData).map(function(m){return m.nick;});if(!m.length){b.innerHTML='';return;}var l=m.map(function(n){return{nick:n,pts:fqScoresData[fqSanitize(n)]||0};});l.sort(function(a,b){return b.pts-a.pts;});var dr=fqGameState?fqGameState.drawer:'';b.innerHTML=l.map(function(it,i){var c='';if(it.nick===dr)c='drawing';if(i===0&&it.pts>0)c+=' top';var rk=it.pts>0?'<span class="fq-score-rank">#'+(i+1)+'</span>':'';return '<span class="fq-score-chip '+c+'">'+rk+'<span class="fq-score-nick">'+fqEsc(it.nick)+'</span><span class="fq-score-pts">'+it.pts+'</span></span>';}).join('');}
+function fqAddScore(nick,pts){var k=fqSanitize(nick),c=fqScoresData[k]||0;fqDb.ref('foodrooms/'+fqRoom.code+'/scores/'+k).set(c+pts);}
+
+function fqListenGame(){var ref=fqDb.ref('foodrooms/'+fqRoom.code+'/game');var cb=ref.on('value',function(s){fqGameState=s.val();fqRenderGS();fqRenderSB();});fqListeners.push(function(){ref.off('value',cb);});}
+function fqRenderGS(){var st=fqGameState?fqGameState.status:null,isDr=fqGameState&&fqGameState.drawer===fqMyNick;var w=document.getElementById('fq-waiting'),tb=document.getElementById('fq-toolbar'),wd=document.getElementById('fq-word-display'),cs=document.getElementById('fq-canvas-status'),ti=document.getElementById('fq-timer'),rb=document.getElementById('fq-round-bar');if(fqGameState&&fqGameState.totalRounds){rb.style.display='flex';document.getElementById('fq-round-badge').textContent=(fqGameState.round||0)+' / '+fqGameState.totalRounds;}else rb.style.display='none';if(fqIsHost){var pl=st==='drawing'||st==='reveal'||st==='picking';document.getElementById('fq-btn-start').style.display=(!st||st==='idle')?'':'none';document.getElementById('fq-btn-skip').style.display=st==='drawing'?'':'none';document.getElementById('fq-btn-end').style.display=pl?'':'none';}if(!st||st==='idle'){w.style.display='flex';tb.style.display='none';wd.style.display='none';cs.textContent='\uB300\uAE30 \uC911';ti.textContent='--';document.getElementById('fq-waiting-sub').textContent=fqIsHost?'"\uAC8C\uC784 \uC2DC\uC791" \uBC84\uD2BC\uC744 \uB20C\uB7EC\uC8FC\uC138\uC694':'\uBC29\uC7A5\uC774 \uC2DC\uC791\uD558\uBA74 \uAC8C\uC784\uC774 \uC2DC\uC791\uB429\uB2C8\uB2E4';if(fqTimerInterval){clearInterval(fqTimerInterval);fqTimerInterval=null;}fqClearLocal();document.getElementById('fq-chat-input').disabled=false;document.getElementById('fq-chat-input').placeholder='\uCC44\uD305...';document.getElementById('fq-modal-word').classList.remove('show');document.getElementById('fq-ov-correct').classList.remove('show');if(fqGameState&&fqGameState.gameover)fqShowGO();return;}if(st==='picking'){w.style.display='flex';tb.style.display='none';wd.style.display='none';cs.textContent=fqGameState.drawer+' \uB2D8\uC774 \uC81C\uC2DC\uC5B4 \uC120\uD0DD \uC911';ti.textContent='--';document.getElementById('fq-chat-input').disabled=false;document.getElementById('fq-chat-input').placeholder='\uCC44\uD305...';if(fqGameState.drawer===fqMyNick&&!document.getElementById('fq-modal-word').classList.contains('show'))fqShowWM();document.getElementById('fq-waiting-sub').textContent=fqGameState.drawer===fqMyNick?'\uC81C\uC2DC\uC5B4\uB97C \uC120\uD0DD\uD574\uC8FC\uC138\uC694':fqGameState.drawer+' \uB2D8\uC774 \uC81C\uC2DC\uC5B4\uB97C \uACE0\uB974\uB294 \uC911...';fqRenderSB();return;}w.style.display='none';if(st==='drawing'){if(isDr){tb.style.display='flex';wd.style.display='block';wd.innerHTML='<div class="fq-word-label">\uC81C\uC2DC\uC5B4</div><div class="fq-word-text">'+fqEsc(fqGameState.word)+'</div>';document.getElementById('fq-chat-input').disabled=true;document.getElementById('fq-chat-input').placeholder='\uCD9C\uC81C\uC790\uB294 \uCC44\uD305 \uBD88\uAC00';}else{tb.style.display='none';wd.style.display='block';wd.innerHTML='<div class="fq-word-label">\uD78C\uD2B8 ('+(fqGameState.word?fqGameState.word.length:'?')+'\uAE00\uC790)</div><div class="fq-word-hint">'+fqMakeHint(fqGameState.word||'')+'</div>';document.getElementById('fq-chat-input').disabled=false;document.getElementById('fq-chat-input').placeholder='\uC815\uB2F5 \uC785\uB825...';}cs.textContent=fqGameState.drawer+' \uB2D8\uC774 \uADF8\uB9AC\uB294 \uC911';fqStartTimer();fqRenderSB();}if(st==='reveal'){tb.style.display='none';wd.style.display='block';wd.innerHTML='<div class="fq-word-label">\uC815\uB2F5</div><div class="fq-word-text">'+fqEsc(fqGameState.word||'')+'</div>';cs.textContent='\uB77C\uC6B4\uB4DC \uC885\uB8CC';document.getElementById('fq-chat-input').disabled=false;document.getElementById('fq-chat-input').placeholder='\uCC44\uD305...';if(fqTimerInterval){clearInterval(fqTimerInterval);fqTimerInterval=null;}ti.textContent='--';ti.classList.remove('warning');if(fqIsHost){if(fqGameState.round>=fqGameState.totalRounds)setTimeout(function(){fqFinish();},AUTO_NEXT);else setTimeout(function(){if(fqGameState&&fqGameState.status==='reveal')fqAutoNext();},AUTO_NEXT);}}}
+function fqStartTimer(){if(fqTimerInterval)clearInterval(fqTimerInterval);var b=document.getElementById('fq-timer');fqTimerInterval=setInterval(function(){if(!fqGameState||fqGameState.status!=='drawing')return;var el=Math.floor((Date.now()-fqGameState.startedAt)/1000),rem=Math.max(fqGetRT()-el,0);b.textContent=rem+'s';b.classList.toggle('warning',rem<=10);fqUpdateHint();if(rem<=0&&fqIsHost){clearInterval(fqTimerInterval);fqTimerInterval=null;fqEndRound(null);}},500);}
+function fqGetRT(){return(fqGameState&&fqGameState.roundTime)||fqRoundTime||60;}
+
+function fqOnStartClick(){if(!fqIsHost)return;var m=Object.values(fqMembersData).map(function(m){return m.nick;});if(m.length<2)return fqToast('2\uBA85 \uC774\uC0C1 \uD544\uC694\uD569\uB2C8\uB2E4');if(!fqAllWords.length)return fqToast('\uC81C\uC2DC\uC5B4\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4');document.getElementById('fq-modal-round').classList.add('show');}
+function fqPickRound(n,el){fqTotalRounds=n;document.querySelectorAll('#fq-round-opts .fq-round-opt').forEach(function(o){o.classList.remove('active');});el.classList.add('active');}
+function fqPickTime(t,el){fqRoundTime=t;document.querySelectorAll('#fq-time-opts .fq-round-opt').forEach(function(o){o.classList.remove('active');});el.classList.add('active');}
+function fqPickDrawer(m,el){fqDrawerMode=m;document.querySelectorAll('#fq-drawer-opts .fq-round-opt').forEach(function(o){o.classList.remove('active');});el.classList.add('active');}
+function fqConfirmStart(){document.getElementById('fq-modal-round').classList.remove('show');fqStreakMap={};var sc={};Object.values(fqMembersData).forEach(function(m){sc[fqSanitize(m.nick)]=0;});fqDb.ref('foodrooms/'+fqRoom.code+'/scores').set(sc);fqDb.ref('foodrooms/'+fqRoom.code+'/game').set({status:'idle',round:0,totalRounds:fqTotalRounds,roundTime:fqRoundTime,nextDrawer:null,drawerMode:fqDrawerMode,drawerIndex:0,gameId:Date.now()+''});var ml=fqDrawerMode==='winner'?'\uC815\uB2F5\uC790\uAC00 \uADF8\uB9AC\uAE30':'\uC21C\uC11C\uB300\uB85C \uADF8\uB9AC\uAE30';fqAddSys('\uAC8C\uC784 \uC2DC\uC791! '+fqTotalRounds+'\uB77C\uC6B4\uB4DC / '+ml+' / '+fqRoundTime+'\uCD08');setTimeout(function(){fqStartNext(null);},500);}
+function fqStartNext(nd){if(!fqIsHost)return;var m=Object.values(fqMembersData).map(function(m){return m.nick;}),mode=(fqGameState&&fqGameState.drawerMode)||fqDrawerMode,dr,ni=(fqGameState&&fqGameState.drawerIndex)||0;if(mode==='sequential'){dr=m[ni%m.length];ni=(ni+1)%m.length;}else{if(nd&&m.includes(nd))dr=nd;else{var prev=fqGameState?fqGameState.drawer:null,cand=m.filter(function(x){return x!==prev;});if(!cand.length)cand=m;dr=cand[Math.floor(Math.random()*cand.length)];}}var rnd=((fqGameState?fqGameState.round:0)||0)+1;fqDb.ref('foodcanvas/'+fqRoom.code).remove();fqDb.ref('foodrooms/'+fqRoom.code+'/game').set({status:'picking',drawer:dr,word:null,round:rnd,totalRounds:(fqGameState&&fqGameState.totalRounds)||fqTotalRounds,startedAt:null,solved:false,nextDrawer:null,drawerMode:mode,drawerIndex:ni,wordChoices:fqRandWords(8),roundTime:(fqGameState&&fqGameState.roundTime)||fqRoundTime});fqAddSys('['+rnd+'/'+((fqGameState&&fqGameState.totalRounds)||fqTotalRounds)+'] '+dr+' \uB2D8\uC774 \uC81C\uC2DC\uC5B4\uB97C \uACE0\uB974\uB294 \uC911...');}
+function fqAutoNext(){if(!fqGameState||fqGameState.status!=='reveal')return;fqStartNext(fqGameState.nextDrawer||null);}
+function fqShowWM(){document.getElementById('fq-modal-word').classList.add('show');document.getElementById('fq-word-input').value='';var sg=fqGameState&&fqGameState.wordChoices?fqGameState.wordChoices:fqRandWords(8);document.getElementById('fq-word-suggestions').innerHTML=sg.map(function(w){return "<span class='fq-word-chip' onclick=\"document.getElementById('fq-word-input').value='"+fqEsc(w)+"';fqSubmitWord()\">"+fqEsc(w)+"</span>";}).join('');}
+function fqSubmitWord(){var w=document.getElementById('fq-word-input').value.trim();if(!w)return fqToast('\uC81C\uC2DC\uC5B4\uB97C \uC120\uD0DD \uB610\uB294 \uC785\uB825\uD574\uC8FC\uC138\uC694');document.getElementById('fq-modal-word').classList.remove('show');fqDb.ref('foodrooms/'+fqRoom.code+'/game').update({status:'drawing',word:w,startedAt:Date.now(),solved:false,wordChoices:null});fqAddSys('['+(fqGameState?fqGameState.round:1)+'/'+((fqGameState&&fqGameState.totalRounds)||fqTotalRounds)+'] '+fqMyNick+' \uB2D8\uC774 \uADF8\uB9BD\uB2C8\uB2E4! ('+w.length+'\uAE00\uC790)');}
+function fqSkipRound(){if(!fqIsHost)return;fqEndRound(null);}
+function fqEndRound(solver){if(!fqGameState||fqGameState.status!=='drawing')return;fqDb.ref('foodrooms/'+fqRoom.code+'/game').update({status:'reveal',nextDrawer:solver||null});if(!solver){fqAddSys('\uC815\uB2F5: '+fqGameState.word);fqStreakMap={};}}
+function fqEndGame(){if(!fqIsHost)return;fqFinish();}
+function fqFinish(){fqShowGO();fqDb.ref('foodrooms/'+fqRoom.code+'/game').set({status:'idle',round:0,totalRounds:0,nextDrawer:null,gameover:true});fqDb.ref('foodcanvas/'+fqRoom.code).remove();fqAddSys('\uAC8C\uC784\uC774 \uC885\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4!');setTimeout(function(){if(fqRoom)fqDb.ref('foodrooms/'+fqRoom.code+'/game/gameover').remove();},5000);}
+function fqHandleStreak(n){Object.keys(fqStreakMap).forEach(function(k){if(k!==n)fqStreakMap[k]=0;});fqStreakMap[n]=(fqStreakMap[n]||0)+1;var s=fqStreakMap[n];if(s>=2){var b=s>=4?3:s>=3?2:1;fqAddScore(n,b);fqAddSys(n+' '+s+'\uC5F0\uC18D \uC815\uB2F5! (+'+b+' \uBCF4\uB108\uC2A4)');}return s;}
+function fqShowGO(){var m=Object.values(fqMembersData).map(function(m){return m.nick;}),l=m.map(function(n){return{nick:n,pts:fqScoresData[fqSanitize(n)]||0};});l.sort(function(a,b){return b.pts-a.pts;});document.getElementById('fq-go-list').innerHTML=l.map(function(it,i){return '<div class="fq-go-item '+(i===0&&it.pts>0?'first':'')+'"><span>'+(i===0&&it.pts>0?'🏆 ':'')+fqEsc(it.nick)+'</span><span class="fq-go-pts">'+it.pts+'\uC810</span></div>';}).join('');document.getElementById('fq-ov-gameover').classList.add('show');}
+function fqCloseGO(){document.getElementById('fq-ov-gameover').classList.remove('show');}
+
+function fqOpenWordMgr(){document.getElementById('fq-modal-wordmgr').classList.add('show');var c=Object.keys(fqWordBank);if(c.length&&!c.includes(fqSelectedCat))fqSelectedCat=c[0];fqRenderWM();}
+function fqCloseWordMgr(){document.getElementById('fq-modal-wordmgr').classList.remove('show');}
+function fqRenderWM(){var c=Object.keys(fqWordBank);document.getElementById('fq-word-stats').textContent=c.length+'\uAC1C \uCE74\uD14C\uACE0\uB9AC / \uCD1D '+fqAllWords.length+'\uAC1C \uC81C\uC2DC\uC5B4';document.getElementById('fq-cat-tabs').innerHTML=c.map(function(x){return '<span class="fq-cat-tab '+(x===fqSelectedCat?'active':'')+'" onclick="fqSelectedCat=\''+fqEsc(x)+'\';fqRenderWM()">'+fqEsc(x)+'<span class="fq-cat-count">'+(fqWordBank[x]||[]).length+'</span></span>';}).join('');var ws=fqWordBank[fqSelectedCat]||[];document.getElementById('fq-word-tags').innerHTML=ws.map(function(w,i){return '<span class="fq-word-tag">'+fqEsc(w)+'<button class="fq-word-del" onclick="fqRemoveWord('+i+')">✕</button></span>';}).join('')||'<span style="color:#c0c0c0;font-size:10px">\uCE74\uD14C\uACE0\uB9AC\uB97C \uC120\uD0DD\uD558\uC138\uC694</span>';}
+function fqAddWord(){var i=document.getElementById('fq-add-word'),w=i.value.trim();if(!w)return;if(!fqSelectedCat)return fqToast('\uCE74\uD14C\uACE0\uB9AC \uBA3C\uC800 \uC120\uD0DD');var ws=fqWordBank[fqSelectedCat]||[];if(ws.includes(w))return fqToast('\uC774\uBBF8 \uC788\uB294 \uC81C\uC2DC\uC5B4');ws.push(w);fqDb.ref('foodwords/'+fqSelectedCat).set(ws);i.value='';i.focus();}
+function fqRemoveWord(idx){if(!fqSelectedCat)return;var ws=fqWordBank[fqSelectedCat]||[];ws.splice(idx,1);if(ws.length)fqDb.ref('foodwords/'+fqSelectedCat).set(ws);else{fqDb.ref('foodwords/'+fqSelectedCat).remove();delete fqWordBank[fqSelectedCat];var c=Object.keys(fqWordBank);fqSelectedCat=c[0]||'';}}
+function fqAddCat(){var i=document.getElementById('fq-add-cat'),c=i.value.trim();if(!c)return;if(fqWordBank[c])return fqToast('\uC774\uBBF8 \uC788\uB294 \uCE74\uD14C\uACE0\uB9AC');fqDb.ref('foodwords/'+c).set([]);fqSelectedCat=c;i.value='';}
+function fqDelCat(){if(!fqSelectedCat)return;if(!confirm('"'+fqSelectedCat+'" \uCE74\uD14C\uACE0\uB9AC\uB97C \uC0AD\uC81C\uD569\uB2C8\uB2E4.'))return;fqDb.ref('foodwords/'+fqSelectedCat).remove();delete fqWordBank[fqSelectedCat];var c=Object.keys(fqWordBank);fqSelectedCat=c[0]||'';fqRenderWM();}
+
+// Canvas
+document.addEventListener('keydown',function(e){if(e.key==='Shift')fqShiftHeld=true;if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();fqUndo();}});
+document.addEventListener('keyup',function(e){if(e.key==='Shift')fqShiftHeld=false;});
+function fqInitCanvas(){var cv=document.getElementById('fq-canvas');fqDrawCtx=cv.getContext('2d');fqDrawCtx.lineCap='round';fqDrawCtx.lineJoin='round';fqClearLocal();cv.addEventListener('pointerdown',fqPD);cv.addEventListener('pointermove',fqPM);cv.addEventListener('pointerup',fqPU);cv.addEventListener('pointerleave',fqPL);document.addEventListener('pointerup',function(e){if(fqDrawing&&SHAPE_TOOLS.includes(fqCurrentTool))fqPU(e);});}
+function fqCP(e){var c=document.getElementById('fq-canvas'),r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*(c.width/r.width),y:(e.clientY-r.top)*(c.height/r.height)};}
+function fqPD(e){if(!fqGameState||fqGameState.status!=='drawing'||fqGameState.drawer!==fqMyNick)return;var p=fqCP(e);if(fqCurrentTool==='fill'){var x=Math.round(p.x),y=Math.round(p.y);fqFF(x,y,fqBrushColor);fqPush([{fill:true,x:x,y:y,c:fqBrushColor}]);return;}fqDrawing=true;if(SHAPE_TOOLS.includes(fqCurrentTool)){fqShapeStartX=p.x;fqShapeStartY=p.y;fqCanvasSnap=fqDrawCtx.getImageData(0,0,800,600);}else{fqLastX=p.x;fqLastY=p.y;fqStrokeBuf=[];}}
+function fqPM(e){if(!fqDrawing)return;var p=fqCP(e);if(SHAPE_TOOLS.includes(fqCurrentTool)){fqDrawCtx.putImageData(fqCanvasSnap,0,0);var s=fqCS(fqShapeStartX,fqShapeStartY,p.x,p.y,fqShiftHeld);fqRS(s,fqCurrentTool,fqBrushColor,Number(fqBrushSize));return;}var x=p.x,y=p.y,col=fqCurrentTool==='eraser'?'#FFFFFF':fqBrushColor,sz=fqCurrentTool==='eraser'?fqBrushSize*4:fqBrushSize;fqDL(fqLastX,fqLastY,x,y,col,sz);fqStrokeBuf.push({x1:fqLastX,y1:fqLastY,x2:x,y2:y,c:col,s:Number(sz)});fqLastX=x;fqLastY=y;if(!fqStrokeTimer)fqStrokeTimer=setTimeout(function(){fqFlush();fqStrokeTimer=null;},80);}
+function fqPU(e){if(!fqDrawing)return;fqDrawing=false;if(SHAPE_TOOLS.includes(fqCurrentTool)&&fqCanvasSnap){var ex=fqShapeStartX,ey=fqShapeStartY;try{var p=fqCP(e);ex=p.x;ey=p.y;}catch(x){}fqDrawCtx.putImageData(fqCanvasSnap,0,0);var s=fqCS(fqShapeStartX,fqShapeStartY,ex,ey,fqShiftHeld);fqRS(s,fqCurrentTool,fqBrushColor,Number(fqBrushSize));fqPush([{shape:fqCurrentTool,x1:s.x1,y1:s.y1,x2:s.x2,y2:s.y2,c:fqBrushColor,s:Number(fqBrushSize)}]);fqCanvasSnap=null;return;}fqFlush();}
+function fqPL(e){if(SHAPE_TOOLS.includes(fqCurrentTool))return;if(!fqDrawing)return;fqDrawing=false;fqFlush();}
+function fqCS(x1,y1,x2,y2,sh){var dx=x2-x1,dy=y2-y1;if(sh){if(fqCurrentTool==='line'){var a=Math.atan2(dy,dx),sn=Math.round(a/(Math.PI/4))*(Math.PI/4),l=Math.sqrt(dx*dx+dy*dy);dx=Math.cos(sn)*l;dy=Math.sin(sn)*l;}else{var sz=Math.max(Math.abs(dx),Math.abs(dy));dx=sz*Math.sign(dx||1);dy=sz*Math.sign(dy||1);}}return{x1:x1,y1:y1,x2:x1+dx,y2:y1+dy};}
+function fqRS(s,t,c,sz){fqDrawCtx.strokeStyle=c;fqDrawCtx.lineWidth=sz;fqDrawCtx.lineCap='round';fqDrawCtx.lineJoin='round';fqDrawCtx.beginPath();if(t==='line'){fqDrawCtx.moveTo(s.x1,s.y1);fqDrawCtx.lineTo(s.x2,s.y2);}else if(t==='rect')fqDrawCtx.rect(s.x1,s.y1,s.x2-s.x1,s.y2-s.y1);else if(t==='circle'){var cx=(s.x1+s.x2)/2,cy=(s.y1+s.y2)/2,rx=Math.abs(s.x2-s.x1)/2,ry=Math.abs(s.y2-s.y1)/2;if(rx>0&&ry>0)fqDrawCtx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);}fqDrawCtx.stroke();}
+function fqFlush(){if(!fqStrokeBuf.length||!fqRoom)return;fqPush(fqStrokeBuf);fqStrokeBuf=[];}
+function fqDL(x1,y1,x2,y2,c,s){fqDrawCtx.strokeStyle=c;fqDrawCtx.lineWidth=s;fqDrawCtx.beginPath();fqDrawCtx.moveTo(x1,y1);fqDrawCtx.lineTo(x2,y2);fqDrawCtx.stroke();}
+function fqClearCanvas(){if(!fqGameState||fqGameState.drawer!==fqMyNick)return;fqClearLocal();fqUndoKeys=[];fqDb.ref('foodcanvas/'+fqRoom.code).remove();fqDb.ref('foodcanvas/'+fqRoom.code).push().set([{clear:true}]);}
+function fqClearLocal(){if(!fqDrawCtx)return;var c=document.getElementById('fq-canvas');fqDrawCtx.fillStyle='#FFFFFF';fqDrawCtx.fillRect(0,0,c.width,c.height);}
+function fqSetTool(t,el){fqCurrentTool=t;document.querySelectorAll('.fq-tool-btn[data-tool]').forEach(function(b){b.classList.remove('active');});el.classList.add('active');document.getElementById('fq-canvas').style.cursor=t==='fill'?'cell':'crosshair';}
+function fqSetColor(c,el){fqBrushColor=c;if(!SHAPE_TOOLS.includes(fqCurrentTool)&&fqCurrentTool!=='fill')fqCurrentTool='pen';document.querySelectorAll('.fq-tool-btn[data-tool]').forEach(function(b){b.classList.toggle('active',b.dataset.tool===fqCurrentTool);});document.querySelectorAll('.fq-color-btn').forEach(function(b){b.classList.remove('active');});if(el)el.classList.add('active');document.getElementById('fq-color-picker').value=c;}
+function fqSetColorPicker(c){fqBrushColor=c;if(!SHAPE_TOOLS.includes(fqCurrentTool)&&fqCurrentTool!=='fill')fqCurrentTool='pen';document.querySelectorAll('.fq-tool-btn[data-tool]').forEach(function(b){b.classList.toggle('active',b.dataset.tool===fqCurrentTool);});document.querySelectorAll('.fq-color-btn').forEach(function(b){b.classList.remove('active');});}
+function fqHex2Rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function fqFF(sx,sy,fh){var cv=document.getElementById('fq-canvas'),w=cv.width,h=cv.height;if(sx<0||sx>=w||sy<0||sy>=h)return;var id=fqDrawCtx.getImageData(0,0,w,h),d=id.data,rgb=fqHex2Rgb(fh),idx=(sy*w+sx)*4,tr=d[idx],tg=d[idx+1],tb=d[idx+2];if(tr===rgb[0]&&tg===rgb[1]&&tb===rgb[2])return;var tol=30;function m(i){return Math.abs(d[i]-tr)<=tol&&Math.abs(d[i+1]-tg)<=tol&&Math.abs(d[i+2]-tb)<=tol;}var st=[[sx,sy]],v=new Uint8Array(w*h);while(st.length){var pt=st.pop(),x=pt[0],y=pt[1],pi=y*w+x;if(x<0||x>=w||y<0||y>=h||v[pi])continue;var i=pi*4;if(!m(i))continue;v[pi]=1;d[i]=rgb[0];d[i+1]=rgb[1];d[i+2]=rgb[2];d[i+3]=255;st.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);}fqDrawCtx.putImageData(id,0,0);}
+function fqPush(data){if(!fqRoom)return;var ref=fqDb.ref('foodcanvas/'+fqRoom.code).push();ref.set(data);fqUndoKeys.push(ref.key);}
+function fqUndo(){if(!fqGameState||fqGameState.drawer!==fqMyNick||!fqUndoKeys.length)return;var k=fqUndoKeys.pop();fqDb.ref('foodcanvas/'+fqRoom.code+'/'+k).remove();}
+function fqRedraw(){fqClearLocal();fqCanvasKeyOrder.forEach(function(key){var arr=fqCanvasData[key];if(!arr||!Array.isArray(arr))return;var f=arr[0];if(f&&f.clear){fqClearLocal();return;}if(f&&f.fill){fqFF(f.x,f.y,f.c);return;}if(f&&f.shape){fqRS(f,f.shape,f.c,f.s);return;}arr.forEach(function(s){fqDL(s.x1,s.y1,s.x2,s.y2,s.c,s.s);});});}
+function fqListenCanvas(){var ref=fqDb.ref('foodcanvas/'+fqRoom.code);fqCanvasData={};fqCanvasKeyOrder=[];fqUndoKeys=[];var c1=ref.on('child_added',function(s){var k=s.key,arr=s.val();if(!arr||!Array.isArray(arr))return;fqCanvasData[k]=arr;fqCanvasKeyOrder.push(k);var f=arr[0];if(f&&f.clear){fqClearLocal();return;}if(f&&f.fill){fqFF(f.x,f.y,f.c);return;}if(f&&f.shape){fqRS(f,f.shape,f.c,f.s);return;}arr.forEach(function(s){fqDL(s.x1,s.y1,s.x2,s.y2,s.c,s.s);});});var c2=ref.on('child_removed',function(s){var k=s.key;delete fqCanvasData[k];fqCanvasKeyOrder=fqCanvasKeyOrder.filter(function(x){return x!==k;});fqRedraw();});fqListeners.push(function(){ref.off('child_added',c1);ref.off('child_removed',c2);});}
+
+// Chat
+function fqListenChat(){var ref=fqDb.ref('foodchat/'+fqRoom.code);var cb=ref.orderByChild('ts').limitToLast(100).on('child_added',function(s){var d=s.val();if(!d)return;fqAppChat(d);if(d.correct)fqShowCorr(d.nick,d.text);});fqListeners.push(function(){ref.off('child_added',cb);});}
+function fqSendChat(){var inp=document.getElementById('fq-chat-input'),t=inp.value.trim();if(!t||!fqRoom)return;inp.value='';if(fqGameState&&fqGameState.status==='drawing'&&!fqGameState.solved&&fqGameState.drawer!==fqMyNick){if(t.replace(/\s/g,'').toLowerCase()===fqGameState.word.replace(/\s/g,'').toLowerCase()){fqDb.ref('foodchat/'+fqRoom.code).push().set({nick:fqMyNick,text:fqGameState.word,ts:Date.now(),correct:true});fqAddScore(fqMyNick,1);fqAddScore(fqGameState.drawer,1);fqHandleStreak(fqMyNick);fqDb.ref('foodrooms/'+fqRoom.code+'/game').update({solved:true,status:'reveal',nextDrawer:fqMyNick});return;}}fqDb.ref('foodchat/'+fqRoom.code).push().set({nick:fqMyNick,text:t,ts:Date.now()});}
+function fqAddSys(msg){if(!fqRoom)return;fqDb.ref('foodchat/'+fqRoom.code).push().set({system:true,text:msg,ts:Date.now()});}
+function fqAppChat(d){var c=document.getElementById('fq-chat-msgs'),div=document.createElement('div');if(d.system){div.className='fq-chat-msg system';div.textContent=d.text;}else if(d.correct){div.className='fq-chat-msg correct';var sk=fqStreakMap[d.nick]||0;var st=sk>=2?' <span class="fq-streak">'+sk+' STREAK</span>':'';div.innerHTML=fqEsc(d.nick)+' \uB2D8\uC774 \uC815\uB2F5! (+1\uC810)'+st;}else{div.className='fq-chat-msg user';var dt=d.text;if(fqGameState&&fqGameState.status==='drawing'&&fqGameState.word&&dt.toLowerCase().includes(fqGameState.word.toLowerCase()))dt=dt.replace(new RegExp(fqGameState.word,'gi'),'***');div.innerHTML='<span class="nick">'+fqEsc(d.nick)+'</span>'+fqEsc(dt);}c.appendChild(div);c.scrollTop=c.scrollHeight;var p=document.getElementById('fq-chat-panel');if(p.classList.contains('collapsed')){fqUnreadChat++;var b=document.getElementById('fq-chat-badge');if(b){b.textContent=fqUnreadChat>99?'99+':fqUnreadChat;b.style.display='inline-block';}}}
+function fqShowCorr(n,w){var o=document.getElementById('fq-ov-correct');document.getElementById('fq-correct-who').textContent=n+' \uC815\uB2F5!';document.getElementById('fq-correct-word').textContent=w;o.classList.add('show');setTimeout(function(){o.classList.remove('show');},2500);}
+function fqToggleChat(){var p=document.getElementById('fq-chat-panel'),col=p.classList.toggle('collapsed');if(!col){fqUnreadChat=0;document.getElementById('fq-chat-badge').style.display='none';document.getElementById('fq-chat-msgs').scrollTop=document.getElementById('fq-chat-msgs').scrollHeight;}}
+
+</script>
