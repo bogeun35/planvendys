@@ -1,0 +1,279 @@
+<!--
+title: 지역별 제휴점 리스트
+meta: 최종 수정: 2026.02.19
+-->
+
+<style>
+#slRoot{font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;height:calc(100vh - 80px);overflow:hidden;display:flex;flex-direction:column}
+#slRoot *{box-sizing:border-box}
+.sl-ctrl{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.sl-ctrl input[type=text]{width:200px;border:1px solid #d1d5db;border-radius:3px;padding:4px 8px;font-size:12px;font-family:'Noto Sans KR',sans-serif}
+.sl-ctrl .sl-btn{padding:4px 12px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#4a5568}
+.sl-ctrl .sl-btn:hover{background:#f0f4f9}
+.sl-ctrl .sl-btn--primary{background:#4a90d9;color:#fff;border-color:#4a90d9}
+.sl-ctrl .sl-btn--primary:hover{background:#3a7bc8}
+.sl-ctrl .sl-sep{width:1px;height:20px;background:#e2e8f0}
+.sl-status{margin-left:auto;font-size:11px;color:#94a3b8}
+
+.sl-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:10px 0;flex-shrink:0}
+.sl-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px}
+.sl-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
+.sl-card__value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a2332}
+
+.sl-tbar{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.sl-tbar input[type=text]{width:200px;border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
+.sl-cnt{font-size:11px;color:#94a3b8}
+.sl-copy-ok{color:#22c55e;font-size:11px;display:none}
+
+.sl-twrap{flex:1;min-height:0;overflow:auto}
+.sl-table{width:100%;border-collapse:collapse}
+.sl-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:left;cursor:pointer;white-space:nowrap;z-index:1}
+.sl-table th:first-child{text-align:center;width:36px}
+.sl-table th:hover{background:#e2e8f0}
+.sl-table th .sl-sort{font-size:9px;margin-left:2px;color:#94a3b8}
+.sl-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;white-space:nowrap}
+.sl-table td:first-child{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8;width:36px}
+.sl-table td:nth-child(2){font-family:'JetBrains Mono',monospace;font-size:10px;color:#4a5568;max-width:100px;overflow:hidden;text-overflow:ellipsis}
+.sl-table td:nth-child(5){font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8}
+.sl-table tr:hover{background:#f8fafd}
+.sl-recent{color:#22c55e;font-weight:600}
+.sl-old{color:#94a3b8}
+
+.sl-loading{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.85);display:none;align-items:center;justify-content:center;z-index:10;flex-direction:column;gap:8px}
+.sl-loading.sl-show{display:flex}
+.sl-loading__bar{width:200px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}
+.sl-loading__fill{height:100%;background:#4a90d9;border-radius:2px;width:0%;transition:width 0.3s}
+.sl-loading__text{font-size:11px;color:#4a5568}
+
+.sl-empty{display:flex;align-items:center;justify-content:center;height:200px;color:#94a3b8;font-size:13px;flex-direction:column;gap:4px}
+</style>
+
+<div id="slRoot" style="position:relative">
+  <div class="sl-ctrl">
+    <label style="font-size:11px;color:#94a3b8">지역명</label>
+    <input type="text" id="slSido" placeholder="예: 강남, 서초, 마포, 성남" onkeydown="if(event.key==='Enter')slFetch()">
+    <button class="sl-btn sl-btn--primary" onclick="slFetch()">조회</button>
+    <div class="sl-sep"></div>
+    <button class="sl-btn" onclick="slCopy()">복사</button>
+    <button class="sl-btn" onclick="slExcel()">엑셀 다운로드</button>
+    <span class="sl-copy-ok" id="slCopyOk">복사됨</span>
+    <span class="sl-status" id="slStatus"></span>
+  </div>
+  <div class="sl-summary" id="slSummary" style="display:none">
+    <div class="sl-card"><div class="sl-card__label">총 제휴점 수</div><div class="sl-card__value" id="slSumTotal">-</div></div>
+    <div class="sl-card"><div class="sl-card__label">최근 1달 거래 발생 제휴점</div><div class="sl-card__value" id="slSumRecent">-</div></div>
+  </div>
+  <div class="sl-tbar" id="slTbar" style="display:none">
+    <input type="text" id="slSearch" placeholder="매장명 / 주소 검색" oninput="slFilter()">
+    <span class="sl-cnt" id="slCnt"></span>
+  </div>
+  <div class="sl-twrap">
+    <div class="sl-empty" id="slEmpty">
+      <div>지역명을 입력하고 조회 버튼을 클릭하세요</div>
+      <div style="font-size:11px">시/도, 시/군/구, 동 이름 모두 검색 가능합니다</div>
+    </div>
+    <table class="sl-table" id="slTable" style="display:none">
+      <thead><tr>
+        <th style="cursor:default">No</th>
+        <th onclick="slSort('sid')">sid<span class="sl-sort" id="slSortsid"></span></th>
+        <th onclick="slSort('name')">매장명<span class="sl-sort" id="slSortname"></span></th>
+        <th onclick="slSort('roadAddress')">주소<span class="sl-sort" id="slSortroadAddress"></span></th>
+        <th onclick="slSort('category')">카테고리<span class="sl-sort" id="slSortcategory"></span></th>
+        <th onclick="slSort('latestSikdaeTradingDate')">최근거래일<span class="sl-sort" id="slSortlatestSikdaeTradingDate"></span></th>
+      </tr></thead>
+      <tbody id="slTbody"></tbody>
+    </table>
+  </div>
+  <div class="sl-loading" id="slLoading">
+    <div class="sl-loading__bar"><div class="sl-loading__fill" id="slLoadFill"></div></div>
+    <div class="sl-loading__text" id="slLoadText">데이터 조회 중...</div>
+  </div>
+</div>
+
+<script>
+var SL = {
+  PROXY: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
+  QID: 1349,
+  raw: [], filtered: [],
+  sortCol: 'latestSikdaeTradingDate', sortDir: 'desc'
+};
+
+function slApi(p) {
+  var qs = Object.keys(p).map(function(k){ return k+'='+encodeURIComponent(p[k]); }).join('&');
+  return fetch(SL.PROXY+'?'+qs,{redirect:'follow'}).then(function(r){return r.json();});
+}
+
+function slN(v){return v.toLocaleString();}
+function slFmt(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+function slLoad(show,pct,txt){
+  var el=document.getElementById('slLoading');
+  if(show)el.classList.add('sl-show');else el.classList.remove('sl-show');
+  if(pct!==undefined)document.getElementById('slLoadFill').style.width=pct+'%';
+  if(txt)document.getElementById('slLoadText').textContent=txt;
+}
+
+async function slFetch(){
+  var sido=document.getElementById('slSido').value.trim();
+  if(!sido){alert('지역명을 입력하세요');return;}
+  slLoad(true,10,'쿼리 실행 중...');
+  document.getElementById('slStatus').textContent='조회 중...';
+  try{
+    var d=await slApi({action:'post',queryId:SL.QID,sido:sido});
+    if(d.query_result){
+      slLoad(true,70,'데이터 처리 중...');
+      slProcess(d.query_result.data.rows,sido);
+    } else if(d.job){
+      slLoad(true,30,'쿼리 실행 중...');
+      await slPoll(d.job.id,sido);
+    } else {
+      alert('API 오류');slLoad(false);
+    }
+  }catch(err){alert('통신 오류: '+err.message);slLoad(false);}
+}
+
+async function slPoll(jid,sido){
+  var max=60,i=0;
+  while(i<max){
+    await new Promise(function(r){setTimeout(r,1000);});
+    var d=await slApi({action:'job',jobId:jid});
+    i++;
+    slLoad(true,30+Math.min(i*0.5,30),'쿼리 실행 중... ('+i+'s)');
+    if(d.job&&d.job.status===3){
+      slLoad(true,65,'결과 조회 중...');
+      var rd=await slApi({action:'result',resultId:d.job.query_result_id});
+      slLoad(true,80,'데이터 처리 중...');
+      slProcess(rd.query_result.data.rows,sido);
+      return;
+    }
+    if(d.job&&d.job.status===4){alert('쿼리 실패');slLoad(false);return;}
+  }
+  alert('시간 초과');slLoad(false);
+}
+
+function slProcess(rows,sido){
+  SL.raw=rows.map(function(r){
+    return {
+      sid:String(r.sid||''),
+      name:String(r.name||''),
+      roadAddress:String(r.roadAddress||''),
+      category:String(r.category||''),
+      latestSikdaeTradingDate:String(r.latestSikdaeTradingDate||'')
+    };
+  });
+  SL.filtered=SL.raw.slice();
+  SL.sortCol='latestSikdaeTradingDate';SL.sortDir='desc';
+  document.getElementById('slSearch').value='';
+  slRenderSummary();
+  slRenderTable();
+  document.getElementById('slSummary').style.display='';
+  document.getElementById('slTbar').style.display='';
+  document.getElementById('slEmpty').style.display='none';
+  document.getElementById('slTable').style.display='';
+  document.getElementById('slStatus').textContent=SL.raw.length.toLocaleString()+'건 ('+sido+')';
+  slLoad(false);
+}
+
+function slRenderSummary(){
+  var total=SL.filtered.length;
+  var now=new Date();
+  var cutoff=slFmt(new Date(now.getFullYear(),now.getMonth()-1,now.getDate()));
+  var recent=0;
+  SL.filtered.forEach(function(r){
+    if(r.latestSikdaeTradingDate&&r.latestSikdaeTradingDate>=cutoff)recent++;
+  });
+  document.getElementById('slSumTotal').textContent=slN(total)+'개';
+  document.getElementById('slSumRecent').textContent=slN(recent)+'개';
+}
+
+function slSort(col){
+  if(SL.sortCol===col)SL.sortDir=SL.sortDir==='desc'?'asc':'desc';
+  else{SL.sortCol=col;SL.sortDir=col==='name'||col==='roadAddress'?'asc':'desc';}
+  slRenderTable();
+}
+
+function slFilter(){
+  var q=document.getElementById('slSearch').value.trim().toLowerCase();
+  SL.filtered=!q?SL.raw.slice():SL.raw.filter(function(r){
+    return r.name.toLowerCase().indexOf(q)!==-1||r.roadAddress.toLowerCase().indexOf(q)!==-1||r.sid.toLowerCase().indexOf(q)!==-1;
+  });
+  slRenderSummary();
+  slRenderTable();
+}
+
+function slRenderTable(){
+  var f=SL.filtered.slice(),col=SL.sortCol,dir=SL.sortDir;
+  f.sort(function(a,b){
+    var va=a[col],vb=b[col];
+    if(col==='latestSikdaeTradingDate'){
+      va=va||'';vb=vb||'';
+      if(!va&&!vb)return 0;if(!va)return 1;if(!vb)return -1;
+    }
+    if(typeof va==='string')return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+    return dir==='asc'?va-vb:vb-va;
+  });
+  document.querySelectorAll('.sl-table .sl-sort').forEach(function(s){s.textContent='';});
+  var si=document.getElementById('slSort'+col);if(si)si.textContent=dir==='asc'?' ▲':' ▼';
+
+  var now=new Date();
+  var cutoff=slFmt(new Date(now.getFullYear(),now.getMonth()-1,now.getDate()));
+  var h='';
+  f.forEach(function(r,i){
+    var dtClass='';
+    if(r.latestSikdaeTradingDate){
+      dtClass=r.latestSikdaeTradingDate>=cutoff?'sl-recent':'sl-old';
+    }
+    h+='<tr>';
+    h+='<td>'+(i+1)+'</td>';
+    h+='<td title="'+r.sid+'">'+r.sid.substring(0,8)+'</td>';
+    h+='<td>'+r.name+'</td>';
+    h+='<td>'+r.roadAddress+'</td>';
+    h+='<td>'+r.category+'</td>';
+    h+='<td class="'+dtClass+'">'+(r.latestSikdaeTradingDate||'-')+'</td>';
+    h+='</tr>';
+  });
+  document.getElementById('slTbody').innerHTML=h;
+  document.getElementById('slCnt').textContent=f.length+'건';
+}
+
+function slCopy(){
+  var f=SL.filtered.slice(),col=SL.sortCol,dir=SL.sortDir;
+  f.sort(function(a,b){var va=a[col],vb=b[col];if(col==='latestSikdaeTradingDate'){va=va||'';vb=vb||'';if(!va&&!vb)return 0;if(!va)return 1;if(!vb)return -1;}if(typeof va==='string')return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);return dir==='asc'?va-vb:vb-va;});
+  var lines=['No\tsid\t매장명\t주소\t카테고리\t최근거래일'];
+  f.forEach(function(r,i){lines.push((i+1)+'\t'+r.sid+'\t'+r.name+'\t'+r.roadAddress+'\t'+r.category+'\t'+(r.latestSikdaeTradingDate||''));});
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){
+    var ok=document.getElementById('slCopyOk');ok.style.display='inline';setTimeout(function(){ok.style.display='none';},1500);
+  });
+}
+
+function slExcel(){
+  if(!SL.filtered.length){alert('데이터가 없습니다');return;}
+  var f=SL.filtered.slice(),col=SL.sortCol,dir=SL.sortDir;
+  f.sort(function(a,b){var va=a[col],vb=b[col];if(col==='latestSikdaeTradingDate'){va=va||'';vb=vb||'';if(!va&&!vb)return 0;if(!va)return 1;if(!vb)return -1;}if(typeof va==='string')return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);return dir==='asc'?va-vb:vb-va;});
+  var xml='<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>';
+  xml+='<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
+  xml+='<Styles><Style ss:ID="h"><Font ss:Bold="1"/><Interior ss:Color="#F0F4F9" ss:Pattern="Solid"/></Style></Styles>';
+  xml+='<Worksheet ss:Name="제휴점리스트"><Table>';
+  xml+='<Row ss:StyleID="h"><Cell><Data ss:Type="String">No</Data></Cell><Cell><Data ss:Type="String">sid</Data></Cell><Cell><Data ss:Type="String">매장명</Data></Cell><Cell><Data ss:Type="String">주소</Data></Cell><Cell><Data ss:Type="String">카테고리</Data></Cell><Cell><Data ss:Type="String">최근거래일</Data></Cell></Row>';
+  f.forEach(function(r,i){
+    xml+='<Row>';
+    xml+='<Cell><Data ss:Type="Number">'+(i+1)+'</Data></Cell>';
+    xml+='<Cell><Data ss:Type="String">'+slEsc(r.sid)+'</Data></Cell>';
+    xml+='<Cell><Data ss:Type="String">'+slEsc(r.name)+'</Data></Cell>';
+    xml+='<Cell><Data ss:Type="String">'+slEsc(r.roadAddress)+'</Data></Cell>';
+    xml+='<Cell><Data ss:Type="String">'+slEsc(r.category)+'</Data></Cell>';
+    xml+='<Cell><Data ss:Type="String">'+slEsc(r.latestSikdaeTradingDate||'')+'</Data></Cell>';
+    xml+='</Row>';
+  });
+  xml+='</Table></Worksheet></Workbook>';
+  var blob=new Blob([xml],{type:'application/vnd.ms-excel'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  var sido=document.getElementById('slSido').value.trim()||'전체';
+  a.download='제휴점리스트_'+sido+'_'+slFmt(new Date())+'.xls';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function slEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>

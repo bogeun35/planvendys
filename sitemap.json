@@ -59,9 +59,14 @@
               "icon": "doc",
               "desc": "SNS 등록전에 테스트용도입니다.",
               "file": "docs/ops/sns-preview.html"
+            },
+            {
+              "id": "store-list",
+              "title": "지역별 제휴점 리스트",
+              "icon": "doc",
+              "desc": "지역별 제휴점 목록 조회",
+              "file": "docs/ops/store-list.html"
             }
-
-            
           ]
         },
         {
