@@ -120,6 +120,13 @@
               "icon": "doc",
               "desc": "복지대장 월별 지급현황 대시보드",
               "file": "docs/ops/companypointtask.html"
+            },
+            {
+              "id": "welfare-mall-order",
+              "title": "복지대장몰 주문현황",
+              "icon": "doc",
+              "desc": "복지대장몰 주문 및 취소 현황",
+              "file": "docs/ops/welfare-mall-order.html"
             }
           ]
         },
@@ -165,13 +172,6 @@
               "desc": "단체선물대장 대시보드를 보여줍니다.",
               "file": "docs/ops/giftpresent.html"
             },
-            {
-              "id": "welfare-mall-order",
-              "title": "복지대장몰 주문현황",
-              "icon": "doc",
-              "desc": "복지대장몰 주문 및 취소 현황",
-              "file": "docs/ops/welfare-mall-order.html"
-            }
           ]
         }
       ]
