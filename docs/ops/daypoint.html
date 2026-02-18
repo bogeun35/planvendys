@@ -32,12 +32,13 @@ meta: 최종 수정: 2026.02.18
 .dp-twrap{overflow:auto;max-height:calc(100vh - 300px);min-height:300px}
 .dp-table{width:100%;border-collapse:collapse}
 .dp-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:right;cursor:pointer;white-space:nowrap;z-index:1}
-.dp-table th:first-child,.dp-table th:nth-child(2){text-align:left}
+.dp-table th:first-child,.dp-table th:nth-child(2),.dp-table th:nth-child(3){text-align:left}
 .dp-table th:hover{background:#e2e8f0}
 .dp-table th .dp-sort{font-size:9px;margin-left:2px;color:#94a3b8}
 .dp-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap}
 .dp-table td:first-child{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8;width:36px}
-.dp-table td:nth-child(2){text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.dp-table td:nth-child(2){text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:#4a5568;max-width:100px;overflow:hidden;text-overflow:ellipsis}
+.dp-table td:nth-child(3){text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis}
 .dp-table tr{cursor:pointer}
 .dp-table tr:hover{background:#f8fafd}
 .dp-table tr.dp-row--sel{background:#eef4fb}
@@ -107,7 +108,7 @@ meta: 최종 수정: 2026.02.18
     <div class="dp-card"><div class="dp-card__label">복지포인트</div><div class="dp-card__value" id="dpSumWelfare">-</div></div>
   </div>
   <div class="dp-tbar">
-    <input type="text" id="dpSearch" placeholder="고객사명 검색" oninput="dpFilter()">
+    <input type="text" id="dpSearch" placeholder="고객사명 / comId 검색" oninput="dpFilter()">
     <span class="dp-cnt" id="dpCnt"></span>
     <button class="dp-btn" onclick="dpCopy()">복사</button>
     <span class="dp-copy-ok" id="dpCopyOk">복사됨</span>
@@ -116,6 +117,7 @@ meta: 최종 수정: 2026.02.18
     <table class="dp-table">
       <thead><tr>
         <th style="width:36px;cursor:default">No</th>
+        <th onclick="dpSort('comId')">comId<span class="dp-sort" id="dpSortcomId"></span></th>
         <th onclick="dpSort('comName')" style="min-width:120px">고객사명<span class="dp-sort" id="dpSortcomName"></span></th>
         <th onclick="dpSort('daily')">일일식대(원)<span class="dp-sort" id="dpSortdaily"></span></th>
         <th onclick="dpSort('longTerm')">장기식대(원)<span class="dp-sort" id="dpSortlongTerm"></span></th>
@@ -257,7 +259,7 @@ function dpSort(col){
 
 function dpFilter(){
   var q=document.getElementById('dpSearch').value.trim().toLowerCase();
-  DP.filtered=!q?DP.latest.slice():DP.latest.filter(function(r){return r.comName.toLowerCase().indexOf(q)!==-1;});
+  DP.filtered=!q?DP.latest.slice():DP.latest.filter(function(r){return r.comName.toLowerCase().indexOf(q)!==-1||r.comId.toLowerCase().indexOf(q)!==-1;});
   dpRenderSummary();dpRenderTable();
 }
 
@@ -271,6 +273,7 @@ function dpRenderTable(){
     var sel=r.comId===DP.selComId?' dp-row--sel':'';
     h+='<tr class="'+sel+'" onclick="dpSelect(\''+r.comId.replace(/'/g,"\\'")+'\')">';
     h+='<td>'+(i+1)+'</td>';
+    h+='<td title="'+r.comId+'">'+r.comId.substring(0,8)+'</td>';
     h+='<td title="'+r.comName+'">'+r.comName+'</td>';
     h+='<td>'+dpN(r.daily)+'</td>';
     h+='<td>'+dpN(r.longTerm)+'</td>';
@@ -381,8 +384,8 @@ function dpRenderChart(dates,dateMap){
 function dpCopy(){
   var f=DP.filtered.slice(),col=DP.sortCol,dir=DP.sortDir;
   f.sort(function(a,b){var va=a[col],vb=b[col];if(typeof va==='string')return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);return dir==='asc'?va-vb:vb-va;});
-  var lines=['No\t고객사명\t일일식대\t장기식대\t무제한식대\t신청식대\t복지포인트\t총합'];
-  f.forEach(function(r,i){lines.push((i+1)+'\t'+r.comName+'\t'+r.daily+'\t'+r.longTerm+'\t'+r.unlimited+'\t'+r.request+'\t'+r.welfare+'\t'+r.total);});
+  var lines=['No\tcomId\t고객사명\t일일식대\t장기식대\t무제한식대\t신청식대\t복지포인트\t총합'];
+  f.forEach(function(r,i){lines.push((i+1)+'\t'+r.comId+'\t'+r.comName+'\t'+r.daily+'\t'+r.longTerm+'\t'+r.unlimited+'\t'+r.request+'\t'+r.welfare+'\t'+r.total);});
   navigator.clipboard.writeText(lines.join('\n')).then(function(){var ok=document.getElementById('dpCopyOk');ok.style.display='inline';setTimeout(function(){ok.style.display='none';},1500);});
 }
 
