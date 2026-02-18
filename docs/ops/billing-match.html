@@ -1,6 +1,5 @@
 <!--
 title: 청구-입금 매칭 검증
-meta: 최종 수정: 2026.02.18
 -->
 
 <style>
@@ -15,6 +14,7 @@ meta: 최종 수정: 2026.02.18
 .bm-btn--danger{border-color:#e85d5d;color:#e85d5d}.bm-btn--danger:hover{background:#fef2f2}
 .bm-btn--green{border-color:#22c55e;color:#22c55e}.bm-btn--green:hover{background:#f0fdf4}
 .bm-btn--sm{font-size:10px;padding:2px 8px}
+.bm-btn--xs{font-size:9px;padding:1px 5px}
 .bm-status{margin-left:auto;font-size:11px;color:#94a3b8}
 .bm-summary{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
 .bm-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:3px;padding:5px 8px}
@@ -24,26 +24,27 @@ meta: 최종 수정: 2026.02.18
 .bm-insight{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
 .bm-insight__box{border:1px solid #e2e8f0;border-radius:3px;padding:8px 10px;background:#fff}
 .bm-insight__title{font-size:11px;font-weight:600;color:#1a2332;margin-bottom:6px}
-.bm-insight__chart{display:flex;align-items:flex-end;gap:2px;height:60px}
-.bm-insight__bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center}
-.bm-insight__bar{width:100%;min-width:8px;background:#4a90d9;border-radius:2px 2px 0 0;cursor:pointer;position:relative}
-.bm-insight__bar:hover{background:#3a7bc8}
-.bm-insight__bar-label{font-size:8px;color:#94a3b8;margin-top:2px}
-.bm-insight__bar-cnt{font-size:7px;color:#4a90d9;font-weight:600;margin-bottom:1px}
-.bm-insight__bar-tip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#1a2332;color:#fff;padding:2px 6px;border-radius:3px;font-size:10px;white-space:nowrap;z-index:10;font-family:'JetBrains Mono',monospace}
-.bm-insight__bar:hover .bm-insight__bar-tip{display:block}
-.bm-insight__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;font-size:10px}
+.bm-chart-wrap{height:80px;display:flex;gap:1px}
+.bm-chart-col{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+.bm-chart-cnt{font-size:7px;color:#4a90d9;font-weight:600;height:12px;line-height:12px}
+.bm-chart-bar-area{flex:1;width:100%;display:flex;flex-direction:column;justify-content:flex-end}
+.bm-chart-bar{width:100%;background:#4a90d9;border-radius:2px 2px 0 0;min-height:2px;cursor:pointer;position:relative;transition:height 0.2s}
+.bm-chart-bar:hover{background:#3a7bc8}
+.bm-chart-lbl{font-size:7px;color:#94a3b8;height:10px;line-height:10px;text-align:center;overflow:hidden}
+.bm-chart-tip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#1a2332;color:#fff;padding:2px 6px;border-radius:3px;font-size:10px;white-space:nowrap;z-index:10;font-family:'JetBrains Mono',monospace}
+.bm-chart-bar:hover .bm-chart-tip{display:block}
+.bm-insight__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px;font-size:10px}
 .bm-insight__stat-label{color:#94a3b8}.bm-insight__stat-value{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11px}
 .bm-tools{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px;color:#4a5568;flex-wrap:wrap}
 .bm-tools input[type="number"]{width:50px;font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 6px;border:1px solid #d1d5db;border-radius:3px;text-align:right}
 .bm-tools select{font-size:11px;padding:2px 6px;border:1px solid #d1d5db;border-radius:3px}
 .bm-body{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .bm-panel{border:1px solid #e2e8f0;border-radius:3px;display:flex;flex-direction:column;max-height:calc(100vh - 360px)}
-.bm-panel__header{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#f8fafd;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.bm-panel__header{display:flex;align-items:center;padding:5px 10px;background:#f8fafd;border-bottom:1px solid #e2e8f0;flex-shrink:0;gap:6px}
 .bm-panel__title{font-size:12px;font-weight:600;color:#1a2332}
-.bm-panel__count{font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace}
+.bm-panel__count{font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;margin-left:auto}
 .bm-panel__bar{display:flex;align-items:center;gap:4px;padding:4px 10px;border-bottom:1px solid #e2e8f0;flex-shrink:0;flex-wrap:wrap}
-.bm-panel__bar input[type="text"]{flex:1;font-size:11px;padding:2px 6px;border:1px solid #d1d5db;border-radius:3px;min-width:100px}
+.bm-panel__bar input[type="text"]{flex:1;font-size:11px;padding:2px 6px;border:1px solid #d1d5db;border-radius:3px;min-width:80px}
 .bm-panel__bar .bm-btn{font-size:10px;padding:1px 6px}
 .bm-sel-info{font-size:10px;color:#4a90d9;padding:2px 10px;background:#eef4fb;border-bottom:1px solid #e2e8f0;flex-shrink:0}
 .bm-tbl-wrap{flex:1;overflow:auto}
@@ -60,23 +61,32 @@ meta: 최종 수정: 2026.02.18
 .bm-tbl .bm-tag{display:inline-block;padding:0 4px;border-radius:2px;font-size:9px;font-weight:600}
 .bm-tbl .bm-dim{color:#94a3b8;font-size:10px}
 .bm-tbl .bm-js{color:#4a90d9;font-weight:600}
-.bm-tag--matched{background:#dcfce7;color:#16a34a}
-.bm-tag--linked{background:#dbeafe;color:#2563eb}
-.bm-tag--unmatched{background:#fee2e2;color:#dc2626}
+.bm-tag--matched{background:#dcfce7;color:#16a34a}.bm-tag--linked{background:#dbeafe;color:#2563eb}.bm-tag--unmatched{background:#fee2e2;color:#dc2626}
 .bm-remark{font-family:'JetBrains Mono',monospace;font-size:10px}
 .bm-remark--plus{color:#e85d5d}.bm-remark--minus{color:#22c55e}.bm-remark--zero{color:#94a3b8}
-.bm-match-line{background:#fafafa;border:1px solid #e2e8f0;border-radius:3px;margin-top:8px;padding:8px 10px}
-.bm-match-line__title{font-size:11px;font-weight:600;margin-bottom:4px}
 .bm-loading{position:absolute;inset:0;background:rgba(255,255,255,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;border-radius:3px}
 .bm-loading__text{font-size:12px;color:#4a5568;margin-bottom:8px}
 .bm-loading__bar{width:200px;height:3px;background:#e2e8f0;border-radius:2px;overflow:hidden}
 .bm-loading__fill{height:100%;background:#4a90d9;transition:width 0.3s}
 .bm-hidden{display:none !important}
-.bm-copy-ok{color:#22c55e;font-size:11px;margin-left:6px;opacity:0;transition:opacity 0.3s}
+.bm-copy-ok{color:#22c55e;font-size:10px;opacity:0;transition:opacity 0.3s}
 .bm-copy-ok--show{opacity:1}
-.bm-detail-tbl{width:100%;border-collapse:collapse;font-size:11px}
-.bm-detail-tbl th{background:#f0f4f9;padding:3px 8px;text-align:left;font-size:10px;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db}
-.bm-detail-tbl td{padding:3px 8px;border-bottom:1px solid #f0f4f9}
+/* Side panel */
+.bm-side-bg{position:fixed;inset:0;background:rgba(0,0,0,0.15);z-index:140;display:none}
+.bm-side-bg--open{display:block}
+.bm-side{position:fixed;top:0;right:-440px;width:440px;height:100vh;background:#fff;border-left:1px solid #d1d5db;z-index:150;transition:right 0.2s;display:flex;flex-direction:column;box-shadow:-2px 0 8px rgba(0,0,0,0.08)}
+.bm-side--open{right:0}
+.bm-side__head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8fafd;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.bm-side__title{font-size:12px;font-weight:600}
+.bm-side__close{cursor:pointer;font-size:18px;color:#94a3b8;border:none;background:none;padding:0 4px}.bm-side__close:hover{color:#1a2332}
+.bm-side__body{flex:1;overflow:auto;padding:10px 12px;font-size:11px}
+.bm-side__foot{padding:8px 12px;border-top:1px solid #e2e8f0;display:flex;gap:6px;flex-shrink:0}
+.bm-dt{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:6px}
+.bm-dt th{background:#f0f4f9;padding:3px 6px;text-align:left;font-size:10px;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db}
+.bm-dt td{padding:3px 6px;border-bottom:1px solid #f0f4f9}
+.bm-dt tr.bm-cand{cursor:pointer}.bm-dt tr.bm-cand:hover td{background:#eef4fb}
+.bm-dt tr.bm-cand-cur td{background:#eef4fb;font-weight:600}
+/* Modal */
 .bm-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:200;display:flex;align-items:center;justify-content:center}
 .bm-modal{background:#fff;border-radius:4px;border:1px solid #d1d5db;width:560px;max-height:80vh;display:flex;flex-direction:column}
 .bm-modal__head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:600}
@@ -86,246 +96,162 @@ meta: 최종 수정: 2026.02.18
 </style>
 
 <div class="bm" id="bmRoot">
-  <div class="bm-loading bm-hidden" id="bmLoading">
-    <div class="bm-loading__text" id="bmLoadText">데이터 조회 중...</div>
-    <div class="bm-loading__bar"><div class="bm-loading__fill" id="bmLoadBar" style="width:0%"></div></div>
-  </div>
-
+  <div class="bm-loading bm-hidden" id="bmLoading"><div class="bm-loading__text" id="bmLoadText"></div><div class="bm-loading__bar"><div class="bm-loading__fill" id="bmLoadBar" style="width:0%"></div></div></div>
   <div class="bm-ctrl">
-    <label>청구서</label><input type="date" id="bmBillStart"><span style="color:#94a3b8">~</span><input type="date" id="bmBillEnd">
-    <button class="bm-btn bm-btn--sm bm-btn--primary" onclick="bmFetchBills()">청구서 조회</button>
-    <span style="color:#e2e8f0;margin:0 4px">|</span>
-    <label>입금</label><input type="date" id="bmDepStart"><span style="color:#94a3b8">~</span><input type="date" id="bmDepEnd">
-    <button class="bm-btn bm-btn--sm bm-btn--primary" onclick="bmFetchDeps()">입금 조회</button>
-    <span style="color:#e2e8f0;margin:0 4px">|</span>
+    <label>청구서</label><input type="date" id="bmBS"><span style="color:#94a3b8">~</span><input type="date" id="bmBE">
+    <button class="bm-btn bm-btn--sm bm-btn--primary" onclick="bmFetchBills()">조회</button>
+    <span style="color:#e2e8f0;margin:0 2px">|</span>
+    <label>입금</label><input type="date" id="bmDS2"><span style="color:#94a3b8">~</span><input type="date" id="bmDE">
+    <button class="bm-btn bm-btn--sm bm-btn--primary" onclick="bmFetchDeps()">조회</button>
+    <span style="color:#e2e8f0;margin:0 2px">|</span>
     <button class="bm-btn bm-btn--sm" onclick="bmHot('thisMonth',this)">이번달</button>
     <button class="bm-btn bm-btn--sm" onclick="bmHot('lastMonth',this)">지난달</button>
     <button class="bm-btn bm-btn--sm" onclick="bmHot('twoMonthsAgo',this)">지지난달</button>
     <button class="bm-btn bm-btn--sm bm-btn--primary" onclick="bmFetchAll()">전체 조회</button>
     <span class="bm-status" id="bmStatus"></span>
   </div>
-
   <div class="bm-summary">
-    <div class="bm-card"><div class="bm-card__label">청구서</div><div class="bm-card__value" id="bmSBillCnt">-</div></div>
-    <div class="bm-card"><div class="bm-card__label">청구 총액</div><div class="bm-card__value" id="bmSBillAmt">-</div></div>
-    <div class="bm-card"><div class="bm-card__label">입금 건수</div><div class="bm-card__value" id="bmSDepCnt">-</div></div>
-    <div class="bm-card"><div class="bm-card__label">입금 총액</div><div class="bm-card__value" id="bmSDepAmt">-</div></div>
-    <div class="bm-card"><div class="bm-card__label">매칭 성공</div><div class="bm-card__value bm-card__value--green" id="bmSMatchCnt">-</div></div>
-    <div class="bm-card"><div class="bm-card__label">매칭률</div><div class="bm-card__value bm-card__value--blue" id="bmSMatchRate">-</div></div>
-    <div class="bm-card"><div class="bm-card__label">미매칭(청구/입금)</div><div class="bm-card__value bm-card__value--red" id="bmSUnmatchCnt">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">청구서</div><div class="bm-card__value" id="bmC0">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">청구 총액</div><div class="bm-card__value" id="bmC1">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">입금 건수</div><div class="bm-card__value" id="bmC2">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">입금 총액</div><div class="bm-card__value" id="bmC3">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">매칭 성공</div><div class="bm-card__value bm-card__value--green" id="bmC4">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">매칭률</div><div class="bm-card__value bm-card__value--blue" id="bmC5">-</div></div>
+    <div class="bm-card"><div class="bm-card__label">미매칭(청구/입금)</div><div class="bm-card__value bm-card__value--red" id="bmC6">-</div></div>
   </div>
-
   <div class="bm-insight bm-hidden" id="bmInsight">
-    <div class="bm-insight__box">
-      <div class="bm-insight__title">입금일자별 입금 현황</div>
-      <div class="bm-insight__chart" id="bmDailyChart"></div>
-      <div class="bm-insight__stats" id="bmDailyStats"></div>
-    </div>
-    <div class="bm-insight__box">
-      <div class="bm-insight__title">연결 상태 요약</div>
-      <div id="bmLinkSummary" style="font-size:11px"></div>
-    </div>
+    <div class="bm-insight__box"><div class="bm-insight__title">입금일자별 입금 현황</div><div class="bm-chart-wrap" id="bmChart"></div><div class="bm-insight__stats" id="bmChartStats"></div></div>
+    <div class="bm-insight__box"><div class="bm-insight__title">연결 상태 요약</div><div id="bmLinkSum" style="font-size:11px"></div></div>
   </div>
-
   <div class="bm-tools">
-    <span>금액 허용 오차</span><input type="number" id="bmTolerance" value="0" min="0" max="100"><span>원</span>
-    <span style="margin-left:8px">매칭 기준</span>
-    <select id="bmMatchMode"><option value="both">JS정규식 + 금액</option><option value="desc">JS정규식만</option><option value="amount">금액만</option></select>
+    <span>금액 허용 오차</span><input type="number" id="bmTol" value="0" min="0"><span>원</span>
+    <span style="margin-left:8px">매칭 기준</span><select id="bmMode"><option value="both">JS정규식+금액</option><option value="desc">JS정규식만</option><option value="amount">금액만</option></select>
     <button class="bm-btn bm-btn--primary" onclick="bmRunMatch()">매칭 실행</button>
     <button class="bm-btn bm-btn--danger bm-hidden" id="bmResetBtn" onclick="bmResetMatch()">매칭 초기화</button>
     <button class="bm-btn" onclick="bmCopyResult()">결과 복사</button>
-    <button class="bm-btn bm-btn--green" onclick="bmShowVoucherModal()">전표 다운로드</button>
-    <span class="bm-copy-ok" id="bmCopyOk">복사 완료</span>
+    <button class="bm-btn bm-btn--green" onclick="bmShowVM()">전표 다운로드</button>
+    <span class="bm-copy-ok" id="bmCO">복사 완료</span>
   </div>
-
   <div class="bm-body">
     <div class="bm-panel">
-      <div class="bm-panel__header"><span class="bm-panel__title">청구서 (입금약정일 기준)</span><span class="bm-panel__count" id="bmBillCount">0건</span></div>
-      <div class="bm-panel__bar">
-        <input type="text" placeholder="청구서명/예금주 검색" id="bmBillSearch" oninput="bmRenderBills()">
-        <button class="bm-btn bm-btn--active" onclick="bmBillFilter('all',this)">전체</button>
-        <button class="bm-btn" onclick="bmBillFilter('linked',this)">연결</button>
-        <button class="bm-btn" onclick="bmBillFilter('matched',this)">매칭</button>
-        <button class="bm-btn" onclick="bmBillFilter('unmatched',this)">미매칭</button>
-      </div>
-      <div class="bm-sel-info bm-hidden" id="bmBillSelInfo">0건 선택</div>
-      <div class="bm-tbl-wrap"><table class="bm-tbl"><colgroup>
-        <col style="width:48px"><col style="width:110px"><col style="width:80px"><col style="width:65px"><col style="width:65px"><col style="width:85px"><col style="width:68px"><col style="width:42px"><col style="width:50px">
-      </colgroup><thead><tr>
-        <th onclick="bmSortBill('billIdx')">#</th><th onclick="bmSortBill('billName')">청구서명</th><th onclick="bmSortBill('depositAccountHolder')">예금주</th><th onclick="bmSortBill('regExDepositAccountHolder')">DB정규식</th><th onclick="bmSortBill('_normalized')">JS정규식</th><th onclick="bmSortBill('totalAmount')" style="text-align:right">청구액(원)</th><th onclick="bmSortBill('payDate')">약정일</th><th>상태</th><th>비고</th>
-      </tr></thead><tbody id="bmBillBody"></tbody></table></div>
+      <div class="bm-panel__header"><span class="bm-panel__title">청구서 (약정일 기준)</span><button class="bm-btn bm-btn--xs" onclick="bmCopyP('bill')">복사</button><span class="bm-copy-ok" id="bmBCO">OK</span><span class="bm-panel__count" id="bmBC">0건</span></div>
+      <div class="bm-panel__bar"><input type="text" placeholder="청구서명/예금주 검색" id="bmBSch" oninput="bmRB()"><button class="bm-btn bm-btn--active" onclick="bmBFi('all',this)">전체</button><button class="bm-btn" onclick="bmBFi('linked',this)">연결</button><button class="bm-btn" onclick="bmBFi('matched',this)">매칭</button><button class="bm-btn" onclick="bmBFi('unmatched',this)">미매칭</button></div>
+      <div class="bm-sel-info bm-hidden" id="bmBSI"></div>
+      <div class="bm-tbl-wrap"><table class="bm-tbl"><colgroup><col style="width:46px"><col style="width:108px"><col style="width:76px"><col style="width:62px"><col style="width:62px"><col style="width:82px"><col style="width:64px"><col style="width:38px"><col style="width:46px"></colgroup><thead><tr><th onclick="bmSoB('billIdx')">#</th><th onclick="bmSoB('billName')">청구서명</th><th onclick="bmSoB('depositAccountHolder')">예금주</th><th onclick="bmSoB('regExDepositAccountHolder')">DB정규식</th><th onclick="bmSoB('_normalized')">JS정규식</th><th onclick="bmSoB('totalAmount')" style="text-align:right">청구액(원)</th><th onclick="bmSoB('payDate')">약정일</th><th>상태</th><th>비고</th></tr></thead><tbody id="bmBB"></tbody></table></div>
     </div>
     <div class="bm-panel">
-      <div class="bm-panel__header"><span class="bm-panel__title">입금내역 (거래일 기준)</span><span class="bm-panel__count" id="bmDepCount">0건</span></div>
-      <div class="bm-panel__bar">
-        <input type="text" placeholder="적요 검색" id="bmDepSearch" oninput="bmRenderDeps()">
-        <button class="bm-btn bm-btn--active" onclick="bmDepFilter('all',this)">전체</button>
-        <button class="bm-btn" onclick="bmDepFilter('linked',this)">연결</button>
-        <button class="bm-btn" onclick="bmDepFilter('matched',this)">매칭</button>
-        <button class="bm-btn" onclick="bmDepFilter('unmatched',this)">미매칭</button>
-      </div>
-      <div class="bm-sel-info bm-hidden" id="bmDepSelInfo">0건 선택</div>
-      <div class="bm-tbl-wrap"><table class="bm-tbl"><colgroup>
-        <col style="width:48px"><col style="width:95px"><col style="width:65px"><col style="width:65px"><col style="width:85px"><col style="width:68px"><col style="width:68px"><col style="width:42px"><col style="width:42px"><col style="width:50px">
-      </colgroup><thead><tr>
-        <th onclick="bmSortDep('bankStatementIdx')">#</th><th onclick="bmSortDep('description')">적요</th><th onclick="bmSortDep('regExDescription')">DB정규식</th><th onclick="bmSortDep('_normalized')">JS정규식</th><th onclick="bmSortDep('depositAmount')" style="text-align:right">입금액(원)</th><th onclick="bmSortDep('transactionDate')">입금일</th><th onclick="bmSortDep('matchedAmount')" style="text-align:right">연결액(원)</th><th>청구서</th><th>상태</th><th>비고</th>
-      </tr></thead><tbody id="bmDepBody"></tbody></table></div>
+      <div class="bm-panel__header"><span class="bm-panel__title">입금내역 (거래일 기준)</span><button class="bm-btn bm-btn--xs" onclick="bmCopyP('dep')">복사</button><span class="bm-copy-ok" id="bmDCO">OK</span><span class="bm-panel__count" id="bmDC2">0건</span></div>
+      <div class="bm-panel__bar"><input type="text" placeholder="적요 검색" id="bmDSch" oninput="bmRD()"><button class="bm-btn bm-btn--active" onclick="bmDFi('all',this)">전체</button><button class="bm-btn" onclick="bmDFi('linked',this)">연결</button><button class="bm-btn" onclick="bmDFi('matched',this)">매칭</button><button class="bm-btn" onclick="bmDFi('unmatched',this)">미매칭</button></div>
+      <div class="bm-sel-info bm-hidden" id="bmDSI"></div>
+      <div class="bm-tbl-wrap"><table class="bm-tbl"><colgroup><col style="width:46px"><col style="width:90px"><col style="width:62px"><col style="width:62px"><col style="width:82px"><col style="width:64px"><col style="width:64px"><col style="width:38px"><col style="width:38px"><col style="width:46px"></colgroup><thead><tr><th onclick="bmSoD('bankStatementIdx')">#</th><th onclick="bmSoD('description')">적요</th><th onclick="bmSoD('regExDescription')">DB정규식</th><th onclick="bmSoD('_normalized')">JS정규식</th><th onclick="bmSoD('depositAmount')" style="text-align:right">입금액(원)</th><th onclick="bmSoD('transactionDate')">입금일</th><th onclick="bmSoD('matchedAmount')" style="text-align:right">연결액(원)</th><th>청구</th><th>상태</th><th>비고</th></tr></thead><tbody id="bmDB"></tbody></table></div>
     </div>
   </div>
-  <div class="bm-match-line bm-hidden" id="bmMatchResult"><div class="bm-match-line__title">매칭 상세</div><div id="bmMatchDetail"></div></div>
 </div>
-<div class="bm-modal-bg bm-hidden" id="bmVoucherModal" onclick="if(event.target===this)bmCloseVoucherModal()">
-  <div class="bm-modal"><div class="bm-modal__head"><span>입금전표 다운로드</span><button class="bm-modal__close" onclick="bmCloseVoucherModal()">&times;</button></div><div class="bm-modal__body" id="bmVoucherBody"></div><div class="bm-modal__foot"><button class="bm-btn" onclick="bmCloseVoucherModal()">닫기</button><button class="bm-btn bm-btn--primary" onclick="bmDownloadAllVouchers()">전체 다운로드</button></div></div>
+<!-- Side panel -->
+<div class="bm-side-bg" id="bmSideBg" onclick="bmCloseSide()"></div>
+<div class="bm-side" id="bmSide">
+  <div class="bm-side__head"><span class="bm-side__title" id="bmST">상세</span><button class="bm-side__close" onclick="bmCloseSide()">&times;</button></div>
+  <div class="bm-side__body" id="bmSB2"></div>
+  <div class="bm-side__foot" id="bmSF"></div>
 </div>
+<!-- Voucher Modal -->
+<div class="bm-modal-bg bm-hidden" id="bmVM" onclick="if(event.target===this)bmCloseVM()"><div class="bm-modal"><div class="bm-modal__head"><span>입금전표 다운로드</span><button class="bm-modal__close" onclick="bmCloseVM()">&times;</button></div><div class="bm-modal__body" id="bmVB"></div><div class="bm-modal__foot"><button class="bm-btn" onclick="bmCloseVM()">닫기</button><button class="bm-btn bm-btn--primary" onclick="bmDLAll()">전체 다운로드</button></div></div></div>
 
 <script>
-var BM={
-    PROXY:'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
-    TEMPLATE_URL:'https://bogeun35.github.io/planvendys/docs/ops/templates/voucher-template.xlsx',
-    QID_BILL:1354,QID_DEP:1355,bills:[],deps:[],dateGroups:{},
-    billFilter:'all',depFilter:'all',billSortCol:'totalAmount',billSortDir:'desc',depSortCol:'depositAmount',depSortDir:'desc',
-    matchRan:false,selBills:new Set(),selDeps:new Set(),templateWB:null,
-    DEPT_MAP:{MEAL:'300008',WELFARE:'300009',GROUP_GIFT:'300010',ADVERTISE:'300011',QUICK:'300013',COMPULSORY_EDUCATION:'300014','':'300007'}
-};
-function bmNormalize(s){if(!s)return '';s=String(s);s=s.replace(/[\s\u00A0\u3000\uA1A1]/g,'');s=s.replace(/\uFF08\uc8FC\uFF09/g,'');s=s.replace(/\u321C/g,'');s=s.replace(/[\uFF08\uFF09]/g,'');s=s.replace(/\(주\)/gi,'');s=s.replace(/주식회사/g,'');return s;}
-function bmApi(p){var qs=Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k]);}).join('&');return fetch(BM.PROXY+'?'+qs,{redirect:'follow'}).then(function(r){return r.json();});}
-function bmDS(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function bmDC(s){return s?s.replace(/-/g,''):'';}
-function bmN(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString();}
-function bmS(v){var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+(a/1e4).toFixed(0)+'만';return p+a.toLocaleString();}
-function bmShowL(t,p){document.getElementById('bmLoading').classList.remove('bm-hidden');document.getElementById('bmLoadText').textContent=t;document.getElementById('bmLoadBar').style.width=p+'%';}
-function bmHideL(){document.getElementById('bmLoading').classList.add('bm-hidden');}
+var B={PROXY:'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',TPL:'https://bogeun35.github.io/planvendys/docs/ops/templates/voucher-template.xlsx',QB:1354,QD:1355,bills:[],deps:[],dg:{},bf:'all',df:'all',bsc:'totalAmount',bsd:'desc',dsc:'depositAmount',dsd:'desc',mr:false,sb:new Set(),sd:new Set(),tw:null,fb:[],fd:[],DM:{MEAL:'300008',WELFARE:'300009',GROUP_GIFT:'300010',ADVERTISE:'300011',QUICK:'300013',COMPULSORY_EDUCATION:'300014','':'300007'}};
 
-function bmHot(key,el){
-    var now=new Date(),y=now.getFullYear(),m=now.getMonth(),s,e;
-    switch(key){case 'thisMonth':s=new Date(y,m,1);e=new Date(y,m+1,0);break;case 'lastMonth':s=new Date(y,m-1,1);e=new Date(y,m,0);break;case 'twoMonthsAgo':s=new Date(y,m-2,1);e=new Date(y,m-1,0);break;}
-    var sv=bmDS(s),ev=bmDS(e);
-    document.getElementById('bmBillStart').value=sv;document.getElementById('bmBillEnd').value=ev;
-    document.getElementById('bmDepStart').value=sv;document.getElementById('bmDepEnd').value=ev;
-    document.querySelectorAll('.bm-ctrl .bm-btn--sm:not(.bm-btn--primary)').forEach(function(b){b.classList.remove('bm-btn--active');});if(el)el.classList.add('bm-btn--active');
-}
-(function(){var now=new Date(),y=now.getFullYear(),m=now.getMonth(),sv=bmDS(new Date(y,m,1)),ev=bmDS(new Date(y,m+1,0));
-    document.getElementById('bmBillStart').value=sv;document.getElementById('bmBillEnd').value=ev;
-    document.getElementById('bmDepStart').value=sv;document.getElementById('bmDepEnd').value=ev;})();
+function bNm(s){if(!s)return'';s=String(s);s=s.replace(/[\s\u00A0\u3000\uA1A1]/g,'');s=s.replace(/\uFF08\uc8FC\uFF09/g,'');s=s.replace(/\u321C/g,'');s=s.replace(/[\uFF08\uFF09]/g,'');s=s.replace(/\(주\)/gi,'');s=s.replace(/주식회사/g,'');return s;}
+function bAp(p){var qs=Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k]);}).join('&');return fetch(B.PROXY+'?'+qs,{redirect:'follow'}).then(function(r){return r.json();});}
+function bDs(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function bDc(s){return s?s.replace(/-/g,''):'';}
+function bN(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString();}
+function bS(v){var p=v<0?'-':'',a=Math.abs(v);if(a>=1e8)return p+(a/1e8).toFixed(1)+'억';if(a>=1e4)return p+(a/1e4).toFixed(0)+'만';return p+a.toLocaleString();}
+function bSL(t,p){document.getElementById('bmLoading').classList.remove('bm-hidden');document.getElementById('bmLoadText').textContent=t;document.getElementById('bmLoadBar').style.width=p+'%';}
+function bHL(){document.getElementById('bmLoading').classList.add('bm-hidden');}
+function bFl(id){var el=document.getElementById(id);el.classList.add('bm-copy-ok--show');setTimeout(function(){el.classList.remove('bm-copy-ok--show');},1500);}
 
-/* ===== Fetch ===== */
-async function bmFetchAll(){bmShowL('청구서 조회 중...',10);BM.bills=[];BM.deps=[];BM.matchRan=false;BM.selBills.clear();BM.selDeps.clear();document.getElementById('bmResetBtn').classList.add('bm-hidden');
-    try{var bR=await bmFQ(BM.QID_BILL,document.getElementById('bmBillStart').value,document.getElementById('bmBillEnd').value,'청구서');bmShowL('입금내역 조회 중...',50);
-        var dR=await bmFQ(BM.QID_DEP,document.getElementById('bmDepStart').value,document.getElementById('bmDepEnd').value,'입금내역');bmShowL('처리 중...',85);
-        bmPB(bR);bmPD(dR);bmAL();bmShowL('완료',100);setTimeout(bmHideL,300);
-        document.getElementById('bmStatus').textContent='청구 '+BM.bills.length+'건 / 입금 '+BM.deps.length+'건';bmRA();
-    }catch(err){bmHideL();document.getElementById('bmStatus').textContent='오류: '+err.message;}}
-async function bmFetchBills(){bmShowL('청구서 조회 중...',20);BM.selBills.clear();
-    try{var r=await bmFQ(BM.QID_BILL,document.getElementById('bmBillStart').value,document.getElementById('bmBillEnd').value,'청구서');bmPB(r);bmAL();bmShowL('완료',100);setTimeout(bmHideL,300);document.getElementById('bmStatus').textContent='청구 '+BM.bills.length+'건';bmRA();
-    }catch(err){bmHideL();document.getElementById('bmStatus').textContent='오류: '+err.message;}}
-async function bmFetchDeps(){bmShowL('입금내역 조회 중...',20);BM.selDeps.clear();
-    try{var r=await bmFQ(BM.QID_DEP,document.getElementById('bmDepStart').value,document.getElementById('bmDepEnd').value,'입금내역');bmPD(r);bmAL();bmShowL('완료',100);setTimeout(bmHideL,300);document.getElementById('bmStatus').textContent='입금 '+BM.deps.length+'건';bmRA();
-    }catch(err){bmHideL();document.getElementById('bmStatus').textContent='오류: '+err.message;}}
-async function bmFQ(qid,sd,ed,l){if(!sd||!ed)throw new Error(l+' 날짜 미입력');var d=await bmApi({action:'post',queryId:qid,startDate:sd,endDate:ed});if(d.query_result)return d.query_result.data.rows;if(d.job)return await bmPoll(d.job.id,l);throw new Error(l+' 실패');}
-async function bmPoll(jid,l){for(var i=0;i<90;i++){await new Promise(function(r){setTimeout(r,1000);});var d=await bmApi({action:'job',jobId:jid});if(d.job&&d.job.status===3){var res=await bmApi({action:'result',resultId:d.job.query_result_id});return res.query_result.data.rows;}if(d.job&&d.job.status===4)throw new Error(l+' 실패');}throw new Error(l+' 타임아웃');}
-function bmPB(rows){BM.bills=rows.map(function(r){var o=String(r.depositAccountHolder||''),db=String(r.regExDepositAccountHolder||'');return{billIdx:Number(r.billIdx)||0,billName:String(r.billName||''),companyId:String(r.companyId||''),payDate:String(r.payDate||''),depositAccountHolder:o,regExDepositAccountHolder:db,_normalized:bmNormalize(db||o),serviceTransactionAmount:Number(r.serviceTransactionAmount)||0,serviceChargeAmount:Number(r.serviceChargeAmount)||0,otherAmount:Number(r.otherAmount)||0,totalAmount:Number(r.totalAmount)||0,contractType:String(r.contractType||''),accountBizNumber:String(r.accountBizNumber||''),_matchStatus:'unmatched',_matchedDepIdx:null,_diff:0};});}
-function bmPD(rows){BM.deps=rows.map(function(r){var o=String(r.description||''),db=String(r.regExDescription||'');return{bankStatementIdx:Number(r.bankStatementIdx)||0,description:o,regExDescription:db,_normalized:bmNormalize(db||o),depositAmount:Number(r.depositAmount)||0,matchedAmount:Number(r.matchedAmount)||0,billIdx:r.billIdx?Number(r.billIdx):null,accountBizNumber:String(r.accountBizNumber||''),codeName:String(r.codeName||''),transactionDate:String(r.transactionDate||'').replace(/T.*/,'').substring(0,10),_matchStatus:r.billIdx?'linked':'unmatched',_matchedBillIdx:r.billIdx?Number(r.billIdx):null,_diff:0};});}
-function bmAL(){BM.bills.forEach(function(b){b._matchStatus='unmatched';b._matchedDepIdx=null;b._diff=0;});BM.deps.forEach(function(d){if(d.billIdx){d._matchStatus='linked';d._matchedBillIdx=d.billIdx;var b=BM.bills.find(function(x){return x.billIdx===d.billIdx;});if(b){b._matchStatus='linked';b._matchedDepIdx=d.bankStatementIdx;}}else{d._matchStatus='unmatched';d._matchedBillIdx=null;}d._diff=0;});}
-function bmRA(){bmRS();bmRI();bmRenderBills();bmRenderDeps();}
+function bmHot(k,el){var n=new Date(),y=n.getFullYear(),m=n.getMonth(),s,e;switch(k){case'thisMonth':s=new Date(y,m,1);e=new Date(y,m+1,0);break;case'lastMonth':s=new Date(y,m-1,1);e=new Date(y,m,0);break;case'twoMonthsAgo':s=new Date(y,m-2,1);e=new Date(y,m-1,0);break;}var sv=bDs(s),ev=bDs(e);document.getElementById('bmBS').value=sv;document.getElementById('bmBE').value=ev;document.getElementById('bmDS2').value=sv;document.getElementById('bmDE').value=ev;document.querySelectorAll('.bm-ctrl .bm-btn--sm:not(.bm-btn--primary)').forEach(function(b){b.classList.remove('bm-btn--active');});if(el)el.classList.add('bm-btn--active');}
+(function(){var n=new Date(),y=n.getFullYear(),m=n.getMonth(),sv=bDs(new Date(y,m,1)),ev=bDs(new Date(y,m+1,0));document.getElementById('bmBS').value=sv;document.getElementById('bmBE').value=ev;document.getElementById('bmDS2').value=sv;document.getElementById('bmDE').value=ev;})();
 
-/* ===== Summary ===== */
-function bmRS(){var bt=0,dt=0,mc=0,ub=0;BM.bills.forEach(function(b){bt+=b.totalAmount;if(b._matchStatus!=='unmatched')mc++;else ub++;});BM.deps.forEach(function(d){dt+=d.depositAmount;});var ud=BM.deps.filter(function(d){return d._matchStatus==='unmatched';}).length;
-    document.getElementById('bmSBillCnt').textContent=BM.bills.length+'건';document.getElementById('bmSBillAmt').textContent=bmS(bt);document.getElementById('bmSDepCnt').textContent=BM.deps.length+'건';document.getElementById('bmSDepAmt').textContent=bmS(dt);document.getElementById('bmSMatchCnt').textContent=mc+'건';document.getElementById('bmSMatchRate').textContent=BM.bills.length>0?((mc/BM.bills.length)*100).toFixed(1)+'%':'-';document.getElementById('bmSUnmatchCnt').textContent=ub+' / '+ud;}
+async function bmFetchAll(){bSL('청구서 조회 중...',10);B.bills=[];B.deps=[];B.mr=false;B.sb.clear();B.sd.clear();bmCloseSide();document.getElementById('bmResetBtn').classList.add('bm-hidden');try{var br=await bFQ(B.QB,document.getElementById('bmBS').value,document.getElementById('bmBE').value,'청구서');bSL('입금내역 조회 중...',50);var dr=await bFQ(B.QD,document.getElementById('bmDS2').value,document.getElementById('bmDE').value,'입금내역');bSL('처리 중...',85);bPB(br);bPD(dr);bAL();bSL('완료',100);setTimeout(bHL,300);document.getElementById('bmStatus').textContent='청구 '+B.bills.length+'건 / 입금 '+B.deps.length+'건';bRA();}catch(e){bHL();document.getElementById('bmStatus').textContent='오류: '+e.message;}}
+async function bmFetchBills(){bSL('청구서 조회...',20);B.sb.clear();try{var r=await bFQ(B.QB,document.getElementById('bmBS').value,document.getElementById('bmBE').value,'청구서');bPB(r);bAL();bSL('완료',100);setTimeout(bHL,300);document.getElementById('bmStatus').textContent='청구 '+B.bills.length+'건';bRA();}catch(e){bHL();document.getElementById('bmStatus').textContent='오류: '+e.message;}}
+async function bmFetchDeps(){bSL('입금내역 조회...',20);B.sd.clear();try{var r=await bFQ(B.QD,document.getElementById('bmDS2').value,document.getElementById('bmDE').value,'입금내역');bPD(r);bAL();bSL('완료',100);setTimeout(bHL,300);document.getElementById('bmStatus').textContent='입금 '+B.deps.length+'건';bRA();}catch(e){bHL();document.getElementById('bmStatus').textContent='오류: '+e.message;}}
+async function bFQ(q,sd,ed,l){if(!sd||!ed)throw new Error(l+' 날짜 미입력');var d=await bAp({action:'post',queryId:q,startDate:sd,endDate:ed});if(d.query_result)return d.query_result.data.rows;if(d.job)return await bPo(d.job.id,l);throw new Error(l+' 실패');}
+async function bPo(j,l){for(var i=0;i<90;i++){await new Promise(function(r){setTimeout(r,1000);});var d=await bAp({action:'job',jobId:j});if(d.job&&d.job.status===3){var r=await bAp({action:'result',resultId:d.job.query_result_id});return r.query_result.data.rows;}if(d.job&&d.job.status===4)throw new Error(l+' 실패');}throw new Error(l+' 타임아웃');}
+function bPB(r){B.bills=r.map(function(r){var o=String(r.depositAccountHolder||''),db=String(r.regExDepositAccountHolder||'');return{billIdx:Number(r.billIdx)||0,billName:String(r.billName||''),companyId:String(r.companyId||''),payDate:String(r.payDate||''),depositAccountHolder:o,regExDepositAccountHolder:db,_normalized:bNm(db||o),serviceTransactionAmount:Number(r.serviceTransactionAmount)||0,serviceChargeAmount:Number(r.serviceChargeAmount)||0,otherAmount:Number(r.otherAmount)||0,totalAmount:Number(r.totalAmount)||0,contractType:String(r.contractType||''),accountBizNumber:String(r.accountBizNumber||''),_ms:'unmatched',_md:null,_diff:0};});}
+function bPD(r){B.deps=r.map(function(r){var o=String(r.description||''),db=String(r.regExDescription||'');return{bankStatementIdx:Number(r.bankStatementIdx)||0,description:o,regExDescription:db,_normalized:bNm(db||o),depositAmount:Number(r.depositAmount)||0,matchedAmount:Number(r.matchedAmount)||0,billIdx:r.billIdx?Number(r.billIdx):null,accountBizNumber:String(r.accountBizNumber||''),codeName:String(r.codeName||''),transactionDate:String(r.transactionDate||'').replace(/T.*/,'').substring(0,10),_ms:r.billIdx?'linked':'unmatched',_mb:r.billIdx?Number(r.billIdx):null,_diff:0};});}
+function bAL(){B.bills.forEach(function(b){b._ms='unmatched';b._md=null;b._diff=0;});B.deps.forEach(function(d){if(d.billIdx){d._ms='linked';d._mb=d.billIdx;var b=B.bills.find(function(x){return x.billIdx===d.billIdx;});if(b){b._ms='linked';b._md=d.bankStatementIdx;}}else{d._ms='unmatched';d._mb=null;}d._diff=0;});}
+function bRA(){bRS();bRI();bmRB();bmRD();}
 
-/* ===== Insight ===== */
-function bmRI(){document.getElementById('bmInsight').classList.remove('bm-hidden');var pd={};BM.deps.forEach(function(d){var dt=d.transactionDate;if(!dt)return;if(!pd[dt])pd[dt]={amount:0,count:0};pd[dt].amount+=d.depositAmount;pd[dt].count++;});
-    var dates=Object.keys(pd).sort(),maxA=0;dates.forEach(function(d){if(pd[d].amount>maxA)maxA=pd[d].amount;});
-    var ch='';dates.forEach(function(d){var v=pd[d],pct=maxA>0?(v.amount/maxA*100):0;ch+='<div class="bm-insight__bar-wrap"><div class="bm-insight__bar-cnt">'+v.count+'</div><div class="bm-insight__bar" style="height:'+Math.max(pct,2)+'%"><div class="bm-insight__bar-tip">'+d.substring(5)+' '+bmN(v.amount)+'원 ('+v.count+'건)</div></div><div class="bm-insight__bar-label">'+d.substring(5)+'</div></div>';});
-    document.getElementById('bmDailyChart').innerHTML=ch||'<span class="bm-dim">데이터 없음</span>';
-    if(dates.length>0){var ams=dates.map(function(d){return pd[d].amount;}),tot=ams.reduce(function(a,b){return a+b;},0);document.getElementById('bmDailyStats').innerHTML='<div><div class="bm-insight__stat-label">일평균</div><div class="bm-insight__stat-value">'+bmS(Math.round(tot/ams.length))+'</div></div><div><div class="bm-insight__stat-label">최고</div><div class="bm-insight__stat-value">'+bmS(Math.max.apply(null,ams))+'</div></div><div><div class="bm-insight__stat-label">최저</div><div class="bm-insight__stat-value">'+bmS(Math.min.apply(null,ams))+'</div></div>';}
-    var linked=BM.deps.filter(function(d){return d.billIdx;}),tla=0,oa=0;linked.forEach(function(d){tla+=d.matchedAmount;var ex=d.depositAmount-(d.matchedAmount||0);if(ex>0)oa+=ex;});
-    document.getElementById('bmLinkSummary').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div><span class="bm-insight__stat-label">DB 연결완료</span><div class="bm-insight__stat-value">'+linked.length+'건</div></div><div><span class="bm-insight__stat-label">연결 금액</span><div class="bm-insight__stat-value">'+bmS(tla)+'</div></div><div><span class="bm-insight__stat-label">미연결 입금</span><div class="bm-insight__stat-value" style="color:#e85d5d">'+BM.deps.filter(function(d){return!d.billIdx;}).length+'건</div></div><div><span class="bm-insight__stat-label">초과(과오)</span><div class="bm-insight__stat-value" style="color:#d97706">'+bmS(oa)+'</div></div></div>';}
+function bRS(){var bt=0,dt=0,mc=0,ub=0;B.bills.forEach(function(b){bt+=b.totalAmount;if(b._ms!=='unmatched')mc++;else ub++;});B.deps.forEach(function(d){dt+=d.depositAmount;});var ud=B.deps.filter(function(d){return d._ms==='unmatched';}).length;document.getElementById('bmC0').textContent=B.bills.length+'건';document.getElementById('bmC1').textContent=bS(bt);document.getElementById('bmC2').textContent=B.deps.length+'건';document.getElementById('bmC3').textContent=bS(dt);document.getElementById('bmC4').textContent=mc+'건';document.getElementById('bmC5').textContent=B.bills.length>0?((mc/B.bills.length)*100).toFixed(1)+'%':'-';document.getElementById('bmC6').textContent=ub+' / '+ud;}
 
-/* ===== Matching ===== */
-function bmRunMatch(){var tol=Number(document.getElementById('bmTolerance').value)||0,mode=document.getElementById('bmMatchMode').value;bmAL();
-    var ub=BM.bills.filter(function(b){return b._matchStatus==='unmatched'&&b.totalAmount>0;}),ud=BM.deps.filter(function(d){return d._matchStatus==='unmatched';}),used={};
-    ub.forEach(function(bill){var nb=bill._normalized;if(!nb&&mode!=='amount')return;for(var i=0;i<ud.length;i++){var dep=ud[i];if(used[dep.bankStatementIdx])continue;var nd=dep._normalized,dm=nb&&nd&&nb===nd,ad=Math.abs(bill.totalAmount-dep.depositAmount),am=ad<=tol,ok=false;if(mode==='both')ok=dm&&am;else if(mode==='desc')ok=dm;else if(mode==='amount')ok=am;if(ok){var diff=bill.totalAmount-dep.depositAmount;bill._matchStatus='matched';bill._matchedDepIdx=dep.bankStatementIdx;bill._diff=diff;dep._matchStatus='matched';dep._matchedBillIdx=bill.billIdx;dep._diff=diff;used[dep.bankStatementIdx]=true;break;}}});
-    BM.matchRan=true;document.getElementById('bmResetBtn').classList.remove('bm-hidden');bmRA();document.getElementById('bmStatus').textContent='매칭 완료: '+BM.bills.filter(function(b){return b._matchStatus!=='unmatched';}).length+'건 성공';}
-function bmResetMatch(){BM.matchRan=false;BM.selBills.clear();BM.selDeps.clear();bmAL();document.getElementById('bmResetBtn').classList.add('bm-hidden');document.getElementById('bmMatchResult').classList.add('bm-hidden');bmRA();document.getElementById('bmStatus').textContent='매칭 초기화됨';}
+function bRI(){document.getElementById('bmInsight').classList.remove('bm-hidden');var pd={};B.deps.forEach(function(d){var dt=d.transactionDate;if(!dt)return;if(!pd[dt])pd[dt]={a:0,c:0};pd[dt].a+=d.depositAmount;pd[dt].c++;});
+    var ds=Object.keys(pd).sort(),mx=1;ds.forEach(function(d){if(pd[d].a>mx)mx=pd[d].a;});
+    var h='';ds.forEach(function(d){var v=pd[d],pct=Math.max((v.a/mx)*100,3);h+='<div class="bm-chart-col"><div class="bm-chart-cnt">'+v.c+'</div><div class="bm-chart-bar-area"><div class="bm-chart-bar" style="height:'+pct+'%"><div class="bm-chart-tip">'+d.substring(5)+' '+bN(v.a)+'원 ('+v.c+'건)</div></div></div><div class="bm-chart-lbl">'+d.substring(5)+'</div></div>';});
+    document.getElementById('bmChart').innerHTML=h||'<span class="bm-dim">데이터 없음</span>';
+    if(ds.length>0){var am=ds.map(function(d){return pd[d].a;}),tt=am.reduce(function(a,b){return a+b;},0);document.getElementById('bmChartStats').innerHTML='<div><div class="bm-insight__stat-label">일평균</div><div class="bm-insight__stat-value">'+bS(Math.round(tt/am.length))+'</div></div><div><div class="bm-insight__stat-label">최고</div><div class="bm-insight__stat-value">'+bS(Math.max.apply(null,am))+'</div></div><div><div class="bm-insight__stat-label">최저</div><div class="bm-insight__stat-value">'+bS(Math.min.apply(null,am))+'</div></div>';}
+    var lk=B.deps.filter(function(d){return d.billIdx;}),tl=0,oa=0;lk.forEach(function(d){tl+=d.matchedAmount;var ex=d.depositAmount-(d.matchedAmount||0);if(ex>0)oa+=ex;});
+    document.getElementById('bmLinkSum').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div><span class="bm-insight__stat-label">DB 연결완료</span><div class="bm-insight__stat-value">'+lk.length+'건</div></div><div><span class="bm-insight__stat-label">연결 금액</span><div class="bm-insight__stat-value">'+bS(tl)+'</div></div><div><span class="bm-insight__stat-label">미연결 입금</span><div class="bm-insight__stat-value" style="color:#e85d5d">'+B.deps.filter(function(d){return!d.billIdx;}).length+'건</div></div><div><span class="bm-insight__stat-label">초과(과오)</span><div class="bm-insight__stat-value" style="color:#d97706">'+bS(oa)+'</div></div></div>';}
 
-/* ===== Multi-select ===== */
-function bmToggleBill(idx,ev){if(ev.ctrlKey||ev.metaKey){if(BM.selBills.has(idx))BM.selBills.delete(idx);else BM.selBills.add(idx);}else{BM.selBills.clear();BM.selBills.add(idx);}bmRenderBills();bmUSI('bill');if(BM.selBills.size===1){bmShowDetail('bill',BM.bills.find(function(x){return x.billIdx===idx;}));}else document.getElementById('bmMatchResult').classList.add('bm-hidden');}
-function bmToggleDep(idx,ev){if(ev.ctrlKey||ev.metaKey){if(BM.selDeps.has(idx))BM.selDeps.delete(idx);else BM.selDeps.add(idx);}else{BM.selDeps.clear();BM.selDeps.add(idx);}bmRenderDeps();bmUSI('dep');if(BM.selDeps.size===1){bmShowDetail('dep',BM.deps.find(function(x){return x.bankStatementIdx===idx;}));}else document.getElementById('bmMatchResult').classList.add('bm-hidden');}
-function bmUSI(t){var el=document.getElementById(t==='bill'?'bmBillSelInfo':'bmDepSelInfo'),n=t==='bill'?BM.selBills.size:BM.selDeps.size;if(n>1){el.textContent=n+'건 선택';el.classList.remove('bm-hidden');}else el.classList.add('bm-hidden');}
+function bmRunMatch(){var tol=Number(document.getElementById('bmTol').value)||0,mode=document.getElementById('bmMode').value;bAL();var ub=B.bills.filter(function(b){return b._ms==='unmatched'&&b.totalAmount>0;}),ud=B.deps.filter(function(d){return d._ms==='unmatched';}),used={};
+    ub.forEach(function(bl){var nb=bl._normalized;if(!nb&&mode!=='amount')return;for(var i=0;i<ud.length;i++){var dp=ud[i];if(used[dp.bankStatementIdx])continue;var nd=dp._normalized,dm=nb&&nd&&nb===nd,ad=Math.abs(bl.totalAmount-dp.depositAmount),am=ad<=tol,ok=false;if(mode==='both')ok=dm&&am;else if(mode==='desc')ok=dm;else if(mode==='amount')ok=am;if(ok){var df=bl.totalAmount-dp.depositAmount;bl._ms='matched';bl._md=dp.bankStatementIdx;bl._diff=df;dp._ms='matched';dp._mb=bl.billIdx;dp._diff=df;used[dp.bankStatementIdx]=true;break;}}});
+    B.mr=true;document.getElementById('bmResetBtn').classList.remove('bm-hidden');bRA();document.getElementById('bmStatus').textContent='매칭 완료: '+B.bills.filter(function(b){return b._ms!=='unmatched';}).length+'건';}
+function bmResetMatch(){B.mr=false;B.sb.clear();B.sd.clear();bAL();bmCloseSide();document.getElementById('bmResetBtn').classList.add('bm-hidden');bRA();document.getElementById('bmStatus').textContent='매칭 초기화됨';}
+function bmManualMatch(bi,di){var bl=B.bills.find(function(x){return x.billIdx===bi;}),dp=B.deps.find(function(x){return x.bankStatementIdx===di;});if(!bl||!dp)return;
+    if(bl._md){var od=B.deps.find(function(x){return x.bankStatementIdx===bl._md;});if(od&&od._ms==='matched'){od._ms='unmatched';od._mb=null;od._diff=0;}}
+    if(dp._mb){var ob=B.bills.find(function(x){return x.billIdx===dp._mb;});if(ob&&ob._ms==='matched'){ob._ms='unmatched';ob._md=null;ob._diff=0;}}
+    var df=bl.totalAmount-dp.depositAmount;bl._ms='matched';bl._md=di;bl._diff=df;dp._ms='matched';dp._mb=bi;dp._diff=df;B.mr=true;document.getElementById('bmResetBtn').classList.remove('bm-hidden');bRA();bmShowSide('bill',bl);}
+function bmUnmatch(bi){var bl=B.bills.find(function(x){return x.billIdx===bi;});if(!bl||bl._ms!=='matched')return;var dp=B.deps.find(function(x){return x.bankStatementIdx===bl._md;});bl._ms='unmatched';bl._md=null;bl._diff=0;if(dp&&dp._ms==='matched'){dp._ms='unmatched';dp._mb=null;dp._diff=0;}bRA();bmShowSide('bill',bl);}
 
-/* ===== Render Bills ===== */
-function bmRenderBills(){var s=(document.getElementById('bmBillSearch').value||'').toLowerCase();
-    var f=BM.bills.filter(function(b){if(BM.billFilter==='linked'&&b._matchStatus!=='linked')return false;if(BM.billFilter==='matched'&&b._matchStatus!=='matched')return false;if(BM.billFilter==='unmatched'&&b._matchStatus!=='unmatched')return false;if(s&&(b.billName+' '+b.depositAccountHolder+' '+b._normalized).toLowerCase().indexOf(s)===-1)return false;return true;});
-    var col=BM.billSortCol,dir=BM.billSortDir==='asc'?1:-1;f.sort(function(a,b){var va=a[col],vb=b[col];if(typeof va==='number')return(va-vb)*dir;return String(va).localeCompare(String(vb))*dir;});
-    var h='';f.forEach(function(b){var cls=b._matchStatus==='linked'?'bm-row--linked':b._matchStatus==='matched'?'bm-row--matched':'';if(BM.selBills.has(b.billIdx))cls+=' bm-row--sel';
-        var tag='',remark='';if(b._matchStatus==='linked'){tag='<span class="bm-tag bm-tag--linked">연결</span>';}else if(b._matchStatus==='matched'){tag='<span class="bm-tag bm-tag--matched">매칭</span>';if(b._diff!==0)remark='<span class="bm-remark '+(b._diff>0?'bm-remark--plus':'bm-remark--minus')+'">'+(b._diff>0?'+':'')+bmN(b._diff)+'</span>';else remark='<span class="bm-remark bm-remark--zero">0</span>';}else{tag='<span class="bm-tag bm-tag--unmatched">미매칭</span>';}
-        h+='<tr class="'+cls+'" onclick="bmToggleBill('+b.billIdx+',event)"><td>'+b.billIdx+'</td><td title="'+b.billName+'">'+b.billName+'</td><td>'+b.depositAccountHolder+'</td><td class="bm-dim">'+(b.regExDepositAccountHolder||'-')+'</td><td class="bm-js">'+b._normalized+'</td><td class="bm-num">'+bmN(b.totalAmount)+'</td><td>'+b.payDate+'</td><td>'+tag+'</td><td>'+remark+'</td></tr>';});
-    document.getElementById('bmBillBody').innerHTML=h;document.getElementById('bmBillCount').textContent=f.length+'건';}
+function bmTB(i,ev){if(ev.ctrlKey||ev.metaKey){if(B.sb.has(i))B.sb.delete(i);else B.sb.add(i);}else{B.sb.clear();B.sb.add(i);}bmRB();bUSI('bill');if(B.sb.size===1)bmShowSide('bill',B.bills.find(function(x){return x.billIdx===i;}));else bmCloseSide();}
+function bmTD(i,ev){if(ev.ctrlKey||ev.metaKey){if(B.sd.has(i))B.sd.delete(i);else B.sd.add(i);}else{B.sd.clear();B.sd.add(i);}bmRD();bUSI('dep');if(B.sd.size===1)bmShowSide('dep',B.deps.find(function(x){return x.bankStatementIdx===i;}));else bmCloseSide();}
+function bUSI(t){var el=document.getElementById(t==='bill'?'bmBSI':'bmDSI'),n=t==='bill'?B.sb.size:B.sd.size;if(n>1){el.textContent=n+'건 선택';el.classList.remove('bm-hidden');}else el.classList.add('bm-hidden');}
 
-/* ===== Render Deps ===== */
-function bmRenderDeps(){var s=(document.getElementById('bmDepSearch').value||'').toLowerCase();
-    var f=BM.deps.filter(function(d){if(BM.depFilter==='linked'&&d._matchStatus!=='linked')return false;if(BM.depFilter==='matched'&&d._matchStatus!=='matched')return false;if(BM.depFilter==='unmatched'&&d._matchStatus!=='unmatched')return false;if(s&&(d.description+' '+d._normalized).toLowerCase().indexOf(s)===-1)return false;return true;});
-    var col=BM.depSortCol,dir=BM.depSortDir==='asc'?1:-1;f.sort(function(a,b){var va=a[col],vb=b[col];if(typeof va==='number')return(va-vb)*dir;return String(va).localeCompare(String(vb))*dir;});
-    var h='';f.forEach(function(d){var cls=d._matchStatus==='linked'?'bm-row--linked':d._matchStatus==='matched'?'bm-row--matched':'';if(BM.selDeps.has(d.bankStatementIdx))cls+=' bm-row--sel';
-        var tag='',remark='';if(d._matchStatus==='linked'){tag='<span class="bm-tag bm-tag--linked">연결</span>';}else if(d._matchStatus==='matched'){tag='<span class="bm-tag bm-tag--matched">매칭</span>';if(d._diff!==0)remark='<span class="bm-remark '+(d._diff>0?'bm-remark--plus':'bm-remark--minus')+'">'+(d._diff>0?'+':'')+bmN(d._diff)+'</span>';else remark='<span class="bm-remark bm-remark--zero">0</span>';}else{tag='<span class="bm-tag bm-tag--unmatched">미매칭</span>';}
-        h+='<tr class="'+cls+'" onclick="bmToggleDep('+d.bankStatementIdx+',event)"><td>'+d.bankStatementIdx+'</td><td title="'+d.description+'">'+d.description+'</td><td class="bm-dim">'+(d.regExDescription||'-')+'</td><td class="bm-js">'+d._normalized+'</td><td class="bm-num">'+bmN(d.depositAmount)+'</td><td>'+d.transactionDate+'</td><td class="bm-num">'+(d.matchedAmount?bmN(d.matchedAmount):'-')+'</td><td>'+(d._matchedBillIdx||'-')+'</td><td>'+tag+'</td><td>'+remark+'</td></tr>';});
-    document.getElementById('bmDepBody').innerHTML=h;document.getElementById('bmDepCount').textContent=f.length+'건';}
+function bmRB(){var s=(document.getElementById('bmBSch').value||'').toLowerCase();var f=B.bills.filter(function(b){if(B.bf==='linked'&&b._ms!=='linked')return false;if(B.bf==='matched'&&b._ms!=='matched')return false;if(B.bf==='unmatched'&&b._ms!=='unmatched')return false;if(s&&(b.billName+' '+b.depositAccountHolder+' '+b._normalized).toLowerCase().indexOf(s)===-1)return false;return true;});
+    var c=B.bsc,d=B.bsd==='asc'?1:-1;f.sort(function(a,b){var va=a[c],vb=b[c];if(typeof va==='number')return(va-vb)*d;return String(va).localeCompare(String(vb))*d;});
+    var h='';f.forEach(function(b){var cl=b._ms==='linked'?'bm-row--linked':b._ms==='matched'?'bm-row--matched':'';if(B.sb.has(b.billIdx))cl+=' bm-row--sel';var tg='',rm='';if(b._ms==='linked')tg='<span class="bm-tag bm-tag--linked">연결</span>';else if(b._ms==='matched'){tg='<span class="bm-tag bm-tag--matched">매칭</span>';if(b._diff!==0)rm='<span class="bm-remark '+(b._diff>0?'bm-remark--plus':'bm-remark--minus')+'">'+(b._diff>0?'+':'')+bN(b._diff)+'</span>';else rm='<span class="bm-remark bm-remark--zero">0</span>';}else tg='<span class="bm-tag bm-tag--unmatched">미매칭</span>';h+='<tr class="'+cl+'" onclick="bmTB('+b.billIdx+',event)"><td>'+b.billIdx+'</td><td title="'+b.billName+'">'+b.billName+'</td><td>'+b.depositAccountHolder+'</td><td class="bm-dim">'+(b.regExDepositAccountHolder||'-')+'</td><td class="bm-js">'+b._normalized+'</td><td class="bm-num">'+bN(b.totalAmount)+'</td><td>'+b.payDate+'</td><td>'+tg+'</td><td>'+rm+'</td></tr>';});
+    document.getElementById('bmBB').innerHTML=h;document.getElementById('bmBC').textContent=f.length+'건';B.fb=f;}
+function bmRD(){var s=(document.getElementById('bmDSch').value||'').toLowerCase();var f=B.deps.filter(function(d){if(B.df==='linked'&&d._ms!=='linked')return false;if(B.df==='matched'&&d._ms!=='matched')return false;if(B.df==='unmatched'&&d._ms!=='unmatched')return false;if(s&&(d.description+' '+d._normalized).toLowerCase().indexOf(s)===-1)return false;return true;});
+    var c=B.dsc,d=B.dsd==='asc'?1:-1;f.sort(function(a,b){var va=a[c],vb=b[c];if(typeof va==='number')return(va-vb)*d;return String(va).localeCompare(String(vb))*d;});
+    var h='';f.forEach(function(d){var cl=d._ms==='linked'?'bm-row--linked':d._ms==='matched'?'bm-row--matched':'';if(B.sd.has(d.bankStatementIdx))cl+=' bm-row--sel';var tg='',rm='';if(d._ms==='linked')tg='<span class="bm-tag bm-tag--linked">연결</span>';else if(d._ms==='matched'){tg='<span class="bm-tag bm-tag--matched">매칭</span>';if(d._diff!==0)rm='<span class="bm-remark '+(d._diff>0?'bm-remark--plus':'bm-remark--minus')+'">'+(d._diff>0?'+':'')+bN(d._diff)+'</span>';else rm='<span class="bm-remark bm-remark--zero">0</span>';}else tg='<span class="bm-tag bm-tag--unmatched">미매칭</span>';h+='<tr class="'+cl+'" onclick="bmTD('+d.bankStatementIdx+',event)"><td>'+d.bankStatementIdx+'</td><td title="'+d.description+'">'+d.description+'</td><td class="bm-dim">'+(d.regExDescription||'-')+'</td><td class="bm-js">'+d._normalized+'</td><td class="bm-num">'+bN(d.depositAmount)+'</td><td>'+d.transactionDate+'</td><td class="bm-num">'+(d.matchedAmount?bN(d.matchedAmount):'-')+'</td><td>'+(d._mb||'-')+'</td><td>'+tg+'</td><td>'+rm+'</td></tr>';});
+    document.getElementById('bmDB').innerHTML=h;document.getElementById('bmDC2').textContent=f.length+'건';B.fd=f;}
 
-/* ===== Detail ===== */
-function bmShowDetail(type,item){var panel=document.getElementById('bmMatchResult'),detail=document.getElementById('bmMatchDetail');if(!item){panel.classList.add('bm-hidden');return;}
-    var tol=Number(document.getElementById('bmTolerance').value)||0,h='';
-    if(type==='bill'){var bill=item,dep=bill._matchedDepIdx?BM.deps.find(function(d){return d.bankStatementIdx===bill._matchedDepIdx;}):null;
-        h+='<table class="bm-detail-tbl"><thead><tr><th style="width:80px">단계</th><th>청구서</th><th>입금내역</th><th style="width:70px">비교</th></tr></thead><tbody>';
-        h+='<tr><td>원본</td><td>'+bill.depositAccountHolder+'</td><td>'+(dep?dep.description:'-')+'</td><td></td></tr>';
-        h+='<tr><td><b>JS정규식</b></td><td class="bm-js">'+bill._normalized+'</td><td class="bm-js">'+(dep?dep._normalized:'-')+'</td><td>'+(dep?(bill._normalized===dep._normalized?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--unmatched">불일치</span>'):'-')+'</td></tr>';
-        h+='<tr><td>금액</td><td class="bm-num">'+bmN(bill.totalAmount)+'</td><td class="bm-num">'+(dep?bmN(dep.depositAmount):'-')+'</td>';
-        if(dep){var diff=bill.totalAmount-dep.depositAmount;h+='<td>'+(Math.abs(diff)<=tol?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-remark '+(diff>0?'bm-remark--plus':'bm-remark--minus')+'">'+(diff>0?'+':'')+bmN(diff)+'</span>')+'</td>';}else h+='<td>-</td>';
-        h+='</tr></tbody></table>';
-        var cands=[];BM.deps.forEach(function(d){var dm=bill._normalized&&d._normalized&&bill._normalized===d._normalized,ad=Math.abs(bill.totalAmount-d.depositAmount);if(dm||ad<=tol)cands.push({d:d,dm:dm,am:ad<=tol,ad:ad});});
-        if(cands.length>0){cands.sort(function(a,b){return(a.dm&&a.am?0:1)-(b.dm&&b.am?0:1)||a.ad-b.ad;});h+='<div style="margin-top:6px"><b style="font-size:11px">매칭 후보 ('+cands.length+'건)</b><table class="bm-detail-tbl" style="margin-top:3px"><thead><tr><th>#</th><th>적요</th><th>JS정규식</th><th>입금액</th><th>입금일</th><th>정규식</th><th>금액</th><th>차이</th></tr></thead><tbody>';
-            cands.slice(0,15).forEach(function(c){var cur=dep&&c.d.bankStatementIdx===dep.bankStatementIdx;h+='<tr'+(cur?' style="background:#eef4fb;font-weight:600"':'')+'><td>'+c.d.bankStatementIdx+'</td><td title="'+c.d.description+'">'+c.d.description+'</td><td class="bm-js">'+c.d._normalized+'</td><td class="bm-num">'+bmN(c.d.depositAmount)+'</td><td>'+c.d.transactionDate+'</td><td>'+(c.dm?'<span class="bm-tag bm-tag--matched">O</span>':'X')+'</td><td>'+(c.am?'<span class="bm-tag bm-tag--matched">O</span>':'X')+'</td><td class="bm-num">'+(c.ad===0?'-':bmN(c.ad))+'</td></tr>';});h+='</tbody></table></div>';}
-    }else{var dep2=item,bill2=dep2._matchedBillIdx?BM.bills.find(function(b){return b.billIdx===dep2._matchedBillIdx;}):null;
-        h+='<table class="bm-detail-tbl"><thead><tr><th style="width:80px">항목</th><th>입금내역</th><th>청구서</th><th style="width:70px">비교</th></tr></thead><tbody>';
-        h+='<tr><td><b>JS정규식</b></td><td class="bm-js">'+dep2._normalized+'</td><td class="bm-js">'+(bill2?bill2._normalized:'-')+'</td><td>'+(bill2?(dep2._normalized===bill2._normalized?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-tag bm-tag--unmatched">불일치</span>'):'-')+'</td></tr>';
-        h+='<tr><td>금액</td><td class="bm-num">'+bmN(dep2.depositAmount)+'</td><td class="bm-num">'+(bill2?bmN(bill2.totalAmount):'-')+'</td>';
-        if(bill2){var d2=bill2.totalAmount-dep2.depositAmount;h+='<td>'+(Math.abs(d2)<=tol?'<span class="bm-tag bm-tag--matched">일치</span>':'<span class="bm-remark">'+(d2>0?'+':'')+bmN(d2)+'</span>')+'</td>';}else h+='<td>-</td>';
-        h+='</tr></tbody></table>';
-        var c2=[];BM.bills.forEach(function(b){var dm=dep2._normalized&&b._normalized&&dep2._normalized===b._normalized,ad=Math.abs(b.totalAmount-dep2.depositAmount);if(dm||ad<=tol)c2.push({b:b,dm:dm,am:ad<=tol,ad:ad});});
-        if(c2.length>0){c2.sort(function(a,b){return(a.dm&&a.am?0:1)-(b.dm&&b.am?0:1)||a.ad-b.ad;});h+='<div style="margin-top:6px"><b style="font-size:11px">매칭 후보 청구서 ('+c2.length+'건)</b><table class="bm-detail-tbl" style="margin-top:3px"><thead><tr><th>#</th><th>청구서명</th><th>JS정규식</th><th>청구액</th><th>약정일</th><th>정규식</th><th>금액</th><th>차이</th></tr></thead><tbody>';
-            c2.slice(0,15).forEach(function(c){var cur=bill2&&c.b.billIdx===bill2.billIdx;h+='<tr'+(cur?' style="background:#eef4fb;font-weight:600"':'')+'><td>'+c.b.billIdx+'</td><td>'+c.b.billName+'</td><td class="bm-js">'+c.b._normalized+'</td><td class="bm-num">'+bmN(c.b.totalAmount)+'</td><td>'+c.b.payDate+'</td><td>'+(c.dm?'<span class="bm-tag bm-tag--matched">O</span>':'X')+'</td><td>'+(c.am?'<span class="bm-tag bm-tag--matched">O</span>':'X')+'</td><td class="bm-num">'+(c.ad===0?'-':bmN(c.ad))+'</td></tr>';});h+='</tbody></table></div>';}
+/* ===== Side Panel ===== */
+function bmShowSide(type,item){if(!item)return;var tol=Number(document.getElementById('bmTol').value)||0,h='',acts='';
+    if(type==='bill'){var bl=item,dp=bl._md?B.deps.find(function(d){return d.bankStatementIdx===bl._md;}):null;
+        document.getElementById('bmST').textContent='청구서 #'+bl.billIdx;
+        h+='<table class="bm-dt"><tr><th style="width:66px">청구서명</th><td>'+bl.billName+'</td></tr><tr><th>예금주</th><td>'+bl.depositAccountHolder+'</td></tr><tr><th>JS정규식</th><td class="bm-js">'+bl._normalized+'</td></tr><tr><th>청구액</th><td style="font-family:JetBrains Mono;font-weight:700">'+bN(bl.totalAmount)+'</td></tr><tr><th>약정일</th><td>'+bl.payDate+'</td></tr><tr><th>상태</th><td>'+(bl._ms==='linked'?'<span class="bm-tag bm-tag--linked">DB연결</span>':bl._ms==='matched'?'<span class="bm-tag bm-tag--matched">매칭</span>':'<span class="bm-tag bm-tag--unmatched">미매칭</span>')+'</td></tr></table>';
+        if(dp){h+='<div style="padding:6px 8px;background:#f0fdf4;border:1px solid #dcfce7;border-radius:3px;margin-bottom:6px"><div style="font-size:10px;font-weight:600;color:#16a34a;margin-bottom:3px">매칭된 입금</div><table class="bm-dt"><tr><th style="width:50px">#</th><td>'+dp.bankStatementIdx+'</td></tr><tr><th>적요</th><td>'+dp.description+'</td></tr><tr><th>입금액</th><td style="font-family:JetBrains Mono">'+bN(dp.depositAmount)+'</td></tr><tr><th>차이</th><td class="bm-remark '+(bl._diff>0?'bm-remark--plus':bl._diff<0?'bm-remark--minus':'bm-remark--zero')+'">'+(bl._diff!==0?(bl._diff>0?'+':'')+bN(bl._diff):'0')+'</td></tr></table></div>';}
+        var cn=[];B.deps.forEach(function(d){if(d._ms==='linked')return;var dm=bl._normalized&&d._normalized&&bl._normalized===d._normalized,ad=Math.abs(bl.totalAmount-d.depositAmount);if(dm||ad<=Math.max(tol,bl.totalAmount*0.1))cn.push({d:d,dm:dm,am:ad<=tol,ad:ad});});cn.sort(function(a,b){return(a.dm&&a.am?0:a.dm?1:a.am?2:3)-(b.dm&&b.am?0:b.dm?1:b.am?2:3)||a.ad-b.ad;});
+        if(cn.length>0){h+='<div style="margin-top:4px"><div style="font-size:11px;font-weight:600;margin-bottom:3px">매칭 후보 ('+cn.length+'건) - 클릭하여 수동 매칭</div><table class="bm-dt"><thead><tr><th>#</th><th>적요</th><th>JS정규식</th><th style="text-align:right">입금액</th><th>입금일</th><th style="text-align:right">차이</th></tr></thead><tbody>';cn.slice(0,20).forEach(function(c){var cur=dp&&c.d.bankStatementIdx===dp.bankStatementIdx;h+='<tr class="bm-cand'+(cur?' bm-cand-cur':'')+'" onclick="bmManualMatch('+bl.billIdx+','+c.d.bankStatementIdx+')"><td>'+c.d.bankStatementIdx+'</td><td title="'+c.d.description+'">'+c.d.description+'</td><td class="bm-js">'+c.d._normalized+'</td><td class="bm-num">'+bN(c.d.depositAmount)+'</td><td>'+c.d.transactionDate+'</td><td class="bm-num" style="color:'+(c.ad===0?'#94a3b8':'#e85d5d')+'">'+(c.ad===0?'-':bN(c.ad))+'</td></tr>';});h+='</tbody></table></div>';}
+        if(bl._ms==='matched')acts='<button class="bm-btn bm-btn--danger" onclick="bmUnmatch('+bl.billIdx+')">매칭 제거</button>';
+    }else{var dp2=item,bl2=dp2._mb?B.bills.find(function(b){return b.billIdx===dp2._mb;}):null;
+        document.getElementById('bmST').textContent='입금 #'+dp2.bankStatementIdx;
+        h+='<table class="bm-dt"><tr><th style="width:66px">적요</th><td>'+dp2.description+'</td></tr><tr><th>JS정규식</th><td class="bm-js">'+dp2._normalized+'</td></tr><tr><th>입금액</th><td style="font-family:JetBrains Mono;font-weight:700">'+bN(dp2.depositAmount)+'</td></tr><tr><th>입금일</th><td>'+dp2.transactionDate+'</td></tr><tr><th>연결액</th><td style="font-family:JetBrains Mono">'+(dp2.matchedAmount?bN(dp2.matchedAmount):'-')+'</td></tr><tr><th>상태</th><td>'+(dp2._ms==='linked'?'<span class="bm-tag bm-tag--linked">DB연결</span>':dp2._ms==='matched'?'<span class="bm-tag bm-tag--matched">매칭</span>':'<span class="bm-tag bm-tag--unmatched">미매칭</span>')+'</td></tr></table>';
+        if(bl2){h+='<div style="padding:6px 8px;background:#f0fdf4;border:1px solid #dcfce7;border-radius:3px;margin-bottom:6px"><div style="font-size:10px;font-weight:600;color:#16a34a;margin-bottom:3px">매칭된 청구서</div><table class="bm-dt"><tr><th style="width:50px">#</th><td>'+bl2.billIdx+'</td></tr><tr><th>청구서명</th><td>'+bl2.billName+'</td></tr><tr><th>청구액</th><td style="font-family:JetBrains Mono">'+bN(bl2.totalAmount)+'</td></tr></table></div>';}
+        var c2=[];B.bills.forEach(function(b){if(b._ms==='linked')return;var dm=dp2._normalized&&b._normalized&&dp2._normalized===b._normalized,ad=Math.abs(b.totalAmount-dp2.depositAmount);if(dm||ad<=Math.max(tol,dp2.depositAmount*0.1))c2.push({b:b,dm:dm,am:ad<=tol,ad:ad});});c2.sort(function(a,b){return(a.dm&&a.am?0:a.dm?1:a.am?2:3)-(b.dm&&b.am?0:b.dm?1:b.am?2:3)||a.ad-b.ad;});
+        if(c2.length>0){h+='<div style="margin-top:4px"><div style="font-size:11px;font-weight:600;margin-bottom:3px">매칭 후보 청구서 ('+c2.length+'건) - 클릭하여 수동 매칭</div><table class="bm-dt"><thead><tr><th>#</th><th>청구서명</th><th>JS정규식</th><th style="text-align:right">청구액</th><th>약정일</th><th style="text-align:right">차이</th></tr></thead><tbody>';c2.slice(0,20).forEach(function(c){var cur=bl2&&c.b.billIdx===bl2.billIdx;h+='<tr class="bm-cand'+(cur?' bm-cand-cur':'')+'" onclick="bmManualMatch('+c.b.billIdx+','+dp2.bankStatementIdx+')"><td>'+c.b.billIdx+'</td><td>'+c.b.billName+'</td><td class="bm-js">'+c.b._normalized+'</td><td class="bm-num">'+bN(c.b.totalAmount)+'</td><td>'+c.b.payDate+'</td><td class="bm-num" style="color:'+(c.ad===0?'#94a3b8':'#e85d5d')+'">'+(c.ad===0?'-':bN(c.ad))+'</td></tr>';});h+='</tbody></table></div>';}
+        if(dp2._ms==='matched'&&dp2._mb)acts='<button class="bm-btn bm-btn--danger" onclick="bmUnmatch('+dp2._mb+')">매칭 제거</button>';
     }
-    detail.innerHTML=h;panel.classList.remove('bm-hidden');}
+    document.getElementById('bmSB2').innerHTML=h;document.getElementById('bmSF').innerHTML=acts;document.getElementById('bmSideBg').classList.add('bm-side-bg--open');document.getElementById('bmSide').classList.add('bm-side--open');}
+function bmCloseSide(){document.getElementById('bmSide').classList.remove('bm-side--open');document.getElementById('bmSideBg').classList.remove('bm-side-bg--open');}
 
-/* ===== Filters & Sort ===== */
-function bmBillFilter(f,el){BM.billFilter=f;el.parentElement.querySelectorAll('.bm-btn').forEach(function(b){b.classList.remove('bm-btn--active');});el.classList.add('bm-btn--active');bmRenderBills();}
-function bmDepFilter(f,el){BM.depFilter=f;el.parentElement.querySelectorAll('.bm-btn').forEach(function(b){b.classList.remove('bm-btn--active');});el.classList.add('bm-btn--active');bmRenderDeps();}
-function bmSortBill(c){if(BM.billSortCol===c)BM.billSortDir=BM.billSortDir==='asc'?'desc':'asc';else{BM.billSortCol=c;BM.billSortDir='desc';}bmRenderBills();}
-function bmSortDep(c){if(BM.depSortCol===c)BM.depSortDir=BM.depSortDir==='asc'?'desc':'asc';else{BM.depSortCol=c;BM.depSortDir='desc';}bmRenderDeps();}
+function bmBFi(f,el){B.bf=f;el.parentElement.querySelectorAll('.bm-btn').forEach(function(b){b.classList.remove('bm-btn--active');});el.classList.add('bm-btn--active');bmRB();}
+function bmDFi(f,el){B.df=f;el.parentElement.querySelectorAll('.bm-btn').forEach(function(b){b.classList.remove('bm-btn--active');});el.classList.add('bm-btn--active');bmRD();}
+function bmSoB(c){if(B.bsc===c)B.bsd=B.bsd==='asc'?'desc':'asc';else{B.bsc=c;B.bsd='desc';}bmRB();}
+function bmSoD(c){if(B.dsc===c)B.dsd=B.dsd==='asc'?'desc':'asc';else{B.dsc=c;B.dsd='desc';}bmRD();}
 
-/* ===== Copy ===== */
-function bmCopyResult(){var l=['billIdx\tbankStatementIdx\t매칭상태\t청구액\t입금액\t차이\t청구서명\t예금주\tJS정규식\t적요'];
-    BM.bills.forEach(function(b){var d=b._matchedDepIdx?BM.deps.find(function(x){return x.bankStatementIdx===b._matchedDepIdx;}):null;l.push([b.billIdx,b._matchedDepIdx||'',b._matchStatus==='linked'?'연결':b._matchStatus==='matched'?'매칭':'미매칭',b.totalAmount,d?d.depositAmount:'',d?b.totalAmount-d.depositAmount:'',b.billName,b.depositAccountHolder,b._normalized,d?d.description:''].join('\t'));});
-    BM.deps.forEach(function(d){if(d._matchStatus==='unmatched')l.push(['',d.bankStatementIdx,'미매칭(입금)','',d.depositAmount,'','','','',d.description].join('\t'));});
-    navigator.clipboard.writeText(l.join('\n')).then(function(){var ok=document.getElementById('bmCopyOk');ok.classList.add('bm-copy-ok--show');setTimeout(function(){ok.classList.remove('bm-copy-ok--show');},1500);});}
+function bmCopyP(t){var l=[];if(t==='bill'){l.push('#\t청구서명\t예금주\tDB정규식\tJS정규식\t청구액\t약정일\t상태\t비고');B.fb.forEach(function(b){l.push([b.billIdx,b.billName,b.depositAccountHolder,b.regExDepositAccountHolder||'',b._normalized,b.totalAmount,b.payDate,b._ms==='linked'?'연결':b._ms==='matched'?'매칭':'미매칭',b._diff||''].join('\t'));});}else{l.push('#\t적요\tDB정규식\tJS정규식\t입금액\t입금일\t연결액\t청구서\t상태\t비고');B.fd.forEach(function(d){l.push([d.bankStatementIdx,d.description,d.regExDescription||'',d._normalized,d.depositAmount,d.transactionDate,d.matchedAmount||'',d._mb||'',d._ms==='linked'?'연결':d._ms==='matched'?'매칭':'미매칭',d._diff||''].join('\t'));});}navigator.clipboard.writeText(l.join('\n')).then(function(){bFl(t==='bill'?'bmBCO':'bmDCO');});}
+function bmCopyResult(){var l=['billIdx\tbankStatementIdx\t매칭상태\t청구액\t입금액\t차이\t청구서명\t예금주\tJS정규식\t적요'];B.bills.forEach(function(b){var d=b._md?B.deps.find(function(x){return x.bankStatementIdx===b._md;}):null;l.push([b.billIdx,b._md||'',b._ms==='linked'?'연결':b._ms==='matched'?'매칭':'미매칭',b.totalAmount,d?d.depositAmount:'',d?b.totalAmount-d.depositAmount:'',b.billName,b.depositAccountHolder,b._normalized,d?d.description:''].join('\t'));});B.deps.forEach(function(d){if(d._ms==='unmatched')l.push(['',d.bankStatementIdx,'미매칭(입금)','',d.depositAmount,'','','','',d.description].join('\t'));});navigator.clipboard.writeText(l.join('\n')).then(function(){bFl('bmCO');});}
 
-/* ===== 전표 모달 ===== */
-function bmBuildDateGroups(){BM.dateGroups={};BM.deps.filter(function(d){return d._matchStatus==='linked'&&d.billIdx;}).forEach(function(dep){var bill=BM.bills.find(function(b){return b.billIdx===dep.billIdx;});if(!bill)return;var dt=dep.transactionDate;if(!dt)return;if(!BM.dateGroups[dt])BM.dateGroups[dt]={date:dt,entries:[],totalDeposit:0,totalMatched:0,totalExcess:0};var g=BM.dateGroups[dt],ma=dep.matchedAmount||0,ex=dep.depositAmount-ma;g.entries.push({dep:dep,bill:bill,deptCd:BM.DEPT_MAP[bill.contractType]||'300007',depositAmount:dep.depositAmount,matchedAmt:ma,excess:ex>0?ex:0});g.totalDeposit+=dep.depositAmount;g.totalMatched+=ma;if(ex>0)g.totalExcess+=ex;});}
-function bmShowVoucherModal(){bmBuildDateGroups();var dates=Object.keys(BM.dateGroups).sort();if(dates.length===0){alert('연결완료된 입금내역이 없습니다.');return;}
-    var h='<table class="bm-detail-tbl"><thead><tr><th>입금일</th><th style="text-align:right">입금액</th><th style="text-align:right">연결액</th><th style="text-align:right">과오</th><th style="text-align:right">건수</th><th style="width:80px"></th></tr></thead><tbody>';
-    dates.forEach(function(dt){var g=BM.dateGroups[dt];h+='<tr><td>'+dt+'</td><td class="bm-num">'+bmN(g.totalDeposit)+'</td><td class="bm-num">'+bmN(g.totalMatched)+'</td><td class="bm-num">'+(g.totalExcess>0?bmN(g.totalExcess):'-')+'</td><td class="bm-num">'+g.entries.length+'</td><td><button class="bm-btn bm-btn--sm bm-btn--primary" onclick="bmDLV(\''+dt+'\')">다운로드</button></td></tr>';});
-    h+='</tbody></table>';document.getElementById('bmVoucherBody').innerHTML=h;document.getElementById('bmVoucherModal').classList.remove('bm-hidden');}
-function bmCloseVoucherModal(){document.getElementById('bmVoucherModal').classList.add('bm-hidden');}
-
-/* ===== 전표 생성 ===== */
-function bmLSJ(cb){if(window.XLSX){cb();return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=cb;s.onerror=function(){alert('SheetJS 로드 실패');};document.head.appendChild(s);}
-async function bmFT(){if(BM.templateWB)return BM.templateWB;var r=await fetch(BM.TEMPLATE_URL);BM.templateWB=await r.arrayBuffer();return BM.templateWB;}
-function bmMVR(dt){var grp=BM.dateGroups[dt];if(!grp)return[];var rows=[],seq=1,dtc=bmDC(dt);var bns=[];grp.entries.forEach(function(e){if(e.dep.codeName&&bns.indexOf(e.dep.codeName)===-1)bns.push(e.dep.codeName);});var bs=bns.length>0?'_'+bns.join('/'):'';
-    var r1=new Array(43).fill('');r1[0]=seq;r1[1]='10/조정전표';r1[6]=dtc;r1[9]='300007';r1[10]='1/차변';r1[11]='11020101';r1[14]=grp.totalDeposit;r1[15]='입금전표'+bs+'_'+dtc;r1[19]='KRW';r1[20]=1;r1[22]=grp.totalDeposit;rows.push(r1);
-    grp.entries.forEach(function(e){var bn=e.dep.codeName?'_'+e.dep.codeName:'';if(e.matchedAmt>0){var r=new Array(43).fill('');r[0]=seq;r[1]='10/조정전표';r[6]=dtc;r[9]=e.deptCd;r[10]='2/대변';r[11]='12071101';r[13]=e.bill.accountBizNumber||'';r[14]=e.matchedAmt;r[15]=(e.bill.billName||e.dep.description)+bn;r[19]='KRW';r[20]=1;r[22]=e.matchedAmt;rows.push(r);}
-        if(e.excess>0){var r2=new Array(43).fill('');r2[0]=seq;r2[1]='10/조정전표';r2[6]=dtc;r2[9]=e.deptCd;r2[10]='2/대변';r2[11]='21110118';r2[13]=e.bill.accountBizNumber||'';r2[14]=e.excess;r2[15]='과오입금_'+(e.bill.billName||e.dep.description)+bn;r2[19]='KRW';r2[20]=1;r2[22]=e.excess;rows.push(r2);}});return rows;}
-function bmWriteWB(dataRows,filename){var buf=BM.templateWB;var wb=XLSX.read(new Uint8Array(buf),{type:'array'});var ws=wb.Sheets[wb.SheetNames[0]];
-    dataRows.forEach(function(row,ri){row.forEach(function(val,ci){if(val==='')return;var addr=XLSX.utils.encode_cell({r:4+ri,c:ci});ws[addr]={v:val,t:typeof val==='number'?'n':'s'};});});
-    var range=XLSX.utils.decode_range(ws['!ref']||'A1');if(4+dataRows.length-1>range.e.r)range.e.r=4+dataRows.length-1;if(42>range.e.c)range.e.c=42;ws['!ref']=XLSX.utils.encode_range(range);XLSX.writeFile(wb,filename);}
-async function bmDLV(dt){bmLSJ(async function(){try{await bmFT();bmWriteWB(bmMVR(dt),'전표입력_'+bmDC(dt)+'_입금전표.xlsx');}catch(err){alert('전표 생성 실패: '+err.message);}});}
-async function bmDownloadAllVouchers(){var dates=Object.keys(BM.dateGroups).sort();if(dates.length===0)return;bmLSJ(async function(){try{await bmFT();var all=[],seq=1;dates.forEach(function(dt){var rows=bmMVR(dt);rows.forEach(function(r){r[0]=seq;});all=all.concat(rows);seq++;});var sd=document.getElementById('bmBillStart').value.replace(/-/g,''),ed=document.getElementById('bmDepEnd').value.replace(/-/g,'');bmWriteWB(all,'전표입력_'+sd+'_'+ed+'_입금전표.xlsx');bmCloseVoucherModal();}catch(err){alert('전표 생성 실패: '+err.message);}});}
+/* ===== 전표 ===== */
+function bBDG(){B.dg={};B.deps.filter(function(d){return d._ms==='linked'&&d.billIdx;}).forEach(function(dp){var bl=B.bills.find(function(b){return b.billIdx===dp.billIdx;});if(!bl)return;var dt=dp.transactionDate;if(!dt)return;if(!B.dg[dt])B.dg[dt]={date:dt,en:[],td:0,tm:0,te:0};var g=B.dg[dt],ma=dp.matchedAmount||0,ex=dp.depositAmount-ma;g.en.push({dp:dp,bl:bl,dc:B.DM[bl.contractType]||'300007',da:dp.depositAmount,ma:ma,ex:ex>0?ex:0});g.td+=dp.depositAmount;g.tm+=ma;if(ex>0)g.te+=ex;});}
+function bmShowVM(){bBDG();var ds=Object.keys(B.dg).sort();if(!ds.length){alert('연결완료된 입금내역이 없습니다.');return;}var h='<table class="bm-dt"><thead><tr><th>입금일</th><th style="text-align:right">입금액</th><th style="text-align:right">연결액</th><th style="text-align:right">과오</th><th style="text-align:right">건수</th><th style="width:60px"></th></tr></thead><tbody>';ds.forEach(function(dt){var g=B.dg[dt];h+='<tr><td>'+dt+'</td><td class="bm-num">'+bN(g.td)+'</td><td class="bm-num">'+bN(g.tm)+'</td><td class="bm-num">'+(g.te>0?bN(g.te):'-')+'</td><td class="bm-num">'+g.en.length+'</td><td><button class="bm-btn bm-btn--xs bm-btn--primary" onclick="bmDLV(\''+dt+'\')">다운로드</button></td></tr>';});h+='</tbody></table>';document.getElementById('bmVB').innerHTML=h;document.getElementById('bmVM').classList.remove('bm-hidden');}
+function bmCloseVM(){document.getElementById('bmVM').classList.add('bm-hidden');}
+function bLSJ(cb){if(window.XLSX){cb();return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=cb;s.onerror=function(){alert('SheetJS 로드 실패');};document.head.appendChild(s);}
+async function bFT(){if(B.tw)return B.tw;var r=await fetch(B.TPL);B.tw=await r.arrayBuffer();return B.tw;}
+function bMVR(dt){var g=B.dg[dt];if(!g)return[];var rows=[],sq=1,dc=bDc(dt);var bn=[];g.en.forEach(function(e){if(e.dp.codeName&&bn.indexOf(e.dp.codeName)===-1)bn.push(e.dp.codeName);});var bs=bn.length?'_'+bn.join('/'):'';var r1=new Array(43).fill('');r1[0]=sq;r1[1]='10/조정전표';r1[6]=dc;r1[9]='300007';r1[10]='1/차변';r1[11]='11020101';r1[14]=g.td;r1[15]='입금전표'+bs+'_'+dc;r1[19]='KRW';r1[20]=1;r1[22]=g.td;rows.push(r1);g.en.forEach(function(e){var bn2=e.dp.codeName?'_'+e.dp.codeName:'';if(e.ma>0){var r=new Array(43).fill('');r[0]=sq;r[1]='10/조정전표';r[6]=dc;r[9]=e.dc;r[10]='2/대변';r[11]='12071101';r[13]=e.bl.accountBizNumber||'';r[14]=e.ma;r[15]=(e.bl.billName||e.dp.description)+bn2;r[19]='KRW';r[20]=1;r[22]=e.ma;rows.push(r);}if(e.ex>0){var r2=new Array(43).fill('');r2[0]=sq;r2[1]='10/조정전표';r2[6]=dc;r2[9]=e.dc;r2[10]='2/대변';r2[11]='21110118';r2[13]=e.bl.accountBizNumber||'';r2[14]=e.ex;r2[15]='과오입금_'+(e.bl.billName||e.dp.description)+bn2;r2[19]='KRW';r2[20]=1;r2[22]=e.ex;rows.push(r2);}});return rows;}
+function bWWB(dr,fn){var wb=XLSX.read(new Uint8Array(B.tw),{type:'array'});var ws=wb.Sheets[wb.SheetNames[0]];dr.forEach(function(r,ri){r.forEach(function(v,ci){if(v==='')return;var a=XLSX.utils.encode_cell({r:4+ri,c:ci});ws[a]={v:v,t:typeof v==='number'?'n':'s'};});});var rng=XLSX.utils.decode_range(ws['!ref']||'A1');if(4+dr.length-1>rng.e.r)rng.e.r=4+dr.length-1;if(42>rng.e.c)rng.e.c=42;ws['!ref']=XLSX.utils.encode_range(rng);XLSX.writeFile(wb,fn);}
+async function bmDLV(dt){bLSJ(async function(){try{await bFT();bWWB(bMVR(dt),'전표입력_'+bDc(dt)+'_입금전표.xlsx');}catch(e){alert('실패: '+e.message);}});}
+async function bmDLAll(){var ds=Object.keys(B.dg).sort();if(!ds.length)return;bLSJ(async function(){try{await bFT();var all=[],sq=1;ds.forEach(function(dt){var r=bMVR(dt);r.forEach(function(x){x[0]=sq;});all=all.concat(r);sq++;});bWWB(all,'전표입력_'+bDc(document.getElementById('bmBS').value)+'_'+bDc(document.getElementById('bmDE').value)+'_입금전표.xlsx');bmCloseVM();}catch(e){alert('실패: '+e.message);}});}
 </script>
