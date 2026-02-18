@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <style>
     :root {
       --bg-primary:#ffffff; --bg-secondary:#f8fafd; --bg-tertiary:#f0f4f9;
@@ -176,6 +177,81 @@
     .guide-modal-loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--text-muted);font-size:12px;gap:8px}
     .guide-modal-loading .spinner{width:14px;height:14px}
 
+    /* ═══ SITEMAP EDITOR ═══ */
+    .sme-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,35,50,.4);z-index:600;align-items:center;justify-content:center}
+    .sme-overlay.open{display:flex}
+    .sme-modal{background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;width:min(900px,94vw);height:min(600px,85vh);display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.12)}
+    .sme-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .sme-header-left{display:flex;align-items:center;gap:10px}
+    .sme-title{font-size:13px;font-weight:600;color:var(--text-primary)}
+    .sme-header-actions{display:flex;gap:6px}
+    .sme-btn{padding:4px 10px;border-radius:3px;font-size:11px;font-family:inherit;cursor:pointer;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-secondary);transition:all .1s}
+    .sme-btn:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+    .sme-btn--accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .sme-btn--accent:hover{background:#3a7bc8;color:#fff}
+    .sme-btn--danger{color:var(--danger);border-color:rgba(232,93,93,.3)}
+    .sme-btn--danger:hover{background:rgba(232,93,93,.06)}
+    .sme-btn--success{color:#22c55e;border-color:rgba(34,197,94,.3)}
+    .sme-btn--success:hover{background:rgba(34,197,94,.06)}
+    .sme-close{width:24px;height:24px;border:none;background:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:3px;transition:all .1s}
+    .sme-close:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+
+    .sme-body{flex:1;display:grid;grid-template-columns:260px 1fr;overflow:hidden}
+    .sme-tree-panel{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+    .sme-tree-toolbar{padding:6px 8px;border-bottom:1px solid var(--border-subtle);display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap}
+    .sme-tree-toolbar .sme-btn{font-size:10px;padding:3px 7px}
+    .sme-tab-bar{padding:4px 8px;border-bottom:1px solid var(--border-subtle);display:flex;gap:2px;flex-shrink:0;flex-wrap:wrap}
+    .sme-tab{padding:3px 8px;border-radius:3px;font-size:11px;color:var(--text-muted);cursor:pointer;transition:all .1s}
+    .sme-tab:hover{color:var(--text-secondary);background:var(--bg-tertiary)}
+    .sme-tab.active{color:var(--accent);background:var(--accent-dim);font-weight:500}
+    .sme-tree-list{flex:1;overflow-y:auto;padding:4px}
+    .sme-tree-list::-webkit-scrollbar{width:3px}
+    .sme-tree-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+    .sme-node{padding:1px 0}
+    .sme-node-row{display:flex;align-items:center;gap:2px;padding:3px 6px;border-radius:3px;cursor:pointer;font-size:12px;color:var(--text-secondary);transition:all .08s;border:1px solid transparent}
+    .sme-node-row:hover{background:var(--bg-hover);color:var(--text-primary)}
+    .sme-node-row.selected{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}
+    .sme-node-toggle{width:14px;height:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--text-muted);cursor:pointer}
+    .sme-node-toggle.hidden{visibility:hidden}
+    .sme-node-toggle.expanded svg{transform:rotate(90deg)}
+    .sme-node-icon{font-size:10px;width:16px;text-align:center;flex-shrink:0;color:var(--text-muted)}
+    .sme-node-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sme-node-actions{display:none;gap:2px;flex-shrink:0}
+    .sme-node-row:hover .sme-node-actions{display:flex}
+    .sme-node-act{width:18px;height:18px;border:none;background:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:2px;font-size:11px;transition:all .1s}
+    .sme-node-act:hover{background:var(--bg-active);color:var(--text-primary)}
+    .sme-node-children{padding-left:14px}
+
+    .sme-edit-panel{display:flex;flex-direction:column;overflow:hidden}
+    .sme-edit-header{padding:8px 14px;border-bottom:1px solid var(--border-subtle);font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;flex-shrink:0}
+    .sme-edit-body{flex:1;overflow-y:auto;padding:12px 14px}
+    .sme-edit-body::-webkit-scrollbar{width:3px}
+    .sme-edit-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .sme-edit-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:12px}
+    .sme-field{margin-bottom:10px}
+    .sme-field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:3px;font-weight:500}
+    .sme-field input,.sme-field select{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:3px;font-size:12px;font-family:inherit;color:var(--text-primary);background:var(--bg-primary);outline:none;transition:border-color .1s}
+    .sme-field input:focus,.sme-field select:focus{border-color:var(--accent)}
+    .sme-field-hint{font-size:10px;color:var(--text-muted);margin-top:2px}
+    .sme-field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+    .sme-footer{padding:8px 14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+    .sme-footer-left{font-size:11px;color:var(--text-muted)}
+    .sme-footer-right{display:flex;gap:6px}
+    .sme-copy-feedback{font-size:11px;color:#22c55e;opacity:0;transition:opacity .3s}
+    .sme-copy-feedback.show{opacity:1}
+
+    /* Admin gear button in GNB */
+    .gnb-admin-btn{width:24px;height:24px;border:none;background:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:all .1s}
+    .gnb-admin-btn:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+
+    @media (max-width: 768px) {
+      .sme-modal { width:98vw; height:90vh }
+      .sme-body { grid-template-columns:1fr; grid-template-rows:200px 1fr }
+      .sme-tree-panel { border-right:none; border-bottom:1px solid var(--border) }
+    }
+
     /* ═══ MOBILE RESPONSIVE ═══ */
     @media (max-width: 768px) {
       :root { --gnb-h: 44px; }
@@ -267,6 +343,9 @@
       <div class="gnb-tabs" id="gnbTabs"></div>
     </div>
     <div class="gnb-right">
+      <button class="gnb-admin-btn" id="gnbAdminBtn" onclick="openSitemapEditor()" title="사이트맵 관리" style="display:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
       <div class="search-box">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input class="search-input" id="searchInput" type="text" placeholder="검색..." autocomplete="off">
@@ -309,12 +388,56 @@
     </div>
   </div>
 
+  <!-- Sitemap Editor Modal -->
+  <div class="sme-overlay" id="smeOverlay" onclick="if(event.target===this)closeSitemapEditor()">
+    <div class="sme-modal">
+      <div class="sme-header">
+        <div class="sme-header-left">
+          <span class="sme-title">사이트맵 관리</span>
+        </div>
+        <div class="sme-header-actions">
+          <button class="sme-close" onclick="closeSitemapEditor()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sme-body">
+        <div class="sme-tree-panel">
+          <div class="sme-tab-bar" id="smeTabBar"></div>
+          <div class="sme-tree-toolbar">
+            <button class="sme-btn" onclick="smeAddPage()">+ 페이지</button>
+            <button class="sme-btn" onclick="smeAddFolder()">+ 폴더</button>
+            <button class="sme-btn" onclick="smeAddTab()">+ 탭</button>
+          </div>
+          <div class="sme-tree-list" id="smeTreeList"></div>
+        </div>
+        <div class="sme-edit-panel">
+          <div class="sme-edit-header" id="smeEditHeader">속성</div>
+          <div class="sme-edit-body" id="smeEditBody">
+            <div class="sme-edit-empty">항목을 선택하세요</div>
+          </div>
+        </div>
+      </div>
+      <div class="sme-footer">
+        <div class="sme-footer-left">
+          <span class="sme-copy-feedback" id="smeCopyFeedback">복사 완료</span>
+        </div>
+        <div class="sme-footer-right">
+          <button class="sme-btn" onclick="smePreviewJson()">JSON 미리보기</button>
+          <button class="sme-btn sme-btn--success" onclick="smeCopyJson()">JSON 복사</button>
+          <button class="sme-btn sme-btn--accent" onclick="smeApplyLive()">실시간 적용</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <script>
 // ═══ FIREBASE ═══
 const firebaseConfig = {
   apiKey: "AIzaSyAQE9oQRDUmeX6ZPO2KOcfd1ctBqt6v34w",
   authDomain: "vendys-b1fea.firebaseapp.com",
   projectId: "vendys-b1fea",
+  databaseURL: "https://vendys-b1fea-default-rtdb.firebaseio.com",
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -373,6 +496,7 @@ auth.onAuthStateChanged(user => {
     document.getElementById("gnbUsername").textContent = user.displayName || user.email.split("@")[0];
     document.getElementById("userEmail").textContent = user.email;
     if (user.photoURL) document.getElementById("gnbAvatar").innerHTML = '<img src="' + user.photoURL + '">';
+    checkAdmin(user.email);
     loadSitemap();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
@@ -687,12 +811,10 @@ async function navigateTo(id) {
 
   var guideBtn = '';
   if (page.guide) {
-    guideBtn = '<button class="guide-btn" onclick="openGuide(\'' + page.guide + '\',\'' + page.title.replace(/'/g,"\\'") + '\')" title="페이지 가이드">?</button>';
+    guideBtn = ' <button class="guide-btn" onclick="openGuide(\'' + page.guide + '\',\'' + page.title.replace(/'/g,"\\'") + '\')" title="페이지 가이드">?</button>';
   }
 
-  el.innerHTML = '<div class="breadcrumb">' + bc + '</div>' +
-    '<div class="doc-title-wrap"><div class="doc-title">' + page.title + '</div>' + guideBtn + '</div>' +
-    '<div class="doc-meta">' + meta + '</div>' +
+  el.innerHTML = '<div class="breadcrumb" style="margin-bottom:6px">' + bc + guideBtn + '</div>' +
     '<div class="doc-body">' + body + childHtml + '</div>';
   el.scrollTop = 0;
 
@@ -752,10 +874,329 @@ document.addEventListener("keydown", e => {
   if(e.key==="Escape"){
     searchInput.blur();searchResults.classList.remove("open");
     closeGuide();
+    closeSitemapEditor();
     if (mobileLnbOpen) closeMobileLnb();
   }
 });
 function toggleUserMenu(){document.getElementById("userMenu").classList.toggle("open")}
+
+// ═══ ADMIN CHECK ═══
+const ADMIN_EMAIL = 'bogeun@vendys.co.kr';
+function checkAdmin(email) {
+  var btn = document.getElementById('gnbAdminBtn');
+  if (btn) btn.style.display = (email === ADMIN_EMAIL) ? 'flex' : 'none';
+}
+
+// ═══ SITEMAP EDITOR ═══
+var SME = {
+  data: null,        // deep copy of SECTIONS for editing
+  selTab: 0,         // selected tab index
+  selPath: null,     // path to selected node: [tabIdx, pageIdx, childIdx, ...]
+  expanded: new Set() // expanded node ids in editor
+};
+
+function openSitemapEditor() {
+  SME.data = JSON.parse(JSON.stringify(SECTIONS));
+  SME.selTab = 0;
+  SME.selPath = null;
+  SME.expanded = new Set();
+  document.getElementById('smeOverlay').classList.add('open');
+  smeRenderTabs();
+  smeRenderTree();
+  smeRenderEdit();
+}
+function closeSitemapEditor() {
+  document.getElementById('smeOverlay').classList.remove('open');
+}
+
+// Tab bar
+function smeRenderTabs() {
+  var html = SME.data.map(function(s, i) {
+    return '<div class="sme-tab' + (i===SME.selTab?' active':'') + '" onclick="smeSelectTab(' + i + ')">' + s.tab + '</div>';
+  }).join('');
+  document.getElementById('smeTabBar').innerHTML = html;
+}
+function smeSelectTab(i) {
+  SME.selTab = i;
+  SME.selPath = null;
+  smeRenderTabs();
+  smeRenderTree();
+  smeRenderEdit();
+}
+
+// Tree rendering
+function smeRenderTree() {
+  var section = SME.data[SME.selTab];
+  if (!section) { document.getElementById('smeTreeList').innerHTML = ''; return; }
+  var html = section.pages.map(function(p, i) {
+    return smeTreeNode(p, [i], 0);
+  }).join('');
+  document.getElementById('smeTreeList').innerHTML = html;
+}
+
+function smeTreeNode(page, path, depth) {
+  var pathStr = JSON.stringify(path);
+  var has = page.children && page.children.length > 0;
+  var isFolder = page.icon === 'folder' || has;
+  var exp = SME.expanded.has(page.id);
+  var sel = SME.selPath && JSON.stringify(SME.selPath) === pathStr;
+  var idx = path[path.length - 1];
+  var parentLen = smeGetSiblings(path).length;
+
+  var toggleCls = has ? (exp ? 'sme-node-toggle expanded' : 'sme-node-toggle') : 'sme-node-toggle hidden';
+  var iconTxt = isFolder ? 'D' : 'F';
+
+  var actions = '';
+  // move up
+  if (idx > 0) actions += '<button class="sme-node-act" onclick="event.stopPropagation();smeMove(' + pathStr + ',-1)" title="위로">&#8593;</button>';
+  // move down
+  if (idx < parentLen - 1) actions += '<button class="sme-node-act" onclick="event.stopPropagation();smeMove(' + pathStr + ',1)" title="아래로">&#8595;</button>';
+  // delete
+  actions += '<button class="sme-node-act" onclick="event.stopPropagation();smeDelete(' + pathStr + ')" title="삭제" style="color:var(--danger)">&#10005;</button>';
+
+  var html = '<div class="sme-node" style="padding-left:' + (depth * 0) + 'px">' +
+    '<div class="sme-node-row' + (sel?' selected':'') + '" onclick="smeSelect(' + pathStr + ')">' +
+      '<span class="' + toggleCls + '" onclick="event.stopPropagation();smeToggleExp(\'' + page.id + '\')">' +
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l10 7-10 7z"/></svg>' +
+      '</span>' +
+      '<span class="sme-node-icon">' + iconTxt + '</span>' +
+      '<span class="sme-node-label">' + (page.title || page.id) + '</span>' +
+      '<span class="sme-node-actions">' + actions + '</span>' +
+    '</div>';
+
+  if (has && exp) {
+    html += '<div class="sme-node-children">';
+    html += page.children.map(function(c, ci) {
+      return smeTreeNode(c, path.concat([ci]), depth + 1);
+    }).join('');
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function smeToggleExp(id) {
+  SME.expanded.has(id) ? SME.expanded.delete(id) : SME.expanded.add(id);
+  smeRenderTree();
+}
+
+function smeGetNode(path) {
+  var pages = SME.data[SME.selTab].pages;
+  var node = pages[path[0]];
+  for (var i = 1; i < path.length; i++) {
+    if (!node.children) return null;
+    node = node.children[path[i]];
+  }
+  return node;
+}
+
+function smeGetSiblings(path) {
+  if (path.length === 1) return SME.data[SME.selTab].pages;
+  var parentPath = path.slice(0, -1);
+  var parent = smeGetNode(parentPath);
+  return parent.children || [];
+}
+
+function smeGetSiblingsArray(path) {
+  if (path.length === 1) return SME.data[SME.selTab].pages;
+  var parentPath = path.slice(0, -1);
+  var parent = smeGetNode(parentPath);
+  return parent.children;
+}
+
+// Select node
+function smeSelect(path) {
+  SME.selPath = path;
+  smeRenderTree();
+  smeRenderEdit();
+}
+
+// Edit panel
+function smeRenderEdit() {
+  var body = document.getElementById('smeEditBody');
+  var header = document.getElementById('smeEditHeader');
+
+  if (!SME.selPath) {
+    header.textContent = '속성';
+    body.innerHTML = '<div class="sme-edit-empty">항목을 선택하세요</div>';
+    return;
+  }
+
+  var node = smeGetNode(SME.selPath);
+  if (!node) { body.innerHTML = '<div class="sme-edit-empty">노드를 찾을 수 없습니다</div>'; return; }
+
+  header.textContent = node.title || node.id;
+
+  var isFolder = node.icon === 'folder' || (node.children && node.children.length > 0);
+
+  body.innerHTML =
+    '<div class="sme-field-row">' +
+      '<div class="sme-field"><label>ID</label><input id="smeFieldId" value="' + esc(node.id||'') + '" onchange="smeUpdateField(\'id\',this.value)"><div class="sme-field-hint">고유 식별자 (영문, 하이픈)</div></div>' +
+      '<div class="sme-field"><label>아이콘</label><select id="smeFieldIcon" onchange="smeUpdateField(\'icon\',this.value)">' +
+        '<option value="doc"' + (node.icon==='doc'?' selected':'') + '>doc</option>' +
+        '<option value="folder"' + (node.icon==='folder'?' selected':'') + '>folder</option>' +
+        '<option value="api"' + (node.icon==='api'?' selected':'') + '>api</option>' +
+        '<option value="db"' + (node.icon==='db'?' selected':'') + '>db</option>' +
+      '</select></div>' +
+    '</div>' +
+    '<div class="sme-field"><label>제목</label><input id="smeFieldTitle" value="' + esc(node.title||'') + '" onchange="smeUpdateField(\'title\',this.value)"></div>' +
+    '<div class="sme-field"><label>설명</label><input id="smeFieldDesc" value="' + esc(node.desc||'') + '" onchange="smeUpdateField(\'desc\',this.value)"></div>' +
+    '<div class="sme-field"><label>파일 경로</label><input id="smeFieldFile" value="' + esc(node.file||'') + '" onchange="smeUpdateField(\'file\',this.value)">' +
+      '<div class="sme-field-hint">docs/ops/example.html</div></div>' +
+    '<div class="sme-field"><label>가이드 파일</label><input id="smeFieldGuide" value="' + esc(node.guide||'') + '" onchange="smeUpdateField(\'guide\',this.value)">' +
+      '<div class="sme-field-hint">docs/guides/example.md (선택사항)</div></div>' +
+    (isFolder ? '<div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--border-subtle)">' +
+      '<button class="sme-btn" onclick="smeAddChild()">+ 하위 페이지 추가</button></div>' : '');
+}
+
+function esc(s) { return s.replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+function smeUpdateField(field, val) {
+  var node = smeGetNode(SME.selPath);
+  if (!node) return;
+  if (val.trim() === '' && (field === 'file' || field === 'guide' || field === 'desc')) {
+    delete node[field];
+  } else {
+    node[field] = val;
+  }
+  smeRenderTree();
+  // keep header in sync
+  document.getElementById('smeEditHeader').textContent = node.title || node.id;
+}
+
+// Add page (at root level of current tab)
+function smeAddPage() {
+  var id = 'new-page-' + Date.now().toString(36);
+  SME.data[SME.selTab].pages.push({
+    id: id, title: '새 페이지', icon: 'doc', desc: '', file: ''
+  });
+  var idx = SME.data[SME.selTab].pages.length - 1;
+  SME.selPath = [idx];
+  smeRenderTree();
+  smeRenderEdit();
+}
+
+// Add folder (at root level)
+function smeAddFolder() {
+  var id = 'new-folder-' + Date.now().toString(36);
+  SME.data[SME.selTab].pages.push({
+    id: id, title: '새 폴더', icon: 'folder', desc: '', children: []
+  });
+  var idx = SME.data[SME.selTab].pages.length - 1;
+  SME.selPath = [idx];
+  SME.expanded.add(id);
+  smeRenderTree();
+  smeRenderEdit();
+}
+
+// Add child to selected folder
+function smeAddChild() {
+  var node = smeGetNode(SME.selPath);
+  if (!node) return;
+  if (!node.children) node.children = [];
+  var id = 'new-child-' + Date.now().toString(36);
+  node.children.push({ id: id, title: '새 페이지', icon: 'doc', desc: '', file: '' });
+  SME.expanded.add(node.id);
+  var ci = node.children.length - 1;
+  SME.selPath = SME.selPath.concat([ci]);
+  smeRenderTree();
+  smeRenderEdit();
+}
+
+// Add tab
+function smeAddTab() {
+  var name = prompt('새 탭 이름:');
+  if (!name || !name.trim()) return;
+  SME.data.push({ tab: name.trim(), pages: [] });
+  SME.selTab = SME.data.length - 1;
+  SME.selPath = null;
+  smeRenderTabs();
+  smeRenderTree();
+  smeRenderEdit();
+}
+
+// Move node up/down
+function smeMove(path, dir) {
+  var arr = smeGetSiblingsArray(path);
+  var idx = path[path.length - 1];
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= arr.length) return;
+  var tmp = arr[idx];
+  arr[idx] = arr[newIdx];
+  arr[newIdx] = tmp;
+  // update selPath
+  var newPath = path.slice();
+  newPath[newPath.length - 1] = newIdx;
+  SME.selPath = newPath;
+  smeRenderTree();
+  smeRenderEdit();
+}
+
+// Delete node
+function smeDelete(path) {
+  var node = smeGetNode(path);
+  var label = node ? node.title : '';
+  if (!confirm('"' + label + '" 항목을 삭제하시겠습니까?' + (node && node.children && node.children.length ? '\n(하위 ' + node.children.length + '개 항목도 함께 삭제됩니다)' : ''))) return;
+  var arr = smeGetSiblingsArray(path);
+  var idx = path[path.length - 1];
+  arr.splice(idx, 1);
+  SME.selPath = null;
+  smeRenderTree();
+  smeRenderEdit();
+}
+
+// Generate JSON
+function smeGenerateJson() {
+  // Clean up: remove empty fields, _meta etc
+  var clean = JSON.parse(JSON.stringify(SME.data));
+  function cleanNode(n) {
+    var obj = { id: n.id, title: n.title, icon: n.icon || 'doc' };
+    if (n.desc) obj.desc = n.desc;
+    if (n.file) obj.file = n.file;
+    if (n.guide) obj.guide = n.guide;
+    if (n.children && n.children.length) {
+      obj.children = n.children.map(cleanNode);
+    }
+    return obj;
+  }
+  var output = {
+    sections: clean.map(function(s) {
+      return { tab: s.tab, pages: s.pages.map(cleanNode) };
+    })
+  };
+  return JSON.stringify(output, null, 2);
+}
+
+function smePreviewJson() {
+  var json = smeGenerateJson();
+  var w = window.open('', '_blank', 'width=600,height=500');
+  w.document.write('<pre style="font-family:JetBrains Mono,monospace;font-size:12px;padding:16px;white-space:pre-wrap;word-break:break-all">' + json.replace(/</g,'&lt;') + '</pre>');
+}
+
+function smeCopyJson() {
+  var json = smeGenerateJson();
+  navigator.clipboard.writeText(json).then(function() {
+    var el = document.getElementById('smeCopyFeedback');
+    el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); }, 1500);
+  });
+}
+
+// Apply live: update SECTIONS in memory (no persistence)
+function smeApplyLive() {
+  var json = smeGenerateJson();
+  var data = JSON.parse(json);
+  SECTIONS = data.sections;
+  buildSearchIndex(SECTIONS);
+  renderGnbTabs();
+  renderMobileTabs();
+  renderTree();
+  closeSitemapEditor();
+  // navigate to first page of current tab
+  if (SECTIONS[currentTab] && SECTIONS[currentTab].pages[0]) {
+    navigateTo(SECTIONS[currentTab].pages[0].id);
+  }
+}
 </script>
 </body>
 </html>
