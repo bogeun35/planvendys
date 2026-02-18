@@ -139,6 +139,11 @@ raw.forEach(function(r) {
 - executeDate: `String(r.executeDate||'')` — "YYYY-MM-DD"
 - amount: `Number(r.amount)||0` — float
 
+### UUID 표시 규칙 (필수)
+- UUID는 절대 잘라서(substring) 표시하지 않는다
+- 테이블 셀에 UUID 전체를 표시한다
+- 셀 너비가 부족하면 CSS `min-width`로 충분한 너비를 확보한다
+
 ## UI/UX 패턴
 
 ### 스크롤 정책 (필수)
@@ -172,6 +177,11 @@ raw.forEach(function(r) {
 - border-radius: 3-4px
 - 패딩 촘촘하게 (ERP 스타일)
 - 이모지 사용 금지, 다크모드 없음
+
+### 테이블 규칙 (필수)
+- **폰트 통일**: 테이블 내 모든 셀(th, td)은 동일한 폰트 패밀리/크기를 사용한다. 특정 컬럼만 다른 폰트를 적용하지 않는다.
+- **컬럼 너비 제어**: 각 `<th>`에 `style="min-width:__px"` 또는 `style="width:__px"`를 지정하여 컬럼별 여백을 조절할 수 있도록 한다.
+- **UUID 전체 표시**: UUID 컬럼은 `min-width:290px` 이상을 확보하여 전체 값이 보이도록 한다.
 
 ### 공통 컴포넌트
 

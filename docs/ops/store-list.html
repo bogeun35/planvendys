@@ -32,9 +32,7 @@ meta: 최종 수정: 2026.02.19
 .sl-table th:hover{background:#e2e8f0}
 .sl-table th .sl-sort{font-size:9px;margin-left:2px;color:#94a3b8}
 .sl-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;white-space:nowrap}
-.sl-table td:first-child{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8;width:36px}
-.sl-table td:nth-child(2){font-family:'JetBrains Mono',monospace;font-size:10px;color:#4a5568;max-width:100px;overflow:hidden;text-overflow:ellipsis}
-.sl-table td:nth-child(5){font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8}
+.sl-table td:first-child{text-align:center;color:#94a3b8}
 .sl-table tr:hover{background:#f8fafd}
 .sl-recent{color:#22c55e;font-weight:600}
 .sl-old{color:#94a3b8}
@@ -74,12 +72,12 @@ meta: 최종 수정: 2026.02.19
     </div>
     <table class="sl-table" id="slTable" style="display:none">
       <thead><tr>
-        <th style="cursor:default">No</th>
-        <th onclick="slSort('sid')">sid<span class="sl-sort" id="slSortsid"></span></th>
-        <th onclick="slSort('name')">매장명<span class="sl-sort" id="slSortname"></span></th>
-        <th onclick="slSort('roadAddress')">주소<span class="sl-sort" id="slSortroadAddress"></span></th>
-        <th onclick="slSort('category')">카테고리<span class="sl-sort" id="slSortcategory"></span></th>
-        <th onclick="slSort('latestSikdaeTradingDate')">최근거래일<span class="sl-sort" id="slSortlatestSikdaeTradingDate"></span></th>
+        <th style="cursor:default;width:36px">No</th>
+        <th onclick="slSort('sid')" style="min-width:290px">sid<span class="sl-sort" id="slSortsid"></span></th>
+        <th onclick="slSort('name')" style="min-width:140px">매장명<span class="sl-sort" id="slSortname"></span></th>
+        <th onclick="slSort('roadAddress')" style="min-width:200px">주소<span class="sl-sort" id="slSortroadAddress"></span></th>
+        <th onclick="slSort('category')" style="min-width:80px">카테고리<span class="sl-sort" id="slSortcategory"></span></th>
+        <th onclick="slSort('latestSikdaeTradingDate')" style="min-width:90px">최근거래일<span class="sl-sort" id="slSortlatestSikdaeTradingDate"></span></th>
       </tr></thead>
       <tbody id="slTbody"></tbody>
     </table>
@@ -225,7 +223,7 @@ function slRenderTable(){
     }
     h+='<tr>';
     h+='<td>'+(i+1)+'</td>';
-    h+='<td title="'+r.sid+'">'+r.sid.substring(0,8)+'</td>';
+    h+='<td>'+r.sid+'</td>';
     h+='<td>'+r.name+'</td>';
     h+='<td>'+r.roadAddress+'</td>';
     h+='<td>'+r.category+'</td>';
