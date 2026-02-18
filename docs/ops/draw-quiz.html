@@ -12,6 +12,11 @@ meta: 최종 수정: 2026.02.18
 .fq-device::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:32px;background:#1a1a1a;border-radius:16px;z-index:200;pointer-events:none}
 .fq-app{flex:1;overflow:hidden;display:flex;flex-direction:column;margin-top:48px;margin-bottom:4px;position:relative;background:#fafafa}
 @media(max-width:480px){.fq-frame{min-height:auto;padding:0}.fq-device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none}.fq-device::before{display:none}.fq-app{margin-top:0;margin-bottom:0}}
+/* Embedded mode: when loaded inside planvendys content area on mobile/narrow */
+.fq.fq-embedded .fq-frame{min-height:auto;padding:0}
+.fq.fq-embedded .fq-device{width:100%;height:calc(100vh - 120px);border-radius:0;box-shadow:none}
+.fq.fq-embedded .fq-device::before{display:none}
+.fq.fq-embedded .fq-app{margin-top:0;margin-bottom:0}
 .fq-scr{display:none;flex-direction:column;flex:1;overflow:hidden}.fq-scr.active{display:flex}
 .fq-home{padding:0 20px;display:flex;flex-direction:column;flex:1;overflow:hidden}
 .fq-home-top{padding:20px 0 10px;text-align:center;flex-shrink:0}
@@ -303,6 +308,8 @@ function fqPartHint(w){var a=w.split(''),n=Math.max(1,Math.floor(a.length/3)),id
 function fqLocalSys(msg){var c=document.getElementById('fq-chat-msgs'),d=document.createElement('div');d.className='fq-chat-msg system';d.textContent=msg;c.appendChild(d);c.scrollTop=c.scrollHeight;}
 function fqUpdateHint(){if(!fqGameState||fqGameState.status!=='drawing'||fqGameState.drawer===fqMyNick)return;var w=fqGameState.word||'',el=Math.floor((Date.now()-fqGameState.startedAt)/1000),rem=Math.max(fqGetRT()-el,0),ns=0;if(rem<=10)ns=2;else if(rem<=30)ns=1;if(fqHintRound!==fqGameState.round){fqHintRound=fqGameState.round;fqHintStage=0;fqCachedPartial='';}if(ns!==fqHintStage){fqHintStage=ns;if(fqHintStage===1)fqLocalSys('\uCD08\uC131 \uD78C\uD2B8 \uACF5\uAC1C');if(fqHintStage===2){if(!fqCachedPartial)fqCachedPartial=fqPartHint(w);fqLocalSys('\uCD94\uAC00 \uD78C\uD2B8 \uACF5\uAC1C');}}var wd=document.getElementById('fq-word-display');if(fqHintStage===0)wd.innerHTML='<div class="fq-word-label">\uD78C\uD2B8 ('+w.length+'\uAE00\uC790)</div><div class="fq-word-hint">'+fqMakeHint(w)+'</div>';else if(fqHintStage===1)wd.innerHTML='<div class="fq-word-label">\uCD08\uC131 \uD78C\uD2B8</div><div class="fq-word-hint">'+fqChoHint(w)+'</div>';else wd.innerHTML='<div class="fq-word-label">\uCD94\uAC00 \uD78C\uD2B8</div><div class="fq-word-hint">'+fqCachedPartial+'</div>';}
 (function(){var n=fqGetNick();if(n)document.getElementById('fq-nick').value=n;})();
+/* Detect embedded mode: if container is narrow (<500px) or on mobile, strip phone frame */
+(function(){function chk(){var el=document.getElementById('fqRoot');if(!el)return;var w=el.parentElement?el.parentElement.offsetWidth:window.innerWidth;var mob=window.innerWidth<=768;if(w<500||mob)el.classList.add('fq-embedded');else el.classList.remove('fq-embedded');}chk();window.addEventListener('resize',chk);})();
 function fqCopyCode(){if(!fqRoom)return;navigator.clipboard.writeText(fqRoom.code).then(function(){fqToast('\uCF54\uB4DC \uBCF5\uC0AC');});}
 function fqCopyLink(){if(!fqRoom)return;navigator.clipboard.writeText(location.href.split('?')[0]+'?room='+fqRoom.code).then(function(){fqToast('\uB9C1\uD06C \uBCF5\uC0AC');});}
 function fqLoadWords(){fqDb.ref('foodwords').on('value',function(snap){fqWordBank=snap.val()||{};fqAllWords=[];Object.values(fqWordBank).forEach(function(cat){if(Array.isArray(cat))fqAllWords.push.apply(fqAllWords,cat);});if(!Object.keys(fqWordBank).length)fqDb.ref('foodwords').set(DEFAULT_WORDS);});}
