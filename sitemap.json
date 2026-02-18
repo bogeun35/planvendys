@@ -136,6 +136,13 @@
               "desc": "벤디스 캐치마인드",
               "file": "docs/ops/draw-quiz.html"
             }
+                                                {
+              "id": "roulete",
+              "title": "오늘 뭐 먹지?",
+              "icon": "doc",
+              "desc": "투표를 통해 뭐먹을지 정해보자",
+              "file": "docs/ops/roulete.html"
+            }
           ]
         },
         {
