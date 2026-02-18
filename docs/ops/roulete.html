@@ -1,5 +1,6 @@
 <!--
 title: 오늘 뭐먹지? 투표
+meta: 최종 수정: 2026.02.18
 -->
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
@@ -344,7 +345,7 @@ function vrSpin(){var voted=vrVotedGames();if(!voted.length)return vrToast('\uD2
 /* Weighted random winner */
 var rand=Math.random()*totalV,wIdx=0;for(var i=0;i<voted.length;i++){rand-=vrVC(voted[i][1]);if(rand<=0){wIdx=i;break;}}
 /* Calc target angle */
-var accDeg=0;for(var j=0;j<wIdx;j++)accDeg+=(vrVC(voted[j][1])/totalV)*360;var sliceDeg=(vrVC(voted[wIdx][1])/totalV)*360;var targetDeg=accDeg+sliceDeg*(0.2+Math.random()*0.6);var stopDeg=(targetDeg+90)%360;var totalSpin=360*(6+Math.floor(Math.random()*4))+stopDeg;
+var accDeg=0;for(var j=0;j<wIdx;j++)accDeg+=(vrVC(voted[j][1])/totalV)*360;var sliceDeg=(vrVC(voted[wIdx][1])/totalV)*360;var targetDeg=accDeg+sliceDeg*(0.2+Math.random()*0.6);var stopDeg=(360-targetDeg+270)%360;var totalSpin=360*(6+Math.floor(Math.random()*4))+stopDeg;
 var duration=4000+Math.random()*1500,startTime=performance.now();var startDeg=(vrSpinAngle*180/Math.PI)%360;
 /* Broadcast to Firebase */
 vrDb.ref(DB_PREFIX+'/'+vrRoom.code+'/roulette').set({spinning:true,finalAngleDeg:totalSpin,duration:duration,startTime:Date.now(),winner:voted[wIdx][1].name,votes:vrVC(voted[wIdx][1]),timestamp:Date.now()});
