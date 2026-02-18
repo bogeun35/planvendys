@@ -246,7 +246,7 @@ title: 오늘 뭐먹지? 투표
   var FB_DB='https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
   var C={apiKey:"AIzaSyAQE9oQRDUmeX6ZPO2KOcfd1ctBqt6v34w",authDomain:"vendys-b1fea.firebaseapp.com",databaseURL:"https://vendys-b1fea-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"vendys-b1fea",storageBucket:"vendys-b1fea.firebasestorage.app",messagingSenderId:"392583358946",appId:"1:392583358946:web:7a6b0cc2a99ec2e08db1bb"};
   function go(){if(!firebase.apps.length)firebase.initializeApp(C);else{var a=firebase.apps[0];if(a.options.databaseURL!==C.databaseURL){try{firebase.app('vrApp');}catch(e){firebase.initializeApp(C,'vrApp');}}}window.vrDb=firebase.database(firebase.apps.length>1?firebase.app('vrApp'):undefined);if(typeof vrLoadRL==='function')vrLoadRL();}
-  if(typeof firebase!=='undefined'&&firebase.database)go();else{var s=document.createElement('script');s.src=FB_DB;s.onload=go;document.head.appendChild(s);}
+  if(typeof firebase!=='undefined'&&firebase.database)setTimeout(go,0);else{var s=document.createElement('script');s.src=FB_DB;s.onload=go;document.head.appendChild(s);}
 })();
 </script>
 <script>
