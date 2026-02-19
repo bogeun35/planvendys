@@ -473,7 +473,8 @@ function closeMobileLnb() {
 // ═══ AUTH ═══
 function signIn() {
   const p = new firebase.auth.GoogleAuthProvider();
-  p.setCustomParameters({ hd: ALLOWED_DOMAIN });
+  var qs = new URLSearchParams(window.location.search);
+  if (!qs.has('guest')) p.setCustomParameters({ hd: ALLOWED_DOMAIN });
   auth.signInWithPopup(p).catch(e => {
     const el = document.getElementById("loginError");
     el.textContent = "로그인 실패: " + e.message; el.style.display = "block";
