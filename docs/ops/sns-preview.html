@@ -150,7 +150,6 @@ meta: 최종 수정: 2026.02.17
     <div class="sp-list__hd">
       <div class="sp-list__title">SNS 콘텐츠 미리보기</div>
       <div class="sp-list__url">
-        <input type="text" id="spSheetUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vRVQqKseP4j1lEhhbm0PZBfizEScUerMzeTc57Cnw8QNrw7VBemN6IYcNFtMNEAZORhUrM6ghYq-8PJ/pub?gid=0&single=true&output=csv" />
         <button onclick="spLoad()">불러오기</button>
       </div>
     </div>
@@ -175,15 +174,7 @@ meta: 최종 수정: 2026.02.17
 </div>
 
 <script>
-var SP={posts:[],sel:0,tab:'home',hv:'list'};
-var DEMO=[
-{title:'2026년 식권대장 신규 기능 업데이트 안내',content:'안녕하세요, 벤디스입니다.\n\n2026년 첫 업데이트로 식권대장에 새로운 기능이 추가되었습니다.\n\n이번 업데이트에서는 모바일 QR 결제 속도가 대폭 개선되었으며, 관리자 페이지에서 실시간 사용 현황을 확인할 수 있는 대시보드가 새롭게 추가되었습니다.\n\n특히 직원들의 식사 패턴을 분석하여 인기 메뉴와 피크 시간대를 한눈에 파악할 수 있어, 구내식당 운영 효율을 크게 높일 수 있습니다.',tags:'식권대장,벤디스,업데이트',thumbnail:'https://picsum.photos/seed/vd1/800/600'},
-{title:'발렌타인데이 특별 이벤트 - 복지대장으로 선물하세요',content:'발렌타인데이를 맞아 복지대장에서 특별 이벤트를 진행합니다.\n\n이번 이벤트 기간 동안 복지포인트로 선물을 구매하시면 최대 20% 추가 적립 혜택을 드립니다.\n\n직원들의 소중한 마음을 복지대장으로 전해보세요.',tags:'복지대장,발렌타인데이,이벤트',thumbnail:'https://picsum.photos/seed/vd2/800/600'},
-{title:'벤디스가 전하는 스마트 오피스 운영 가이드',content:'하이브리드 근무 시대, 효율적인 오피스 운영을 위한 가이드를 준비했습니다.\n\n출근 인원에 맞춘 탄력적 식대 관리부터, 재택근무자를 위한 복지포인트 활용까지 다양한 솔루션을 제안드립니다.\n\n벤디스의 서비스를 활용하면 인사팀의 업무 부담을 크게 줄일 수 있습니다.',tags:'스마트오피스,하이브리드근무,HR',thumbnail:'https://picsum.photos/seed/vd3/800/600'},
-{title:'퀵대장 서비스 지역 확대 소식',content:'퀵대장 서비스가 수도권 전 지역으로 확대됩니다.\n\n기존 서울, 경기 일부 지역에서만 이용 가능했던 퀵대장이 인천, 경기 전 지역으로 서비스를 확장합니다.\n\n당일 배송은 물론 시간 지정 배송까지 가능하며, 법인 전용 특별 요금이 적용됩니다.',tags:'퀵대장,배송,수도권',thumbnail:'https://picsum.photos/seed/vd4/800/600'},
-{title:'2025년 벤디스 연간 리포트 공개',content:'2025년 한 해 동안 벤디스와 함께 해주신 모든 고객사에 감사드립니다.\n\n지난해 벤디스는 총 1,200개 기업 고객사에 서비스를 제공했으며, 누적 거래액 500억원을 달성했습니다.\n\n올해도 더 나은 서비스로 보답하겠습니다.',tags:'연간리포트,벤디스,성과',thumbnail:'https://picsum.photos/seed/vd5/800/600'},
-{title:'단체선물대장 설 선물세트 얼리버드 오픈',content:'2026년 설을 맞아 단체선물대장에서 프리미엄 선물세트를 준비했습니다.\n\n한우, 과일, 건강식품 등 엄선된 선물세트를 법인 특별가로 만나보세요.\n\n얼리버드 주문 시 무료 배송과 메시지 카드 서비스를 제공합니다.',tags:'단체선물대장,설선물,법인선물',thumbnail:'https://picsum.photos/seed/vd6/800/600'}
-];
+var SP={posts:[],sel:0,tab:'home',hv:'list',PROXY:'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec'};
 
 var I={
 heart:'<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
@@ -204,11 +195,39 @@ var SB='<div class="phone__sb"><span class="phone__sb-time">9:41</span><span cla
 
 function spInit(){spLoad();}
 
-function spCSV(t){var r=[],h=[],iq=false,fs=[],f='',ls=t.split('\n');for(var i=0;i<ls.length;i++){var l=ls[i];for(var j=0;j<l.length;j++){var c=l[j];if(iq){if(c==='"'){if(j+1<l.length&&l[j+1]==='"'){f+='"';j++}else{iq=false}}else{f+=c}}else{if(c==='"'){iq=true}else if(c===','){fs.push(f);f=''}else{f+=c}}}if(iq){f+='\n'}else{fs.push(f);f='';if(!h.length){h=fs.map(function(x){return x.trim().toLowerCase().replace(/\r/g,'')})}else{var o={};h.forEach(function(k,idx){o[k]=(fs[idx]||'').replace(/\r/g,'').trim()});if(!o.tags&&o.tag){o.tags=o.tag}if(o.title&&o.title.length>0)r.push(o)}fs=[]}}return r}
+function spApi(p){
+  var qs=Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k])}).join('&');
+  return fetch(SP.PROXY+'?'+qs,{redirect:'follow'}).then(function(r){return r.json()});
+}
 
-async function spLoad(){var u=document.getElementById('spSheetUrl').value.trim();if(!u){document.getElementById('spStatus').textContent='URL 필요';document.getElementById('spStatus').style.color='#e85d5d';return}document.getElementById('spStatus').textContent='로딩...';document.getElementById('spStatus').style.color='#4a90d9';try{var r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status);var t=await r.text();var p=spCSV(t);if(!p.length){document.getElementById('spStatus').textContent='데이터 없음';document.getElementById('spStatus').style.color='#e85d5d';return}SP.posts=p;SP.sel=0;document.getElementById('spStatus').textContent=p.length+'건 로드';document.getElementById('spStatus').style.color='#22c55e';spList();spRender()}catch(e){document.getElementById('spStatus').textContent='실패: '+e.message;document.getElementById('spStatus').style.color='#e85d5d'}}
+async function spLoad(){
+  document.getElementById('spStatus').textContent='로딩...';
+  document.getElementById('spStatus').style.color='#4a90d9';
+  try{
+    var d=await spApi({action:'blogStats'});
+    if(d.error){document.getElementById('spStatus').textContent='오류: '+d.error;document.getElementById('spStatus').style.color='#e85d5d';return}
+    var posts=d.posts||[];
+    if(!posts.length){document.getElementById('spStatus').textContent='데이터 없음';document.getElementById('spStatus').style.color='#e85d5d';return}
+    SP.posts=posts.map(function(r){
+      return {
+        title:String(r.title||''),
+        content:String(r.content||''),
+        thumbnail:String(r.thumbnail||''),
+        tags:String(r.category||''),
+        link:String(r.url||'')
+      };
+    });
+    SP.sel=0;
+    document.getElementById('spStatus').textContent=SP.posts.length+'건 로드';
+    document.getElementById('spStatus').style.color='#22c55e';
+    spList();spRender();
+  }catch(e){
+    document.getElementById('spStatus').textContent='실패: '+e.message;
+    document.getElementById('spStatus').style.color='#e85d5d';
+  }
+}
 
-function spList(){var el=document.getElementById('spListBody');var h='';SP.posts.forEach(function(p,i){var a=i===SP.sel?' sp-item--active':'';var th=p.thumbnail?'<img referrerpolicy="no-referrer" class="sp-item__thumb" src="'+E(p.thumbnail)+'" onerror="this.outerHTML=\'<div class=sp-item__no-thumb>IMG</div>\'" />':'<div class="sp-item__no-thumb">IMG</div>';h+='<div class="sp-item'+a+'" onclick="spSel('+i+')">'+th+'<div class="sp-item__info"><div class="sp-item__num">#'+(i+1)+'</div><div class="sp-item__title">'+E(p.title||'')+'</div><div class="sp-item__desc">'+E((p.content||'').replace(/\n/g,' ').substring(0,60))+'</div></div></div>'});h+='<div class="sp-guide"><div class="sp-guide__title">구글시트 컬럼 구조</div><table class="sp-guide__table"><tr><th>컬럼명</th><th>설명</th><th>예시</th></tr><tr><td><code>title</code></td><td>제목</td><td>업데이트 안내</td></tr><tr><td><code>link</code></td><td>블로그 URL</td><td>https://blog.naver...</td></tr><tr><td><code>content</code></td><td>본문</td><td>안녕하세요...</td></tr><tr><td><code>tag</code></td><td>태그(쉼표)</td><td>벤디스,식권</td></tr><tr><td><code>thumbnail</code></td><td>이미지 URL</td><td>https://...</td></tr></table><div class="sp-guide__note">thumbnail: GAS 함수 =BLOG_THUMBNAIL(url)로 자동 추출 가능<br/>시트 > 파일 > 공유 > 웹에 게시 > CSV > URL 복사</div></div>';el.innerHTML=h}
+function spList(){var el=document.getElementById('spListBody');var h='';SP.posts.forEach(function(p,i){var a=i===SP.sel?' sp-item--active':'';var th=p.thumbnail?'<img referrerpolicy="no-referrer" class="sp-item__thumb" src="'+E(p.thumbnail)+'" onerror="this.outerHTML=\'<div class=sp-item__no-thumb>IMG</div>\'" />':'<div class="sp-item__no-thumb">IMG</div>';h+='<div class="sp-item'+a+'" onclick="spSel('+i+')">'+th+'<div class="sp-item__info"><div class="sp-item__num">#'+(i+1)+'</div><div class="sp-item__title">'+E(p.title||'')+'</div><div class="sp-item__desc">'+E((p.content||'').replace(/\n/g,' ').substring(0,60))+'</div></div></div>'});h+='<div class="sp-guide"><div class="sp-guide__title">데이터 소스</div><div class="sp-guide__note">블로그 통계 API (blogStats)에서 자동 로드<br/>구글시트 게시글 메타데이터 기반</div></div>';el.innerHTML=h}
 
 function spSel(i){SP.sel=i;spList();spRender()}
 function spTab(t,el){SP.tab=t;document.querySelectorAll('.sp-tab').forEach(function(x){x.classList.remove('sp-tab--active')});el.classList.add('sp-tab--active');spRender()}
