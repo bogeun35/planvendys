@@ -442,6 +442,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const ALLOWED_DOMAIN = "vendys.co.kr";
+const ALLOWED_EMAILS = ["pomez971@gmail.com"];
 
 // ═══ STATE ═══
 let SECTIONS = [];
@@ -483,7 +484,7 @@ function signOut() { auth.signOut(); }
 auth.onAuthStateChanged(user => {
   document.getElementById("loading").style.display = "none";
   if (user) {
-    if (user.email.split("@")[1] !== ALLOWED_DOMAIN) {
+    if (user.email.split("@")[1] !== ALLOWED_DOMAIN && ALLOWED_EMAILS.indexOf(user.email) === -1) {
       auth.signOut();
       document.getElementById("loginScreen").style.display = "flex";
       const el = document.getElementById("loginError");
