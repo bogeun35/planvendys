@@ -6,24 +6,38 @@ meta: 최종 수정: 2026.02.19
 <style>
 .bs{font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;position:relative;height:calc(100vh - 80px);overflow:hidden;display:flex;flex-direction:column}
 .bs *{box-sizing:border-box}
+
+/* ── Tabs ── */
+.bs-tabs{display:flex;gap:0;border-bottom:2px solid #e2e8f0;flex-shrink:0}
+.bs-tab{padding:8px 20px;font-size:12px;font-weight:600;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color 0.15s,border-color 0.15s}
+.bs-tab:hover{color:#4a5568}
+.bs-tab.bs-tab--active{color:#4a90d9;border-bottom-color:#4a90d9}
+.bs-tab-body{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
+.bs-tab-body.bs-tab--active{display:flex}
+
+/* ── Controls ── */
 .bs-ctrl{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e2e8f0;flex-shrink:0;flex-wrap:wrap}
 .bs-ctrl input[type=text]{width:200px;border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
-.bs-ctrl .bs-btn{padding:4px 12px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#4a5568}
-.bs-ctrl .bs-btn:hover{background:#f0f4f9}
-.bs-ctrl .bs-btn--primary{background:#4a90d9;color:#fff;border-color:#4a90d9}
-.bs-ctrl .bs-btn--primary:hover{background:#3a7bc8}
-.bs-ctrl .bs-sep{width:1px;height:20px;background:#e2e8f0}
+.bs-ctrl input[type=date]{border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:12px;font-family:'Noto Sans KR',sans-serif}
+.bs-ctrl label{font-size:11px;color:#94a3b8}
+.bs-btn{padding:4px 12px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#4a5568}
+.bs-btn:hover{background:#f0f4f9}
+.bs-btn--primary{background:#4a90d9;color:#fff;border-color:#4a90d9}
+.bs-btn--primary:hover{background:#3a7bc8}
+.bs-btn--active{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
+.bs-sep{width:1px;height:20px;background:#e2e8f0}
 .bs-status{margin-left:auto;font-size:11px;color:#94a3b8}
 
+/* ── Summary Cards ── */
 .bs-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 0;flex-shrink:0}
 .bs-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px}
 .bs-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
 .bs-card__value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a2332}
 
-.bs-tbar{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #e2e8f0;flex-shrink:0}
 .bs-cnt{font-size:11px;color:#94a3b8}
 .bs-copy-ok{color:#22c55e;font-size:11px;display:none}
 
+/* ── Post Table ── */
 .bs-twrap{flex:1;min-height:0;overflow:auto}
 .bs-table{width:100%;border-collapse:collapse;table-layout:fixed}
 .bs-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:left;cursor:pointer;white-space:nowrap;z-index:1;position:relative}
@@ -42,8 +56,18 @@ meta: 최종 수정: 2026.02.19
 .bs-table tr.bs-row--sel{background:#eef4fb}
 .bs-thumb{width:40px;height:40px;border-radius:3px;object-fit:cover;vertical-align:middle}
 .bs-thumb-empty{width:40px;height:40px;border-radius:3px;background:#f0f4f9;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8}
-.bs-title-link{color:#1a2332;text-decoration:none}
-.bs-title-link:hover{text-decoration:underline;color:#4a90d9}
+
+/* ── Daily Overview (Tab 2) ── */
+.bs-daily-chart{height:220px;position:relative;flex-shrink:0;margin-bottom:8px}
+.bs-daily-twrap{flex:1;min-height:0;overflow:auto}
+.bs-daily-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.bs-daily-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:right;cursor:pointer;white-space:nowrap;z-index:1;position:relative}
+.bs-daily-table th:first-child{text-align:left}
+.bs-daily-table th:nth-child(2){text-align:left}
+.bs-daily-table th:hover{background:#e2e8f0}
+.bs-daily-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.bs-daily-table td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif}
+.bs-daily-table td:nth-child(2){text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:10px;color:#94a3b8}
 
 /* ── Side Panel ── */
 .bs-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.15);z-index:100;opacity:0;pointer-events:none;transition:opacity 0.2s}
@@ -61,7 +85,6 @@ meta: 최종 수정: 2026.02.19
 .bs-panel__ctrl label{font-size:11px;color:#94a3b8}
 .bs-panel__ctrl input[type=date]{border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
 .bs-panel__ctrl .bs-btn{padding:3px 8px;font-size:10px}
-.bs-panel__ctrl .bs-btn--active{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
 .bs-panel__body{flex:1;overflow:auto;padding:12px 16px}
 .bs-panel__cards{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
 .bs-pcard{background:#f8fafd;border:1px solid #e2e8f0;border-radius:3px;padding:5px 7px}
@@ -86,34 +109,83 @@ meta: 최종 수정: 2026.02.19
 </style>
 
 <div class="bs" id="bsRoot">
-  <div class="bs-ctrl">
-    <input type="text" id="bsSearch" placeholder="제목 / 카테고리 검색" oninput="bsFilter()">
-    <button class="bs-btn bs-btn--primary" onclick="bsFetch()">새로고침</button>
-    <div class="bs-sep"></div>
-    <span class="bs-cnt" id="bsCnt"></span>
-    <button class="bs-btn" onclick="bsCopy()">복사</button>
-    <span class="bs-copy-ok" id="bsCopyOk">복사됨</span>
-    <span class="bs-status" id="bsStatus"></span>
+  <!-- Tab Header -->
+  <div class="bs-tabs">
+    <div class="bs-tab bs-tab--active" onclick="bsTabSwitch('posts')">게시글 목록</div>
+    <div class="bs-tab" onclick="bsTabSwitch('daily')">일자별 현황</div>
   </div>
-  <div class="bs-summary">
-    <div class="bs-card"><div class="bs-card__label">총 게시글</div><div class="bs-card__value" id="bsSumPosts">-</div></div>
-    <div class="bs-card"><div class="bs-card__label">총 방문수</div><div class="bs-card__value" id="bsSumVisits">-</div></div>
-    <div class="bs-card"><div class="bs-card__label">평균 방문수</div><div class="bs-card__value" id="bsSumAvg">-</div></div>
-    <div class="bs-card"><div class="bs-card__label">최근 게시일</div><div class="bs-card__value" id="bsSumLatest">-</div></div>
+
+  <!-- ═══ Tab 1: 게시글 목록 ═══ -->
+  <div class="bs-tab-body bs-tab--active" id="bsTabPosts">
+    <div class="bs-ctrl">
+      <input type="text" id="bsSearch" placeholder="제목 / 카테고리 검색" oninput="bsFilter()">
+      <button class="bs-btn bs-btn--primary" onclick="bsFetch()">새로고침</button>
+      <div class="bs-sep"></div>
+      <span class="bs-cnt" id="bsCnt"></span>
+      <button class="bs-btn" onclick="bsCopy()">복사</button>
+      <span class="bs-copy-ok" id="bsCopyOk">복사됨</span>
+      <span class="bs-status" id="bsStatus"></span>
+    </div>
+    <div class="bs-summary">
+      <div class="bs-card"><div class="bs-card__label">총 게시글</div><div class="bs-card__value" id="bsSumPosts">-</div></div>
+      <div class="bs-card"><div class="bs-card__label">총 방문수</div><div class="bs-card__value" id="bsSumVisits">-</div></div>
+      <div class="bs-card"><div class="bs-card__label">평균 방문수</div><div class="bs-card__value" id="bsSumAvg">-</div></div>
+      <div class="bs-card"><div class="bs-card__label">최근 게시일</div><div class="bs-card__value" id="bsSumLatest">-</div></div>
+    </div>
+    <div class="bs-twrap">
+      <table class="bs-table">
+        <thead><tr>
+          <th style="width:36px;cursor:default">No<div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+          <th style="width:52px;cursor:default">썸네일<div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+          <th onclick="bsSort('title')">제목<span class="bs-sort" id="bsSorttitle"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+          <th onclick="bsSort('category')" style="width:100px">카테고리<span class="bs-sort" id="bsSortcategory"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+          <th onclick="bsSort('publishDate')" style="width:100px">작성일<span class="bs-sort" id="bsSortpublishDate"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+          <th onclick="bsSort('totalVisit')" style="width:90px;text-align:right">총 방문수<span class="bs-sort" id="bsSorttotalVisit"></span></th>
+        </tr></thead>
+        <tbody id="bsTbody"></tbody>
+      </table>
+    </div>
   </div>
-  <div class="bs-twrap">
-    <table class="bs-table">
-      <thead><tr>
-        <th style="width:36px;cursor:default">No<div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
-        <th style="width:52px;cursor:default">썸네일<div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
-        <th onclick="bsSort('title')">제목<span class="bs-sort" id="bsSorttitle"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
-        <th onclick="bsSort('category')" style="width:100px">카테고리<span class="bs-sort" id="bsSortcategory"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
-        <th onclick="bsSort('publishDate')" style="width:100px">작성일<span class="bs-sort" id="bsSortpublishDate"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
-        <th onclick="bsSort('totalVisit')" style="width:90px;text-align:right">총 방문수<span class="bs-sort" id="bsSorttotalVisit"></span></th>
-      </tr></thead>
-      <tbody id="bsTbody"></tbody>
-    </table>
+
+  <!-- ═══ Tab 2: 일자별 현황 ═══ -->
+  <div class="bs-tab-body" id="bsTabDaily">
+    <div class="bs-ctrl">
+      <label>시작일</label>
+      <input type="date" id="bsDailyStart">
+      <label>종료일</label>
+      <input type="date" id="bsDailyEnd">
+      <button class="bs-btn bs-btn--primary" onclick="bsDailyRender()">조회</button>
+      <div class="bs-sep"></div>
+      <button class="bs-btn" onclick="bsDailyHot('7d',this)">7일</button>
+      <button class="bs-btn" onclick="bsDailyHot('14d',this)">14일</button>
+      <button class="bs-btn" onclick="bsDailyHot('30d',this)">30일</button>
+      <button class="bs-btn" onclick="bsDailyHot('all',this)">전체</button>
+      <div class="bs-sep"></div>
+      <button class="bs-btn" onclick="bsDailyCopy()">복사</button>
+      <span class="bs-copy-ok" id="bsDailyCopyOk">복사됨</span>
+      <span class="bs-status" id="bsDailyStatus"></span>
+    </div>
+    <div class="bs-summary" id="bsDailySummary">
+      <div class="bs-card"><div class="bs-card__label">조회 기간</div><div class="bs-card__value" id="bsDSumRange">-</div></div>
+      <div class="bs-card"><div class="bs-card__label">기간 총 방문수</div><div class="bs-card__value" id="bsDSumTotal">-</div></div>
+      <div class="bs-card"><div class="bs-card__label">일평균 방문수</div><div class="bs-card__value" id="bsDSumAvg">-</div></div>
+      <div class="bs-card"><div class="bs-card__label">피크일</div><div class="bs-card__value" id="bsDSumPeak">-</div></div>
+    </div>
+    <div class="bs-daily-chart"><canvas id="bsDailyChart"></canvas></div>
+    <div class="bs-daily-twrap">
+      <table class="bs-daily-table">
+        <thead><tr>
+          <th style="width:100px" onclick="bsDailySort('date')">날짜<span class="bs-sort" id="bsDSortdate"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+          <th style="width:80px" onclick="bsDailySort('dow')">요일<span class="bs-sort" id="bsDSortdow"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+          <th onclick="bsDailySort('visitors')">총 방문수<span class="bs-sort" id="bsDSortvisitors"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+          <th onclick="bsDailySort('postCount')">게시글 수<span class="bs-sort" id="bsDSortpostCount"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+          <th onclick="bsDailySort('diff')">전일 대비<span class="bs-sort" id="bsDSortdiff"></span></th>
+        </tr></thead>
+        <tbody id="bsDailyTbody"></tbody>
+      </table>
+    </div>
   </div>
+
   <div class="bs-loading" id="bsLoading">
     <div class="bs-loading__bar"><div class="bs-loading__fill" id="bsLoadFill"></div></div>
     <div class="bs-loading__text" id="bsLoadText">데이터 조회 중...</div>
@@ -149,11 +221,17 @@ var BS = {
   posts: [],
   daily: [],
   dailyMap: {},
+  dailyTotal: {},
+  dailyPostCount: {},
   filtered: [],
   sortCol: 'totalVisit',
   sortDir: 'desc',
+  dSortCol: 'date',
+  dSortDir: 'desc',
   selPostId: null,
-  detailChart: null
+  detailChart: null,
+  dailyChart: null,
+  activeTab: 'posts'
 };
 
 function bsApi(p) {
@@ -165,6 +243,13 @@ function bsN(v) { if (v === 0) return '0'; return (v < 0 ? '-' : '') + Math.abs(
 function bsS(v) { var p = v < 0 ? '-' : '', a = Math.abs(v); if (a >= 1e8) return p + (a / 1e8).toFixed(1) + '억'; if (a >= 1e4) return p + (a / 1e4).toFixed(0) + '만'; return p + a.toLocaleString(); }
 function bsFmt(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 
+var BS_DOW = ['일', '월', '화', '수', '목', '금', '토'];
+function bsDow(dateStr) {
+  var parts = dateStr.split('-');
+  var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  return BS_DOW[d.getDay()];
+}
+
 function bsLoad(show, pct, txt) {
   var el = document.getElementById('bsLoading');
   if (show) el.classList.add('bs-show'); else el.classList.remove('bs-show');
@@ -172,6 +257,27 @@ function bsLoad(show, pct, txt) {
   if (txt) document.getElementById('bsLoadText').textContent = txt;
 }
 
+/* ── Tab Switch ── */
+function bsTabSwitch(tab) {
+  BS.activeTab = tab;
+  document.querySelectorAll('.bs-tabs .bs-tab').forEach(function(t) { t.classList.remove('bs-tab--active'); });
+  document.querySelectorAll('.bs-tab-body').forEach(function(b) { b.classList.remove('bs-tab--active'); });
+  if (tab === 'posts') {
+    document.querySelector('.bs-tabs .bs-tab:nth-child(1)').classList.add('bs-tab--active');
+    document.getElementById('bsTabPosts').classList.add('bs-tab--active');
+  } else {
+    document.querySelector('.bs-tabs .bs-tab:nth-child(2)').classList.add('bs-tab--active');
+    document.getElementById('bsTabDaily').classList.add('bs-tab--active');
+    if (BS.daily.length > 0 && !document.getElementById('bsDailyStart').value) {
+      var now = new Date();
+      document.getElementById('bsDailyEnd').value = bsFmt(now);
+      document.getElementById('bsDailyStart').value = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29));
+      bsDailyRender();
+    }
+  }
+}
+
+/* ── Fetch ── */
 async function bsFetch() {
   bsLoad(true, 10, '데이터 조회 중...');
   document.getElementById('bsStatus').textContent = '조회 중...';
@@ -202,27 +308,37 @@ async function bsFetch() {
     bsLoad(true, 85, '렌더링 중...');
     bsRenderSummary();
     bsRenderTable();
-    document.getElementById('bsStatus').textContent = BS.posts.length + '건 조회 완료';
+    document.getElementById('bsStatus').textContent = BS.posts.length + '개 게시글, ' + BS.daily.length + '건 일별 데이터';
     bsLoad(false);
   } catch (err) { alert('통신 오류: ' + err.message); bsLoad(false); }
 }
 
 function bsProcess() {
   var map = {};
+  var totalByDate = {};
+  var countByDate = {};
   BS.daily.forEach(function(r) {
     var pid = r.postId;
     if (!map[pid]) map[pid] = {};
-    map[pid][r.date] = r.visitors;
+    map[pid][r.date] = (map[pid][r.date] || 0) + r.visitors;
+    totalByDate[r.date] = (totalByDate[r.date] || 0) + r.visitors;
+    if (!countByDate[r.date]) countByDate[r.date] = {};
+    countByDate[r.date][pid] = true;
   });
   BS.dailyMap = map;
+  BS.dailyTotal = totalByDate;
+  BS.dailyPostCount = {};
+  Object.keys(countByDate).forEach(function(dt) {
+    BS.dailyPostCount[dt] = Object.keys(countByDate[dt]).length;
+  });
   BS.filtered = BS.posts.slice();
   BS.selPostId = null;
 }
 
+/* ── Tab 1: Posts ── */
 function bsRenderSummary() {
   var f = BS.filtered;
-  var totalVisits = 0;
-  var latestDate = '';
+  var totalVisits = 0, latestDate = '';
   f.forEach(function(r) {
     totalVisits += r.totalVisit;
     if (r.publishDate > latestDate) latestDate = r.publishDate;
@@ -280,6 +396,154 @@ function bsRenderTable() {
   document.getElementById('bsCnt').textContent = f.length + '건';
 }
 
+/* ── Tab 2: Daily Overview ── */
+function bsDailyHot(key, el) {
+  var now = new Date(), end = bsFmt(now), start;
+  switch (key) {
+    case '7d': start = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)); break;
+    case '14d': start = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13)); break;
+    case '30d': start = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29)); break;
+    case 'all': start = ''; end = ''; break;
+  }
+  document.getElementById('bsDailyStart').value = start;
+  document.getElementById('bsDailyEnd').value = end;
+  document.querySelectorAll('#bsTabDaily .bs-ctrl .bs-btn:not(.bs-btn--primary)').forEach(function(b) { b.classList.remove('bs-btn--active'); });
+  if (el) el.classList.add('bs-btn--active');
+  bsDailyRender();
+}
+
+function bsDailySort(col) {
+  if (BS.dSortCol === col) BS.dSortDir = BS.dSortDir === 'desc' ? 'asc' : 'desc';
+  else { BS.dSortCol = col; BS.dSortDir = col === 'date' ? 'desc' : 'desc'; }
+  bsDailyRender();
+}
+
+function bsDailyRender() {
+  var sd = document.getElementById('bsDailyStart').value;
+  var ed = document.getElementById('bsDailyEnd').value;
+  var dates = Object.keys(BS.dailyTotal).sort();
+  if (sd) dates = dates.filter(function(d) { return d >= sd; });
+  if (ed) dates = dates.filter(function(d) { return d <= ed; });
+
+  var totalV = 0, peakV = 0, peakDate = '-';
+  var rows = [];
+  dates.forEach(function(dt, idx) {
+    var v = BS.dailyTotal[dt] || 0;
+    var pc = BS.dailyPostCount[dt] || 0;
+    totalV += v;
+    if (v > peakV) { peakV = v; peakDate = dt; }
+    var prevV = idx > 0 ? (BS.dailyTotal[dates[idx - 1]] || 0) : null;
+    var diff = prevV !== null ? v - prevV : null;
+    rows.push({ date: dt, dow: bsDow(dt), visitors: v, postCount: pc, diff: diff });
+  });
+  var avgV = dates.length > 0 ? Math.round(totalV / dates.length) : 0;
+
+  var rangeStr = dates.length > 0 ? dates[0] + ' ~ ' + dates[dates.length - 1] : '-';
+  document.getElementById('bsDSumRange').textContent = dates.length + '일';
+  document.getElementById('bsDSumTotal').textContent = bsN(totalV);
+  document.getElementById('bsDSumAvg').textContent = bsN(avgV);
+  document.getElementById('bsDSumPeak').textContent = peakDate + ' (' + bsN(peakV) + ')';
+  document.getElementById('bsDailyStatus').textContent = rangeStr;
+
+  var col = BS.dSortCol, dir = BS.dSortDir;
+  rows.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (va === null) va = dir === 'asc' ? -Infinity : -Infinity;
+    if (vb === null) vb = dir === 'asc' ? -Infinity : -Infinity;
+    if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+  document.querySelectorAll('.bs-daily-table .bs-sort').forEach(function(s) { s.textContent = ''; });
+  var sortEl = document.getElementById('bsDSort' + col);
+  if (sortEl) sortEl.textContent = dir === 'asc' ? ' \u25B2' : ' \u25BC';
+
+  var h = '';
+  rows.forEach(function(r) {
+    var diffStr = r.diff === null ? '-' : (r.diff === 0 ? '-' : (r.diff > 0 ? '+' : '') + bsN(r.diff));
+    var diffCls = r.diff !== null && r.diff !== 0 ? (r.diff > 0 ? ' bs-pos' : ' bs-neg') : '';
+    h += '<tr>';
+    h += '<td>' + r.date + '</td>';
+    h += '<td>' + r.dow + '</td>';
+    h += '<td>' + bsN(r.visitors) + '</td>';
+    h += '<td>' + bsN(r.postCount) + '</td>';
+    h += '<td class="' + diffCls + '">' + diffStr + '</td>';
+    h += '</tr>';
+  });
+  document.getElementById('bsDailyTbody').innerHTML = h;
+
+  bsDailyRenderChart(dates);
+}
+
+function bsDailyRenderChart(dates) {
+  if (typeof Chart === 'undefined') {
+    setTimeout(function() { bsDailyRenderChart(dates); }, 200);
+    return;
+  }
+  if (BS.dailyChart) { BS.dailyChart.destroy(); BS.dailyChart = null; }
+  var canvas = document.getElementById('bsDailyChart');
+  if (!canvas) return;
+  var values = dates.map(function(d) { return BS.dailyTotal[d] || 0; });
+  BS.dailyChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: '일별 총 방문수',
+        data: values,
+        backgroundColor: 'rgba(74,144,217,0.6)',
+        borderColor: '#4a90d9',
+        borderWidth: 1,
+        borderRadius: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: function(ctx) { return ctx[0].label + ' (' + bsDow(ctx[0].label) + ')'; },
+            label: function(ctx) { return '방문수: ' + ctx.parsed.y.toLocaleString() + '명'; }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, callback: function(v) { return v.toLocaleString(); } },
+          grid: { color: '#f0f4f9' }
+        }
+      }
+    }
+  });
+}
+
+function bsDailyCopy() {
+  var sd = document.getElementById('bsDailyStart').value;
+  var ed = document.getElementById('bsDailyEnd').value;
+  var dates = Object.keys(BS.dailyTotal).sort();
+  if (sd) dates = dates.filter(function(d) { return d >= sd; });
+  if (ed) dates = dates.filter(function(d) { return d <= ed; });
+  var lines = ['날짜\t요일\t총 방문수\t게시글 수'];
+  dates.forEach(function(dt) {
+    lines.push(dt + '\t' + bsDow(dt) + '\t' + (BS.dailyTotal[dt] || 0) + '\t' + (BS.dailyPostCount[dt] || 0));
+  });
+  var text = lines.join('\n');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      var el = document.getElementById('bsDailyCopyOk');
+      el.style.display = 'inline';
+      setTimeout(function() { el.style.display = 'none'; }, 1500);
+    });
+  }
+}
+
+/* ── Side Panel (Post Detail) ── */
 function bsSelect(postId) {
   BS.selPostId = postId;
   bsRenderTable();
@@ -289,16 +553,11 @@ function bsSelect(postId) {
   var meta = '카테고리: ' + (post.category || '-') + ' &nbsp;|&nbsp; 작성일: ' + (post.publishDate || '-') + ' &nbsp;|&nbsp; 총 방문수: ' + bsN(post.totalVisit);
   if (post.url) meta += '<br><a href="' + post.url + '" target="_blank">' + post.url + '</a>';
   document.getElementById('bsPanelMeta').innerHTML = meta;
-
   var now = new Date();
-  var end = bsFmt(now);
-  var start = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29));
-  document.getElementById('bsDetailStart').value = start;
-  document.getElementById('bsDetailEnd').value = end;
-
+  document.getElementById('bsDetailEnd').value = bsFmt(now);
+  document.getElementById('bsDetailStart').value = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29));
   document.getElementById('bsOverlay').classList.add('bs-show');
   document.getElementById('bsPanel').classList.add('bs-show');
-
   document.querySelectorAll('.bs-panel__ctrl .bs-btn:not(.bs-btn--primary)').forEach(function(b) { b.classList.remove('bs-btn--active'); });
   bsRenderDetail();
 }
@@ -331,11 +590,9 @@ function bsRenderDetail() {
   var dailyData = BS.dailyMap[pid] || {};
   var sd = document.getElementById('bsDetailStart').value;
   var ed = document.getElementById('bsDetailEnd').value;
-
   var dates = Object.keys(dailyData).sort();
   if (sd) dates = dates.filter(function(d) { return d >= sd; });
   if (ed) dates = dates.filter(function(d) { return d <= ed; });
-
   var totalV = 0, peakV = 0, peakDate = '-';
   dates.forEach(function(d) {
     var v = dailyData[d] || 0;
@@ -343,15 +600,12 @@ function bsRenderDetail() {
     if (v > peakV) { peakV = v; peakDate = d; }
   });
   var avgV = dates.length > 0 ? Math.round(totalV / dates.length) : 0;
-
   var body = '<div class="bs-panel__cards">';
   body += '<div class="bs-pcard"><div class="bs-pcard__label">기간 방문수</div><div class="bs-pcard__value">' + bsN(totalV) + '</div></div>';
   body += '<div class="bs-pcard"><div class="bs-pcard__label">일평균</div><div class="bs-pcard__value">' + bsN(avgV) + '</div></div>';
   body += '<div class="bs-pcard"><div class="bs-pcard__label">피크일</div><div class="bs-pcard__value" style="font-size:11px">' + peakDate + ' (' + bsN(peakV) + ')</div></div>';
   body += '</div>';
-
   body += '<div class="bs-chart-wrap"><canvas id="bsChart"></canvas></div>';
-
   body += '<div class="bs-panel__section">일별 방문수 (' + dates.length + '일)</div>';
   body += '<div style="max-height:240px;overflow:auto"><table class="bs-dtable"><thead><tr><th>날짜</th><th>방문수</th><th>전일 대비</th></tr></thead><tbody>';
   for (var i = dates.length - 1; i >= 0; i--) {
@@ -364,9 +618,7 @@ function bsRenderDetail() {
     body += '<tr><td>' + dt + '</td><td>' + bsN(v) + '</td><td class="' + diffCls + '">' + diffStr + '</td></tr>';
   }
   body += '</tbody></table></div>';
-
   document.getElementById('bsPanelBody').innerHTML = body;
-
   bsRenderChart(dates, dailyData);
 }
 
@@ -378,12 +630,11 @@ function bsRenderChart(dates, data) {
   if (BS.detailChart) { BS.detailChart.destroy(); BS.detailChart = null; }
   var canvas = document.getElementById('bsChart');
   if (!canvas) return;
-  var labels = dates;
   var values = dates.map(function(d) { return data[d] || 0; });
   BS.detailChart = new Chart(canvas, {
     type: 'line',
     data: {
-      labels: labels,
+      labels: dates,
       datasets: [{
         label: '방문수',
         data: values,
@@ -401,27 +652,17 @@ function bsRenderChart(dates, data) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) { return ctx.parsed.y.toLocaleString() + '명'; }
-          }
-        }
+        tooltip: { callbacks: { label: function(ctx) { return ctx.parsed.y.toLocaleString() + '명'; } } }
       },
       scales: {
-        x: {
-          ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 },
-          grid: { display: false }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, callback: function(v) { return v.toLocaleString(); } },
-          grid: { color: '#f0f4f9' }
-        }
+        x: { ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, callback: function(v) { return v.toLocaleString(); } }, grid: { color: '#f0f4f9' } }
       }
     }
   });
 }
 
+/* ── Copy (Tab1) ── */
 function bsCopy() {
   var f = BS.filtered.slice(), col = BS.sortCol, dir = BS.sortDir;
   f.sort(function(a, b) {
@@ -442,7 +683,6 @@ function bsCopy() {
     bsCopyFeedback();
   }
 }
-
 function bsCopyFeedback() {
   var el = document.getElementById('bsCopyOk');
   el.style.display = 'inline';
