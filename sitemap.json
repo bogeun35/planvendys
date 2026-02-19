@@ -66,6 +66,13 @@
               "icon": "doc",
               "desc": "지역별 제휴점 목록 조회",
               "file": "docs/ops/store-list.html"
+            },
+            {
+              "id": "blog-stats",
+              "title": "블로그 통계",
+              "icon": "doc",
+              "desc": "블로그 게시글 통계 대시보드",
+              "file": "docs/ops/blog-stats.html"
             }
           ]
         },

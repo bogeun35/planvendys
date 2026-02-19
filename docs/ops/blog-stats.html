@@ -1,0 +1,483 @@
+<!--
+title: 블로그 통계
+meta: 최종 수정: 2026.02.19
+-->
+
+<style>
+.bs{font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;position:relative;height:calc(100vh - 80px);overflow:hidden;display:flex;flex-direction:column}
+.bs *{box-sizing:border-box}
+.bs-ctrl{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e2e8f0;flex-shrink:0;flex-wrap:wrap}
+.bs-ctrl input[type=text]{width:200px;border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
+.bs-ctrl .bs-btn{padding:4px 12px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#4a5568}
+.bs-ctrl .bs-btn:hover{background:#f0f4f9}
+.bs-ctrl .bs-btn--primary{background:#4a90d9;color:#fff;border-color:#4a90d9}
+.bs-ctrl .bs-btn--primary:hover{background:#3a7bc8}
+.bs-ctrl .bs-sep{width:1px;height:20px;background:#e2e8f0}
+.bs-status{margin-left:auto;font-size:11px;color:#94a3b8}
+
+.bs-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 0;flex-shrink:0}
+.bs-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px}
+.bs-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
+.bs-card__value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a2332}
+
+.bs-tbar{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.bs-cnt{font-size:11px;color:#94a3b8}
+.bs-copy-ok{color:#22c55e;font-size:11px;display:none}
+
+.bs-twrap{flex:1;min-height:0;overflow:auto}
+.bs-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.bs-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:left;cursor:pointer;white-space:nowrap;z-index:1;position:relative}
+.bs-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.bs-resizer:hover,.bs-resizer.bs-resizing{background:#4a90d9;opacity:0.4}
+.bs-table td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bs-table th:first-child{text-align:center}
+.bs-table th:last-child{text-align:right}
+.bs-table th:hover{background:#e2e8f0}
+.bs-table th .bs-sort{font-size:9px;margin-left:2px;color:#94a3b8}
+.bs-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px}
+.bs-table td:first-child{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8}
+.bs-table td:last-child{text-align:right;font-family:'JetBrains Mono',monospace}
+.bs-table tr{cursor:pointer}
+.bs-table tr:hover{background:#f8fafd}
+.bs-table tr.bs-row--sel{background:#eef4fb}
+.bs-thumb{width:40px;height:40px;border-radius:3px;object-fit:cover;vertical-align:middle}
+.bs-thumb-empty{width:40px;height:40px;border-radius:3px;background:#f0f4f9;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8}
+.bs-title-link{color:#1a2332;text-decoration:none}
+.bs-title-link:hover{text-decoration:underline;color:#4a90d9}
+
+/* ── Side Panel ── */
+.bs-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.15);z-index:100;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.bs-overlay.bs-show{opacity:1;pointer-events:auto}
+.bs-panel{position:fixed;top:0;right:0;bottom:0;width:560px;background:#fff;z-index:101;box-shadow:-4px 0 20px rgba(0,0,0,0.1);transform:translateX(100%);transition:transform 0.25s ease;display:flex;flex-direction:column;font-family:'Noto Sans KR',sans-serif}
+.bs-panel.bs-show{transform:translateX(0)}
+.bs-panel__head{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafd;gap:8px;flex-shrink:0}
+.bs-panel__title{font-size:14px;font-weight:700;color:#1a2332;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bs-panel__close{width:28px;height:28px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#4a5568;flex-shrink:0}
+.bs-panel__close:hover{background:#f0f4f9}
+.bs-panel__meta{font-size:10px;color:#94a3b8;padding:6px 16px;border-bottom:1px solid #e2e8f0;flex-shrink:0;line-height:1.6}
+.bs-panel__meta a{color:#4a90d9;text-decoration:none}
+.bs-panel__meta a:hover{text-decoration:underline}
+.bs-panel__ctrl{display:flex;align-items:center;gap:6px;padding:8px 16px;border-bottom:1px solid #e2e8f0;flex-shrink:0;flex-wrap:wrap}
+.bs-panel__ctrl label{font-size:11px;color:#94a3b8}
+.bs-panel__ctrl input[type=date]{border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
+.bs-panel__ctrl .bs-btn{padding:3px 8px;font-size:10px}
+.bs-panel__ctrl .bs-btn--active{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
+.bs-panel__body{flex:1;overflow:auto;padding:12px 16px}
+.bs-panel__cards{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.bs-pcard{background:#f8fafd;border:1px solid #e2e8f0;border-radius:3px;padding:5px 7px}
+.bs-pcard__label{font-size:10px;color:#94a3b8}
+.bs-pcard__value{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.bs-panel__section{font-size:11px;font-weight:600;color:#4a5568;margin:8px 0 4px}
+.bs-dtable{width:100%;border-collapse:collapse}
+.bs-dtable th{background:#f0f4f9;padding:3px 6px;font-size:10px;font-weight:600;color:#4a5568;text-align:right;border-bottom:1px solid #d1d5db;position:sticky;top:0;z-index:1}
+.bs-dtable th:first-child{text-align:left}
+.bs-dtable td{padding:3px 6px;font-size:11px;text-align:right;font-family:'JetBrains Mono',monospace;border-bottom:1px solid #f0f4f9}
+.bs-dtable td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:11px}
+.bs-neg{color:#e85d5d}
+.bs-pos{color:#22c55e}
+.bs-chart-wrap{margin-top:10px;height:200px;position:relative}
+
+/* ── Loading ── */
+.bs-loading{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.85);display:none;align-items:center;justify-content:center;z-index:10;flex-direction:column;gap:8px}
+.bs-loading.bs-show{display:flex}
+.bs-loading__bar{width:200px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}
+.bs-loading__fill{height:100%;background:#4a90d9;border-radius:2px;width:0%;transition:width 0.3s}
+.bs-loading__text{font-size:11px;color:#4a5568}
+</style>
+
+<div class="bs" id="bsRoot">
+  <div class="bs-ctrl">
+    <input type="text" id="bsSearch" placeholder="제목 / 카테고리 검색" oninput="bsFilter()">
+    <button class="bs-btn bs-btn--primary" onclick="bsFetch()">새로고침</button>
+    <div class="bs-sep"></div>
+    <span class="bs-cnt" id="bsCnt"></span>
+    <button class="bs-btn" onclick="bsCopy()">복사</button>
+    <span class="bs-copy-ok" id="bsCopyOk">복사됨</span>
+    <span class="bs-status" id="bsStatus"></span>
+  </div>
+  <div class="bs-summary">
+    <div class="bs-card"><div class="bs-card__label">총 게시글</div><div class="bs-card__value" id="bsSumPosts">-</div></div>
+    <div class="bs-card"><div class="bs-card__label">총 방문수</div><div class="bs-card__value" id="bsSumVisits">-</div></div>
+    <div class="bs-card"><div class="bs-card__label">평균 방문수</div><div class="bs-card__value" id="bsSumAvg">-</div></div>
+    <div class="bs-card"><div class="bs-card__label">최근 게시일</div><div class="bs-card__value" id="bsSumLatest">-</div></div>
+  </div>
+  <div class="bs-twrap">
+    <table class="bs-table">
+      <thead><tr>
+        <th style="width:36px;cursor:default">No<div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+        <th style="width:52px;cursor:default">썸네일<div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+        <th onclick="bsSort('title')">제목<span class="bs-sort" id="bsSorttitle"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+        <th onclick="bsSort('category')" style="width:100px">카테고리<span class="bs-sort" id="bsSortcategory"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+        <th onclick="bsSort('publishDate')" style="width:100px">작성일<span class="bs-sort" id="bsSortpublishDate"></span><div class="bs-resizer" onmousedown="bsResizeStart(event)"></div></th>
+        <th onclick="bsSort('totalVisit')" style="width:90px;text-align:right">총 방문수<span class="bs-sort" id="bsSorttotalVisit"></span></th>
+      </tr></thead>
+      <tbody id="bsTbody"></tbody>
+    </table>
+  </div>
+  <div class="bs-loading" id="bsLoading">
+    <div class="bs-loading__bar"><div class="bs-loading__fill" id="bsLoadFill"></div></div>
+    <div class="bs-loading__text" id="bsLoadText">데이터 조회 중...</div>
+  </div>
+</div>
+
+<div class="bs-overlay" id="bsOverlay" onclick="bsClosePanel()"></div>
+<div class="bs-panel" id="bsPanel">
+  <div class="bs-panel__head">
+    <div class="bs-panel__title" id="bsPanelTitle">-</div>
+    <button class="bs-panel__close" onclick="bsClosePanel()">&#x2715;</button>
+  </div>
+  <div class="bs-panel__meta" id="bsPanelMeta"></div>
+  <div class="bs-panel__ctrl">
+    <label>시작</label>
+    <input type="date" id="bsDetailStart">
+    <label>종료</label>
+    <input type="date" id="bsDetailEnd">
+    <button class="bs-btn bs-btn--primary" onclick="bsRenderDetail()">조회</button>
+    <button class="bs-btn" onclick="bsDetailHot('7d',this)">7일</button>
+    <button class="bs-btn" onclick="bsDetailHot('14d',this)">14일</button>
+    <button class="bs-btn" onclick="bsDetailHot('30d',this)">30일</button>
+    <button class="bs-btn" onclick="bsDetailHot('all',this)">전체</button>
+  </div>
+  <div class="bs-panel__body" id="bsPanelBody">
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:12px">게시글을 선택하세요</div>
+  </div>
+</div>
+
+<script>
+var BS = {
+  PROXY: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
+  posts: [],
+  daily: [],
+  dailyMap: {},
+  filtered: [],
+  sortCol: 'totalVisit',
+  sortDir: 'desc',
+  selPostId: null,
+  detailChart: null
+};
+
+function bsApi(p) {
+  var qs = Object.keys(p).map(function(k) { return k + '=' + encodeURIComponent(p[k]); }).join('&');
+  return fetch(BS.PROXY + '?' + qs, { redirect: 'follow' }).then(function(r) { return r.json(); });
+}
+
+function bsN(v) { if (v === 0) return '0'; return (v < 0 ? '-' : '') + Math.abs(v).toLocaleString(); }
+function bsS(v) { var p = v < 0 ? '-' : '', a = Math.abs(v); if (a >= 1e8) return p + (a / 1e8).toFixed(1) + '억'; if (a >= 1e4) return p + (a / 1e4).toFixed(0) + '만'; return p + a.toLocaleString(); }
+function bsFmt(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+function bsLoad(show, pct, txt) {
+  var el = document.getElementById('bsLoading');
+  if (show) el.classList.add('bs-show'); else el.classList.remove('bs-show');
+  if (pct !== undefined) document.getElementById('bsLoadFill').style.width = pct + '%';
+  if (txt) document.getElementById('bsLoadText').textContent = txt;
+}
+
+async function bsFetch() {
+  bsLoad(true, 10, '데이터 조회 중...');
+  document.getElementById('bsStatus').textContent = '조회 중...';
+  try {
+    var d = await bsApi({ action: 'blogStats' });
+    bsLoad(true, 60, '데이터 처리 중...');
+    if (d.error) { alert('API 오류: ' + d.error); bsLoad(false); return; }
+    BS.posts = (d.posts || []).map(function(r) {
+      return {
+        url: String(r.url || ''),
+        postId: String(r.postId || ''),
+        thumbnail: String(r.thumbnail || ''),
+        title: String(r.title || ''),
+        content: String(r.content || ''),
+        publishDate: String(r.publishDate || ''),
+        category: String(r.category || ''),
+        totalVisit: Number(r.totalVisit) || 0
+      };
+    });
+    BS.daily = (d.daily || []).map(function(r) {
+      return {
+        postId: String(r.postId || ''),
+        date: String(r.date || ''),
+        visitors: Number(r.visitors) || 0
+      };
+    });
+    bsProcess();
+    bsLoad(true, 85, '렌더링 중...');
+    bsRenderSummary();
+    bsRenderTable();
+    document.getElementById('bsStatus').textContent = BS.posts.length + '건 조회 완료';
+    bsLoad(false);
+  } catch (err) { alert('통신 오류: ' + err.message); bsLoad(false); }
+}
+
+function bsProcess() {
+  var map = {};
+  BS.daily.forEach(function(r) {
+    var pid = r.postId;
+    if (!map[pid]) map[pid] = {};
+    map[pid][r.date] = r.visitors;
+  });
+  BS.dailyMap = map;
+  BS.filtered = BS.posts.slice();
+  BS.selPostId = null;
+}
+
+function bsRenderSummary() {
+  var f = BS.filtered;
+  var totalVisits = 0;
+  var latestDate = '';
+  f.forEach(function(r) {
+    totalVisits += r.totalVisit;
+    if (r.publishDate > latestDate) latestDate = r.publishDate;
+  });
+  var avg = f.length > 0 ? Math.round(totalVisits / f.length) : 0;
+  document.getElementById('bsSumPosts').textContent = f.length + '건';
+  document.getElementById('bsSumVisits').textContent = bsN(totalVisits);
+  document.getElementById('bsSumAvg').textContent = bsN(avg);
+  document.getElementById('bsSumLatest').textContent = latestDate || '-';
+}
+
+function bsSort(col) {
+  if (BS.sortCol === col) BS.sortDir = BS.sortDir === 'desc' ? 'asc' : 'desc';
+  else { BS.sortCol = col; BS.sortDir = (col === 'title' || col === 'category' || col === 'publishDate') ? 'asc' : 'desc'; }
+  bsRenderTable();
+}
+
+function bsFilter() {
+  var q = document.getElementById('bsSearch').value.trim().toLowerCase();
+  BS.filtered = !q ? BS.posts.slice() : BS.posts.filter(function(r) {
+    return r.title.toLowerCase().indexOf(q) !== -1 || r.category.toLowerCase().indexOf(q) !== -1;
+  });
+  bsRenderSummary();
+  bsRenderTable();
+}
+
+function bsRenderTable() {
+  var f = BS.filtered.slice(), col = BS.sortCol, dir = BS.sortDir;
+  f.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+  document.querySelectorAll('.bs-table .bs-sort').forEach(function(s) { s.textContent = ''; });
+  var si = document.getElementById('bsSort' + col);
+  if (si) si.textContent = dir === 'asc' ? ' \u25B2' : ' \u25BC';
+  var h = '';
+  f.forEach(function(r, i) {
+    var sel = r.postId === BS.selPostId ? ' bs-row--sel' : '';
+    var esc = r.postId.replace(/'/g, "\\'");
+    h += '<tr class="' + sel + '" onclick="bsSelect(\'' + esc + '\')">';
+    h += '<td>' + (i + 1) + '</td>';
+    if (r.thumbnail) {
+      h += '<td><img class="bs-thumb" src="' + r.thumbnail + '" referrerpolicy="no-referrer" onerror="this.outerHTML=\'<span class=bs-thumb-empty>-</span>\'"></td>';
+    } else {
+      h += '<td><span class="bs-thumb-empty">-</span></td>';
+    }
+    h += '<td title="' + r.title.replace(/"/g, '&quot;') + '">' + r.title + '</td>';
+    h += '<td>' + r.category + '</td>';
+    h += '<td>' + r.publishDate + '</td>';
+    h += '<td style="text-align:right;font-family:\'JetBrains Mono\',monospace">' + bsN(r.totalVisit) + '</td>';
+    h += '</tr>';
+  });
+  document.getElementById('bsTbody').innerHTML = h;
+  document.getElementById('bsCnt').textContent = f.length + '건';
+}
+
+function bsSelect(postId) {
+  BS.selPostId = postId;
+  bsRenderTable();
+  var post = BS.posts.filter(function(r) { return r.postId === postId; })[0];
+  if (!post) return;
+  document.getElementById('bsPanelTitle').textContent = post.title;
+  var meta = '카테고리: ' + (post.category || '-') + ' &nbsp;|&nbsp; 작성일: ' + (post.publishDate || '-') + ' &nbsp;|&nbsp; 총 방문수: ' + bsN(post.totalVisit);
+  if (post.url) meta += '<br><a href="' + post.url + '" target="_blank">' + post.url + '</a>';
+  document.getElementById('bsPanelMeta').innerHTML = meta;
+
+  var now = new Date();
+  var end = bsFmt(now);
+  var start = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29));
+  document.getElementById('bsDetailStart').value = start;
+  document.getElementById('bsDetailEnd').value = end;
+
+  document.getElementById('bsOverlay').classList.add('bs-show');
+  document.getElementById('bsPanel').classList.add('bs-show');
+
+  document.querySelectorAll('.bs-panel__ctrl .bs-btn:not(.bs-btn--primary)').forEach(function(b) { b.classList.remove('bs-btn--active'); });
+  bsRenderDetail();
+}
+
+function bsClosePanel() {
+  document.getElementById('bsOverlay').classList.remove('bs-show');
+  document.getElementById('bsPanel').classList.remove('bs-show');
+  BS.selPostId = null;
+  bsRenderTable();
+}
+
+function bsDetailHot(key, el) {
+  var now = new Date(), end = bsFmt(now), start;
+  switch (key) {
+    case '7d': start = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)); break;
+    case '14d': start = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13)); break;
+    case '30d': start = bsFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29)); break;
+    case 'all': start = ''; end = ''; break;
+  }
+  document.getElementById('bsDetailStart').value = start;
+  document.getElementById('bsDetailEnd').value = end;
+  document.querySelectorAll('.bs-panel__ctrl .bs-btn:not(.bs-btn--primary)').forEach(function(b) { b.classList.remove('bs-btn--active'); });
+  if (el) el.classList.add('bs-btn--active');
+  bsRenderDetail();
+}
+
+function bsRenderDetail() {
+  var pid = BS.selPostId;
+  if (!pid) return;
+  var dailyData = BS.dailyMap[pid] || {};
+  var sd = document.getElementById('bsDetailStart').value;
+  var ed = document.getElementById('bsDetailEnd').value;
+
+  var dates = Object.keys(dailyData).sort();
+  if (sd) dates = dates.filter(function(d) { return d >= sd; });
+  if (ed) dates = dates.filter(function(d) { return d <= ed; });
+
+  var totalV = 0, peakV = 0, peakDate = '-';
+  dates.forEach(function(d) {
+    var v = dailyData[d] || 0;
+    totalV += v;
+    if (v > peakV) { peakV = v; peakDate = d; }
+  });
+  var avgV = dates.length > 0 ? Math.round(totalV / dates.length) : 0;
+
+  var body = '<div class="bs-panel__cards">';
+  body += '<div class="bs-pcard"><div class="bs-pcard__label">기간 방문수</div><div class="bs-pcard__value">' + bsN(totalV) + '</div></div>';
+  body += '<div class="bs-pcard"><div class="bs-pcard__label">일평균</div><div class="bs-pcard__value">' + bsN(avgV) + '</div></div>';
+  body += '<div class="bs-pcard"><div class="bs-pcard__label">피크일</div><div class="bs-pcard__value" style="font-size:11px">' + peakDate + ' (' + bsN(peakV) + ')</div></div>';
+  body += '</div>';
+
+  body += '<div class="bs-chart-wrap"><canvas id="bsChart"></canvas></div>';
+
+  body += '<div class="bs-panel__section">일별 방문수 (' + dates.length + '일)</div>';
+  body += '<div style="max-height:240px;overflow:auto"><table class="bs-dtable"><thead><tr><th>날짜</th><th>방문수</th><th>전일 대비</th></tr></thead><tbody>';
+  for (var i = dates.length - 1; i >= 0; i--) {
+    var dt = dates[i];
+    var v = dailyData[dt] || 0;
+    var prev = i > 0 ? (dailyData[dates[i - 1]] || 0) : null;
+    var diff = prev !== null ? v - prev : null;
+    var diffStr = diff === null ? '-' : (diff === 0 ? '-' : (diff > 0 ? '+' : '') + bsN(diff));
+    var diffCls = diff !== null && diff !== 0 ? (diff > 0 ? ' bs-pos' : ' bs-neg') : '';
+    body += '<tr><td>' + dt + '</td><td>' + bsN(v) + '</td><td class="' + diffCls + '">' + diffStr + '</td></tr>';
+  }
+  body += '</tbody></table></div>';
+
+  document.getElementById('bsPanelBody').innerHTML = body;
+
+  bsRenderChart(dates, dailyData);
+}
+
+function bsRenderChart(dates, data) {
+  if (typeof Chart === 'undefined') {
+    setTimeout(function() { bsRenderChart(dates, data); }, 200);
+    return;
+  }
+  if (BS.detailChart) { BS.detailChart.destroy(); BS.detailChart = null; }
+  var canvas = document.getElementById('bsChart');
+  if (!canvas) return;
+  var labels = dates;
+  var values = dates.map(function(d) { return data[d] || 0; });
+  BS.detailChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '방문수',
+        data: values,
+        borderColor: '#4a90d9',
+        backgroundColor: 'rgba(74,144,217,0.08)',
+        borderWidth: 1.5,
+        pointRadius: dates.length > 60 ? 0 : 2,
+        pointHoverRadius: 4,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.parsed.y.toLocaleString() + '명'; }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, callback: function(v) { return v.toLocaleString(); } },
+          grid: { color: '#f0f4f9' }
+        }
+      }
+    }
+  });
+}
+
+function bsCopy() {
+  var f = BS.filtered.slice(), col = BS.sortCol, dir = BS.sortDir;
+  f.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+  var lines = ['No\t제목\t카테고리\t작성일\t총 방문수'];
+  f.forEach(function(r, i) {
+    lines.push((i + 1) + '\t' + r.title + '\t' + r.category + '\t' + r.publishDate + '\t' + r.totalVisit);
+  });
+  var text = lines.join('\n');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() { bsCopyFeedback(); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    bsCopyFeedback();
+  }
+}
+
+function bsCopyFeedback() {
+  var el = document.getElementById('bsCopyOk');
+  el.style.display = 'inline';
+  setTimeout(function() { el.style.display = 'none'; }, 1500);
+}
+
+/* ── Column Resize ── */
+var bsResizeState = { th: null, startX: 0, startW: 0 };
+function bsResizeStart(e) {
+  e.stopPropagation(); e.preventDefault();
+  var th = e.target.parentElement;
+  bsResizeState.th = th; bsResizeState.startX = e.clientX; bsResizeState.startW = th.offsetWidth;
+  e.target.classList.add('bs-resizing');
+  document.addEventListener('mousemove', bsResizeMove);
+  document.addEventListener('mouseup', bsResizeEnd);
+}
+function bsResizeMove(e) {
+  if (!bsResizeState.th) return;
+  var newW = Math.max(40, bsResizeState.startW + (e.clientX - bsResizeState.startX));
+  bsResizeState.th.style.width = newW + 'px';
+}
+function bsResizeEnd() {
+  if (bsResizeState.th) { var r = bsResizeState.th.querySelector('.bs-resizer'); if (r) r.classList.remove('bs-resizing'); }
+  bsResizeState.th = null;
+  document.removeEventListener('mousemove', bsResizeMove);
+  document.removeEventListener('mouseup', bsResizeEnd);
+}
+
+/* ── Init ── */
+(function bsInit() {
+  if (typeof Chart === 'undefined') {
+    var sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+    document.head.appendChild(sc);
+  }
+  setTimeout(function() { bsFetch(); }, 0);
+})();
+</script>
