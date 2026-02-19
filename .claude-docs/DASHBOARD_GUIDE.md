@@ -180,8 +180,46 @@ raw.forEach(function(r) {
 
 ### 테이블 규칙 (필수)
 - **폰트 통일**: 테이블 내 모든 셀(th, td)은 동일한 폰트 패밀리/크기를 사용한다. 특정 컬럼만 다른 폰트를 적용하지 않는다.
-- **컬럼 너비 제어**: 각 `<th>`에 `style="min-width:__px"` 또는 `style="width:__px"`를 지정하여 컬럼별 여백을 조절할 수 있도록 한다.
+- **컬럼 너비 제어**: 각 `<th>`에 `style="width:__px"`를 지정하여 컬럼별 여백을 조절할 수 있도록 한다.
 - **UUID 전체 표시**: UUID 컬럼은 `min-width:290px` 이상을 확보하여 전체 값이 보이도록 한다.
+- **컬럼 리사이즈 (필수)**: 모든 테이블에 사용자가 컬럼 경계를 드래그하여 너비를 조절할 수 있는 기능을 적용한다.
+  - `table-layout:fixed` 적용
+  - 각 `<th>` 내부 우측에 `.xx-resizer` div 배치 (마지막 컬럼 제외)
+  - 드래그 시 파란색(#4a90d9) 하이라이트 피드백
+  - `td`에 `overflow:hidden;text-overflow:ellipsis` 적용
+
+```css
+/* 리사이저 CSS 패턴 */
+.xx-table{table-layout:fixed}
+.xx-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.xx-resizer:hover,.xx-resizer.xx-resizing{background:#4a90d9;opacity:0.4}
+.xx-table th{position:relative}  /* position:relative 필수 */
+.xx-table td{overflow:hidden;text-overflow:ellipsis}
+```
+
+```javascript
+/* 리사이저 JS 패턴 */
+var xxResizeState={th:null,startX:0,startW:0};
+function xxResizeStart(e){
+  e.stopPropagation();e.preventDefault();
+  var th=e.target.parentElement;
+  xxResizeState.th=th;xxResizeState.startX=e.clientX;xxResizeState.startW=th.offsetWidth;
+  e.target.classList.add('xx-resizing');
+  document.addEventListener('mousemove',xxResizeMove);
+  document.addEventListener('mouseup',xxResizeEnd);
+}
+function xxResizeMove(e){
+  if(!xxResizeState.th)return;
+  var newW=Math.max(40,xxResizeState.startW+(e.clientX-xxResizeState.startX));
+  xxResizeState.th.style.width=newW+'px';
+}
+function xxResizeEnd(){
+  if(xxResizeState.th){var r=xxResizeState.th.querySelector('.xx-resizer');if(r)r.classList.remove('xx-resizing');}
+  xxResizeState.th=null;
+  document.removeEventListener('mousemove',xxResizeMove);
+  document.removeEventListener('mouseup',xxResizeEnd);
+}
+```
 
 ### 공통 컴포넌트
 

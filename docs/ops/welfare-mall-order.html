@@ -64,7 +64,10 @@ meta: 최종 수정: 2026.02.18
 /* table */
 .wm table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
 .wm thead{position:sticky;top:0;z-index:2}
-.wm th{background:#f0f4f9;color:#4a5568;font-weight:600;font-size:10px;letter-spacing:.3px;padding:5px 8px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;cursor:pointer;user-select:none;overflow:hidden;text-overflow:ellipsis}
+.wm th{background:#f0f4f9;color:#4a5568;font-weight:600;font-size:10px;letter-spacing:.3px;padding:5px 8px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;cursor:pointer;user-select:none;overflow:hidden;text-overflow:ellipsis;position:relative}
+.wm-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.wm-resizer:hover,.wm-resizer.wm-resizing{background:#4a90d9;opacity:0.4}
+.wm td{overflow:hidden;text-overflow:ellipsis}
 .wm th:hover{background:#e6ecf3}
 .wm th.sorted-asc::after{content:' \25B2';font-size:8px}
 .wm th.sorted-desc::after{content:' \25BC';font-size:8px}
@@ -734,9 +737,15 @@ function wmStHot(key,el){
     var btns=el.parentElement.querySelectorAll('.wm-ctrl-btn:not(.primary)');btns.forEach(function(b){b.classList.remove('active')});el.classList.add('active');wmStFilter();
 }
 
+/* ── Column Resize ── */
+var wmResizeState={th:null,startX:0,startW:0};
+function wmResizeStart(e){e.stopPropagation();e.preventDefault();var th=e.target.parentElement;wmResizeState.th=th;wmResizeState.startX=e.clientX;wmResizeState.startW=th.offsetWidth;e.target.classList.add('wm-resizing');document.addEventListener('mousemove',wmResizeMove);document.addEventListener('mouseup',wmResizeEnd);}
+function wmResizeMove(e){if(!wmResizeState.th)return;var newW=Math.max(40,wmResizeState.startW+(e.clientX-wmResizeState.startX));wmResizeState.th.style.width=newW+'px';}
+function wmResizeEnd(){if(wmResizeState.th){var r=wmResizeState.th.querySelector('.wm-resizer');if(r)r.classList.remove('wm-resizing');}wmResizeState.th=null;document.removeEventListener('mousemove',wmResizeMove);document.removeEventListener('mouseup',wmResizeEnd);}
+
 /* utils */
 function wmSwitchTab(t,el){document.querySelectorAll('.wm-tab').forEach(function(x){x.classList.remove('active')});el.classList.add('active');document.getElementById('wmPanelAll').classList.toggle('active',t==='all');document.getElementById('wmPanelUnique').classList.toggle('active',t==='unique');document.getElementById('wmPanelStats').classList.toggle('active',t==='stats')}
-function wmBH(id,cols,sc,sd,fn){var h='<tr>';cols.forEach(function(c){var cl=sc===c.key?(sd==='asc'?' sorted-asc':' sorted-desc'):'';var st=c.w?' style="width:'+c.w+'"':'';h+='<th class="'+cl+'"'+st+' onclick="'+fn+"('"+c.key+"')"+'">'+(c.label)+'</th>'});h+='</tr>';document.getElementById(id).innerHTML=h}
+function wmBH(id,cols,sc,sd,fn){var h='<tr>';cols.forEach(function(c,i){var cl=sc===c.key?(sd==='asc'?' sorted-asc':' sorted-desc'):'';var st=c.w?' style="width:'+c.w+'"':'';var resizer=i<cols.length-1?'<div class="wm-resizer" onmousedown="wmResizeStart(event)"></div>':'';h+='<th class="'+cl+'"'+st+' onclick="'+fn+"('"+c.key+"')"+'">'+(c.label)+resizer+'</th>'});h+='</tr>';document.getElementById(id).innerHTML=h}
 function wmSA(a,c,d){a.sort(function(x,y){var va=x[c],vb=y[c];if(typeof va==='number'&&typeof vb==='number')return d==='asc'?va-vb:vb-va;va=String(va||'');vb=String(vb||'');return d==='asc'?va.localeCompare(vb):vb.localeCompare(va)})}
 function wmF(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
 function wmE(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}

@@ -107,12 +107,15 @@ title: 단체선물대장 주문현황
 .gg-grid__scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
 
 /* ── table ── */
-.gg table{width:100%;border-collapse:collapse;font-size:11px}
+.gg table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
 .gg thead{position:sticky;top:0;z-index:2}
 .gg th{
     background:#f0f4f9;color:#4a5568;font-weight:600;font-size:10px;letter-spacing:.3px;
-    padding:6px 10px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;
+    padding:6px 10px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;position:relative;
 }
+.gg-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.gg-resizer:hover,.gg-resizer.gg-resizing{background:#4a90d9;opacity:0.4}
+.gg td{overflow:hidden;text-overflow:ellipsis}
 .gg tbody tr{border-bottom:1px solid #f1f5f9;transition:background .08s}
 .gg tbody tr:hover{background:#f8fafd}
 .gg tbody tr.gg-clickable{cursor:pointer}
@@ -277,8 +280,8 @@ title: 단체선물대장 주문현황
                 </select>
             </div>
             <div class="gg-grid"><div class="gg-grid__scroll"><table><thead><tr>
-                <th style="width:36px">#</th><th>고객사</th><th>수령인</th><th>상품명</th><th>제휴점</th><th>상태</th><th>확정일자</th>
-                <th style="text-align:right">판매가(원)</th><th style="text-align:right">매입가(원)</th><th style="text-align:right">예상금액(원)</th>
+                <th style="width:36px">#<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>고객사<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>수령인<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>상품명<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>제휴점<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>상태<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>확정일자<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">판매가(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">매입가(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">예상금액(원)</th>
             </tr></thead><tbody id="ggAB"></tbody></table></div>
             <div class="gg-footer">
                 <span id="ggACnt">0건</span>
@@ -299,10 +302,10 @@ title: 단체선물대장 주문현황
                 <button class="gg-copy-btn" onclick="ggCopyComp(this)">클립보드 복사</button>
             </div>
             <div class="gg-grid"><div class="gg-grid__scroll"><table><thead><tr>
-                <th style="width:36px">#</th><th>고객사명</th>
-                <th style="text-align:right">전체</th><th style="text-align:right">미선택</th><th style="text-align:right">선택완료</th><th style="text-align:right">주문확정</th><th style="text-align:right">배송완료</th>
-                <th style="text-align:right">판매금액(원)</th><th style="text-align:right">매입금액(원)</th><th style="text-align:right">마진(원)</th><th style="text-align:right">마진율</th>
-                <th style="text-align:right">예상금액(원)</th><th>선택률</th><th style="min-width:80px">진행</th>
+                <th style="width:36px">#<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>고객사명<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">전체<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">미선택<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">선택완료<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">주문확정<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">배송완료<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">판매금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">매입금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">마진(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">마진율<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">예상금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>선택률<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="min-width:80px">진행</th>
             </tr></thead><tbody id="ggCB"></tbody></table></div>
             <div class="gg-footer">
                 <span id="ggCCnt">0개</span>
@@ -323,10 +326,10 @@ title: 단체선물대장 주문현황
                 <button class="gg-copy-btn" onclick="ggCopyProd(this)">클립보드 복사</button>
             </div>
             <div class="gg-grid"><div class="gg-grid__scroll"><table><thead><tr>
-                <th style="width:36px">#</th><th>상품코드</th><th>상품명</th><th>제휴점</th>
-                <th style="text-align:right">수량</th><th style="text-align:right">고객사수</th>
-                <th style="text-align:right">판매금액(원)</th><th style="text-align:right">매입금액(원)</th><th style="text-align:right">마진(원)</th><th style="text-align:right">마진율</th>
-                <th style="text-align:right">예상금액(원)</th><th style="min-width:80px">상태</th>
+                <th style="width:36px">#<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>상품코드<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>상품명<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>제휴점<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">수량<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">고객사수<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">판매금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">매입금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">마진(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">마진율<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">예상금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="min-width:80px">상태</th>
             </tr></thead><tbody id="ggPB"></tbody></table></div>
             <div class="gg-footer"><span id="ggPCnt">0개</span><span></span></div></div>
         </div>
@@ -339,10 +342,10 @@ title: 단체선물대장 주문현황
                 <button class="gg-copy-btn" onclick="ggCopyStore(this)">클립보드 복사</button>
             </div>
             <div class="gg-grid"><div class="gg-grid__scroll"><table><thead><tr>
-                <th style="width:36px">#</th><th>제휴점명</th>
-                <th style="text-align:right">전체수량</th><th style="text-align:right">상품종류</th><th style="text-align:right">고객사수</th>
-                <th style="text-align:right">판매금액(원)</th><th style="text-align:right">매입금액(원)</th><th style="text-align:right">마진(원)</th><th style="text-align:right">마진율</th>
-                <th style="text-align:right">평균단가(원)</th><th style="text-align:right">예상금액(원)</th><th style="min-width:80px">상태</th>
+                <th style="width:36px">#<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th>제휴점명<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">전체수량<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">상품종류<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">고객사수<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">판매금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">매입금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">마진(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">마진율<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th>
+                <th style="text-align:right">평균단가(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">예상금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="min-width:80px">상태</th>
             </tr></thead><tbody id="ggSTB"></tbody></table></div>
             <div class="gg-footer"><span id="ggSTCnt">0개</span><span></span></div></div>
         </div>
@@ -368,7 +371,7 @@ title: 단체선물대장 주문현황
                 </div>
                 <div class="gg-grid" style="flex:1;margin:0">
                     <div class="gg-grid__scroll"><table><thead><tr>
-                        <th>일자</th><th style="text-align:right">건수</th><th style="text-align:right">판매금액(원)</th><th style="text-align:right">매입금액(원)</th><th style="text-align:right">마진(원)</th><th style="text-align:right">누적건수</th><th style="text-align:right">누적판매(원)</th>
+                        <th>일자<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">건수<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">판매금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">매입금액(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">마진(원)<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">누적건수<div class="gg-resizer" onmousedown="ggResizeStart(event)"></div></th><th style="text-align:right">누적판매(원)</th>
                     </tr></thead><tbody id="ggDB"></tbody></table></div>
                     <div class="gg-footer"><span id="ggDCnt">0행</span><span id="ggDAmt"></span></div>
                 </div>
@@ -1008,4 +1011,10 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape') ggClo
     document.getElementById('ggED').value = '2026-02-28';
     ggHideLoading();
 })();
+
+/* ── Column Resize ── */
+var ggResizeState={th:null,startX:0,startW:0};
+function ggResizeStart(e){e.stopPropagation();e.preventDefault();var th=e.target.parentElement;ggResizeState.th=th;ggResizeState.startX=e.clientX;ggResizeState.startW=th.offsetWidth;e.target.classList.add('gg-resizing');document.addEventListener('mousemove',ggResizeMove);document.addEventListener('mouseup',ggResizeEnd);}
+function ggResizeMove(e){if(!ggResizeState.th)return;var newW=Math.max(40,ggResizeState.startW+(e.clientX-ggResizeState.startX));ggResizeState.th.style.width=newW+'px';}
+function ggResizeEnd(){if(ggResizeState.th){var r=ggResizeState.th.querySelector('.gg-resizer');if(r)r.classList.remove('gg-resizing');}ggResizeState.th=null;document.removeEventListener('mousemove',ggResizeMove);document.removeEventListener('mouseup',ggResizeEnd);}
 </script>

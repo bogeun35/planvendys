@@ -36,9 +36,12 @@ title: 복지대장 지급현황 대시보드
 .wf-grid-toolbar input:focus{border-color:#4a90d9}
 .wf-grid-toolbar span{font-size:11px;color:#94a3b8;white-space:nowrap}
 .wf-grid-wrap{overflow:auto;max-height:440px}
-.wf-grid{width:100%;border-collapse:collapse;font-size:12px;user-select:text}
+.wf-grid{width:100%;border-collapse:collapse;font-size:12px;user-select:text;table-layout:fixed}
 .wf-grid thead{position:sticky;top:0;z-index:2}
-.wf-grid th{padding:5px 10px;text-align:left;font-weight:600;color:#4a5568;background:#f0f4f9;border-bottom:1px solid #e2e8f0;border-right:1px solid #edf1f7;white-space:nowrap;cursor:pointer;user-select:none}
+.wf-grid th{padding:5px 10px;text-align:left;font-weight:600;color:#4a5568;background:#f0f4f9;border-bottom:1px solid #e2e8f0;border-right:1px solid #edf1f7;white-space:nowrap;cursor:pointer;user-select:none;position:relative}
+.wf-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.wf-resizer:hover,.wf-resizer.wf-resizing{background:#4a90d9;opacity:0.4}
+.wf-grid td{overflow:hidden;text-overflow:ellipsis}
 .wf-grid th:last-child{border-right:none}
 .wf-grid th:hover{background:#e6ecf3}
 .wf-grid td{padding:4px 10px;border-bottom:1px solid #f0f4f9;border-right:1px solid #f5f7fa;white-space:nowrap}
@@ -96,9 +99,10 @@ title: 복지대장 지급현황 대시보드
 .wf-chart__col-bars{display:flex;gap:1px;align-items:flex-end;flex:1;width:100%}
 .wf-chart__fill{flex:1;border-radius:2px 2px 0 0;min-height:2px;transition:height .3s ease}
 .wf-chart__label{font-size:9px;color:#94a3b8;font-family:'JetBrains Mono',monospace;padding-top:3px}
-.wf-cmp-table{width:100%;border-collapse:collapse;font-size:11px}
+.wf-cmp-table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
 .wf-cmp-table thead{position:sticky;top:0;z-index:1}
-.wf-cmp-table th{padding:4px 8px;text-align:left;font-weight:600;color:#4a5568;background:#f0f4f9;border-bottom:1px solid #e2e8f0;border-right:1px solid #edf1f7;white-space:nowrap;cursor:pointer;user-select:none}
+.wf-cmp-table th{padding:4px 8px;text-align:left;font-weight:600;color:#4a5568;background:#f0f4f9;border-bottom:1px solid #e2e8f0;border-right:1px solid #edf1f7;white-space:nowrap;cursor:pointer;user-select:none;position:relative}
+.wf-cmp-table td{overflow:hidden;text-overflow:ellipsis}
 .wf-cmp-table th:last-child{border-right:none}
 .wf-cmp-table th:hover{background:#e6ecf3}
 .wf-cmp-table td{padding:3px 8px;border-bottom:1px solid #f0f4f9;border-right:1px solid #f5f7fa;white-space:nowrap}
@@ -176,12 +180,12 @@ title: 복지대장 지급현황 대시보드
             <div class="wf-grid-wrap" id="wfGridWrap">
                 <table class="wf-grid" id="wfGrid">
                     <thead><tr>
-                        <th class="col-rank" onclick="wfSort('rank')">#</th>
-                        <th onclick="wfSort('comId')">comId</th>
-                        <th onclick="wfSort('name')">고객사명</th>
-                        <th class="col-r" onclick="wfSort('totalAmount')">지급액(원)</th>
-                        <th class="col-c" onclick="wfSort('userCount')">사용자(명)</th>
-                        <th class="col-r" onclick="wfSort('avgPerUser')">인당 평균(원)</th>
+                        <th class="col-rank" style="width:40px" onclick="wfSort('rank')">#<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>
+                        <th onclick="wfSort('comId')" style="min-width:290px">comId<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>
+                        <th onclick="wfSort('name')" style="min-width:120px">고객사명<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>
+                        <th class="col-r" onclick="wfSort('totalAmount')">지급액(원)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>
+                        <th class="col-c" onclick="wfSort('userCount')">사용자(명)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>
+                        <th class="col-r" onclick="wfSort('avgPerUser')">인당 평균(원)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>
                         <th class="col-c" onclick="wfSort('txCount')">건수</th>
                     </tr></thead>
                     <tbody id="wfTbody"></tbody>
@@ -396,7 +400,7 @@ function wfRenderDetail(){
             users.sort(function(a,b){return Math.abs(b.amount)-Math.abs(a.amount)});
             users.forEach(function(u){
                 h+='<div class="wf-detail__user-row">'
-                    +'<span class="uid" title="'+u.userId+'">'+u.userId.slice(0,8)+'</span>'
+                    +'<span class="uid" title="'+u.userId+'">'+u.userId+'</span>'
                     +'<span class="ua'+(u.amount<0?' amount-neg':'')+'">'+wfN(u.amount)+'</span></div>';
             });
             h+='</div>';
@@ -604,17 +608,17 @@ function wfBuildCmp(prevRows,psd,ped){
         +'<button class="wf-btn--sm" id="wfCmpCopyBtn" onclick="wfCmpCopy()">클립보드 복사</button></div>'
         +'<div style="overflow-x:auto;max-height:400px;overflow-y:auto">'
         +'<table class="wf-cmp-table" id="wfCmpTable"><thead><tr>'
-        +'<th onclick="wfCmpSort(\'comId\')">comId</th>'
-        +'<th onclick="wfCmpSort(\'name\')">고객사명</th>'
-        +'<th class="col-r" onclick="wfCmpSort(\'curAmt\')">당기(원)</th>'
-        +'<th class="col-r" onclick="wfCmpSort(\'prevAmt\')">전년(원)</th>'
-        +'<th class="col-r" onclick="wfCmpSort(\'diff\')">증감(원)</th>'
-        +'<th class="col-r" onclick="wfCmpSort(\'pct\')">증감률(%)</th>'
-        +'<th class="col-r" onclick="wfCmpSort(\'curUC\')">당기(명)</th>'
-        +'<th class="col-r" onclick="wfCmpSort(\'prevUC\')">전년(명)</th>'
-        +'<th class="col-r" onclick="wfCmpSort(\'diffUC\')">증감(명)</th>'
-        +'<th class="col-r" onclick="wfCmpSort(\'curAvg\')">당기 평균(원)</th>'
-        +'<th class="col-r" onclick="wfCmpSort(\'prevAvg\')">전년 평균(원)</th>'
+        +'<th onclick="wfCmpSort(\'comId\')" style="min-width:290px">comId<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th onclick="wfCmpSort(\'name\')" style="min-width:120px">고객사명<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th class="col-r" onclick="wfCmpSort(\'curAmt\')">당기(원)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th class="col-r" onclick="wfCmpSort(\'prevAmt\')">전년(원)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th class="col-r" onclick="wfCmpSort(\'diff\')">증감(원)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th class="col-r" onclick="wfCmpSort(\'pct\')">증감률(%)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th class="col-r" onclick="wfCmpSort(\'curUC\')">당기(명)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th class="col-r" onclick="wfCmpSort(\'prevUC\')">전년(명)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th class="col-r" onclick="wfCmpSort(\'diffUC\')">증감(명)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th class="col-r" onclick="wfCmpSort(\'curAvg\')">당기 평균(원)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
+        +'<th class="col-r" onclick="wfCmpSort(\'prevAvg\')">전년 평균(원)<div class="wf-resizer" onmousedown="wfResizeStart(event)"></div></th>'
         +'<th class="col-r" onclick="wfCmpSort(\'diffAvg\')">평균 증감(원)</th>'
         +'</tr></thead><tbody id="wfCmpTbody"></tbody></table></div>';
     document.getElementById('wfCmpBody').innerHTML=h;
@@ -676,6 +680,12 @@ function wfCmpCard(label,cur,prev,isMoney){
 }
 function wfByMonth(rows,field){var m={};rows.forEach(function(r){var mk=r.executeDate?r.executeDate.slice(0,7):'';if(mk)m[mk]=(m[mk]||0)+(Number(r[field])||0)});return m}
 function wfMergeM(a,b,curY,prevY){var ms=new Set();Object.keys(a).forEach(function(k){ms.add(k.slice(5,7))});Object.keys(b).forEach(function(k){ms.add(k.slice(5,7))});return Array.from(ms).sort().map(function(m){return{cur:curY+'-'+m,prev:prevY+'-'+m,label:m+'월'}})}
+
+/* ── Column Resize ── */
+var wfResizeState={th:null,startX:0,startW:0};
+function wfResizeStart(e){e.stopPropagation();e.preventDefault();var th=e.target.parentElement;wfResizeState.th=th;wfResizeState.startX=e.clientX;wfResizeState.startW=th.offsetWidth;e.target.classList.add('wf-resizing');document.addEventListener('mousemove',wfResizeMove);document.addEventListener('mouseup',wfResizeEnd);}
+function wfResizeMove(e){if(!wfResizeState.th)return;var newW=Math.max(40,wfResizeState.startW+(e.clientX-wfResizeState.startX));wfResizeState.th.style.width=newW+'px';}
+function wfResizeEnd(){if(wfResizeState.th){var r=wfResizeState.th.querySelector('.wf-resizer');if(r)r.classList.remove('wf-resizing');}wfResizeState.th=null;document.removeEventListener('mousemove',wfResizeMove);document.removeEventListener('mouseup',wfResizeEnd);}
 
 /* 포맷 함수 */
 function wfN(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}

@@ -63,9 +63,12 @@ title: 매출통계 대시보드
 .sl-copy-btn:hover{background:#f0f4f9}
 .sl-copy-btn.copied{background:#22c55e;color:#fff;border-color:#22c55e}
 .sl-tw{overflow:auto;flex:1;max-height:420px}
-.sl-t{width:100%;border-collapse:collapse;font-size:11px}
+.sl-t{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
 .sl-t thead{position:sticky;top:0;z-index:5}
-.sl-t th{background:#f0f4f9;padding:4px 6px;text-align:left;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;font-size:10px;user-select:none}
+.sl-t th{background:#f0f4f9;padding:4px 6px;text-align:left;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;font-size:10px;user-select:none;position:relative}
+.sl-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.sl-resizer:hover,.sl-resizer.sl-resizing{background:#4a90d9;opacity:0.4}
+.sl-t td{overflow:hidden;text-overflow:ellipsis}
 .sl-t th:hover{background:#e2e8f0}
 .sl-t th.r,.sl-t td.r{text-align:right;font-family:'JetBrains Mono',monospace}
 .sl-t th .a{font-size:8px;margin-left:2px;color:#94a3b8}
@@ -90,7 +93,7 @@ title: 매출통계 대시보드
 .sl-mt th.r,.sl-mt td.r{text-align:right;font-family:'JetBrains Mono',monospace}
 .sl-mt td{padding:3px 6px;border-bottom:1px solid #f0f4f9}
 .sl-pivot-wrap{overflow:auto;margin:8px 0}
-.sl-pivot{border-collapse:collapse;font-size:11px;width:100%}
+.sl-pivot{border-collapse:collapse;font-size:11px;width:100%;table-layout:fixed}
 .sl-pivot th,.sl-pivot td{padding:4px 8px;border:1px solid #e2e8f0;white-space:nowrap}
 .sl-pivot th{background:#f0f4f9;font-weight:600;color:#4a5568;font-size:10px;position:sticky;top:0;z-index:2}
 .sl-pivot td.r{text-align:right;font-family:'JetBrains Mono',monospace}
@@ -457,15 +460,15 @@ function slCT(){
     var pMap={},lMap={};SL._cp.forEach(function(g){pMap[g.id]=g});SL._cl.forEach(function(g){lMap[g.id]=g});
     var cols=[{k:'id',l:'고객사 ID',n:0},{k:'name',l:'고객사명',n:0},{k:'group',l:'그룹',n:0},{k:'sido',l:'지역',n:0},{k:'txAmt',l:'거래액(원)',n:1},{k:'sikTx',l:'식권대장(원)',n:1},{k:'bokTx',l:'복지대장(원)',n:1},{k:'orderCnt',l:'주문 수',n:1},{k:'userCnt',l:'사용자 수',n:1},{k:'shopFee',l:'수수료(원)',n:1}];
     var h='<table class="sl-t"><thead><tr>';
-    cols.forEach(function(c2){var s=SL.comSort===c2.k,ar=s?(SL.comDir==='asc'?'&#9650;':'&#9660;'):'&#9650;';h+='<th class="'+(c2.n?'r ':'')+(s?'s ':'')+'" onclick="slCSrt(\''+c2.k+'\')">'+c2.l+'<span class="a">'+ar+'</span></th>'});
-    h+='<th class="r" style="font-size:9px">전월대비</th><th class="r" style="font-size:9px">전년대비</th>';
+    cols.forEach(function(c2){var s=SL.comSort===c2.k,ar=s?(SL.comDir==='asc'?'&#9650;':'&#9660;'):'&#9650;';h+='<th class="'+(c2.n?'r ':'')+(s?'s ':'')+'" onclick="slCSrt(\''+c2.k+'\')">'+c2.l+'<span class="a">'+ar+'</span><div class="sl-resizer" onmousedown="slResizeStart(event)"></div></th>'});
+    h+='<th class="r" style="font-size:9px">전월대비<div class="sl-resizer" onmousedown="slResizeStart(event)"></div></th><th class="r" style="font-size:9px">전년대비</th>';
     h+='</tr></thead><tbody>';
     data.forEach(function(g){
         var pg=pMap[g.id],lg=lMap[g.id];
         var lPct=slPct(g.shopFee,lg?lg.shopFee:0),pPct=slPct(g.shopFee,pg?pg.shopFee:0);
         var lCls=(g.shopFee-(lg?lg.shopFee:0))>0?'up':(g.shopFee-(lg?lg.shopFee:0))<0?'down':'flat';
         var pCls=(g.shopFee-(pg?pg.shopFee:0))>0?'up':(g.shopFee-(pg?pg.shopFee:0))<0?'down':'flat';
-        h+='<tr class="'+(SL.comSel===g.id?'sel':'')+'" onclick="slCSel(\''+g.id+'\')"><td class="id" title="'+g.id+'">'+g.id.substring(0,8)+'...</td><td>'+g.name+'</td><td>'+g.group+'</td><td>'+g.sido+'</td><td class="r">'+slN(g.txAmt)+'</td><td class="r">'+slN(g.sikTx)+'</td><td class="r">'+slN(g.bokTx)+'</td><td class="r">'+slN(g.orderCnt)+'</td><td class="r">'+slN(g.userCnt)+'</td><td class="r">'+slN(g.shopFee)+'</td><td class="r '+lCls+'" style="font-size:10px">'+lPct+'</td><td class="r '+pCls+'" style="font-size:10px">'+pPct+'</td></tr>';
+        h+='<tr class="'+(SL.comSel===g.id?'sel':'')+'" onclick="slCSel(\''+g.id+'\')"><td class="id" title="'+g.id+'">'+g.id+'</td><td>'+g.name+'</td><td>'+g.group+'</td><td>'+g.sido+'</td><td class="r">'+slN(g.txAmt)+'</td><td class="r">'+slN(g.sikTx)+'</td><td class="r">'+slN(g.bokTx)+'</td><td class="r">'+slN(g.orderCnt)+'</td><td class="r">'+slN(g.userCnt)+'</td><td class="r">'+slN(g.shopFee)+'</td><td class="r '+lCls+'" style="font-size:10px">'+lPct+'</td><td class="r '+pCls+'" style="font-size:10px">'+pPct+'</td></tr>';
     });
     h+='</tbody></table>';
     if($('slCTW'))$('slCTW').innerHTML=h;
@@ -875,4 +878,10 @@ async function slY5(){
     h+='</tbody></table></div>';
     el.innerHTML=h;
 }
+
+/* ── Column Resize ── */
+var slResizeState={th:null,startX:0,startW:0};
+function slResizeStart(e){e.stopPropagation();e.preventDefault();var th=e.target.parentElement;slResizeState.th=th;slResizeState.startX=e.clientX;slResizeState.startW=th.offsetWidth;e.target.classList.add('sl-resizing');document.addEventListener('mousemove',slResizeMove);document.addEventListener('mouseup',slResizeEnd);}
+function slResizeMove(e){if(!slResizeState.th)return;var newW=Math.max(40,slResizeState.startW+(e.clientX-slResizeState.startX));slResizeState.th.style.width=newW+'px';}
+function slResizeEnd(){if(slResizeState.th){var r=slResizeState.th.querySelector('.sl-resizer');if(r)r.classList.remove('sl-resizing');}slResizeState.th=null;document.removeEventListener('mousemove',slResizeMove);document.removeEventListener('mouseup',slResizeEnd);}
 </script>

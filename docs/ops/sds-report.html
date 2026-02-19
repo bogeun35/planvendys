@@ -74,12 +74,15 @@ title: 식권대장 결제내역 보고서
 
 /* 테이블 (우) */
 .sk-tbl-wrap { max-height: calc(100vh - 340px); overflow: auto; }
-.sk-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+.sk-tbl { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
 .sk-tbl thead { position: sticky; top: 0; z-index: 1; }
 .sk-tbl th {
     background: #f8fafd; border-bottom: 2px solid #e2e8f0; padding: 4px 8px;
-    text-align: left; font-weight: 600; color: #4a5568; white-space: nowrap; font-size: 11px;
+    text-align: left; font-weight: 600; color: #4a5568; white-space: nowrap; font-size: 11px; position: relative;
 }
+.sk-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.sk-resizer:hover,.sk-resizer.sk-resizing{background:#4a90d9;opacity:0.4}
+.sk-tbl td{overflow:hidden;text-overflow:ellipsis}
 .sk-tbl td {
     padding: 3px 8px; border-bottom: 1px solid #f0f4f9; white-space: nowrap;
     font-size: 11px; color: #1a2332;
@@ -162,10 +165,10 @@ title: 식권대장 결제내역 보고서
                 <table class="sk-tbl" id="skTbl">
                     <thead>
                         <tr>
-                            <th>결제번호</th><th>날짜</th><th>ID</th><th>이름</th><th>사원번호</th>
-                            <th>부서1</th><th>부서2</th><th>부서3</th><th>가맹점</th>
-                            <th>선택 정책 사용식대</th><th>총 결제총액</th><th>정산금액</th>
-                            <th>결제형태</th><th>조식</th><th>중식</th><th>석식</th><th>특식</th>
+                            <th>결제번호<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>날짜<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>ID<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>이름<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>사원번호<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th>
+                            <th>부서1<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>부서2<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>부서3<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>가맹점<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th>
+                            <th>선택 정책 사용식대<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>총 결제총액<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>정산금액<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th>
+                            <th>결제형태<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>조식<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>중식<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>석식<div class="sk-resizer" onmousedown="skResizeStart(event)"></div></th><th>특식</th>
                         </tr>
                     </thead>
                     <tbody id="skTbody"></tbody>
@@ -565,4 +568,10 @@ async function skDownloadDept(dept) {
     var ed = document.getElementById('skEnd').value;
     XLSX.writeFile(wb, '식권대장_' + dept + '_' + sd + '_' + ed + '.xlsx');
 }
+
+/* ── Column Resize ── */
+var skResizeState={th:null,startX:0,startW:0};
+function skResizeStart(e){e.stopPropagation();e.preventDefault();var th=e.target.parentElement;skResizeState.th=th;skResizeState.startX=e.clientX;skResizeState.startW=th.offsetWidth;e.target.classList.add('sk-resizing');document.addEventListener('mousemove',skResizeMove);document.addEventListener('mouseup',skResizeEnd);}
+function skResizeMove(e){if(!skResizeState.th)return;var newW=Math.max(40,skResizeState.startW+(e.clientX-skResizeState.startX));skResizeState.th.style.width=newW+'px';}
+function skResizeEnd(){if(skResizeState.th){var r=skResizeState.th.querySelector('.sk-resizer');if(r)r.classList.remove('sk-resizing');}skResizeState.th=null;document.removeEventListener('mousemove',skResizeMove);document.removeEventListener('mouseup',skResizeEnd);}
 </script>

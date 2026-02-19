@@ -59,8 +59,11 @@ meta: 최종 수정: 2026.02.16
 .np-xl-btn:hover{border-color:#22c55e;color:#22c55e}
 
 .np-right-scroll{overflow:auto;flex:1;position:relative}
-.np-rtbl{width:100%;border-collapse:collapse}
-.np-rtbl th{position:sticky;top:0;background:#f0f4f9;padding:4px 6px;text-align:left;font-size:10px;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;z-index:1}
+.np-rtbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.np-rtbl th{position:sticky;top:0;background:#f0f4f9;padding:4px 6px;text-align:left;font-size:10px;font-weight:600;color:#4a5568;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;z-index:1;position:relative}
+.np-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.np-resizer:hover,.np-resizer.np-resizing{background:#4a90d9;opacity:0.4}
+.np-rtbl td{overflow:hidden;text-overflow:ellipsis}
 .np-rtbl th:hover{color:#4a90d9}
 .np-rtbl th.np-sort-asc::after{content:' \25B2';font-size:8px}
 .np-rtbl th.np-sort-desc::after{content:' \25BC';font-size:8px}
@@ -452,9 +455,10 @@ function npRenderRaw() {
     document.getElementById('npRInfo').textContent = data.length.toLocaleString() + '건';
 
     var head = document.getElementById('npRHead');
-    head.innerHTML = '<tr>' + NP.RAW_COLS.map(function(c) {
+    head.innerHTML = '<tr>' + NP.RAW_COLS.map(function(c, i) {
         var cls = NP.rSortCol === c.key ? (NP.rSortDir === 'asc' ? 'np-sort-asc' : 'np-sort-desc') : '';
-        return '<th class="' + cls + '" onclick="npSortRaw(\'' + c.key + '\')">' + c.label + '</th>';
+        var resizer = i < NP.RAW_COLS.length - 1 ? '<div class="np-resizer" onmousedown="npResizeStart(event)"></div>' : '';
+        return '<th class="' + cls + '" onclick="npSortRaw(\'' + c.key + '\')">' + c.label + resizer + '</th>';
     }).join('') + '</tr>';
 
     var body = document.getElementById('npRBody');
@@ -580,4 +584,10 @@ function npSetStatus(t){ document.getElementById('npStatus').textContent = t; }
     npHot('thisMonth', document.querySelectorAll('.np-ctrl-btn:not(.np-ctrl-btn--primary)')[1]);
     document.getElementById('npEmpty').style.display='flex';
 })();
+
+/* ── Column Resize ── */
+var npResizeState={th:null,startX:0,startW:0};
+function npResizeStart(e){e.stopPropagation();e.preventDefault();var th=e.target.parentElement;npResizeState.th=th;npResizeState.startX=e.clientX;npResizeState.startW=th.offsetWidth;e.target.classList.add('np-resizing');document.addEventListener('mousemove',npResizeMove);document.addEventListener('mouseup',npResizeEnd);}
+function npResizeMove(e){if(!npResizeState.th)return;var newW=Math.max(40,npResizeState.startW+(e.clientX-npResizeState.startX));npResizeState.th.style.width=newW+'px';}
+function npResizeEnd(){if(npResizeState.th){var r=npResizeState.th.querySelector('.np-resizer');if(r)r.classList.remove('np-resizing');}npResizeState.th=null;document.removeEventListener('mousemove',npResizeMove);document.removeEventListener('mouseup',npResizeEnd);}
 </script>

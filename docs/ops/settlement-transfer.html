@@ -44,7 +44,9 @@ meta: 최종 수정: 2026.02.17
 .st-tbl-wrap{flex:1;overflow:auto}
 .st-tbl{width:100%;border-collapse:collapse;table-layout:fixed}
 .st-tbl th,.st-tbl td{overflow:hidden;text-overflow:ellipsis}
-.st-tbl th{position:sticky;top:0;background:#f0f4f9;font-size:10px;font-weight:600;color:#4a5568;padding:4px 6px;text-align:left;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;z-index:1}
+.st-tbl th{position:sticky;top:0;background:#f0f4f9;font-size:10px;font-weight:600;color:#4a5568;padding:4px 6px;text-align:left;border-bottom:1px solid #d1d5db;cursor:pointer;white-space:nowrap;z-index:1;position:relative}
+.st-resizer{position:absolute;top:0;right:0;width:5px;height:100%;cursor:col-resize;user-select:none;z-index:2}
+.st-resizer:hover,.st-resizer.st-resizing{background:#4a90d9;opacity:0.4}
 .st-tbl th:hover{color:#4a90d9}
 .st-tbl td{padding:3px 6px;border-bottom:1px solid #f0f4f9;font-size:11px;white-space:nowrap}
 .st-tbl tr:hover td{background:#f8fafd}
@@ -129,12 +131,12 @@ meta: 최종 수정: 2026.02.17
       <div class="st-tbl-wrap"><table class="st-tbl"><colgroup>
         <col style="width:55px"><col style="width:72px"><col style="width:130px"><col style="width:100px"><col style="width:110px"><col style="width:100px"><col style="width:100px">
       </colgroup><thead><tr>
-        <th onclick="stSort('settlementTransferStatementIdx')">#</th>
-        <th onclick="stSort('transferDate')">이체일</th>
-        <th onclick="stSort('accountBizName')">거래처명</th>
-        <th onclick="stSort('accountBizNumber')">사업자번호</th>
-        <th onclick="stSort('amount')" style="text-align:right">이체금액(원)</th>
-        <th onclick="stSort('vendysWithdrawalBankName')">출금은행</th>
+        <th onclick="stSort('settlementTransferStatementIdx')">#<div class="st-resizer" onmousedown="stResizeStart(event)"></div></th>
+        <th onclick="stSort('transferDate')">이체일<div class="st-resizer" onmousedown="stResizeStart(event)"></div></th>
+        <th onclick="stSort('accountBizName')">거래처명<div class="st-resizer" onmousedown="stResizeStart(event)"></div></th>
+        <th onclick="stSort('accountBizNumber')">사업자번호<div class="st-resizer" onmousedown="stResizeStart(event)"></div></th>
+        <th onclick="stSort('amount')" style="text-align:right">이체금액(원)<div class="st-resizer" onmousedown="stResizeStart(event)"></div></th>
+        <th onclick="stSort('vendysWithdrawalBankName')">출금은행<div class="st-resizer" onmousedown="stResizeStart(event)"></div></th>
         <th onclick="stSort('transferBankName')">입금은행</th>
       </tr></thead><tbody id="stBody"></tbody></table></div>
     </div>
@@ -443,4 +445,10 @@ async function stDownloadAll(){
         }catch(err){alert('전표 생성 실패: '+err.message);}
     });
 }
+
+/* ── Column Resize ── */
+var stResizeState={th:null,startX:0,startW:0};
+function stResizeStart(e){e.stopPropagation();e.preventDefault();var th=e.target.parentElement;stResizeState.th=th;stResizeState.startX=e.clientX;stResizeState.startW=th.offsetWidth;e.target.classList.add('st-resizing');document.addEventListener('mousemove',stResizeMove);document.addEventListener('mouseup',stResizeEnd);}
+function stResizeMove(e){if(!stResizeState.th)return;var newW=Math.max(40,stResizeState.startW+(e.clientX-stResizeState.startX));stResizeState.th.style.width=newW+'px';}
+function stResizeEnd(){if(stResizeState.th){var r=stResizeState.th.querySelector('.st-resizer');if(r)r.classList.remove('st-resizing');}stResizeState.th=null;document.removeEventListener('mousemove',stResizeMove);document.removeEventListener('mouseup',stResizeEnd);}
 </script>

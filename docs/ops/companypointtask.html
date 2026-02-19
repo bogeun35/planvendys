@@ -427,7 +427,7 @@ function mpRenderLeft() {
     var html = '';
     data.forEach(function(r, i) {
         var sel = MP.selectedIdx === i;
-        var shortId = r.comId.length > 8 ? r.comId.slice(0, 8) + '..' : r.comId;
+        var shortId = r.comId;
         html += '<tr class="' + (sel ? 'mp-row--sel' : '') + '" onclick="mpSelectRow(' + i + ')" style="cursor:pointer">';
         html += '<td style="font-family:JetBrains Mono,monospace;font-size:11px">' + r.executeDate + '</td>';
         html += '<td>' + r.name + '</td>';
@@ -566,7 +566,7 @@ function mpRenderRight() {
 
         var expDate = r.expireDate ? r.expireDate.slice(0, 10) : '-';
         var execTime = r.executeDate ? r.executeDate.slice(11, 19) : '-';
-        var shortUserId = r.userId.length > 8 ? r.userId.slice(0, 8) + '..' : r.userId;
+        var shortUserId = r.userId;
 
         html += '<tr>';
         html += '<td>' + r.userName + '</td>';
