@@ -1,0 +1,117 @@
+// ═══════════════════════════════════════════════════════════════
+// GAS doGet에 추가할 bannerStats 액션
+// 기존 doGet의 switch/if 분기에 아래 case를 추가
+// ═══════════════════════════════════════════════════════════════
+
+// doGet 함수 내부에 추가:
+// case 'bannerStats': return handleBannerStats();
+
+function handleBannerStats() {
+  var SHEET_ID = '1kdcTJmpu8T2f4W2Dz9TZ1XNu2snnKc9eGXgu4kwx1jQ';
+  
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    
+    // ── A: 배너 메타데이터 (gid=741868809) ──
+    var metaSheet = ss.getSheetByName(null); // gid로 찾기
+    var sheets = ss.getSheets();
+    var metaData = [], gaData = [];
+    
+    sheets.forEach(function(sheet) {
+      if (sheet.getSheetId() === 741868809) {
+        var rows = sheet.getDataRange().getValues();
+        var headers = rows[0]; // idx, 타이틀, 광고시작일, 광고종료일, 타입, 위치, 이미지url, 테이블, 상세위치
+        for (var i = 1; i < rows.length; i++) {
+          var r = rows[i];
+          if (!r[0] && !r[1]) continue; // 빈 행 스킵
+          metaData.push({
+            idx: Number(r[0]) || 0,
+            title: String(r[1] || ''),
+            startDate: formatDate(r[2]),
+            endDate: formatDate(r[3]),
+            type: String(r[4] || ''),
+            location: String(r[5] || ''),
+            imageUrl: String(r[6] || ''),
+            table: String(r[7] || ''),
+            detailPosition: String(r[8] || '')
+          });
+        }
+      }
+      
+      // ── B: GA 이벤트 데이터 (gid=2070391366) ──
+      if (sheet.getSheetId() === 2070391366) {
+        var rows = sheet.getDataRange().getValues();
+        // 날짜, 이벤트명, 클릭/조회, 배너광고ID, 배너광고타입, 이벤트수
+        for (var i = 1; i < rows.length; i++) {
+          var r = rows[i];
+          if (!r[0]) continue;
+          gaData.push({
+            date: formatDate(r[0]),
+            eventName: String(r[1] || ''),
+            clickOrView: String(r[2] || ''),
+            bannerId: r[3] !== '' && r[3] !== null && r[3] !== undefined ? String(r[3]) : '',
+            bannerType: String(r[4] || ''),
+            eventCount: Number(r[5]) || 0
+          });
+        }
+      }
+    });
+    
+    var result = JSON.stringify({ banners: metaData, events: gaData });
+    return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function formatDate(val) {
+  if (!val) return '';
+  if (val instanceof Date) {
+    var y = val.getFullYear();
+    var m = String(val.getMonth() + 1).padStart(2, '0');
+    var d = String(val.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+  }
+  // "2026. 2. 19" 같은 형식 처리
+  var s = String(val).replace(/\s/g, '');
+  // YYYYMMDD 형식
+  if (/^\d{8}$/.test(s)) {
+    return s.substring(0, 4) + '-' + s.substring(4, 6) + '-' + s.substring(6, 8);
+  }
+  // YYYY.M.D 또는 YYYY.MM.DD
+  var match = s.match(/^(\d{4})\.(\d{1,2})\.(\d{1,2})/);
+  if (match) {
+    return match[1] + '-' + match[2].padStart(2, '0') + '-' + match[3].padStart(2, '0');
+  }
+  return String(val);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// 전체 doGet 수정 예시 (기존 코드에 bannerStats case 추가)
+// ═══════════════════════════════════════════════════════════════
+//
+// function doGet(e) {
+//   var action = e.parameter.action;
+//   
+//   switch (action) {
+//     case 'post':
+//     case 'job':
+//     case 'result':
+//       // ... 기존 Redash 프록시 로직 ...
+//       break;
+//     
+//     case 'blogStats':
+//       // ... 기존 블로그 통계 로직 ...
+//       break;
+//     
+//     case 'bannerStats':          // ← 추가
+//       return handleBannerStats(); // ← 추가
+//     
+//     default:
+//       return ContentService.createTextOutput(JSON.stringify({ error: 'Unknown action' }))
+//         .setMimeType(ContentService.MimeType.JSON);
+//   }
+// }
