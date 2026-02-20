@@ -1,117 +1,780 @@
-// ═══════════════════════════════════════════════════════════════
-// GAS doGet에 추가할 bannerStats 액션
-// 기존 doGet의 switch/if 분기에 아래 case를 추가
-// ═══════════════════════════════════════════════════════════════
+<!--
+title: 배너 조회/클릭수
+meta: 최종 수정: 2026.02.20
+-->
 
-// doGet 함수 내부에 추가:
-// case 'bannerStats': return handleBannerStats();
+<style>
+.bn{font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;position:relative;height:calc(100vh - 80px);overflow:hidden;display:flex;flex-direction:column}
+.bn *{box-sizing:border-box}
 
-function handleBannerStats() {
-  var SHEET_ID = '1kdcTJmpu8T2f4W2Dz9TZ1XNu2snnKc9eGXgu4kwx1jQ';
-  
+/* ── Tabs ── */
+.bn-tabs{display:flex;gap:0;border-bottom:2px solid #e2e8f0;flex-shrink:0}
+.bn-tab{padding:8px 20px;font-size:12px;font-weight:600;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color 0.15s,border-color 0.15s}
+.bn-tab:hover{color:#4a5568}
+.bn-tab.bn-tab--active{color:#4a90d9;border-bottom-color:#4a90d9}
+.bn-tab-body{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
+.bn-tab-body.bn-tab--active{display:flex}
+
+/* ── Controls ── */
+.bn-ctrl{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e2e8f0;flex-shrink:0;flex-wrap:wrap}
+.bn-ctrl input[type=text]{width:200px;border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
+.bn-ctrl input[type=date]{border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:12px;font-family:'Noto Sans KR',sans-serif}
+.bn-ctrl select{border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
+.bn-ctrl label{font-size:11px;color:#94a3b8}
+.bn-btn{padding:4px 12px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;font-size:11px;font-family:'Noto Sans KR',sans-serif;color:#4a5568}
+.bn-btn:hover{background:#f0f4f9}
+.bn-btn--primary{background:#4a90d9;color:#fff;border-color:#4a90d9}
+.bn-btn--primary:hover{background:#3a7bc8}
+.bn-btn--active{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
+.bn-sep{width:1px;height:20px;background:#e2e8f0}
+.bn-status{margin-left:auto;font-size:11px;color:#94a3b8}
+.bn-copy-ok{color:#22c55e;font-size:11px;display:none}
+
+/* ── Summary Cards ── */
+.bn-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 0;flex-shrink:0}
+.bn-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:8px 10px}
+.bn-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
+.bn-card__value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a2332}
+
+.bn-cnt{font-size:11px;color:#94a3b8}
+
+/* ── Table ── */
+.bn-twrap{flex:1;min-height:0;overflow:auto}
+.bn-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.bn-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:left;cursor:pointer;white-space:nowrap;z-index:1}
+.bn-table th:hover{background:#e2e8f0}
+.bn-table th .bn-sort{font-size:9px;margin-left:2px;color:#94a3b8}
+.bn-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bn-table tr{cursor:pointer}
+.bn-table tr:hover{background:#f8fafd}
+.bn-table tr.bn-row--sel{background:#eef4fb}
+.bn-num{text-align:right;font-family:'JetBrains Mono',monospace}
+.bn-center{text-align:center}
+.bn-thumb{width:60px;height:32px;border-radius:2px;object-fit:cover;vertical-align:middle}
+.bn-thumb-empty{width:60px;height:32px;border-radius:2px;background:#f0f4f9;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#94a3b8}
+.bn-badge{display:inline-block;padding:1px 6px;border-radius:2px;font-size:10px;font-weight:500}
+.bn-badge--main{background:#eef4fb;color:#4a90d9}
+.bn-badge--event{background:#fef3c7;color:#d49a2a}
+.bn-badge--shortcut{background:#ecfdf5;color:#22c55e}
+.bn-active{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:4px}
+.bn-inactive{display:inline-block;width:6px;height:6px;border-radius:50%;background:#d1d5db;margin-right:4px}
+
+/* ── Daily Tab ── */
+.bn-daily-chart{height:220px;position:relative;flex-shrink:0;margin-bottom:8px}
+.bn-daily-twrap{flex:1;min-height:0;overflow:auto}
+.bn-daily-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.bn-daily-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:right;cursor:pointer;white-space:nowrap;z-index:1}
+.bn-daily-table th:first-child{text-align:left}
+.bn-daily-table th:nth-child(2){text-align:left}
+.bn-daily-table th:hover{background:#e2e8f0}
+.bn-daily-table td{padding:4px 8px;border-bottom:1px solid #f0f4f9;font-size:11px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.bn-daily-table td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif}
+.bn-daily-table td:nth-child(2){text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:10px;color:#94a3b8}
+
+/* ── Side Panel ── */
+.bn-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.15);z-index:100;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.bn-overlay.bn-show{opacity:1;pointer-events:auto}
+.bn-panel{position:fixed;top:0;right:0;bottom:0;width:600px;background:#fff;z-index:101;box-shadow:-4px 0 20px rgba(0,0,0,0.1);transform:translateX(100%);transition:transform 0.25s ease;display:flex;flex-direction:column;font-family:'Noto Sans KR',sans-serif}
+.bn-panel.bn-show{transform:translateX(0)}
+.bn-panel__head{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafd;gap:8px;flex-shrink:0}
+.bn-panel__title{font-size:14px;font-weight:700;color:#1a2332;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bn-panel__close{width:28px;height:28px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#4a5568;flex-shrink:0}
+.bn-panel__close:hover{background:#f0f4f9}
+.bn-panel__meta{font-size:10px;color:#94a3b8;padding:6px 16px;border-bottom:1px solid #e2e8f0;flex-shrink:0;line-height:1.6}
+.bn-panel__ctrl{display:flex;align-items:center;gap:6px;padding:8px 16px;border-bottom:1px solid #e2e8f0;flex-shrink:0;flex-wrap:wrap}
+.bn-panel__ctrl label{font-size:11px;color:#94a3b8}
+.bn-panel__ctrl input[type=date]{border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
+.bn-panel__ctrl .bn-btn{padding:3px 8px;font-size:10px}
+.bn-panel__body{flex:1;overflow:auto;padding:12px 16px}
+.bn-panel__cards{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.bn-pcard{background:#f8fafd;border:1px solid #e2e8f0;border-radius:3px;padding:5px 7px}
+.bn-pcard__label{font-size:10px;color:#94a3b8}
+.bn-pcard__value{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.bn-panel__section{font-size:11px;font-weight:600;color:#4a5568;margin:8px 0 4px}
+.bn-dtable{width:100%;border-collapse:collapse}
+.bn-dtable th{background:#f0f4f9;padding:3px 6px;font-size:10px;font-weight:600;color:#4a5568;text-align:right;border-bottom:1px solid #d1d5db;position:sticky;top:0;z-index:1}
+.bn-dtable th:first-child{text-align:left}
+.bn-dtable td{padding:3px 6px;font-size:11px;text-align:right;font-family:'JetBrains Mono',monospace;border-bottom:1px solid #f0f4f9}
+.bn-dtable td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:11px}
+.bn-neg{color:#e85d5d}
+.bn-pos{color:#22c55e}
+.bn-chart-wrap{margin-top:10px;height:200px;position:relative}
+
+/* ── Loading ── */
+.bn-loading{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.85);display:none;align-items:center;justify-content:center;z-index:10;flex-direction:column;gap:8px}
+.bn-loading.bn-show{display:flex}
+.bn-loading__bar{width:200px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}
+.bn-loading__fill{height:100%;background:#4a90d9;border-radius:2px;width:0%;transition:width 0.3s}
+.bn-loading__text{font-size:11px;color:#4a5568}
+</style>
+
+<div class="bn" id="bnRoot">
+  <!-- Tab Header -->
+  <div class="bn-tabs">
+    <div class="bn-tab bn-tab--active" onclick="bnTabSwitch('banners')">배너 목록</div>
+    <div class="bn-tab" onclick="bnTabSwitch('daily')">일자별 현황</div>
+  </div>
+
+  <!-- Tab 1: 배너 목록 -->
+  <div class="bn-tab-body bn-tab--active" id="bnTabBanners">
+    <div class="bn-ctrl">
+      <input type="text" id="bnSearch" placeholder="배너명 / 위치 / 타입 검색" oninput="bnFilter()">
+      <select id="bnLocFilter" onchange="bnFilter()">
+        <option value="">전체 위치</option>
+      </select>
+      <select id="bnTypeFilter" onchange="bnFilter()">
+        <option value="">전체 타입</option>
+      </select>
+      <select id="bnActiveFilter" onchange="bnFilter()">
+        <option value="">전체 상태</option>
+        <option value="active">진행중</option>
+        <option value="ended">종료</option>
+      </select>
+      <button class="bn-btn bn-btn--primary" onclick="bnFetch()">새로고침</button>
+      <div class="bn-sep"></div>
+      <span class="bn-cnt" id="bnCnt"></span>
+      <button class="bn-btn" onclick="bnCopy()">복사</button>
+      <span class="bn-copy-ok" id="bnCopyOk">복사됨</span>
+      <span class="bn-status" id="bnStatus"></span>
+    </div>
+    <div class="bn-summary">
+      <div class="bn-card"><div class="bn-card__label">총 배너수</div><div class="bn-card__value" id="bnSumTotal">-</div></div>
+      <div class="bn-card"><div class="bn-card__label">총 조회수</div><div class="bn-card__value" id="bnSumViews">-</div></div>
+      <div class="bn-card"><div class="bn-card__label">총 클릭수</div><div class="bn-card__value" id="bnSumClicks">-</div></div>
+      <div class="bn-card"><div class="bn-card__label">평균 CTR</div><div class="bn-card__value" id="bnSumCTR">-</div></div>
+      <div class="bn-card"><div class="bn-card__label">진행중</div><div class="bn-card__value" id="bnSumActive">-</div></div>
+    </div>
+    <div class="bn-twrap">
+      <table class="bn-table">
+        <thead><tr>
+          <th style="width:32px;cursor:default" class="bn-center">No</th>
+          <th style="width:68px;cursor:default">이미지</th>
+          <th onclick="bnSort('title')">배너명<span class="bn-sort" id="bnSorttitle"></span></th>
+          <th onclick="bnSort('location')" style="width:80px">위치<span class="bn-sort" id="bnSortlocation"></span></th>
+          <th onclick="bnSort('type')" style="width:80px">타입<span class="bn-sort" id="bnSorttype"></span></th>
+          <th onclick="bnSort('startDate')" style="width:90px">시작일<span class="bn-sort" id="bnSortstartDate"></span></th>
+          <th onclick="bnSort('endDate')" style="width:90px">종료일<span class="bn-sort" id="bnSortendDate"></span></th>
+          <th onclick="bnSort('views')" style="width:80px" class="bn-num">조회수<span class="bn-sort" id="bnSortviews"></span></th>
+          <th onclick="bnSort('clicks')" style="width:80px" class="bn-num">클릭수<span class="bn-sort" id="bnSortclicks"></span></th>
+          <th onclick="bnSort('ctr')" style="width:64px" class="bn-num">CTR(%)<span class="bn-sort" id="bnSortctr"></span></th>
+        </tr></thead>
+        <tbody id="bnTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 2: 일자별 현황 -->
+  <div class="bn-tab-body" id="bnTabDaily">
+    <div class="bn-ctrl">
+      <label>시작일</label>
+      <input type="date" id="bnDailyStart">
+      <label>종료일</label>
+      <input type="date" id="bnDailyEnd">
+      <button class="bn-btn bn-btn--primary" onclick="bnDailyRender()">조회</button>
+      <div class="bn-sep"></div>
+      <button class="bn-btn" onclick="bnDailyHot('7d',this)">7일</button>
+      <button class="bn-btn" onclick="bnDailyHot('14d',this)">14일</button>
+      <button class="bn-btn" onclick="bnDailyHot('30d',this)">30일</button>
+      <button class="bn-btn" onclick="bnDailyHot('all',this)">전체</button>
+      <div class="bn-sep"></div>
+      <button class="bn-btn" onclick="bnDailyCopy()">복사</button>
+      <span class="bn-copy-ok" id="bnDailyCopyOk">복사됨</span>
+      <span class="bn-status" id="bnDailyStatus"></span>
+    </div>
+    <div class="bn-summary" id="bnDailySummary">
+      <div class="bn-card"><div class="bn-card__label">조회 기간</div><div class="bn-card__value" id="bnDSumRange">-</div></div>
+      <div class="bn-card"><div class="bn-card__label">기간 총 조회수</div><div class="bn-card__value" id="bnDSumViews">-</div></div>
+      <div class="bn-card"><div class="bn-card__label">기간 총 클릭수</div><div class="bn-card__value" id="bnDSumClicks">-</div></div>
+      <div class="bn-card"><div class="bn-card__label">기간 CTR</div><div class="bn-card__value" id="bnDSumCTR">-</div></div>
+      <div class="bn-card"><div class="bn-card__label">피크일(조회)</div><div class="bn-card__value" id="bnDSumPeak">-</div></div>
+    </div>
+    <div class="bn-daily-chart"><canvas id="bnDailyChart"></canvas></div>
+    <div class="bn-daily-twrap">
+      <table class="bn-daily-table">
+        <thead><tr>
+          <th style="width:100px" onclick="bnDailySort('date')">날짜<span class="bn-sort" id="bnDSortdate"></span></th>
+          <th style="width:50px" onclick="bnDailySort('dow')">요일<span class="bn-sort" id="bnDSortdow"></span></th>
+          <th onclick="bnDailySort('views')">조회수<span class="bn-sort" id="bnDSortviews"></span></th>
+          <th onclick="bnDailySort('clicks')">클릭수<span class="bn-sort" id="bnDSortclicks"></span></th>
+          <th onclick="bnDailySort('ctr')">CTR(%)<span class="bn-sort" id="bnDSortctr"></span></th>
+          <th onclick="bnDailySort('viewDiff')">조회 전일비<span class="bn-sort" id="bnDSortviewDiff"></span></th>
+          <th onclick="bnDailySort('clickDiff')">클릭 전일비<span class="bn-sort" id="bnDSortclickDiff"></span></th>
+        </tr></thead>
+        <tbody id="bnDailyTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bn-loading" id="bnLoading">
+    <div class="bn-loading__bar"><div class="bn-loading__fill" id="bnLoadFill"></div></div>
+    <div class="bn-loading__text" id="bnLoadText">데이터 조회 중...</div>
+  </div>
+</div>
+
+<!-- Side Panel -->
+<div class="bn-overlay" id="bnOverlay" onclick="bnClosePanel()"></div>
+<div class="bn-panel" id="bnPanel">
+  <div class="bn-panel__head">
+    <div class="bn-panel__title" id="bnPanelTitle">-</div>
+    <button class="bn-panel__close" onclick="bnClosePanel()">&#x2715;</button>
+  </div>
+  <div class="bn-panel__meta" id="bnPanelMeta"></div>
+  <div class="bn-panel__ctrl">
+    <label>시작</label>
+    <input type="date" id="bnDetailStart">
+    <label>종료</label>
+    <input type="date" id="bnDetailEnd">
+    <button class="bn-btn bn-btn--primary" onclick="bnRenderDetail()">조회</button>
+    <button class="bn-btn" onclick="bnDetailHot('7d',this)">7일</button>
+    <button class="bn-btn" onclick="bnDetailHot('14d',this)">14일</button>
+    <button class="bn-btn" onclick="bnDetailHot('30d',this)">30일</button>
+    <button class="bn-btn" onclick="bnDetailHot('all',this)">전체</button>
+  </div>
+  <div class="bn-panel__body" id="bnPanelBody">
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:12px">배너를 선택하세요</div>
+  </div>
+</div>
+
+<script>
+var BN = {
+  PROXY: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
+  banners: [],       // 메타데이터
+  events: [],        // GA 로그
+  merged: [],        // 배너 + 집계
+  filtered: [],
+  dailyMap: {},      // { bannerId: { date: { views, clicks } } }
+  dailyTotal: {},    // { date: { views, clicks } }
+  sortCol: 'views',
+  sortDir: 'desc',
+  dSortCol: 'date',
+  dSortDir: 'desc',
+  selIdx: null,
+  detailChart: null,
+  dailyChart: null,
+  activeTab: 'banners'
+};
+
+function bnApi(p) {
+  var qs = Object.keys(p).map(function(k) { return k + '=' + encodeURIComponent(p[k]); }).join('&');
+  return fetch(BN.PROXY + '?' + qs, { redirect: 'follow' }).then(function(r) { return r.json(); });
+}
+
+function bnN(v) { if (v === 0) return '0'; return (v < 0 ? '-' : '') + Math.abs(v).toLocaleString(); }
+function bnS(v) { var p = v < 0 ? '-' : '', a = Math.abs(v); if (a >= 1e8) return p + (a / 1e8).toFixed(1) + '억'; if (a >= 1e4) return p + (a / 1e4).toFixed(0) + '만'; return p + a.toLocaleString(); }
+function bnFmt(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function bnD(v) { if (v === 0) return '-'; return (v > 0 ? '+' : '') + bnN(v); }
+
+var BN_DOW = ['일', '월', '화', '수', '목', '금', '토'];
+function bnDow(dateStr) {
+  var parts = dateStr.split('-');
+  return BN_DOW[new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])).getDay()];
+}
+
+function bnLoad(show, pct, txt) {
+  var el = document.getElementById('bnLoading');
+  if (show) el.classList.add('bn-show'); else el.classList.remove('bn-show');
+  if (pct !== undefined) document.getElementById('bnLoadFill').style.width = pct + '%';
+  if (txt) document.getElementById('bnLoadText').textContent = txt;
+}
+
+function bnTabSwitch(tab) {
+  BN.activeTab = tab;
+  document.querySelectorAll('#bnRoot .bn-tabs .bn-tab').forEach(function(t) { t.classList.remove('bn-tab--active'); });
+  document.querySelectorAll('#bnRoot .bn-tab-body').forEach(function(b) { b.classList.remove('bn-tab--active'); });
+  if (tab === 'banners') {
+    document.querySelector('#bnRoot .bn-tabs .bn-tab:nth-child(1)').classList.add('bn-tab--active');
+    document.getElementById('bnTabBanners').classList.add('bn-tab--active');
+  } else {
+    document.querySelector('#bnRoot .bn-tabs .bn-tab:nth-child(2)').classList.add('bn-tab--active');
+    document.getElementById('bnTabDaily').classList.add('bn-tab--active');
+    if (Object.keys(BN.dailyTotal).length > 0 && !document.getElementById('bnDailyStart').value) {
+      var now = new Date();
+      document.getElementById('bnDailyEnd').value = bnFmt(now);
+      document.getElementById('bnDailyStart').value = bnFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29));
+      bnDailyRender();
+    }
+  }
+}
+
+/* ── Fetch ── */
+async function bnFetch() {
+  bnLoad(true, 10, '데이터 조회 중...');
+  document.getElementById('bnStatus').textContent = '조회 중...';
   try {
-    var ss = SpreadsheetApp.openById(SHEET_ID);
-    
-    // ── A: 배너 메타데이터 (gid=741868809) ──
-    var metaSheet = ss.getSheetByName(null); // gid로 찾기
-    var sheets = ss.getSheets();
-    var metaData = [], gaData = [];
-    
-    sheets.forEach(function(sheet) {
-      if (sheet.getSheetId() === 741868809) {
-        var rows = sheet.getDataRange().getValues();
-        var headers = rows[0]; // idx, 타이틀, 광고시작일, 광고종료일, 타입, 위치, 이미지url, 테이블, 상세위치
-        for (var i = 1; i < rows.length; i++) {
-          var r = rows[i];
-          if (!r[0] && !r[1]) continue; // 빈 행 스킵
-          metaData.push({
-            idx: Number(r[0]) || 0,
-            title: String(r[1] || ''),
-            startDate: formatDate(r[2]),
-            endDate: formatDate(r[3]),
-            type: String(r[4] || ''),
-            location: String(r[5] || ''),
-            imageUrl: String(r[6] || ''),
-            table: String(r[7] || ''),
-            detailPosition: String(r[8] || '')
-          });
-        }
-      }
-      
-      // ── B: GA 이벤트 데이터 (gid=2070391366) ──
-      if (sheet.getSheetId() === 2070391366) {
-        var rows = sheet.getDataRange().getValues();
-        // 날짜, 이벤트명, 클릭/조회, 배너광고ID, 배너광고타입, 이벤트수
-        for (var i = 1; i < rows.length; i++) {
-          var r = rows[i];
-          if (!r[0]) continue;
-          gaData.push({
-            date: formatDate(r[0]),
-            eventName: String(r[1] || ''),
-            clickOrView: String(r[2] || ''),
-            bannerId: r[3] !== '' && r[3] !== null && r[3] !== undefined ? String(r[3]) : '',
-            bannerType: String(r[4] || ''),
-            eventCount: Number(r[5]) || 0
-          });
-        }
-      }
+    var d = await bnApi({ action: 'bannerStats' });
+    bnLoad(true, 50, '데이터 처리 중...');
+    if (d.error) { alert('API 오류: ' + d.error); bnLoad(false); return; }
+    BN.banners = (d.banners || []).map(function(r) {
+      return {
+        idx: Number(r.idx) || 0,
+        title: String(r.title || ''),
+        startDate: String(r.startDate || ''),
+        endDate: String(r.endDate || ''),
+        type: String(r.type || ''),
+        location: String(r.location || ''),
+        imageUrl: String(r.imageUrl || ''),
+        detailPosition: String(r.detailPosition || '')
+      };
     });
-    
-    var result = JSON.stringify({ banners: metaData, events: gaData });
-    return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.JSON);
-    
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ error: err.message }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+    BN.events = (d.events || []).map(function(r) {
+      return {
+        date: String(r.date || ''),
+        eventName: String(r.eventName || ''),
+        clickOrView: String(r.clickOrView || ''),
+        bannerId: String(r.bannerId || ''),
+        bannerType: String(r.bannerType || ''),
+        eventCount: Number(r.eventCount) || 0
+      };
+    });
+    bnProcess();
+    bnLoad(true, 85, '렌더링 중...');
+    bnBuildFilters();
+    bnFilter();
+    document.getElementById('bnStatus').textContent = BN.banners.length + '개 배너, ' + BN.events.length + '건 이벤트';
+    bnLoad(false);
+  } catch (err) { alert('통신 오류: ' + err.message); bnLoad(false); }
 }
 
-function formatDate(val) {
-  if (!val) return '';
-  if (val instanceof Date) {
-    var y = val.getFullYear();
-    var m = String(val.getMonth() + 1).padStart(2, '0');
-    var d = String(val.getDate()).padStart(2, '0');
-    return y + '-' + m + '-' + d;
-  }
-  // "2026. 2. 19" 같은 형식 처리
-  var s = String(val).replace(/\s/g, '');
-  // YYYYMMDD 형식
-  if (/^\d{8}$/.test(s)) {
-    return s.substring(0, 4) + '-' + s.substring(4, 6) + '-' + s.substring(6, 8);
-  }
-  // YYYY.M.D 또는 YYYY.MM.DD
-  var match = s.match(/^(\d{4})\.(\d{1,2})\.(\d{1,2})/);
-  if (match) {
-    return match[1] + '-' + match[2].padStart(2, '0') + '-' + match[3].padStart(2, '0');
-  }
-  return String(val);
+function bnProcess() {
+  var today = bnFmt(new Date());
+
+  // 배너별 집계 + 일별 맵 구축
+  var bannerAgg = {};  // { idx: { views, clicks } }
+  var dailyMap = {};   // { idx: { date: { views, clicks } } }
+  var dailyTotal = {}; // { date: { views, clicks } }
+
+  BN.events.forEach(function(e) {
+    var bid = e.bannerId;
+    var isView = e.clickOrView === '조회';
+    var isClick = e.clickOrView === '클릭';
+    if (!isView && !isClick) return;
+
+    // 배너별 합계
+    if (!bannerAgg[bid]) bannerAgg[bid] = { views: 0, clicks: 0 };
+    if (isView) bannerAgg[bid].views += e.eventCount;
+    if (isClick) bannerAgg[bid].clicks += e.eventCount;
+
+    // 배너별 일별
+    if (!dailyMap[bid]) dailyMap[bid] = {};
+    if (!dailyMap[bid][e.date]) dailyMap[bid][e.date] = { views: 0, clicks: 0 };
+    if (isView) dailyMap[bid][e.date].views += e.eventCount;
+    if (isClick) dailyMap[bid][e.date].clicks += e.eventCount;
+
+    // 전체 일별
+    if (!dailyTotal[e.date]) dailyTotal[e.date] = { views: 0, clicks: 0 };
+    if (isView) dailyTotal[e.date].views += e.eventCount;
+    if (isClick) dailyTotal[e.date].clicks += e.eventCount;
+  });
+
+  BN.dailyMap = dailyMap;
+  BN.dailyTotal = dailyTotal;
+
+  // 배너 메타 + 집계 병합
+  BN.merged = BN.banners.map(function(b) {
+    var agg = bannerAgg[String(b.idx)] || { views: 0, clicks: 0 };
+    var ctr = agg.views > 0 ? (agg.clicks / agg.views * 100) : 0;
+    var isActive = b.endDate >= today;
+    return {
+      idx: b.idx,
+      title: b.title,
+      startDate: b.startDate,
+      endDate: b.endDate,
+      type: b.type,
+      location: b.location,
+      imageUrl: b.imageUrl,
+      detailPosition: b.detailPosition,
+      views: agg.views,
+      clicks: agg.clicks,
+      ctr: ctr,
+      isActive: isActive
+    };
+  });
+
+  BN.filtered = BN.merged.slice();
+  BN.selIdx = null;
 }
 
+function bnBuildFilters() {
+  var locs = {}, types = {};
+  BN.merged.forEach(function(b) {
+    if (b.location) locs[b.location] = true;
+    if (b.type) types[b.type] = true;
+  });
+  var locSel = document.getElementById('bnLocFilter');
+  locSel.innerHTML = '<option value="">전체 위치</option>';
+  Object.keys(locs).sort().forEach(function(l) {
+    locSel.innerHTML += '<option value="' + l + '">' + l + '</option>';
+  });
+  var typeSel = document.getElementById('bnTypeFilter');
+  typeSel.innerHTML = '<option value="">전체 타입</option>';
+  Object.keys(types).sort().forEach(function(t) {
+    typeSel.innerHTML += '<option value="' + t + '">' + t + '</option>';
+  });
+}
 
-// ═══════════════════════════════════════════════════════════════
-// 전체 doGet 수정 예시 (기존 코드에 bannerStats case 추가)
-// ═══════════════════════════════════════════════════════════════
-//
-// function doGet(e) {
-//   var action = e.parameter.action;
-//   
-//   switch (action) {
-//     case 'post':
-//     case 'job':
-//     case 'result':
-//       // ... 기존 Redash 프록시 로직 ...
-//       break;
-//     
-//     case 'blogStats':
-//       // ... 기존 블로그 통계 로직 ...
-//       break;
-//     
-//     case 'bannerStats':          // ← 추가
-//       return handleBannerStats(); // ← 추가
-//     
-//     default:
-//       return ContentService.createTextOutput(JSON.stringify({ error: 'Unknown action' }))
-//         .setMimeType(ContentService.MimeType.JSON);
-//   }
-// }
+/* ── Filter ── */
+function bnFilter() {
+  var q = document.getElementById('bnSearch').value.trim().toLowerCase();
+  var loc = document.getElementById('bnLocFilter').value;
+  var type = document.getElementById('bnTypeFilter').value;
+  var active = document.getElementById('bnActiveFilter').value;
+
+  BN.filtered = BN.merged.filter(function(b) {
+    if (q && b.title.toLowerCase().indexOf(q) === -1 && b.location.toLowerCase().indexOf(q) === -1 && b.type.toLowerCase().indexOf(q) === -1) return false;
+    if (loc && b.location !== loc) return false;
+    if (type && b.type !== type) return false;
+    if (active === 'active' && !b.isActive) return false;
+    if (active === 'ended' && b.isActive) return false;
+    return true;
+  });
+  bnRenderSummary();
+  bnRenderTable();
+}
+
+/* ── Summary ── */
+function bnRenderSummary() {
+  var f = BN.filtered;
+  var totalV = 0, totalC = 0, activeCount = 0;
+  f.forEach(function(b) {
+    totalV += b.views;
+    totalC += b.clicks;
+    if (b.isActive) activeCount++;
+  });
+  var ctr = totalV > 0 ? (totalC / totalV * 100) : 0;
+  document.getElementById('bnSumTotal').textContent = f.length + '개';
+  document.getElementById('bnSumViews').textContent = bnS(totalV);
+  document.getElementById('bnSumClicks').textContent = bnS(totalC);
+  document.getElementById('bnSumCTR').textContent = ctr.toFixed(2) + '%';
+  document.getElementById('bnSumActive').textContent = activeCount + '개';
+}
+
+/* ── Sort + Table ── */
+function bnSort(col) {
+  if (BN.sortCol === col) BN.sortDir = BN.sortDir === 'desc' ? 'asc' : 'desc';
+  else { BN.sortCol = col; BN.sortDir = (col === 'title' || col === 'location' || col === 'type' || col === 'startDate' || col === 'endDate') ? 'asc' : 'desc'; }
+  bnRenderTable();
+}
+
+function bnRenderTable() {
+  var f = BN.filtered.slice(), col = BN.sortCol, dir = BN.sortDir;
+  f.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+  document.querySelectorAll('.bn-table .bn-sort').forEach(function(s) { s.textContent = ''; });
+  var si = document.getElementById('bnSort' + col);
+  if (si) si.textContent = dir === 'asc' ? ' \u25B2' : ' \u25BC';
+
+  var h = '';
+  f.forEach(function(r, i) {
+    var sel = r.idx === BN.selIdx ? ' bn-row--sel' : '';
+    var statusDot = r.isActive ? '<span class="bn-active"></span>' : '<span class="bn-inactive"></span>';
+    var typeBadge = '';
+    if (r.type === 'MAIN') typeBadge = '<span class="bn-badge bn-badge--main">MAIN</span>';
+    else if (r.type === 'EVENT') typeBadge = '<span class="bn-badge bn-badge--event">EVENT</span>';
+    else if (r.type === 'SHORTCUT') typeBadge = '<span class="bn-badge bn-badge--shortcut">SHORTCUT</span>';
+    else typeBadge = '<span class="bn-badge">' + r.type + '</span>';
+
+    h += '<tr class="' + sel + '" onclick="bnSelect(' + r.idx + ')">';
+    h += '<td class="bn-center" style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#94a3b8">' + (i + 1) + '</td>';
+    if (r.imageUrl) {
+      h += '<td><img class="bn-thumb" src="' + r.imageUrl + '" referrerpolicy="no-referrer" onerror="this.outerHTML=\'<span class=bn-thumb-empty>-</span>\'"></td>';
+    } else {
+      h += '<td><span class="bn-thumb-empty">-</span></td>';
+    }
+    h += '<td title="' + r.title.replace(/"/g, '&quot;') + '">' + statusDot + r.title + '</td>';
+    h += '<td>' + r.location + '</td>';
+    h += '<td>' + typeBadge + '</td>';
+    h += '<td style="font-family:\'JetBrains Mono\',monospace;font-size:10px">' + r.startDate + '</td>';
+    h += '<td style="font-family:\'JetBrains Mono\',monospace;font-size:10px">' + r.endDate + '</td>';
+    h += '<td class="bn-num">' + bnN(r.views) + '</td>';
+    h += '<td class="bn-num">' + bnN(r.clicks) + '</td>';
+    h += '<td class="bn-num">' + r.ctr.toFixed(2) + '</td>';
+    h += '</tr>';
+  });
+  document.getElementById('bnTbody').innerHTML = h;
+  document.getElementById('bnCnt').textContent = f.length + '건';
+}
+
+/* ── Tab 2: Daily ── */
+function bnDailyHot(key, el) {
+  var now = new Date(), end = bnFmt(now), start;
+  switch (key) {
+    case '7d': start = bnFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)); break;
+    case '14d': start = bnFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13)); break;
+    case '30d': start = bnFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29)); break;
+    case 'all': start = ''; end = ''; break;
+  }
+  document.getElementById('bnDailyStart').value = start;
+  document.getElementById('bnDailyEnd').value = end;
+  document.querySelectorAll('#bnTabDaily .bn-ctrl .bn-btn:not(.bn-btn--primary)').forEach(function(b) { b.classList.remove('bn-btn--active'); });
+  if (el) el.classList.add('bn-btn--active');
+  bnDailyRender();
+}
+
+function bnDailySort(col) {
+  if (BN.dSortCol === col) BN.dSortDir = BN.dSortDir === 'desc' ? 'asc' : 'desc';
+  else { BN.dSortCol = col; BN.dSortDir = 'desc'; }
+  bnDailyRender();
+}
+
+function bnDailyRender() {
+  var sd = document.getElementById('bnDailyStart').value;
+  var ed = document.getElementById('bnDailyEnd').value;
+  var dates = Object.keys(BN.dailyTotal).sort();
+  if (sd) dates = dates.filter(function(d) { return d >= sd; });
+  if (ed) dates = dates.filter(function(d) { return d <= ed; });
+
+  var totalV = 0, totalC = 0, peakV = 0, peakDate = '-';
+  var rows = [];
+  dates.forEach(function(dt, idx) {
+    var dv = BN.dailyTotal[dt];
+    var v = dv.views, c = dv.clicks;
+    totalV += v; totalC += c;
+    if (v > peakV) { peakV = v; peakDate = dt; }
+    var prevDv = idx > 0 ? BN.dailyTotal[dates[idx - 1]] : null;
+    var viewDiff = prevDv ? v - prevDv.views : null;
+    var clickDiff = prevDv ? c - prevDv.clicks : null;
+    var ctr = v > 0 ? (c / v * 100) : 0;
+    rows.push({ date: dt, dow: bnDow(dt), views: v, clicks: c, ctr: ctr, viewDiff: viewDiff, clickDiff: clickDiff });
+  });
+  var ctrTotal = totalV > 0 ? (totalC / totalV * 100) : 0;
+
+  document.getElementById('bnDSumRange').textContent = dates.length + '일';
+  document.getElementById('bnDSumViews').textContent = bnS(totalV);
+  document.getElementById('bnDSumClicks').textContent = bnS(totalC);
+  document.getElementById('bnDSumCTR').textContent = ctrTotal.toFixed(2) + '%';
+  document.getElementById('bnDSumPeak').textContent = peakDate + ' (' + bnN(peakV) + ')';
+  var rangeStr = dates.length > 0 ? dates[0] + ' ~ ' + dates[dates.length - 1] : '-';
+  document.getElementById('bnDailyStatus').textContent = rangeStr;
+
+  var col = BN.dSortCol, dir = BN.dSortDir;
+  rows.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (va === null) va = -Infinity;
+    if (vb === null) vb = -Infinity;
+    if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+  document.querySelectorAll('.bn-daily-table .bn-sort').forEach(function(s) { s.textContent = ''; });
+  var sortEl = document.getElementById('bnDSort' + col);
+  if (sortEl) sortEl.textContent = dir === 'asc' ? ' \u25B2' : ' \u25BC';
+
+  var h = '';
+  rows.forEach(function(r) {
+    var vdStr = r.viewDiff === null ? '-' : bnD(r.viewDiff);
+    var cdStr = r.clickDiff === null ? '-' : bnD(r.clickDiff);
+    var vdCls = r.viewDiff !== null && r.viewDiff !== 0 ? (r.viewDiff > 0 ? ' bn-pos' : ' bn-neg') : '';
+    var cdCls = r.clickDiff !== null && r.clickDiff !== 0 ? (r.clickDiff > 0 ? ' bn-pos' : ' bn-neg') : '';
+    h += '<tr>';
+    h += '<td>' + r.date + '</td>';
+    h += '<td>' + r.dow + '</td>';
+    h += '<td>' + bnN(r.views) + '</td>';
+    h += '<td>' + bnN(r.clicks) + '</td>';
+    h += '<td>' + r.ctr.toFixed(2) + '</td>';
+    h += '<td class="' + vdCls + '">' + vdStr + '</td>';
+    h += '<td class="' + cdCls + '">' + cdStr + '</td>';
+    h += '</tr>';
+  });
+  document.getElementById('bnDailyTbody').innerHTML = h;
+  bnDailyRenderChart(dates);
+}
+
+function bnDailyRenderChart(dates) {
+  if (typeof Chart === 'undefined') { setTimeout(function() { bnDailyRenderChart(dates); }, 200); return; }
+  if (BN.dailyChart) { BN.dailyChart.destroy(); BN.dailyChart = null; }
+  var canvas = document.getElementById('bnDailyChart');
+  if (!canvas) return;
+  var views = dates.map(function(d) { return BN.dailyTotal[d].views; });
+  var clicks = dates.map(function(d) { return BN.dailyTotal[d].clicks; });
+  BN.dailyChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: dates,
+      datasets: [
+        { label: '조회수', data: views, backgroundColor: 'rgba(74,144,217,0.5)', borderColor: '#4a90d9', borderWidth: 1, borderRadius: 2, order: 2 },
+        { label: '클릭수', data: clicks, backgroundColor: 'rgba(232,93,93,0.6)', borderColor: '#e85d5d', borderWidth: 1, borderRadius: 2, order: 1 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { font: { size: 10 }, boxWidth: 12 } },
+        tooltip: {
+          callbacks: {
+            title: function(ctx) { return ctx[0].label + ' (' + bnDow(ctx[0].label) + ')'; },
+            label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString(); }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, callback: function(v) { return v.toLocaleString(); } }, grid: { color: '#f0f4f9' } }
+      }
+    }
+  });
+}
+
+function bnDailyCopy() {
+  var sd = document.getElementById('bnDailyStart').value;
+  var ed = document.getElementById('bnDailyEnd').value;
+  var dates = Object.keys(BN.dailyTotal).sort();
+  if (sd) dates = dates.filter(function(d) { return d >= sd; });
+  if (ed) dates = dates.filter(function(d) { return d <= ed; });
+  var lines = ['날짜\t요일\t조회수\t클릭수\tCTR(%)'];
+  dates.forEach(function(dt) {
+    var dv = BN.dailyTotal[dt];
+    var ctr = dv.views > 0 ? (dv.clicks / dv.views * 100).toFixed(2) : '0.00';
+    lines.push(dt + '\t' + bnDow(dt) + '\t' + dv.views + '\t' + dv.clicks + '\t' + ctr);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(function() {
+    var el = document.getElementById('bnDailyCopyOk');
+    el.style.display = 'inline'; setTimeout(function() { el.style.display = 'none'; }, 1500);
+  });
+}
+
+/* ── Side Panel ── */
+function bnSelect(idx) {
+  BN.selIdx = idx;
+  bnRenderTable();
+  var banner = BN.merged.filter(function(b) { return b.idx === idx; })[0];
+  if (!banner) return;
+  document.getElementById('bnPanelTitle').textContent = banner.title;
+  var meta = '위치: ' + (banner.location || '-') + ' &nbsp;|&nbsp; 타입: ' + (banner.type || '-');
+  meta += ' &nbsp;|&nbsp; 기간: ' + banner.startDate + ' ~ ' + banner.endDate;
+  meta += ' &nbsp;|&nbsp; 상세: ' + (banner.detailPosition || '-');
+  if (banner.imageUrl) meta += '<br><img src="' + banner.imageUrl + '" style="max-width:100%;max-height:80px;margin-top:4px;border-radius:3px" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'">';
+  document.getElementById('bnPanelMeta').innerHTML = meta;
+
+  var now = new Date();
+  document.getElementById('bnDetailEnd').value = bnFmt(now);
+  document.getElementById('bnDetailStart').value = bnFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29));
+  document.getElementById('bnOverlay').classList.add('bn-show');
+  document.getElementById('bnPanel').classList.add('bn-show');
+  document.querySelectorAll('.bn-panel__ctrl .bn-btn:not(.bn-btn--primary)').forEach(function(b) { b.classList.remove('bn-btn--active'); });
+  bnRenderDetail();
+}
+
+function bnClosePanel() {
+  document.getElementById('bnOverlay').classList.remove('bn-show');
+  document.getElementById('bnPanel').classList.remove('bn-show');
+  BN.selIdx = null;
+  bnRenderTable();
+}
+
+function bnDetailHot(key, el) {
+  var now = new Date(), end = bnFmt(now), start;
+  switch (key) {
+    case '7d': start = bnFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)); break;
+    case '14d': start = bnFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13)); break;
+    case '30d': start = bnFmt(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29)); break;
+    case 'all': start = ''; end = ''; break;
+  }
+  document.getElementById('bnDetailStart').value = start;
+  document.getElementById('bnDetailEnd').value = end;
+  document.querySelectorAll('.bn-panel__ctrl .bn-btn:not(.bn-btn--primary)').forEach(function(b) { b.classList.remove('bn-btn--active'); });
+  if (el) el.classList.add('bn-btn--active');
+  bnRenderDetail();
+}
+
+function bnRenderDetail() {
+  var bid = BN.selIdx;
+  if (bid === null) return;
+  var dailyData = BN.dailyMap[String(bid)] || {};
+  var sd = document.getElementById('bnDetailStart').value;
+  var ed = document.getElementById('bnDetailEnd').value;
+  var dates = Object.keys(dailyData).sort();
+  if (sd) dates = dates.filter(function(d) { return d >= sd; });
+  if (ed) dates = dates.filter(function(d) { return d <= ed; });
+
+  var totalV = 0, totalC = 0, peakV = 0, peakDate = '-';
+  dates.forEach(function(d) {
+    var dv = dailyData[d];
+    totalV += dv.views; totalC += dv.clicks;
+    if (dv.views > peakV) { peakV = dv.views; peakDate = d; }
+  });
+  var ctr = totalV > 0 ? (totalC / totalV * 100) : 0;
+
+  var body = '<div class="bn-panel__cards">';
+  body += '<div class="bn-pcard"><div class="bn-pcard__label">기간 조회수</div><div class="bn-pcard__value">' + bnN(totalV) + '</div></div>';
+  body += '<div class="bn-pcard"><div class="bn-pcard__label">기간 클릭수</div><div class="bn-pcard__value">' + bnN(totalC) + '</div></div>';
+  body += '<div class="bn-pcard"><div class="bn-pcard__label">CTR</div><div class="bn-pcard__value">' + ctr.toFixed(2) + '%</div></div>';
+  body += '<div class="bn-pcard"><div class="bn-pcard__label">피크일</div><div class="bn-pcard__value" style="font-size:11px">' + peakDate + '</div></div>';
+  body += '</div>';
+  body += '<div class="bn-chart-wrap"><canvas id="bnDetailChart"></canvas></div>';
+  body += '<div class="bn-panel__section">일별 상세 (' + dates.length + '일)</div>';
+  body += '<div style="max-height:240px;overflow:auto"><table class="bn-dtable"><thead><tr><th>날짜</th><th>조회수</th><th>클릭수</th><th>CTR(%)</th><th>조회 전일비</th></tr></thead><tbody>';
+  for (var i = dates.length - 1; i >= 0; i--) {
+    var dt = dates[i];
+    var dv = dailyData[dt];
+    var prevDv = i > 0 ? dailyData[dates[i - 1]] : null;
+    var vDiff = prevDv ? dv.views - prevDv.views : null;
+    var dCtr = dv.views > 0 ? (dv.clicks / dv.views * 100).toFixed(2) : '0.00';
+    var diffStr = vDiff === null ? '-' : bnD(vDiff);
+    var diffCls = vDiff !== null && vDiff !== 0 ? (vDiff > 0 ? ' bn-pos' : ' bn-neg') : '';
+    body += '<tr><td>' + dt + '</td><td>' + bnN(dv.views) + '</td><td>' + bnN(dv.clicks) + '</td><td>' + dCtr + '</td><td class="' + diffCls + '">' + diffStr + '</td></tr>';
+  }
+  body += '</tbody></table></div>';
+  document.getElementById('bnPanelBody').innerHTML = body;
+  bnRenderDetailChart(dates, dailyData);
+}
+
+function bnRenderDetailChart(dates, data) {
+  if (typeof Chart === 'undefined') { setTimeout(function() { bnRenderDetailChart(dates, data); }, 200); return; }
+  if (BN.detailChart) { BN.detailChart.destroy(); BN.detailChart = null; }
+  var canvas = document.getElementById('bnDetailChart');
+  if (!canvas) return;
+  var views = dates.map(function(d) { return data[d].views; });
+  var clicks = dates.map(function(d) { return data[d].clicks; });
+  BN.detailChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [
+        { label: '조회수', data: views, borderColor: '#4a90d9', backgroundColor: 'rgba(74,144,217,0.08)', borderWidth: 1.5, pointRadius: dates.length > 60 ? 0 : 2, fill: true, tension: 0.3 },
+        { label: '클릭수', data: clicks, borderColor: '#e85d5d', backgroundColor: 'rgba(232,93,93,0.05)', borderWidth: 1.5, pointRadius: dates.length > 60 ? 0 : 2, fill: true, tension: 0.3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { font: { size: 10 }, boxWidth: 12 } },
+        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString(); } } }
+      },
+      scales: {
+        x: { ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { font: { size: 9, family: "'JetBrains Mono',monospace" }, callback: function(v) { return v.toLocaleString(); } }, grid: { color: '#f0f4f9' } }
+      }
+    }
+  });
+}
+
+/* ── Copy (Tab1) ── */
+function bnCopy() {
+  var f = BN.filtered.slice(), col = BN.sortCol, dir = BN.sortDir;
+  f.sort(function(a, b) {
+    var va = a[col], vb = b[col];
+    if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+  var lines = ['No\t배너명\t위치\t타입\t시작일\t종료일\t조회수\t클릭수\tCTR(%)'];
+  f.forEach(function(r, i) {
+    lines.push((i + 1) + '\t' + r.title + '\t' + r.location + '\t' + r.type + '\t' + r.startDate + '\t' + r.endDate + '\t' + r.views + '\t' + r.clicks + '\t' + r.ctr.toFixed(2));
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(function() {
+    var el = document.getElementById('bnCopyOk');
+    el.style.display = 'inline'; setTimeout(function() { el.style.display = 'none'; }, 1500);
+  });
+}
+
+/* ── Init ── */
+(function bnInit() {
+  if (typeof Chart === 'undefined') {
+    var sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js';
+    document.head.appendChild(sc);
+  }
+  setTimeout(function() { bnFetch(); }, 0);
+})();
+</script>
