@@ -73,6 +73,13 @@
               "icon": "doc",
               "desc": "블로그 게시글 통계 대시보드",
               "file": "docs/ops/blog-stats.html"
+            },
+                        {
+              "id": "bannerstats",
+              "title": "배너 조회 클릭 통계",
+              "icon": "doc",
+              "desc": "배너 조회 클릭 대시보드",
+              "file": "docs/ops/bannerstats.html"
             }
           ]
         },
