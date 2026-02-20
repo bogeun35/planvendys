@@ -7,7 +7,6 @@ meta: 최종 수정: 2026.02.20
 .bn{font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#1a2332;position:relative;height:calc(100vh - 80px);overflow:hidden;display:flex;flex-direction:column}
 .bn *{box-sizing:border-box}
 
-/* Tabs */
 .bn-tabs{display:flex;gap:0;border-bottom:2px solid #e2e8f0;flex-shrink:0}
 .bn-tab{padding:8px 20px;font-size:12px;font-weight:600;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s}
 .bn-tab:hover{color:#4a5568}
@@ -15,7 +14,6 @@ meta: 최종 수정: 2026.02.20
 .bn-tab-body{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
 .bn-tab-body.bn--active{display:flex}
 
-/* Controls */
 .bn-ctrl{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid #e2e8f0;flex-shrink:0;flex-wrap:wrap}
 .bn-ctrl input[type=text]{width:180px;border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:11px;font-family:'Noto Sans KR',sans-serif}
 .bn-ctrl input[type=date]{border:1px solid #d1d5db;border-radius:3px;padding:3px 6px;font-size:12px;font-family:'Noto Sans KR',sans-serif}
@@ -25,25 +23,21 @@ meta: 최종 수정: 2026.02.20
 .bn-btn--pri{background:#4a90d9;color:#fff;border-color:#4a90d9}
 .bn-btn--pri:hover{background:#3a7bc8}
 .bn-btn--on{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
-.bn-btn--danger{background:#fef2f2;border-color:#e85d5d;color:#e85d5d}
 .bn-sep{width:1px;height:20px;background:#e2e8f0}
 .bn-status{margin-left:auto;font-size:11px;color:#94a3b8}
 .bn-cnt{font-size:11px;color:#94a3b8}
 .bn-copy-ok{color:#22c55e;font-size:11px;display:none}
 
-/* Position filter buttons */
 .bn-pos-wrap{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
 .bn-pos-btn{padding:2px 8px;border:1px solid #d1d5db;border-radius:3px;background:#fff;cursor:pointer;font-size:10px;font-family:'Noto Sans KR',sans-serif;color:#4a5568}
 .bn-pos-btn:hover{background:#f0f4f9}
 .bn-pos-btn.bn--on{background:#eef4fb;border-color:#4a90d9;color:#4a90d9}
 
-/* Summary Cards */
 .bn-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:8px 0;flex-shrink:0}
 .bn-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:4px;padding:6px 10px}
 .bn-card__label{font-size:10px;color:#94a3b8;margin-bottom:2px}
 .bn-card__value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#1a2332}
 
-/* Table */
 .bn-twrap{flex:1;min-height:0;overflow:auto}
 .bn-table{width:100%;border-collapse:collapse;table-layout:fixed}
 .bn-table th{position:sticky;top:0;background:#f0f4f9;border-bottom:2px solid #d1d5db;padding:4px 8px;font-size:11px;font-weight:600;color:#4a5568;text-align:left;cursor:pointer;white-space:nowrap;z-index:1}
@@ -57,14 +51,13 @@ meta: 최종 수정: 2026.02.20
 .bn-num{text-align:right;font-family:'JetBrains Mono',monospace}
 .bn-mono{font-family:'JetBrains Mono',monospace;font-size:10px}
 .bn-center{text-align:center}
-.bn-thumb{width:60px;height:32px;border-radius:2px;object-fit:cover;vertical-align:middle}
-.bn-thumb-empty{width:60px;height:32px;border-radius:2px;background:#f0f4f9;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#94a3b8}
+.bn-thumb{width:120px;height:40px;border-radius:2px;object-fit:cover;vertical-align:middle}
+.bn-thumb-empty{width:120px;height:40px;border-radius:2px;background:#f0f4f9;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#94a3b8}
 .bn-active-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px}
 .bn-active-dot--on{background:#22c55e}
 .bn-active-dot--off{background:#d1d5db}
 .bn-chk{width:14px;height:14px;cursor:pointer;accent-color:#4a90d9}
 
-/* Daily Tab */
 .bn-daily-chart{height:200px;position:relative;flex-shrink:0;margin-bottom:8px}
 .bn-daily-twrap{flex:1;min-height:0;overflow:auto}
 .bn-daily-table{width:100%;border-collapse:collapse;table-layout:fixed}
@@ -76,7 +69,6 @@ meta: 최종 수정: 2026.02.20
 .bn-daily-table td:first-child{text-align:left;font-family:'Noto Sans KR',sans-serif}
 .bn-daily-table td:nth-child(2){text-align:left;font-family:'Noto Sans KR',sans-serif;font-size:10px;color:#94a3b8}
 
-/* Report Tab */
 .bn-rpt-empty{display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:12px;flex-direction:column;gap:8px}
 .bn-rpt-chips{display:flex;gap:4px;flex-wrap:wrap;padding:4px 0;align-items:center}
 .bn-rpt-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border:1px solid #4a90d9;border-radius:3px;font-size:10px;color:#4a90d9;background:#eef4fb}
@@ -84,15 +76,10 @@ meta: 최종 수정: 2026.02.20
 .bn-rpt-chip__x:hover{color:#e85d5d}
 .bn-rpt-content{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:12px}
 .bn-rpt-section{border:1px solid #e2e8f0;border-radius:4px;overflow:hidden}
-.bn-rpt-section__head{background:#f8fafd;padding:6px 10px;font-size:11px;font-weight:600;color:#1a2332;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:6px}
+.bn-rpt-section__head{background:#f8fafd;padding:6px 10px;font-size:11px;font-weight:600;color:#1a2332;border-bottom:1px solid #e2e8f0}
 .bn-rpt-section__body{padding:10px}
-.bn-rpt-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
-.bn-rpt-card{background:#f8fafd;border:1px solid #e2e8f0;border-radius:3px;padding:5px 7px}
-.bn-rpt-card__label{font-size:10px;color:#94a3b8}
-.bn-rpt-card__value{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace}
-.bn-rpt-chart{height:180px;position:relative;margin-bottom:8px}
+.bn-rpt-chart{height:220px;position:relative}
 
-/* Side Panel */
 .bn-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.15);z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
 .bn-overlay.bn--show{opacity:1;pointer-events:auto}
 .bn-panel{position:fixed;top:0;right:0;bottom:0;width:600px;background:#fff;z-index:101;box-shadow:-4px 0 20px rgba(0,0,0,.1);transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;font-family:'Noto Sans KR',sans-serif}
@@ -120,12 +107,14 @@ meta: 최종 수정: 2026.02.20
 .bn-neg{color:#e85d5d}.bn-pos{color:#22c55e}
 .bn-chart-wrap{margin-top:10px;height:180px;position:relative}
 
-/* Loading */
 .bn-loading{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.85);display:none;align-items:center;justify-content:center;z-index:10;flex-direction:column;gap:8px}
 .bn-loading.bn--show{display:flex}
 .bn-loading__bar{width:200px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden}
 .bn-loading__fill{height:100%;background:#4a90d9;border-radius:2px;width:0%;transition:width .3s}
 .bn-loading__text{font-size:11px;color:#4a5568}
+
+/* debug */
+.bn-debug{font-size:10px;color:#94a3b8;padding:4px 0;flex-shrink:0}
 </style>
 
 <div class="bn" id="bnRoot">
@@ -135,7 +124,7 @@ meta: 최종 수정: 2026.02.20
     <div class="bn-tab" onclick="bnTabSwitch('report')">광고 리포트 <span id="bnRptBadge" style="font-size:10px;color:#4a90d9"></span></div>
   </div>
 
-  <!-- ═══ Tab 1: 배너 목록 ═══ -->
+  <!-- Tab 1: 배너 목록 -->
   <div class="bn-tab-body bn--active" id="bnTabList">
     <div class="bn-ctrl">
       <input type="text" id="bnSearch" placeholder="배너명 / idx 검색" oninput="bnFilter()">
@@ -155,14 +144,15 @@ meta: 최종 수정: 2026.02.20
       <div class="bn-card"><div class="bn-card__label">평균 CTR</div><div class="bn-card__value" id="bnSumCTR">-</div></div>
       <div class="bn-card"><div class="bn-card__label">선택됨</div><div class="bn-card__value" id="bnSumSel">0개</div></div>
     </div>
+    <div class="bn-debug" id="bnDebug"></div>
     <div class="bn-twrap">
       <table class="bn-table">
         <thead><tr>
           <th style="width:28px;cursor:default" class="bn-center"><input type="checkbox" class="bn-chk" onchange="bnToggleAll(this)"></th>
           <th onclick="bnSort('idx')" style="width:50px" class="bn-center">idx<span class="bn-sort" id="bnSortidx"></span></th>
-          <th style="width:64px;cursor:default">이미지</th>
+          <th style="width:130px;cursor:default">이미지</th>
           <th onclick="bnSort('title')">배너명<span class="bn-sort" id="bnSorttitle"></span></th>
-          <th onclick="bnSort('position')" style="width:160px">상세위치<span class="bn-sort" id="bnSortposition"></span></th>
+          <th onclick="bnSort('position')" style="width:140px">상세위치<span class="bn-sort" id="bnSortposition"></span></th>
           <th onclick="bnSort('startDate')" style="width:86px">시작일<span class="bn-sort" id="bnSortstartDate"></span></th>
           <th onclick="bnSort('endDate')" style="width:86px">종료일<span class="bn-sort" id="bnSortendDate"></span></th>
           <th onclick="bnSort('views')" style="width:76px" class="bn-num">조회수<span class="bn-sort" id="bnSortviews"></span></th>
@@ -174,7 +164,7 @@ meta: 최종 수정: 2026.02.20
     </div>
   </div>
 
-  <!-- ═══ Tab 2: 일자별 현황 ═══ -->
+  <!-- Tab 2: 일자별 현황 -->
   <div class="bn-tab-body" id="bnTabDaily">
     <div class="bn-ctrl">
       <label>시작일</label><input type="date" id="bnDailyStart">
@@ -214,7 +204,7 @@ meta: 최종 수정: 2026.02.20
     </div>
   </div>
 
-  <!-- ═══ Tab 3: 광고 리포트 ═══ -->
+  <!-- Tab 3: 광고 리포트 -->
   <div class="bn-tab-body" id="bnTabReport">
     <div class="bn-ctrl">
       <span class="bn-cnt">선택된 배너</span>
@@ -264,23 +254,18 @@ meta: 최종 수정: 2026.02.20
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════════════════════
-   BN - 배너 조회/클릭수 대시보드
-   접두사: bn
-   ══════════════════════════════════════════════════════════════════ */
-var BN = {
-  PROXY: 'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
-  banners: [], events: [], merged: [], filtered: [],
-  dailyMap: {}, dailyTotal: {},
-  sortCol: 'idx', sortDir: 'desc',
-  dSortCol: 'date', dSortDir: 'desc',
-  selIdx: null, checked: {},
-  posFilter: '',
-  detailChart: null, dailyChart: null, rptCharts: []
+var BN={
+  PROXY:'https://script.google.com/macros/s/AKfycbzyZ3GkPnU_1D_gax47Fa96GGCz-kVJU3QReBIoMzLo54PcfONtFe_h7QS2vRNxTZq3/exec',
+  banners:[],events:[],merged:[],filtered:[],
+  dailyMap:{},dailyTotal:{},
+  sortCol:'idx',sortDir:'desc',
+  dSortCol:'date',dSortDir:'desc',
+  selIdx:null,checked:{},posFilter:'',
+  detailChart:null,dailyChart:null,rptCharts:[]
 };
 
-function bnApi(p) {
-  var qs = Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k])}).join('&');
+function bnApi(p){
+  var qs=Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k])}).join('&');
   return fetch(BN.PROXY+'?'+qs,{redirect:'follow'}).then(function(r){return r.json()});
 }
 function bnN(v){if(v===0)return'0';return(v<0?'-':'')+Math.abs(v).toLocaleString()}
@@ -290,6 +275,21 @@ function bnFmt(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'
 var BN_DOW=['일','월','화','수','목','금','토'];
 function bnDow(s){var p=s.split('-');return BN_DOW[new Date(+p[0],+p[1]-1,+p[2]).getDay()]}
 
+/**
+ * 프론트에서도 날짜 정규화
+ * GAS에서 "YYYY-MM-DD"로 넘어와야 하지만 혹시 "YYYYMMDD"가 오면 변환
+ */
+function bnNormDate(v){
+  if(!v)return'';
+  var s=String(v).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+  if(/^\d{8}$/.test(s))return s.substring(0,4)+'-'+s.substring(4,6)+'-'+s.substring(6,8);
+  // "2026. 2. 20" etc
+  var m=s.replace(/\s/g,'').match(/^(\d{4})\.(\d{1,2})\.(\d{1,2})/);
+  if(m)return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
+  return s;
+}
+
 function bnLoad(show,pct,txt){
   var el=document.getElementById('bnLoading');
   if(show)el.classList.add('bn--show');else el.classList.remove('bn--show');
@@ -297,21 +297,20 @@ function bnLoad(show,pct,txt){
   if(txt)document.getElementById('bnLoadText').textContent=txt;
 }
 
-/* ── Tab Switch ── */
 function bnTabSwitch(tab){
   document.querySelectorAll('#bnRoot .bn-tab').forEach(function(t){t.classList.remove('bn--active')});
   document.querySelectorAll('#bnRoot .bn-tab-body').forEach(function(b){b.classList.remove('bn--active')});
   var idx=tab==='list'?0:tab==='daily'?1:2;
   document.querySelectorAll('#bnRoot .bn-tabs .bn-tab')[idx].classList.add('bn--active');
-  var bodies=['bnTabList','bnTabDaily','bnTabReport'];
-  document.getElementById(bodies[idx]).classList.add('bn--active');
+  ['bnTabList','bnTabDaily','bnTabReport'][idx];
+  document.getElementById(['bnTabList','bnTabDaily','bnTabReport'][idx]).classList.add('bn--active');
   if(tab==='daily'&&Object.keys(BN.dailyTotal).length>0&&!document.getElementById('bnDailyStart').value){
     var now=new Date();
     document.getElementById('bnDailyEnd').value=bnFmt(now);
     document.getElementById('bnDailyStart').value=bnFmt(new Date(now.getFullYear(),now.getMonth(),now.getDate()-29));
     bnDailyRender();
   }
-  if(tab==='report') bnRptUpdateChips();
+  if(tab==='report')bnRptUpdateChips();
 }
 
 /* ── Fetch ── */
@@ -322,54 +321,96 @@ async function bnFetch(){
     var d=await bnApi({action:'bannerStats'});
     bnLoad(true,50,'데이터 처리 중...');
     if(d.error){alert('API 오류: '+d.error);bnLoad(false);return}
+
     BN.banners=(d.banners||[]).map(function(r){
-      return{idx:Number(r.idx)||0,title:String(r.title||''),startDate:String(r.startDate||''),endDate:String(r.endDate||''),imageUrl:String(r.imageUrl||''),position:String(r.position||'')};
+      return{
+        idx:Number(r.idx)||0,
+        title:String(r.title||''),
+        startDate:bnNormDate(r.startDate),
+        endDate:bnNormDate(r.endDate),
+        imageUrl:String(r.imageUrl||''),
+        position:String(r.position||'')
+      };
     });
     BN.events=(d.events||[]).map(function(r){
-      return{date:String(r.date||''),clickOrView:String(r.clickOrView||''),bannerId:String(r.bannerId||''),eventCount:Number(r.eventCount)||0};
+      return{
+        date:bnNormDate(r.date),
+        clickOrView:String(r.clickOrView||''),
+        bannerId:String(r.bannerId||''),
+        eventCount:Number(r.eventCount)||0
+      };
     });
+
+    // 디버그: 데이터 확인
+    var bannerIds={};
+    BN.banners.forEach(function(b){bannerIds[String(b.idx)]=true});
+    var eventBids={};
+    var matchCount=0;
+    BN.events.forEach(function(e){
+      eventBids[e.bannerId]=true;
+      if(bannerIds[e.bannerId])matchCount++;
+    });
+    var debugMsg='배너 '+BN.banners.length+'개 (idx: '+BN.banners.slice(0,5).map(function(b){return b.idx}).join(',')+'..), 이벤트 '+BN.events.length+'건, 매칭 '+matchCount+'건';
+    debugMsg+=', 이벤트 bannerId 샘플: ['+Object.keys(eventBids).slice(0,5).join(',')+']';
+    debugMsg+=', 이벤트 날짜 샘플: ['+BN.events.slice(0,3).map(function(e){return e.date}).join(',')+']';
+    debugMsg+=', 이벤트 clickOrView 샘플: ['+BN.events.slice(0,3).map(function(e){return e.clickOrView}).join(',')+']';
+    document.getElementById('bnDebug').textContent=debugMsg;
+    console.log('BN Debug - banners sample:', BN.banners.slice(0,3));
+    console.log('BN Debug - events sample:', BN.events.slice(0,5));
+    console.log('BN Debug - banner idx set:', Object.keys(bannerIds).slice(0,10));
+    console.log('BN Debug - event bannerId set:', Object.keys(eventBids).slice(0,10));
+
     bnProcess();
     bnLoad(true,85,'렌더링 중...');
     bnBuildPosFilter();
     bnFilter();
-    document.getElementById('bnStatus').textContent=BN.banners.length+'개 배너, '+BN.events.length+'건 이벤트';
+    document.getElementById('bnStatus').textContent=BN.banners.length+'개 배너, '+BN.events.length+'건 이벤트 (매칭 '+matchCount+'건)';
     bnLoad(false);
   }catch(err){alert('통신 오류: '+err.message);bnLoad(false)}
 }
 
 function bnProcess(){
   var today=bnFmt(new Date());
-  var agg={}, dailyMap={}, dailyTotal={};
+  var agg={},dailyMap={},dailyTotal={};
+
   BN.events.forEach(function(e){
-    var bid=e.bannerId, isV=e.clickOrView==='조회', isC=e.clickOrView==='클릭';
+    var bid=e.bannerId;
+    if(!bid)return;
+    var isV=e.clickOrView==='조회';
+    var isC=e.clickOrView==='클릭';
     if(!isV&&!isC)return;
+
     if(!agg[bid])agg[bid]={views:0,clicks:0};
     if(isV)agg[bid].views+=e.eventCount;
     if(isC)agg[bid].clicks+=e.eventCount;
+
     if(!dailyMap[bid])dailyMap[bid]={};
     if(!dailyMap[bid][e.date])dailyMap[bid][e.date]={views:0,clicks:0};
     if(isV)dailyMap[bid][e.date].views+=e.eventCount;
     if(isC)dailyMap[bid][e.date].clicks+=e.eventCount;
+
     if(!dailyTotal[e.date])dailyTotal[e.date]={views:0,clicks:0};
     if(isV)dailyTotal[e.date].views+=e.eventCount;
     if(isC)dailyTotal[e.date].clicks+=e.eventCount;
   });
-  BN.dailyMap=dailyMap; BN.dailyTotal=dailyTotal;
+
+  BN.dailyMap=dailyMap;
+  BN.dailyTotal=dailyTotal;
+
   BN.merged=BN.banners.map(function(b){
     var a=agg[String(b.idx)]||{views:0,clicks:0};
-    return{idx:b.idx,title:b.title,startDate:b.startDate,endDate:b.endDate,imageUrl:b.imageUrl,position:b.position,views:a.views,clicks:a.clicks,ctr:a.views>0?(a.clicks/a.views*100):0,isActive:b.endDate>=today};
+    return{idx:b.idx,title:b.title,startDate:b.startDate,endDate:b.endDate,imageUrl:b.imageUrl,position:b.position,
+      views:a.views,clicks:a.clicks,ctr:a.views>0?(a.clicks/a.views*100):0,isActive:b.endDate>=today};
   });
   BN.filtered=BN.merged.slice();
 }
 
-/* ── Position filter buttons ── */
 function bnBuildPosFilter(){
-  var positions={};
-  BN.merged.forEach(function(b){if(b.position)positions[b.position]=true});
+  var pos={};
+  BN.merged.forEach(function(b){if(b.position)pos[b.position]=true});
   var wrap=document.getElementById('bnPosWrap');
   var h='<span class="bn-pos-btn bn--on" onclick="bnPosClick(\'\',this)">전체</span>';
-  Object.keys(positions).sort().forEach(function(p){
-    // 짧은 라벨: "홈 중간배너(1000 * 380)" → "홈 중간배너"
+  Object.keys(pos).sort().forEach(function(p){
     var short=p.replace(/\(.*\)/,'').trim();
     h+='<span class="bn-pos-btn" onclick="bnPosClick(\''+p.replace(/'/g,"\\'")+'\',this)" title="'+p+'">'+short+'</span>';
   });
@@ -383,7 +424,6 @@ function bnPosClick(pos,el){
   bnFilter();
 }
 
-/* ── Filter ── */
 function bnFilter(){
   var q=document.getElementById('bnSearch').value.trim().toLowerCase();
   var pos=BN.posFilter;
@@ -392,12 +432,11 @@ function bnFilter(){
     if(pos&&b.position!==pos)return false;
     return true;
   });
-  bnRenderSummary();
-  bnRenderTable();
+  bnRenderSummary();bnRenderTable();
 }
 
 function bnRenderSummary(){
-  var f=BN.filtered, tv=0, tc=0;
+  var f=BN.filtered,tv=0,tc=0;
   f.forEach(function(b){tv+=b.views;tc+=b.clicks});
   var ctr=tv>0?(tc/tv*100):0;
   var selCnt=Object.keys(BN.checked).filter(function(k){return BN.checked[k]}).length;
@@ -409,7 +448,6 @@ function bnRenderSummary(){
   document.getElementById('bnRptBadge').textContent=selCnt>0?'('+selCnt+')':'';
 }
 
-/* ── Sort + Table ── */
 function bnSort(col){
   if(BN.sortCol===col)BN.sortDir=BN.sortDir==='desc'?'asc':'desc';
   else{BN.sortCol=col;BN.sortDir=(col==='title'||col==='position'||col==='startDate'||col==='endDate')?'asc':'desc'}
@@ -451,28 +489,16 @@ function bnRenderTable(){
   document.getElementById('bnCnt').textContent=f.length+'건';
 }
 
-/* ── Checkbox ── */
-function bnCheck(idx,el){
-  BN.checked[idx]=el.checked;
-  bnRenderSummary();
-  bnRenderTable();
-}
-function bnToggleAll(el){
-  var checked=el.checked;
-  BN.filtered.forEach(function(b){BN.checked[b.idx]=checked});
-  bnRenderSummary();
-  bnRenderTable();
-}
+function bnCheck(idx,el){BN.checked[idx]=el.checked;bnRenderSummary();bnRenderTable()}
+function bnToggleAll(el){var c=el.checked;BN.filtered.forEach(function(b){BN.checked[b.idx]=c});bnRenderSummary();bnRenderTable()}
 
 /* ── Side Panel ── */
 function bnSelect(idx){
-  BN.selIdx=idx;
-  bnRenderTable();
+  BN.selIdx=idx;bnRenderTable();
   var b=BN.merged.filter(function(x){return x.idx===idx})[0];
   if(!b)return;
   document.getElementById('bnPanelTitle').textContent='['+b.idx+'] '+b.title;
-  var meta='상세위치: '+(b.position||'-')+' &nbsp;|&nbsp; 기간: '+b.startDate+' ~ '+b.endDate;
-  meta+=' &nbsp;|&nbsp; 상태: '+(b.isActive?'진행중':'종료');
+  var meta='상세위치: '+(b.position||'-')+' | 기간: '+b.startDate+' ~ '+b.endDate+' | '+(b.isActive?'진행중':'종료');
   if(b.imageUrl)meta+='<br><img src="'+b.imageUrl+'" style="max-width:100%;max-height:80px;margin-top:4px;border-radius:3px" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'">';
   document.getElementById('bnPanelMeta').innerHTML=meta;
   var now=new Date();
@@ -491,8 +517,7 @@ function bnClosePanel(){
 function bnDetHot(key,el){
   var now=new Date(),end=bnFmt(now),start;
   switch(key){case'7d':start=bnFmt(new Date(now.getFullYear(),now.getMonth(),now.getDate()-6));break;case'14d':start=bnFmt(new Date(now.getFullYear(),now.getMonth(),now.getDate()-13));break;case'30d':start=bnFmt(new Date(now.getFullYear(),now.getMonth(),now.getDate()-29));break;case'all':start='';end='';break}
-  document.getElementById('bnDetailStart').value=start;
-  document.getElementById('bnDetailEnd').value=end;
+  document.getElementById('bnDetailStart').value=start;document.getElementById('bnDetailEnd').value=end;
   document.querySelectorAll('.bn-panel__ctrl .bn-btn:not(.bn-btn--pri)').forEach(function(b){b.classList.remove('bn-btn--on')});
   if(el)el.classList.add('bn-btn--on');
   bnRenderDetail();
@@ -517,8 +542,7 @@ function bnRenderDetail(){
   body+='<div class="bn-panel__section">일별 상세 ('+dates.length+'일)</div>';
   body+='<div style="max-height:240px;overflow:auto"><table class="bn-dtable"><thead><tr><th>날짜</th><th>조회수</th><th>클릭수</th><th>CTR(%)</th><th>조회 전일비</th></tr></thead><tbody>';
   for(var i=dates.length-1;i>=0;i--){
-    var dt=dates[i],dv=dd[dt];
-    var prev=i>0?dd[dates[i-1]]:null;
+    var dt=dates[i],dv=dd[dt],prev=i>0?dd[dates[i-1]]:null;
     var diff=prev?dv.views-prev.views:null;
     var diffStr=diff===null?'-':bnD(diff);
     var diffCls=diff!==null&&diff!==0?(diff>0?' bn-pos':' bn-neg'):'';
@@ -527,8 +551,7 @@ function bnRenderDetail(){
   }
   body+='</tbody></table></div>';
   document.getElementById('bnPanelBody').innerHTML=body;
-  // chart
-  if(typeof Chart==='undefined'){setTimeout(function(){bnRenderDetail()},200);return}
+  if(typeof Chart==='undefined'){setTimeout(bnRenderDetail,200);return}
   if(BN.detailChart){BN.detailChart.destroy();BN.detailChart=null}
   var cv=document.getElementById('bnDetChart');if(!cv)return;
   BN.detailChart=new Chart(cv,{type:'line',data:{labels:dates,datasets:[
@@ -570,7 +593,7 @@ function bnDailyRender(){
   document.getElementById('bnDSumViews').textContent=bnS(tv);
   document.getElementById('bnDSumClicks').textContent=bnS(tc);
   document.getElementById('bnDSumCTR').textContent=ctr.toFixed(2)+'%';
-  document.getElementById('bnDSumPeak').textContent=pd+' ('+bnN(pv)+')';
+  document.getElementById('bnDSumPeak').textContent=pd+(pd!=='-'?' ('+bnN(pv)+')':'');
   document.getElementById('bnDailyStatus').textContent=dates.length>0?dates[0]+' ~ '+dates[dates.length-1]:'-';
   var col=BN.dSortCol,dir=BN.dSortDir;
   rows.sort(function(a,b){var va=a[col],vb=b[col];if(va===null)va=-Infinity;if(vb===null)vb=-Infinity;if(typeof va==='string')return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);return dir==='asc'?va-vb:vb-va});
@@ -584,8 +607,7 @@ function bnDailyRender(){
     h+='<tr><td>'+r.date+'</td><td>'+r.dow+'</td><td>'+bnN(r.views)+'</td><td>'+bnN(r.clicks)+'</td><td>'+r.ctr.toFixed(2)+'</td><td class="'+vc+'">'+vd+'</td><td class="'+cc+'">'+cd+'</td></tr>';
   });
   document.getElementById('bnDailyTbody').innerHTML=h;
-  // chart
-  if(typeof Chart==='undefined'){setTimeout(function(){bnDailyRender()},200);return}
+  if(typeof Chart==='undefined'){setTimeout(bnDailyRender,200);return}
   if(BN.dailyChart){BN.dailyChart.destroy();BN.dailyChart=null}
   var cv=document.getElementById('bnDailyChart');if(!cv)return;
   BN.dailyChart=new Chart(cv,{type:'bar',data:{labels:dates,datasets:[
@@ -608,21 +630,16 @@ function bnGetCheckedList(){
   var ids=Object.keys(BN.checked).filter(function(k){return BN.checked[k]}).map(Number);
   return BN.merged.filter(function(b){return ids.indexOf(b.idx)!==-1}).sort(function(a,b){return b.idx-a.idx});
 }
-
 function bnRptUpdateChips(){
   var list=bnGetCheckedList();
   var h='';
   list.forEach(function(b){
     h+='<span class="bn-rpt-chip">['+b.idx+'] '+b.title.substring(0,20)+(b.title.length>20?'...':'')+' <span class="bn-rpt-chip__x" onclick="bnRptRemove('+b.idx+')">&times;</span></span>';
   });
-  if(!h)h='<span style="color:#94a3b8;font-size:10px">배너 목록에서 체크박스로 선택하세요</span>';
+  if(!h)h='<span style="color:#94a3b8;font-size:10px">배너 목록에서 체크박스로 선택</span>';
   document.getElementById('bnRptChips').innerHTML=h;
 }
-
-function bnRptRemove(idx){
-  BN.checked[idx]=false;
-  bnRenderSummary();bnRenderTable();bnRptUpdateChips();
-}
+function bnRptRemove(idx){BN.checked[idx]=false;bnRenderSummary();bnRenderTable();bnRptUpdateChips()}
 
 function bnRHot(key,el){
   var now=new Date(),end=bnFmt(now),start;
@@ -644,46 +661,29 @@ function bnRptRender(){
   bnRptUpdateChips();
   var sd=document.getElementById('bnRptStart').value,ed=document.getElementById('bnRptEnd').value;
   if(!sd||!ed){var now=new Date();ed=bnFmt(now);sd=bnFmt(new Date(now.getFullYear(),now.getMonth(),now.getDate()-29));document.getElementById('bnRptStart').value=sd;document.getElementById('bnRptEnd').value=ed}
-
-  // destroy old charts
   BN.rptCharts.forEach(function(c){c.destroy()});BN.rptCharts=[];
-
-  // collect all dates in range
   var allDates={};
   list.forEach(function(b){
     var dd=BN.dailyMap[String(b.idx)]||{};
-    Object.keys(dd).forEach(function(d){
-      if(sd&&d<sd)return;if(ed&&d>ed)return;
-      allDates[d]=true;
-    });
+    Object.keys(dd).forEach(function(d){if((!sd||d>=sd)&&(!ed||d>ed?false:true))allDates[d]=true});
   });
   var dates=Object.keys(allDates).sort();
 
-  // ── Comparison chart ──
-  var html='<div class="bn-rpt-section"><div class="bn-rpt-section__head">조회수 추이 비교</div><div class="bn-rpt-section__body"><div style="height:220px;position:relative"><canvas id="bnRptChartV"></canvas></div></div></div>';
-  html+='<div class="bn-rpt-section"><div class="bn-rpt-section__head">클릭수 추이 비교</div><div class="bn-rpt-section__body"><div style="height:220px;position:relative"><canvas id="bnRptChartC"></canvas></div></div></div>';
-
-  // ── Per-banner summary cards ──
+  var html='<div class="bn-rpt-section"><div class="bn-rpt-section__head">조회수 추이 비교</div><div class="bn-rpt-section__body"><div class="bn-rpt-chart"><canvas id="bnRptChartV"></canvas></div></div></div>';
+  html+='<div class="bn-rpt-section"><div class="bn-rpt-section__head">클릭수 추이 비교</div><div class="bn-rpt-section__body"><div class="bn-rpt-chart"><canvas id="bnRptChartC"></canvas></div></div></div>';
   html+='<div class="bn-rpt-section"><div class="bn-rpt-section__head">배너별 요약 ('+sd+' ~ '+ed+')</div><div class="bn-rpt-section__body">';
   html+='<table class="bn-dtable"><thead><tr><th style="text-align:left">배너</th><th>idx</th><th>조회수</th><th>클릭수</th><th>CTR(%)</th><th>일평균 조회</th><th>일평균 클릭</th></tr></thead><tbody>';
   list.forEach(function(b){
     var dd=BN.dailyMap[String(b.idx)]||{};
     var tv=0,tc=0,days=0;
-    dates.forEach(function(d){
-      if(dd[d]){tv+=dd[d].views;tc+=dd[d].clicks;days++}
-    });
+    dates.forEach(function(d){if(dd[d]){tv+=dd[d].views;tc+=dd[d].clicks;days++}});
     var ctr=tv>0?(tc/tv*100):0;
-    var avgV=days>0?Math.round(tv/days):0;
-    var avgC=days>0?Math.round(tc/days):0;
-    html+='<tr><td>'+b.title.substring(0,30)+(b.title.length>30?'...':'')+'</td><td>'+b.idx+'</td><td>'+bnN(tv)+'</td><td>'+bnN(tc)+'</td><td>'+ctr.toFixed(2)+'</td><td>'+bnN(avgV)+'</td><td>'+bnN(avgC)+'</td></tr>';
+    html+='<tr><td>'+b.title.substring(0,35)+(b.title.length>35?'...':'')+'</td><td>'+b.idx+'</td><td>'+bnN(tv)+'</td><td>'+bnN(tc)+'</td><td>'+ctr.toFixed(2)+'</td><td>'+bnN(days>0?Math.round(tv/days):0)+'</td><td>'+bnN(days>0?Math.round(tc/days):0)+'</td></tr>';
   });
   html+='</tbody></table></div></div>';
-
   document.getElementById('bnRptContent').innerHTML=html;
 
-  // render charts
-  if(typeof Chart==='undefined'){setTimeout(function(){bnRptRender()},200);return}
-  // Views chart
+  if(typeof Chart==='undefined'){setTimeout(bnRptRender,200);return}
   var dsV=[],dsC=[];
   list.forEach(function(b,i){
     var dd=BN.dailyMap[String(b.idx)]||{};
@@ -692,34 +692,28 @@ function bnRptRender(){
     dsV.push({label:label,data:dates.map(function(d){return dd[d]?dd[d].views:0}),borderColor:color,backgroundColor:'transparent',borderWidth:1.5,pointRadius:dates.length>60?0:2,tension:.3});
     dsC.push({label:label,data:dates.map(function(d){return dd[d]?dd[d].clicks:0}),borderColor:color,backgroundColor:'transparent',borderWidth:1.5,pointRadius:dates.length>60?0:2,tension:.3});
   });
-  var chartOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:9},boxWidth:10}}},scales:{x:{ticks:{font:{size:8,family:"'JetBrains Mono',monospace"},maxRotation:45,autoSkip:true,maxTicksLimit:15},grid:{display:false}},y:{beginAtZero:true,ticks:{font:{size:9,family:"'JetBrains Mono',monospace"},callback:function(v){return v.toLocaleString()}},grid:{color:'#f0f4f9'}}}};
+  var opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:9},boxWidth:10}}},scales:{x:{ticks:{font:{size:8,family:"'JetBrains Mono',monospace"},maxRotation:45,autoSkip:true,maxTicksLimit:15},grid:{display:false}},y:{beginAtZero:true,ticks:{font:{size:9,family:"'JetBrains Mono',monospace"},callback:function(v){return v.toLocaleString()}},grid:{color:'#f0f4f9'}}}};
   var cvV=document.getElementById('bnRptChartV');
-  if(cvV)BN.rptCharts.push(new Chart(cvV,{type:'line',data:{labels:dates,datasets:dsV},options:chartOpts}));
+  if(cvV)BN.rptCharts.push(new Chart(cvV,{type:'line',data:{labels:dates,datasets:dsV},options:opts}));
   var cvC=document.getElementById('bnRptChartC');
-  if(cvC)BN.rptCharts.push(new Chart(cvC,{type:'line',data:{labels:dates,datasets:dsC},options:chartOpts}));
+  if(cvC)BN.rptCharts.push(new Chart(cvC,{type:'line',data:{labels:dates,datasets:dsC},options:opts}));
 }
 
 function bnRptCopy(){
-  var list=bnGetCheckedList();if(list.length===0)return;
+  var list=bnGetCheckedList();if(!list.length)return;
   var sd=document.getElementById('bnRptStart').value,ed=document.getElementById('bnRptEnd').value;
   var allDates={};
-  list.forEach(function(b){
-    var dd=BN.dailyMap[String(b.idx)]||{};
-    Object.keys(dd).forEach(function(d){if((!sd||d>=sd)&&(!ed||d<=ed))allDates[d]=true});
-  });
+  list.forEach(function(b){var dd=BN.dailyMap[String(b.idx)]||{};Object.keys(dd).forEach(function(d){if((!sd||d>=sd)&&(!ed||d<=ed))allDates[d]=true})});
   var dates=Object.keys(allDates).sort();
   var lines=['배너\tidx\t조회수\t클릭수\tCTR(%)\t일평균조회\t일평균클릭'];
   list.forEach(function(b){
-    var dd=BN.dailyMap[String(b.idx)]||{};
-    var tv=0,tc=0,days=0;
+    var dd=BN.dailyMap[String(b.idx)]||{},tv=0,tc=0,days=0;
     dates.forEach(function(d){if(dd[d]){tv+=dd[d].views;tc+=dd[d].clicks;days++}});
-    var ctr=tv>0?(tc/tv*100).toFixed(2):'0.00';
-    lines.push(b.title+'\t'+b.idx+'\t'+tv+'\t'+tc+'\t'+ctr+'\t'+(days>0?Math.round(tv/days):0)+'\t'+(days>0?Math.round(tc/days):0));
+    lines.push(b.title+'\t'+b.idx+'\t'+tv+'\t'+tc+'\t'+(tv>0?(tc/tv*100).toFixed(2):'0.00')+'\t'+(days>0?Math.round(tv/days):0)+'\t'+(days>0?Math.round(tc/days):0));
   });
   navigator.clipboard.writeText(lines.join('\n')).then(function(){var el=document.getElementById('bnRptCopyOk');el.style.display='inline';setTimeout(function(){el.style.display='none'},1500)});
 }
 
-/* ── Copy (Tab1) ── */
 function bnCopy(){
   var f=BN.filtered.slice(),col=BN.sortCol,dir=BN.sortDir;
   f.sort(function(a,b){var va=a[col],vb=b[col];if(typeof va==='string')return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);return dir==='asc'?va-vb:vb-va});
