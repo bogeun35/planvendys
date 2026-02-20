@@ -109,8 +109,14 @@
               "icon": "doc",
               "desc": "일자별 잔액 내역",
               "file": "docs/ops/daypoint.html"
+            },
+            {
+              "id": "billing-manager-lookup",
+              "title": "청구 담당자 조회",
+              "icon": "doc",
+              "desc": "청구계약 담당자 조회",
+              "file": "docs/ops/billing-manager-lookup.html"
             }
-            
           ]
         },
         {

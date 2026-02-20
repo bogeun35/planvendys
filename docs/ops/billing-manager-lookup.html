@@ -1,0 +1,461 @@
+<!--
+title: 청구 담당자 조회
+meta: Vone API 청구계약 담당자 조회
+-->
+
+<style>
+.bm *{margin:0;padding:0;box-sizing:border-box}
+.bm{font-family:'Noto Sans KR',sans-serif;color:#1a2332;font-size:13px;line-height:1.5;display:flex;flex-direction:column;gap:10px}
+.bm-ctrl{display:flex;align-items:center;gap:6px}
+.bm-ctrl-right{display:flex;align-items:center;gap:6px;margin-left:auto}
+.bm-btn{
+  display:inline-flex;align-items:center;
+  padding:5px 12px;border:1px solid #e2e8f0;border-radius:3px;
+  background:#fff;color:#4a5568;font-family:inherit;
+  font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.bm-btn:hover{background:#f0f4f9;border-color:#ccd5e0}
+.bm-btn--primary{background:#4a90d9;border-color:#4a90d9;color:#fff}
+.bm-btn--primary:hover{background:#3a7bc8}
+.bm-btn--primary:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.bm-btn--danger{background:#fff;border-color:#e85d5d;color:#e85d5d}
+.bm-btn--danger:hover{background:#fef2f2}
+.bm-btn--success{background:#22c55e;border-color:#22c55e;color:#fff;font-weight:600}
+.bm-btn--success:hover{background:#1db954}
+.bm-btn--success:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.bm-btn--copied{background:#22c55e!important;border-color:#22c55e!important;color:#fff!important}
+
+/* Token */
+.bm-token{display:flex;align-items:center;gap:6px}
+.bm-token__input{
+  flex:1;padding:5px 10px;border:1px solid #e2e8f0;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:#1a2332;background:#fff;
+}
+.bm-token__input:focus{outline:none;border-color:#4a90d9}
+.bm-token__status{font-size:11px;color:#94a3b8;min-width:40px}
+.bm-token__status--ok{color:#22c55e}
+
+/* IDX Input */
+.bm-idx{display:flex;gap:10px;min-height:0}
+.bm-idx__area{
+  flex:1;padding:8px 10px;border:1px solid #e2e8f0;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:#1a2332;
+  resize:vertical;min-height:80px;max-height:200px;line-height:1.6;
+}
+.bm-idx__area:focus{outline:none;border-color:#4a90d9}
+.bm-idx__area::placeholder{color:#94a3b8;font-family:'Noto Sans KR',sans-serif}
+.bm-idx__side{display:flex;flex-direction:column;gap:6px;min-width:100px}
+.bm-idx__count{font-size:11px;color:#94a3b8;text-align:center;margin-top:auto}
+
+/* Stats */
+.bm-stats{display:flex;gap:8px}
+.bm-stat{
+  background:#fff;border:1px solid #e2e8f0;border-radius:3px;
+  padding:8px 14px;flex:1;display:flex;align-items:baseline;gap:8px;
+}
+.bm-stat__label{font-size:11px;color:#94a3b8;font-weight:500}
+.bm-stat__value{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600}
+.bm-stat__value--success{color:#22c55e}
+.bm-stat__value--fail{color:#e85d5d}
+.bm-stat__value--progress{color:#4a90d9}
+
+/* Progress */
+.bm-progress{height:2px;background:#eef2f7;display:none}
+.bm-progress.active{display:block}
+.bm-progress__fill{height:100%;background:#4a90d9;transition:width .3s;width:0%}
+
+/* Panel */
+.bm-panel{background:#fff;border:1px solid #e2e8f0;border-radius:3px;overflow:hidden}
+.bm-panel__head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 14px;border-bottom:1px solid #e2e8f0;background:#f0f4f9;
+}
+.bm-panel__title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+.bm-panel__badge{
+  background:#eef4fb;color:#4a90d9;font-family:'JetBrains Mono',monospace;
+  font-size:10px;font-weight:600;padding:1px 7px;border-radius:8px;
+}
+.bm-panel__actions{display:flex;gap:6px}
+
+/* Table */
+.bm-table-wrap{overflow:auto;max-height:420px}
+.bm-table-wrap table{width:100%;border-collapse:collapse;font-size:12px;min-width:1100px}
+.bm-table-wrap thead{position:sticky;top:0;z-index:2}
+.bm-table-wrap th{
+  background:#f0f4f9;color:#4a5568;font-weight:600;font-size:11px;
+  padding:5px 10px;text-align:left;white-space:nowrap;border-bottom:2px solid #e2e8f0;
+}
+.bm-table-wrap td{
+  padding:4px 10px;border-bottom:1px solid #eef2f7;white-space:nowrap;
+  max-width:200px;overflow:hidden;text-overflow:ellipsis;font-size:12px;
+}
+.bm-table-wrap tbody tr{transition:background .1s}
+.bm-table-wrap tbody tr:hover td{background:#f0f4f9}
+.bm-table-wrap .rn{color:#94a3b8;font-family:'JetBrains Mono',monospace;font-size:10px;text-align:center;width:30px}
+.bm-table-wrap .idx{font-family:'JetBrains Mono',monospace;font-size:11px}
+.bm-table-wrap .status--ok{color:#22c55e;font-weight:600}
+.bm-table-wrap .status--fail{color:#e85d5d;font-weight:600}
+.bm-table-wrap .status--run{color:#d49a2a}
+.bm-table-wrap .mgr-group{border-left:2px solid #eef2f7;padding-left:8px}
+.bm-table-wrap .mgr-group:first-of-type{border-left:none;padding-left:10px}
+
+.bm-empty{padding:32px 16px;text-align:center;color:#94a3b8;font-size:12px}
+
+/* Log */
+.bm-log{
+  font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 14px;
+  max-height:100px;overflow-y:auto;line-height:1.6;color:#4a5568;background:#f0f4f9;
+}
+.bm-log__line--success{color:#22c55e}
+.bm-log__line--error{color:#e85d5d}
+.bm-log__line--info{color:#4a90d9}
+.bm-log__time{color:#94a3b8;margin-right:6px}
+</style>
+
+<div class="bm" id="bmRoot">
+  <!-- Token -->
+  <div class="bm-token">
+    <input class="bm-token__input" id="bmTokenInput" type="password" placeholder="Bearer 토큰을 붙여넣으세요 (Vone 개발자도구 > Network에서 복사)">
+    <button class="bm-btn" onclick="bmApplyToken()">적용</button>
+    <span class="bm-token__status" id="bmTokenStatus">(미설정)</span>
+  </div>
+
+  <!-- IDX Input + Actions -->
+  <div class="bm-idx">
+    <textarea class="bm-idx__area" id="bmIdxInput" placeholder="청구계약 IDX를 줄바꿈으로 붙여넣으세요&#10;예:&#10;5018&#10;4912&#10;4910"></textarea>
+    <div class="bm-idx__side">
+      <button class="bm-btn bm-btn--primary" id="bmBtnRun" onclick="bmRun()" disabled>조회 실행</button>
+      <button class="bm-btn bm-btn--danger" id="bmBtnStop" onclick="bmStop()" style="display:none">중단</button>
+      <button class="bm-btn" onclick="bmClear()">초기화</button>
+      <div class="bm-idx__count" id="bmIdxCount">0건</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="bm-stats">
+    <div class="bm-stat"><span class="bm-stat__label">총 건수</span><span class="bm-stat__value" id="bmStatTotal">0</span></div>
+    <div class="bm-stat"><span class="bm-stat__label">성공</span><span class="bm-stat__value bm-stat__value--success" id="bmStatSuccess">0</span></div>
+    <div class="bm-stat"><span class="bm-stat__label">실패</span><span class="bm-stat__value bm-stat__value--fail" id="bmStatFail">0</span></div>
+    <div class="bm-stat"><span class="bm-stat__label">진행</span><span class="bm-stat__value bm-stat__value--progress" id="bmStatProgress">-</span></div>
+  </div>
+
+  <!-- Result -->
+  <div class="bm-panel">
+    <div class="bm-panel__head">
+      <div class="bm-panel__title">조회 결과 <span class="bm-panel__badge" id="bmResultBadge">0</span></div>
+      <div class="bm-panel__actions">
+        <button class="bm-btn" onclick="bmCopyClipboard()" id="bmBtnCopy" style="display:none;font-size:11px;padding:3px 10px">클립보드 복사</button>
+        <button class="bm-btn bm-btn--success" onclick="bmDownloadExcel()" id="bmBtnExcel" style="display:none;font-size:11px;padding:3px 10px">엑셀 다운로드</button>
+      </div>
+    </div>
+    <div class="bm-progress" id="bmProgressBar"><div class="bm-progress__fill" id="bmProgressFill"></div></div>
+    <div class="bm-table-wrap" id="bmTableWrap"><div class="bm-empty">조회 결과가 여기에 표시됩니다</div></div>
+  </div>
+
+  <!-- Log -->
+  <div class="bm-panel">
+    <div class="bm-panel__head">
+      <div class="bm-panel__title">로그</div>
+      <div class="bm-panel__actions">
+        <button class="bm-btn" onclick="bmClearLog()" style="font-size:10px;padding:2px 8px">지우기</button>
+      </div>
+    </div>
+    <div class="bm-log" id="bmLogArea"></div>
+  </div>
+</div>
+
+<script>
+/* ── External libs ── */
+(function bmLoadLibs() {
+  function loadScript(src, cb) {
+    if (document.querySelector('script[src="' + src + '"]')) { if (cb) cb(); return; }
+    var s = document.createElement('script'); s.src = src; s.onload = cb; document.head.appendChild(s);
+  }
+  if (typeof XLSX === 'undefined') {
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+  }
+})();
+
+/* ── Global State ── */
+var BM = {
+  API_BASE: 'https://vone-api.sikdae.com/finance/client-contracts/assignee/',
+  token: '',
+  stopFlag: false,
+  running: false,
+  data: []  // { idx, managers:[], status, error }
+};
+
+/* ── IDX count ── */
+var bmIdxInput = document.getElementById('bmIdxInput');
+bmIdxInput.addEventListener('input', function() {
+  var lines = bmParseIdx();
+  document.getElementById('bmIdxCount').textContent = lines.length + '건';
+  document.getElementById('bmBtnRun').disabled = !lines.length || !BM.token;
+});
+
+function bmParseIdx() {
+  var raw = bmIdxInput.value.trim();
+  if (!raw) return [];
+  return raw.split(/[\r\n]+/).map(function(s) { return s.trim().replace(/\..*$/, ''); }).filter(function(s) { return s && s !== '0'; });
+}
+
+/* ── Token ── */
+function bmApplyToken() {
+  var v = document.getElementById('bmTokenInput').value.trim();
+  if (!v) { bmLog('토큰을 입력하세요', 'error'); return; }
+  BM.token = v;
+  var el = document.getElementById('bmTokenStatus');
+  el.textContent = '설정됨';
+  el.className = 'bm-token__status bm-token__status--ok';
+  document.getElementById('bmBtnRun').disabled = !bmParseIdx().length;
+  bmLog('토큰 적용 완료', 'success');
+}
+
+/* ── Run ── */
+async function bmRun() {
+  var idxList = bmParseIdx();
+  if (!idxList.length) { bmLog('IDX를 입력하세요', 'error'); return; }
+  if (!BM.token) { bmLog('토큰을 설정하세요', 'error'); return; }
+
+  BM.stopFlag = false;
+  BM.running = true;
+  BM.data = [];
+
+  document.getElementById('bmBtnRun').disabled = true;
+  document.getElementById('bmBtnStop').style.display = '';
+  document.getElementById('bmBtnCopy').style.display = 'none';
+  document.getElementById('bmBtnExcel').style.display = 'none';
+
+  var pBar = document.getElementById('bmProgressBar');
+  var pFill = document.getElementById('bmProgressFill');
+  pBar.classList.add('active');
+  pFill.style.width = '0%';
+
+  var total = idxList.length;
+  var successCnt = 0, failCnt = 0;
+
+  bmLog('조회 시작 - ' + total + '건', 'info');
+  bmUpdateStats(total, 0, 0, '0/' + total);
+
+  for (var i = 0; i < total; i++) {
+    if (BM.stopFlag) {
+      bmLog('중단됨 (' + (i) + '/' + total + ')', 'error');
+      break;
+    }
+
+    var idx = idxList[i];
+    pFill.style.width = (i / total * 100) + '%';
+    bmUpdateStats(total, successCnt, failCnt, (i + 1) + '/' + total);
+
+    var row = { idx: idx, managers: [], status: 'run', error: '' };
+    BM.data.push(row);
+    bmRenderTable();
+
+    try {
+      var tokenHeader = BM.token;
+      if (!/^Bearer/i.test(tokenHeader)) tokenHeader = 'Bearer ' + tokenHeader;
+
+      var resp = await fetch(BM.API_BASE + idx + '/managers', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Authorization': tokenHeader,
+          'User-Agent': 'Mozilla/5.0'
+        }
+      });
+
+      if (resp.status === 401) {
+        row.status = 'fail';
+        row.error = '토큰만료';
+        failCnt++;
+        bmLog('[' + idx + '] 토큰 만료', 'error');
+        bmRenderTable();
+        bmLog('토큰이 만료되었습니다. 갱신 후 다시 실행하세요.', 'error');
+        break;
+      }
+
+      if (!resp.ok) {
+        row.status = 'fail';
+        row.error = 'HTTP ' + resp.status;
+        failCnt++;
+        bmLog('[' + idx + '] 실패 - HTTP ' + resp.status, 'error');
+        bmRenderTable();
+        continue;
+      }
+
+      var json = await resp.json();
+      var content = json.content || [];
+      var mgrs = [];
+      for (var j = 0; j < Math.min(content.length, 3); j++) {
+        mgrs.push({
+          name: content[j].managerName || '',
+          email: content[j].managerEmail || '',
+          phone: content[j].managerPhone || ''
+        });
+      }
+      row.managers = mgrs;
+      row.status = 'ok';
+      row.count = content.length;
+      successCnt++;
+      bmLog('[' + idx + '] ' + content.length + '명', 'success');
+
+    } catch (err) {
+      row.status = 'fail';
+      row.error = err.message;
+      failCnt++;
+      bmLog('[' + idx + '] ' + err.message, 'error');
+    }
+
+    bmRenderTable();
+  }
+
+  pFill.style.width = '100%';
+  setTimeout(function() { pBar.classList.remove('active'); }, 1000);
+
+  bmUpdateStats(total, successCnt, failCnt, '완료');
+  BM.running = false;
+  document.getElementById('bmBtnRun').disabled = false;
+  document.getElementById('bmBtnStop').style.display = 'none';
+  if (BM.data.length) {
+    document.getElementById('bmBtnCopy').style.display = '';
+    document.getElementById('bmBtnExcel').style.display = '';
+  }
+  bmLog('조회 완료 - 성공:' + successCnt + ' 실패:' + failCnt, successCnt ? 'success' : 'error');
+}
+
+/* ── Stop ── */
+function bmStop() {
+  BM.stopFlag = true;
+  bmLog('중단 요청...', 'info');
+}
+
+/* ── Clear ── */
+function bmClear() {
+  BM.data = [];
+  BM.stopFlag = false;
+  bmIdxInput.value = '';
+  document.getElementById('bmIdxCount').textContent = '0건';
+  document.getElementById('bmBtnRun').disabled = true;
+  document.getElementById('bmBtnCopy').style.display = 'none';
+  document.getElementById('bmBtnExcel').style.display = 'none';
+  bmUpdateStats(0, 0, 0, '-');
+  bmRenderTable();
+  bmLog('초기화', 'info');
+}
+
+/* ── Stats ── */
+function bmUpdateStats(total, success, fail, progress) {
+  document.getElementById('bmStatTotal').textContent = total;
+  document.getElementById('bmStatSuccess').textContent = success;
+  document.getElementById('bmStatFail').textContent = fail;
+  document.getElementById('bmStatProgress').textContent = progress;
+}
+
+/* ── Table ── */
+function bmRenderTable() {
+  var wrap = document.getElementById('bmTableWrap');
+  document.getElementById('bmResultBadge').textContent = BM.data.length;
+  if (!BM.data.length) {
+    wrap.innerHTML = '<div class="bm-empty">조회 결과가 여기에 표시됩니다</div>';
+    return;
+  }
+  var html = '<table><thead><tr>' +
+    '<th style="width:30px">#</th>' +
+    '<th style="width:70px">계약IDX</th>' +
+    '<th style="width:80px">1번 이름</th><th style="width:160px">1번 이메일</th><th style="width:110px">1번 연락처</th>' +
+    '<th style="width:80px">2번 이름</th><th style="width:160px">2번 이메일</th><th style="width:110px">2번 연락처</th>' +
+    '<th style="width:80px">3번 이름</th><th style="width:160px">3번 이메일</th><th style="width:110px">3번 연락처</th>' +
+    '<th style="width:70px">상태</th>' +
+    '</tr></thead><tbody>';
+
+  for (var i = 0; i < BM.data.length; i++) {
+    var r = BM.data[i];
+    var statusClass = r.status === 'ok' ? 'status--ok' : r.status === 'fail' ? 'status--fail' : 'status--run';
+    var statusText = r.status === 'ok' ? (r.count || 0) + '명' : r.status === 'fail' ? r.error : '조회중...';
+
+    html += '<tr><td class="rn">' + (i + 1) + '</td><td class="idx">' + r.idx + '</td>';
+
+    for (var m = 0; m < 3; m++) {
+      var mgr = r.managers[m];
+      if (mgr) {
+        html += '<td class="mgr-group">' + mgr.name + '</td><td>' + mgr.email + '</td><td>' + mgr.phone + '</td>';
+      } else {
+        html += '<td class="mgr-group"></td><td></td><td></td>';
+      }
+    }
+
+    html += '<td class="' + statusClass + '">' + statusText + '</td></tr>';
+  }
+
+  wrap.innerHTML = html + '</tbody></table>';
+  // 자동 스크롤
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+/* ── Clipboard ── */
+function bmCopyClipboard() {
+  if (!BM.data.length) return;
+  var H = ['계약IDX','1번이름','1번이메일','1번연락처','2번이름','2번이메일','2번연락처','3번이름','3번이메일','3번연락처','상태'];
+  var tsv = H.join('\t') + '\n';
+  for (var i = 0; i < BM.data.length; i++) {
+    var r = BM.data[i];
+    var cols = [r.idx];
+    for (var m = 0; m < 3; m++) {
+      var mgr = r.managers[m];
+      cols.push(mgr ? mgr.name : '');
+      cols.push(mgr ? mgr.email : '');
+      cols.push(mgr ? mgr.phone : '');
+    }
+    cols.push(r.status === 'ok' ? r.count + '명' : r.error || r.status);
+    tsv += cols.join('\t') + '\n';
+  }
+  navigator.clipboard.writeText(tsv).then(function() {
+    bmLog('클립보드 복사 완료', 'success');
+    var b = document.getElementById('bmBtnCopy'), o = b.textContent;
+    b.classList.add('bm-btn--copied'); b.textContent = '복사됨';
+    setTimeout(function() { b.textContent = o; b.classList.remove('bm-btn--copied'); }, 1500);
+  });
+}
+
+/* ── Excel ── */
+function bmDownloadExcel() {
+  if (!BM.data.length || typeof XLSX === 'undefined') return;
+  var H = ['계약IDX','1번이름','1번이메일','1번연락처','2번이름','2번이메일','2번연락처','3번이름','3번이메일','3번연락처','상태'];
+  var rows = [H];
+  for (var i = 0; i < BM.data.length; i++) {
+    var r = BM.data[i];
+    var cols = [parseInt(r.idx) || r.idx];
+    for (var m = 0; m < 3; m++) {
+      var mgr = r.managers[m];
+      cols.push(mgr ? mgr.name : '');
+      cols.push(mgr ? mgr.email : '');
+      cols.push(mgr ? mgr.phone : '');
+    }
+    cols.push(r.status === 'ok' ? r.count + '명' : r.error || r.status);
+    rows.push(cols);
+  }
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:10},{wch:10},{wch:25},{wch:15},{wch:10},{wch:25},{wch:15},{wch:10},{wch:25},{wch:15},{wch:10}];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '청구담당자');
+  var now = new Date();
+  XLSX.writeFile(wb, '청구담당자_조회_' + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '.xlsx');
+  bmLog('엑셀 다운로드 완료', 'success');
+}
+
+/* ── Log ── */
+function bmLog(msg, type) {
+  type = type || '';
+  var a = document.getElementById('bmLogArea'), now = new Date();
+  var t = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+  var l = document.createElement('div');
+  l.className = 'bm-log__line' + (type ? ' bm-log__line--' + type : '');
+  l.innerHTML = '<span class="bm-log__time">[' + t + ']</span>' + msg;
+  a.insertBefore(l, a.firstChild);
+  while (a.children.length > 100) a.removeChild(a.lastChild);
+}
+
+function bmClearLog() { document.getElementById('bmLogArea').innerHTML = ''; }
+
+bmLog('준비 완료', 'info');
+</script>
